@@ -23,11 +23,9 @@ button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 
 /* ---------- stage ---------- */
-#stage{position:fixed;left:50%;top:var(--top);transform:translateX(-50%);overflow:hidden;border-radius:4px;
-  box-shadow:0 0 0 3px #050806,0 14px 40px rgba(0,0,0,.55)}
+#stage{position:fixed;inset:0;overflow:hidden;background:#0a0f0c}
 #c{display:block;image-rendering:pixelated;image-rendering:crisp-edges;cursor:none;touch-action:none;transform-origin:0 0}
-#zoomChip{position:fixed;z-index:25;display:flex;align-items:center;gap:4px;padding:4px;opacity:0;pointer-events:none;transform:translateY(6px) scale(.96);transition:opacity .2s,transform .2s}
-#zoomChip.on{opacity:1;pointer-events:auto;transform:none}
+#zoomChip{position:fixed;z-index:25;display:flex;align-items:center;gap:4px;padding:4px;transition:opacity .2s}
 #zoomChip .ibtn{width:34px;height:34px}#zoomChip .ibtn img{width:22px;height:22px}
 #zoomChip .ibtn.on{background:#2c4a24;box-shadow:inset 0 0 0 2px var(--moss),0 4px 0 #040604}
 #zLvl{font-family:var(--display);font-size:11px;min-width:42px;text-align:center}
@@ -2910,7 +2908,7 @@ const ui={
     $('btnSettings').querySelector('img').src=iconURL('gear');document.querySelectorAll('.icX').forEach(i=>i.src=iconURL('x'));
     for(const[id,ic]of[['zIn','zin'],['zOut','zout'],['zFollow','follow'],['zReset','zreset']])$(id).querySelector('img').src=iconURL(ic);
     $('zIn').addEventListener('click',()=>{setZoom(cam.z*1.35);SFX.play('ui');});$('zOut').addEventListener('click',()=>{setZoom(cam.z/1.35);SFX.play('ui');});
-    $('zReset').addEventListener('click',()=>{cam.follow=false;setZoom(1);SFX.play('ui');});
+    $('zReset').addEventListener('click',()=>{camReset();SFX.play('ui');});
     $('zFollow').addEventListener('click',()=>{cam.follow=!cam.follow;camApply();SFX.play('ui');ui.toast(cam.follow?'Following your critter':'Stopped following',true);});
     const mk=(d,menu)=>{const b=document.createElement('button');b.className='db'+(menu?' menu '+d.id:'');b.id='d-'+d.id;b.title=`${d.label} (${d.key})`;
       b.innerHTML=`<img class="px" src="${iconURL(d.id)}" alt=""><span>${d.label}</span><kbd>${d.key}</kbd>`;return b;};
@@ -3102,19 +3100,21 @@ function setTool(t){
 }
 function toggleLight(){const w=game.world;if(!w)return;w.dayTarget=w.dayTarget>0.5?0:1;SFX.play(w.dayTarget?'lightsOn':'lightsOff');
   flash(w.dayTarget?'Lights on. Good morning, jar.':'Lights off. The night shift wakes up.');ui.refreshLight();}
-// ---- Camera: CSS zoom/pan of the canvas inside the clipping stage (toPix follows the transform for free)
-const cam={z:1,tx:0,ty:0,follow:false,hinted:false,cw:0};
-function stageSize(){return[parseFloat(canvas.style.width)||W,parseFloat(canvas.style.height)||H];}
-function camApply(){const[cw,ch]=stageSize();cam.z=clamp(cam.z,1,4);cam.tx=clamp(cam.tx,cw-cw*cam.z,0);cam.ty=clamp(cam.ty,ch-ch*cam.z,0);
-  canvas.style.transform=cam.z<=1.001?'':`translate(${cam.tx}px,${cam.ty}px) scale(${cam.z})`;
-  $('zoomChip').classList.toggle('on',cam.z>1.01);$('zLvl').textContent=cam.z.toFixed(1)+'×';$('zFollow').classList.toggle('on',cam.follow);}
-function setZoom(z,px,py){const[cw,ch]=stageSize();if(px===undefined){px=cw/2;py=ch/2;}
-  const nz=clamp(z,1,4),u=(px-cam.tx)/cam.z,v=(py-cam.ty)/cam.z;cam.tx=px-u*nz;cam.ty=py-v*nz;cam.z=nz;camApply();
-  if(nz>1.01&&!cam.hinted){cam.hinted=true;ui.toast(game.pointer.touch?'Pinch to zoom, two fingers to pan':'Scroll to zoom, right-drag to look around',true);}}
+// ---- Camera: the tank fills the window (cover); zoom/pan is a CSS transform, so toPix follows it for free.
+// z=1 is "fill the screen"; zooming out down to zmin shows the whole tank; HUD margins let edges scroll clear of the bars.
+const cam={z:1,zmin:0.5,tx:0,ty:0,follow:false,hinted:false,cw:W,ch:H,init:false,mT:0,mB:0};
+function camApply(){const vw=innerWidth,vh=innerHeight;cam.z=clamp(cam.z,cam.zmin,4);const sw=cam.cw*cam.z,sh=cam.ch*cam.z;
+  cam.tx=sw<=vw?(vw-sw)/2:clamp(cam.tx,vw-sw,0);
+  cam.ty=sh<=vh?(vh-sh)/2:clamp(cam.ty,vh-sh-cam.mB,cam.mT);
+  canvas.style.transform=`translate(${cam.tx}px,${cam.ty}px) scale(${cam.z})`;
+  $('zLvl').textContent=(cam.z*100/Math.max(1e-6,1)).toFixed(0)+'%';$('zFollow').classList.toggle('on',cam.follow);}
+function setZoom(z,px,py){if(px===undefined){px=innerWidth/2;py=(cam.mT+innerHeight-cam.mB)/2;}
+  const nz=clamp(z,cam.zmin,4),u=(px-cam.tx)/cam.z,v=(py-cam.ty)/cam.z;cam.tx=px-u*nz;cam.ty=py-v*nz;cam.z=nz;camApply();
+  if(Math.abs(nz-1)>0.05&&!cam.hinted){cam.hinted=true;ui.toast(game.pointer.touch?'Pinch to zoom, two fingers to pan':'Scroll to zoom, right-drag to look around',true);}}
 function panBy(dx,dy){cam.tx+=dx;cam.ty+=dy;cam.follow=false;camApply();}
-function stageXY(x,y){const r=$('stage').getBoundingClientRect();return[x-r.left,y-r.top];}
-function camFollow(dt){const pet=game.world&&game.world.pet;if(!cam.follow||cam.z<=1.01||!pet||game.mode!=='play')return;
-  const[cw,ch]=stageSize(),s=cw/W,k=Math.min(1,dt*3.5);cam.tx=lerp(cam.tx,cw/2-pet.x*s*cam.z,k);cam.ty=lerp(cam.ty,ch/2-(pet.y-pet.h-4)*s*cam.z,k);camApply();}
+function stageXY(x,y){return[x,y];}
+function camCenterOn(x,y,k){const s=cam.cw/W;cam.tx=lerp(cam.tx,innerWidth/2-x*s*cam.z,k);cam.ty=lerp(cam.ty,(cam.mT+innerHeight-cam.mB)/2-y*s*cam.z,k);camApply();}
+function camFollow(dt){const pet=game.world&&game.world.pet;if(!cam.follow||!pet||game.mode!=='play')return;camCenterOn(pet.x,pet.y-pet.h-4,Math.min(1,dt*3.5));}
 $('stage').addEventListener('wheel',e=>{if(game.mode!=='play'||ui.open)return;e.preventDefault();
   const[px,py]=stageXY(e.clientX,e.clientY),dy=e.deltaMode===1?e.deltaY*16:e.deltaY;setZoom(cam.z*Math.exp(-clamp(dy,-120,120)*0.0018),px,py);},{passive:false});
 const touches=new Map();let pinch=null,touchBlock=false;
@@ -3123,9 +3123,9 @@ function startPinch(){
   // a second finger cancels whatever the first one started; food conjured a moment ago just vanishes
   const q=game.held;if(q&&q===game.heldNew&&performance.now()-game.heldT<400){game.held=null;const L=game.world.prey,i=L.indexOf(q);if(i>=0)L.splice(i,1);}
   up();const P=pinchPts(),[mx,my]=stageXY(P.mx,P.my);pinch={d0:P.d,z0:cam.z,u:(mx-cam.tx)/cam.z,v:(my-cam.ty)/cam.z};}
-function movePinch(){const P=pinchPts(),[mx,my]=stageXY(P.mx,P.my),nz=clamp(pinch.z0*P.d/pinch.d0,1,4);
+function movePinch(){const P=pinchPts(),[mx,my]=stageXY(P.mx,P.my),nz=clamp(pinch.z0*P.d/pinch.d0,cam.zmin,4);
   cam.tx=mx-pinch.u*nz;cam.ty=my-pinch.v*nz;cam.z=nz;cam.follow=false;camApply();
-  if(nz>1.01&&!cam.hinted){cam.hinted=true;ui.toast('Pinch to zoom, two fingers to pan',true);}}
+  if(Math.abs(nz-1)>0.05&&!cam.hinted){cam.hinted=true;ui.toast('Pinch to zoom, two fingers to pan',true);}}
 function toPix(e){const r=canvas.getBoundingClientRect();return[(e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H];}
 function objectAt(x,y){const w=game.world;let best=null,bd=1e9;for(const o of[...w.toys,...w.decor]){const d=Math.hypot(o.x-x,(o.y-(o.h||0)-3)-y);if(d<o.r+4&&d<bd){bd=d;best=o;}}return best;}
 canvas.addEventListener('contextmenu',e=>{e.preventDefault();if(game.placing){game.placing=null;ui.toast('Placement cancelled.',true);}});
@@ -3183,19 +3183,27 @@ canvas.addEventListener('pointerleave',()=>{if(!game.pointer.down)game.pointer.i
 window.addEventListener('keydown',e=>{
   if(e.key==='Escape'){if(game.placing){game.placing=null;ui.toast('Placement cancelled.',true);}else if(ui.revealShown)ui.hideReveal();else if(ui.open&&!game.firstRun)ui.close();return;}
   if(ui.open||game.mode!=='play'||e.target.tagName==='INPUT')return;
-  if(e.key==='+'||e.key==='='){setZoom(cam.z*1.35);return;}if(e.key==='-'||e.key==='_'){setZoom(cam.z/1.35);return;}if(e.key==='0'){cam.follow=false;setZoom(1);return;}
+  if(e.key==='+'||e.key==='='){setZoom(cam.z*1.35);return;}if(e.key==='-'||e.key==='_'){setZoom(cam.z/1.35);return;}if(e.key==='0'){camReset();return;}
   const k=e.key.toLowerCase(),map={'1':'feed','2':'pet','3':'grab','4':'mist','5':'tap','6':'play'};
   if(map[k])ui.toolClick(map[k]);else if(k==='l')toggleLight();
   else if(k==='m'){save.set.sfx=!save.set.sfx;SFX.setMuted(!save.set.sfx);$('setSfx').classList.toggle('on',save.set.sfx);markDirty();ui.toast(save.set.sfx?'Sound effects on':'Sound effects off',true);}
   else if(k==='b')ui.openModal('mBag');else if(k==='g')ui.openModal('mGacha');else if(k==='p')ui.openModal('mPets');
   else if(k==='f'){const fs=FOOD_ORDER;game.food=fs[(fs.indexOf(game.food)+1)%fs.length];if(game.tool!=='feed')setTool('feed');else ui.renderTray();}
 });
+function camReset(){cam.follow=innerHeight>innerWidth*1.1;cam.z=1;camCenterOn(W/2,H/2,1);}
 function fit(){
-  const small=innerWidth<=760,top=small?$('top').offsetHeight+6:62,bot=small?($('dock').offsetHeight+86):156,aw=innerWidth-16,ah=Math.max(120,innerHeight-top-bot);
-  let s=Math.min(aw/W,ah/H);if(save.set.pixel&&s>=1)s=Math.floor(s);s=Math.max(0.5,s);
-  const cw=Math.floor(W*s),ch=Math.floor(H*s),st=top+Math.max(0,(ah-ch)/2);if(cam.cw&&cam.cw!==cw){const f=cw/cam.cw;cam.tx*=f;cam.ty*=f;}cam.cw=cw;
-  canvas.style.width=cw+'px';canvas.style.height=ch+'px';const sg=$('stage');sg.style.top=st+'px';sg.style.width=cw+'px';sg.style.height=ch+'px';$('toast').style.top=(st+6)+'px';
-  const zc=$('zoomChip');zc.style.right=Math.round((innerWidth-cw)/2+8)+'px';zc.style.top=Math.round(st+ch-zc.offsetHeight-8)+'px';camApply();
+  const vw=innerWidth,vh=innerHeight,small=vw<=760;
+  // the tank covers the whole window; HUD floats on top
+  let base=Math.max(vw/W,vh/H);if(save.set.pixel)base=Math.ceil(base);
+  const cw=W*base,ch=H*base,f=cam.init?cw/cam.cw:1;
+  if(cam.init){const cxw=(vw/2-cam.tx)/(cam.cw*cam.z),cyw=(vh/2-cam.ty)/(cam.ch*cam.z);cam.cw=cw;cam.ch=ch;cam.tx=vw/2-cxw*cw*cam.z;cam.ty=vh/2-cyw*ch*cam.z;}
+  cam.cw=cw;cam.ch=ch;cam.zmin=Math.min(1,Math.min(vw/W,vh/H)/base);
+  canvas.style.width=cw+'px';canvas.style.height=ch+'px';
+  const topH=$('top').getBoundingClientRect().bottom,dockH=vh-$('dock').getBoundingClientRect().top;
+  cam.mT=Math.round(topH+6);cam.mB=Math.round(dockH+64);
+  $('toast').style.top=Math.round(topH+8)+'px';
+  const zc=$('zoomChip');zc.style.right='10px';zc.style.top=Math.round(vh-cam.mB-zc.offsetHeight-6)+'px';
+  if(!cam.init){cam.init=true;camReset();}else camApply();
 }
 window.addEventListener('resize',fit);
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&game.kind)writeSave();});
