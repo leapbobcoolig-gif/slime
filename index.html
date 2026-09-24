@@ -149,6 +149,7 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .pull[disabled]{opacity:.5;cursor:default}
 .odds{display:flex;gap:10px;flex-wrap:wrap;font-family:var(--display);font-size:9px;letter-spacing:.06em}
 .odds span{color:var(--c)}
+.odds .boost{flex-basis:100%}
 .coll h4{margin:4px 0 8px;font-family:var(--display);font-size:11px;color:var(--mute);letter-spacing:.1em;text-transform:uppercase}
 .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px}
 .cg{position:relative;aspect-ratio:1;background:#0d130f;border-radius:7px;box-shadow:inset 0 0 0 2px var(--rc,#26352b);display:grid;place-items:center}
@@ -399,6 +400,12 @@ const SFX=(()=>{
     squeak2:()=>{tone(1500,0.1,{type:'square',to:2100,gain:0.04});tone(2100,0.12,{delay:0.08,type:'square',to:1400,gain:0.035});},
     bell:()=>{tone(1568,0.7,{gain:0.06,nojit:true});tone(3136,0.4,{gain:0.025,nojit:true});tone(2349,0.55,{delay:0.02,gain:0.03,nojit:true});},
     blow:()=>tone(420,0.1,{to:800,gain:0.03}),
+    beep:()=>{tone(880,0.07,{type:'square',gain:0.03,nojit:true});tone(880,0.07,{delay:0.11,type:'square',gain:0.03,nojit:true});},
+    whirr:()=>{noise(0.45,{freq:900,to:1500,q:3,gain:0.03});tone(300,0.45,{type:'triangle',to:540,gain:0.02});},
+    boop:()=>tone(520,0.13,{type:'sine',to:290,gain:0.09}),
+    clack:()=>{noise(0.05,{freq:2200,gain:0.07});tone(640,0.05,{type:'square',gain:0.02});},
+    musicbox:()=>arp([784,988,1175,988,784,659,784,1047],0.17,{type:'triangle',gain:0.04,dur:0.32,nojit:true}),
+    flutter:()=>noise(0.12,{freq:3200,to:1800,q:1.5,gain:0.025}),
     bpop:()=>{tone(1300,0.045,{to:380,gain:0.07});noise(0.02,{freq:4200,gain:0.06});},
     zap:()=>tone(1900,0.09,{type:'sawtooth',to:500,gain:0.028}),
     whoosh:()=>noise(0.22,{freq:500,to:2600,q:0.8,gain:0.07}),
@@ -807,15 +814,16 @@ class Pet{
     const hd=this.headPos(),slow=this.kind==='gsnail';let best=null,bd=1e9;
     if(w.laser&&w.laser.on&&!slow){const d=Math.hypot(w.laser.x-hd.x,w.laser.y-hd.y);if(d<(close?90:230)){best=w.laser;bd=d;}}
     if(!best&&!slow&&w.bubbles)for(const b of w.bubbles){if(b.dead||b.caught)continue;const d=Math.hypot(b.x-hd.x,b.y-hd.y);if(d<(close?60:110)&&d<bd){bd=d;best=b;}}
-    if(!best&&!close&&w.toys&&w.toys.length&&Math.random()<0.1&&S.happy<97)
-      for(const t of w.toys){if(t.cool>0||t.dragged)continue;const d=Math.hypot(t.x-hd.x,t.y-hd.y);if(d<150&&d<bd){bd=d;best=t;}}
+    if(!best&&!close&&w.feather&&w.feather.on&&!w.feather.dead&&!slow){const d=Math.hypot(w.feather.x-hd.x,w.feather.y-hd.y);if(d<200){best=w.feather;bd=d;}}
+    if(!best&&!close&&w.toys&&w.toys.length&&S.happy<97)
+      for(const t of w.toys){if(t.cool>0||t.dragged||Math.random()>(t.lively?0.45:0.1))continue;const d=Math.hypot(t.x-hd.x,t.y-hd.y);if(d<150&&d<bd){bd=d;best=t;}}
     if(!best)return false;
-    this.prey=best;this.state='hunt';this.timer=best.kind==='laser'?20:9;return true;
+    this.prey=best;this.state='hunt';this.timer=best.kind==='laser'||best.kind==='feather'?20:9;return true;
   }
   brain(dt){
     const w=this.world,S=w.stats;this.timer-=dt;this.eyesClosed=false;
     switch(this.state){
-      case 'idle':this.stop(dt);if(this.scanPrey(dt))break;if(this.scanPlay(dt))break;
+      case 'idle':this.stop(dt);if(this.danceNext){this.state='dance';this.timer=this.danceNext;this.danceNext=0;this.musicDance=true;break;}if(this.scanPrey(dt))break;if(this.scanPlay(dt))break;
         if(w.disco&&w.dayness<0.5&&!this.preview&&Math.random()<dt*0.35){this.state='dance';this.timer=rand(3,5);break;}
         if(this.timer<=0)this.decide();break;
       case 'dance':
@@ -823,7 +831,7 @@ class Pet{
         if(this.kind==='frog'&&this.mode==='sit'&&this.mt<=0)this.startHop(this.x+Math.cos(this.ang+1.5)*5,this.y+Math.sin(this.ang+1.5)*5,'turn',0,0);
         if(this.antLag!==undefined)this.antLag+=Math.sin(this.t*11)*dt*3;
         this.fxT-=dt;if(this.fxT<=0){this.fxT=0.5;const hd=this.headPos();spawn(w,'note',hd.x+rand(-4,4),hd.y-6-this.h,{life:1.4,c:Math.floor(rand(4))});}
-        if(this.timer<=0||!w.disco||w.dayness>0.5){this.state='idle';this.timer=rand(1,2);}
+        if(this.timer<=0||(!this.musicDance&&(!w.disco||w.dayness>0.5))){this.state='idle';this.timer=rand(1,2);this.musicDance=false;}
         break;
       case 'wander':
         if(this.scanPrey(dt))break;if(this.scanPlay(dt))break;
@@ -2117,6 +2125,8 @@ function updateParts(w,dt){
           if(d&&Math.hypot(p.x-d.x,p.y-d.y)<d.rw){if(Math.random()<0.3)w.ripples.push({x:p.x,y:p.y,age:0});}
           else{wetAt(w,p.x,p.y);if(Math.random()<0.4)spawn(w,'splash',p.x,p.y,{life:0.18});}if(Math.random()<0.15)SFX.play('drip');}break;
       case 'mist':p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=1-dt*2;p.vy*=1-dt*2;break;
+      case 'fdrop':p.vh-=120*dt;p.h+=p.vh*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.h<=1.8)p.life=0;break;
+      case 'smoke':p.y-=7*dt;p.x+=p.vx*dt;p.vx*=1-dt;break;
       case 'dust':p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=1-dt*5;p.vy*=1-dt*5;break;
       case 'spark':p.y-=9*dt;p.x+=Math.sin(p.life*9)*0.15;break;
       case 'note':p.y-=11*dt;p.x+=Math.sin(p.life*7)*0.3;break;
@@ -2249,6 +2259,17 @@ const ITEMS={
   crown:{cat:'hat',r:2,name:'Golden crown',desc:'Ruler of the jar.'},
   halo:{cat:'hat',r:3,name:'Glowing halo',desc:'An angel. Probably. It glows in the dark.'},
   ufo:{cat:'hat',r:3,name:'Tiny UFO',desc:'Hovers overhead with a friendly tractor beam.'},
+  cap:{cat:'hat',r:0,name:'Baseball cap',desc:'Sporty. Brim forward, like a pro.'},
+  strawhat:{cat:'hat',r:0,name:'Straw sun hat',desc:'For long lazy days under the heat lamp.'},
+  bunny:{cat:'hat',r:0,name:'Bunny ears',desc:'Hop hop. Even if you slither.'},
+  leaf:{cat:'hat',r:0,name:'Leaf cap',desc:'A fresh leaf, worn with pride.'},
+  chef:{cat:'hat',r:1,name:'Chef hat',desc:'Head chef of the cricket kitchen.'},
+  pirate:{cat:'hat',r:1,name:'Pirate hat',desc:'Arr. The water dish be mine.'},
+  viking:{cat:'hat',r:1,name:'Viking helmet',desc:'Little horns for big bravery.'},
+  santa:{cat:'hat',r:1,name:'Santa hat',desc:'Jolly all year round.'},
+  jester:{cat:'hat',r:2,name:'Jester hat',desc:'Jingles and wiggles with every step.'},
+  antlers:{cat:'hat',r:2,name:'Mossy antlers',desc:'Majestic. Slightly overgrown.'},
+  stars:{cat:'hat',r:3,name:'Orbiting stars',desc:'Tiny stars that circle and twinkle forever.'},
   mushrooms:{cat:'decor',r:0,name:'Toadstools',desc:'Spotty red mushrooms for the moss.'},
   pumpkin:{cat:'decor',r:0,name:'Jack-o-lantern',desc:'Grins and glows after dark.'},
   gnome:{cat:'decor',r:0,name:'Garden gnome',desc:'He is watching. Supportively.'},
@@ -2257,6 +2278,15 @@ const ITEMS={
   crystal:{cat:'decor',r:2,name:'Glow crystal',desc:'Hums with cool light at night.'},
   chest:{cat:'decor',r:2,name:'Treasure chest',desc:'Pops open now and then with a shiny coin inside.'},
   castle:{cat:'decor',r:3,name:'Tiny castle',desc:'A fortress fit for a critter.'},
+  cactus:{cat:'decor',r:0,name:'Potted cactus',desc:'Prickly, but friendly. It even blooms.'},
+  seashell:{cat:'decor',r:0,name:'Seashell',desc:'Hold it close and hear the ocean.'},
+  sign:{cat:'decor',r:0,name:'Wooden sign',desc:'Says "home sweet jar" in wobbly letters.'},
+  windmill:{cat:'decor',r:1,name:'Windmill',desc:'Its sails turn lazily all day long.'},
+  tent:{cat:'decor',r:1,name:'Camping tent',desc:'For tiny adventures. Cosy glow at night.'},
+  bench:{cat:'decor',r:1,name:'Park bench',desc:'Take a seat and watch the moss grow.'},
+  fountain:{cat:'decor',r:2,name:'Stone fountain',desc:'Bubbles and splashes all day.'},
+  torii:{cat:'decor',r:2,name:'Torii gate',desc:'A peaceful red gate for the jar.'},
+  volcano:{cat:'decor',r:3,name:'Mini volcano',desc:'Puffs smoke by day and glows with lava at night.'},
   ball:{cat:'toy',r:0,name:'Beach ball',desc:'Rolls, bounces, gets chased. Flick it with Grab!'},
   squeaky:{cat:'toy',r:0,name:'Squeaky duck',desc:'A rubber duck that squeaks when nibbled.'},
   bell:{cat:'toy',r:0,name:'Jingle ball',desc:'Rings with every nudge.'},
@@ -2266,14 +2296,26 @@ const ITEMS={
   feeder:{cat:'toy',r:2,name:'Puzzle feeder',desc:'Nudge it enough and a treat pops out.'},
   laser:{cat:'tool',r:2,name:'Laser pointer',desc:'Tool: a red dot your pet absolutely must catch.'},
   disco:{cat:'toy',r:3,name:'Disco ball',desc:'At night the jar becomes a dance floor.'},
+  yarn:{cat:'toy',r:0,name:'Yarn ball',desc:'Soft, rolly and extremely chaseable.'},
+  dice:{cat:'toy',r:0,name:'Foam die',desc:'Tumbles to a new number every time it gets bopped.'},
+  plush:{cat:'toy',r:0,name:'Octopus plush',desc:'A squishy friend that boops when hugged.'},
+  spinner:{cat:'toy',r:1,name:'Spinning top',desc:'Nudge it and it whirls around the tank.'},
+  feather:{cat:'tool',r:1,name:'Feather teaser',desc:'Tool: dangle a fluttery feather for your pet to pounce on.'},
+  rc:{cat:'toy',r:1,name:'RC car',desc:'Zooms around on its own and beeps. Chase it!'},
+  musicbox:{cat:'toy',r:2,name:'Music box',desc:'Plays a little tune when nudged. Time to dance!'},
+  bubbler:{cat:'toy',r:2,name:'Bubble machine',desc:'Puffs out bubbles all by itself.'},
+  butterfly:{cat:'toy',r:3,name:'Clockwork butterfly',desc:'Flutters through the air. Catch it if you can!'},
 };
 const MACHINES={
   toys:{name:'Toy Capsules',price:50,col:'#3fc7b0',desc:'Balls, squeakers, gadgets and tools for playtime. Pets play with toys on their own and earn you coins.',
-    pool:['ball','squeaky','bell','mirror','bubbles','windup','feeder','laser','disco']},
+    pool:['ball','squeaky','bell','mirror','bubbles','windup','feeder','laser','disco','yarn','dice','plush','spinner','feather','rc','musicbox','bubbler','butterfly']},
   style:{name:'Style Capsules',price:60,col:'#ff7eb3',desc:'Hats for your critters and decor for the tank. Each critter keeps its own hat.',
-    pool:['party','bow','flower','beanie','tophat','cowboy','shades','propeller','wizard','crown','halo','ufo','mushrooms','pumpkin','gnome','flamingo','lantern','crystal','chest','castle']},
+    pool:['party','bow','flower','beanie','tophat','cowboy','shades','propeller','wizard','crown','halo','ufo','mushrooms','pumpkin','gnome','flamingo','lantern','crystal','chest','castle',
+      'cap','strawhat','bunny','leaf','chef','pirate','viking','santa','jester','antlers','stars','cactus','seashell','sign','windmill','tent','bench','fountain','torii','volcano']},
 };
-const TOY_LABEL={ball:'the beach ball',squeaky:'the squeaky duck',bell:'the jingle ball',mirror:'its reflection',windup:'the wind-up beetle',feeder:'the puzzle feeder',disco:'the disco ball'};
+const TOY_LABEL={ball:'the beach ball',squeaky:'the squeaky duck',bell:'the jingle ball',mirror:'its reflection',windup:'the wind-up beetle',feeder:'the puzzle feeder',disco:'the disco ball',
+  yarn:'the yarn ball',dice:'the foam die',plush:'the octopus plush',spinner:'the spinning top',rc:'the RC car',musicbox:'the music box',bubbler:'the bubble machine',butterfly:'the clockwork butterfly'};
+const TOY_TOOLS=['laser','bubbles','feather'];
 const ROSTER=['frog','lizard','salamander','snake','chameleon','tarantula','crab','turtle','gsnail'];
 
 // =====================================================================
@@ -2343,6 +2385,21 @@ function drawHat(fb,id,A,t){
       for(let k=0;k<5;k++){const a=k/5*TAU+0.3,u=Math.cos(a)*2.6,v=Math.sin(a)*2.6;C(P(u,v,1.4),0.6,P(u,v,3.4),0.3,HM.GOLD,1.5+(u>0?1:0));}
       D(P(2.9,0,0.9),0.65,HM.RUBY,3);break;
     case 'ufo':{const hz=14+Math.sin(t*2)*1;D(P(0,0,hz),4.2,HM.METAL,0);D(P(0,0,hz+1),2.0,HM.GLASS,1);break;}
+    case 'cap':D(P(2.5,0,0.2),2.2,HM.RED,0);C(P(0,0,0),3.0,P(0,0,1.5),2.6,HM.RED,1,0,1.5);D(P(0,0,2.9),0.55,HM.WHITE,2);break;
+    case 'strawhat':D(P(0,0,0),5.2,HM.TAN,0);C(P(0,0,0.3),2.4,P(0,0,2.4),2.2,HM.TAN,1,0,2);C(P(0,0,0.5),2.55,P(0,0,1.1),2.5,HM.RED,1.5);break;
+    case 'bunny':for(const sd of[-1,1]){C(P(-0.5,sd*1.4,0.3),1.0,P(-1.4,sd*2.1,7.2),0.85,HM.WHITE,1);C(P(-0.3,sd*1.45,1.2),0.5,P(-1.1,sd*2.0,6.4),0.42,HM.PINK,2);}break;
+    case 'leaf':C(P(-2.8,-0.6,0.9),1.0,P(2.8,0.6,1.8),1.0,HM.GREEN,0);D(P(0,0,1.4),2.3,HM.GREEN,0.5);C(P(2.9,0.6,1.8),0.3,P(3.9,1.0,2.6),0.25,HM.BROWN,1);break;
+    case 'chef':C(P(0,0,0),2.6,P(0,0,2.2),2.6,HM.WHITE,0,0,2.2);D(P(0,0,4.2),3.2,HM.WHITE,1);D(P(0,-1.7,4.4),2.1,HM.WHITE,1.2);D(P(0,1.7,4.4),2.1,HM.WHITE,1.2);break;
+    case 'pirate':D(P(0,0,0.3),4.3,HM.BLACK,0);C(P(0,0,0.4),2.6,P(0,0,3.0),2.2,HM.BLACK,1);D(P(2.4,0,2.0),0.85,HM.WHITE,2);break;
+    case 'viking':C(P(0,0,0),3.1,P(0,0,1.8),2.4,HM.METAL,0,0,1.8);C(P(0,0,0.2),3.25,P(0,0,0.6),3.2,HM.GOLD,0.5);
+      for(const sd of[-1,1])C(P(0,sd*2.6,1.2),0.85,P(0.6,sd*4.4,4.8),0.3,HM.WHITE,1);break;
+    case 'santa':C(P(0,0,0),3.2,P(0,0,0.9),3.2,HM.WHITE,0);C(P(0,0,0.9),2.9,P(-2.4,0.8,6.2),0.55,HM.RED,1,0,6);D(P(-2.7,0.9,6.2),1.15,HM.WHITE,2);break;
+    case 'jester':{const wb=Math.sin(t*4)*0.6;C(P(0,0,0),3.0,P(0,0,1.2),2.8,HM.PURPLE,0);
+      C(P(0,-1.4,1.3),1.4,P(-1.5,-4.6,5.4+wb),0.5,HM.PURPLE,1);C(P(0,1.4,1.3),1.4,P(-1.5,4.6,5.4-wb),0.5,HM.YELLOW,1);
+      D(P(-1.6,-4.8,5.2+wb),0.7,HM.GOLD,2);D(P(-1.6,4.8,5.2-wb),0.7,HM.GOLD,2);break;}
+    case 'antlers':for(const sd of[-1,1]){C(P(0,sd*1.8,0.4),0.6,P(-0.8,sd*3.3,6.2),0.4,HM.BROWN,1);C(P(-0.4,sd*2.6,3.4),0.42,P(1.3,sd*3.9,5.2),0.3,HM.BROWN,1.2);
+      C(P(-0.7,sd*3.1,5.2),0.36,P(-2.3,sd*4.3,7),0.28,HM.BROWN,1.2);D(P(-0.8,sd*3.3,6.3),0.6,HM.GREEN,1.6);}break;
+    case 'stars':for(let k=0;k<3;k++){const a=t*1.6+k*TAU/3;D(P(Math.cos(a)*3.8,Math.sin(a)*3.8,6+Math.sin(a*2)*0.8),0.95,HM.YELLOW,2);}break;
   }
 }
 function hatGlow(fb,id,A,t){// emissive bits drawn after lighting
@@ -2353,6 +2410,8 @@ function hatGlow(fb,id,A,t){// emissive bits drawn after lighting
     for(let y=Math.floor(top);y<bot;y++){const k=(y-top)/Math.max(1,bot-top),w=(1.6+k*3.4)*S;for(let x=Math.floor(sx-w);x<=sx+w;x++)if(((x+y)&1)===0)padd(fb,x,y,20,60,40);}
     for(let i=0;i<6;i++){const a=i/6*TAU+t*2,on=((Math.floor(t*6)+i)&1),[lx,ly]=P(Math.cos(a)*3.9,Math.sin(a)*3.9,hz);
       if(on)padd(fb,lx,ly,i%2?220:80,i%2?80:220,120);}}
+  else if(id==='stars'){for(let k=0;k<3;k++){const a=t*1.6+k*TAU/3,[x,y]=P(Math.cos(a)*3.8,Math.sin(a)*3.8,6+Math.sin(a*2)*0.8),b=150+Math.sin(t*6+k*2)*80;
+      padd(fb,x,y,b,b*0.9,b*0.4);for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]])padd(fb,x+dx*2,y+dy*2,b*0.4,b*0.36,b*0.12);}}
   else if(id==='wizard'){for(let i=0;i<3;i++){const k=(t*0.8+i/3)%1,[x,y]=P(Math.cos(i*2.1+t)*2.6*(1-k),Math.sin(i*2.1+t)*2.6*(1-k),1+k*7);const b=Math.sin(k*Math.PI)*200;padd(fb,x,y,b,b*0.9,b*0.3);}}
 }
 
@@ -2360,14 +2419,16 @@ function hatGlow(fb,id,A,t){// emissive bits drawn after lighting
 //  Decor + toys share one painter (materials 60-86)
 // =====================================================================
 const OM={WOOD:60,GOLD:61,STONE:62,RED:63,CREAM:64,CRYS:65,PAPER:66,METAL:67,BLUE:68,SKIN:69,WHITE:70,PINK:71,ORANGE:72,STEM:73,BLACK:74,
-  BALL:80,YELLOW:81,SILVER:82,MIRROR:83,FRAME:84,BEETLE:85,PEG:86};
+  BALL:80,YELLOW:81,SILVER:82,MIRROR:83,FRAME:84,BEETLE:85,PEG:86,CACTUS:75,LAVA:76,WATER:77,YARN:78,CANVAS:79,SHELL:87};
 const OR={60:ramp('#2a1608','#4e2e14','#7a4a24','#a8703a'),61:ramp('#5a3a06','#a8780e','#e8b82a','#fff0a0'),62:ramp('#2a2a2e','#4a4a50','#727278','#a8a8ae'),
   63:ramp('#5a0a10','#a01824','#e0343c','#ff8a8a'),64:ramp('#7a6a50','#b8a888','#e2d6bc','#fffaec'),65:ramp('#0a3a4a','#1a7a90','#3ec8e0','#bff8ff'),
   66:ramp('#6a1a10','#b83a1c','#f07a3a','#ffc080'),67:ramp('#1a1a1e','#2e3036','#50545c','#8a9098'),68:ramp('#0e2050','#1e3c90','#3a64d0','#8aa8ff'),
   69:ramp('#7a4a30','#c07a58','#f0aa84','#ffd4bc'),70:ramp('#8a8a90','#c8c8cc','#eeeeee','#ffffff'),71:ramp('#7a2a48','#c05080','#ff88b4','#ffc8dc'),
   72:ramp('#6a2a04','#b85810','#f08a24','#ffc060'),73:ramp('#1a3a10','#2e5a1a','#4a8a2a','#7ab848'),74:ramp('#050506','#0e0e12','#1c1c22','#34343e'),
   81:ramp('#7a5a08','#c89a14','#f8d838','#fff8a8'),82:ramp('#3a3e46','#6a707c','#a8b0bc','#f0f4ff'),83:ramp('#2a5a6a','#5a9ab0','#a8dcee','#f0ffff'),
-  84:ramp('#2a1450','#4a2890','#7a4ad0','#b890ff'),85:ramp('#0a3a2a','#146a4a','#28a878','#80f0c0'),86:ramp('#5a0e14','#a01e28','#e0404a','#ff8a8a')};
+  84:ramp('#2a1450','#4a2890','#7a4ad0','#b890ff'),85:ramp('#0a3a2a','#146a4a','#28a878','#80f0c0'),86:ramp('#5a0e14','#a01e28','#e0404a','#ff8a8a'),
+  75:ramp('#123a1a','#1e6a2a','#3aa044','#8ade7a'),76:ramp('#6a1004','#c8300a','#ff7a1a','#ffe070'),77:ramp('#0e3a5a','#1e6a9a','#3aa8e0','#aee8ff'),
+  78:ramp('#7a2a48','#c05a88','#ff94c0','#ffd0e4'),79:ramp('#0e3a3a','#1a6a64','#2ea89a','#86e0d0'),87:ramp('#7a4a48','#c08a80','#f0c4b0','#fff0e4')};
 const BALLC=[OR[63],OR[81],ramp('#0e2a6a','#1e4ab0','#3a7af0','#9ac0ff'),OR[70],ramp('#124a14','#1e8a24','#3ac040','#9af0a0'),OR[72]];
 const OBJ_PAINTER={outline:hex('#0a0806'),seam:0.9,balls:[],t:0,color(m,q,s,l,x,y){
   switch(m){
@@ -2378,6 +2439,11 @@ const OBJ_PAINTER={outline:hex('#0a0806'),seam:0.9,balls:[],t:0,color(m,q,s,l,x,
     case OM.SILVER:{const f=(Math.floor(x/1.5)+Math.floor(y/1.5)+Math.floor(this.t*6))&3;return OR[82][clamp(q+(f===0?1:f===2?-1:0),0,3)];}
     case OM.MIRROR:{const g=(x+y+Math.floor(this.t*8))%14;return OR[83][g<2?3:q];}
     case OM.BEETLE:if(Math.abs(l)<0.12)return OR[74][q];break;
+    case OM.CACTUS:if(hash(x*7,y*5)>0.9)return OR[64][3];if(x%3===0)return OR[75][Math.max(0,q-1)];break;
+    case OM.LAVA:return OR[76][clamp(q+(hash(x,y+Math.floor(this.t*4))>0.7?1:0),0,3)];
+    case OM.WATER:if((x+y+Math.floor(this.t*6))%5===0)return OR[77][3];break;
+    case OM.YARN:if((x*2+y)%4===0)return OR[78][Math.max(0,q-1)];break;
+    case OM.SHELL:if(x%2===0)return OR[87][Math.max(0,q-1)];break;
   }
   const r=OR[m];return r?r[q]:INK;}};
 function objFrame(x,y,k=1){return(u,v,z)=>[x+u*k,y+(v-z)*k];}
@@ -2395,6 +2461,20 @@ function drawDecor(fb,d){
     case 'crystal':[[0,0,8,1.7],[-2.3,1,5.5,1.3],[2.1,1.3,6,1.2],[0.9,-1.6,4.2,1.0]].forEach(([u,v,h,r],i)=>C(P(u,v,0),r,P(u*1.25,v*1.25,h),0.3,OM.CRYS,i*0.4));break;
     case 'chest':{C(P(-2.8,0,1.6),2.2,P(2.8,0,1.6),2.2,OM.WOOD,0);C(P(-1.5,-0.2,1.6),2.3,P(-1.5,0.2,1.6),2.3,OM.GOLD,0.4);C(P(1.5,-0.2,1.6),2.3,P(1.5,0.2,1.6),2.3,OM.GOLD,0.4);
       D(P(0,2.1,1.8),0.6,OM.GOLD,2);if(d.open>0.1){D(P(0,-0.4,3.2),1.8,OM.GOLD,3);C(P(-2.8,-2.6,4.2),1.1,P(2.8,-2.6,4.2),1.1,OM.WOOD,3.2);}break;}
+    case 'cactus':C(P(0,0,0),1.5,P(0,0,6.5),1.4,OM.CACTUS,0);C(P(1.4,0,3),0.8,P(3,0,3.6),0.8,OM.CACTUS,1);C(P(3,0,3.6),0.8,P(3,0,5.6),0.7,OM.CACTUS,1);
+      C(P(-1.4,0,2.2),0.7,P(-2.7,0,2.8),0.7,OM.CACTUS,1);C(P(-2.7,0,2.8),0.7,P(-2.7,0,4.4),0.6,OM.CACTUS,1);D(P(0,0,7),0.9,OM.PINK,2);
+      C(P(0,0,-0.2),2.0,P(0,0,1.0),1.8,OM.PAPER,1.5);break;
+    case 'seashell':C(P(-2.4,0,1.4),2.6,P(2.2,0,1.0),1.0,OM.SHELL,0);D(P(2.9,0,1.0),0.9,OM.SHELL,0.5);D(P(-2.8,0.6,1.6),1.2,OM.PINK,0.8);break;
+    case 'sign':C(P(0,0,0),0.5,P(0,0,6),0.5,OM.WOOD,0);C(P(-3.2,0,6.2),1.6,P(3.2,0,6.2),1.6,OM.WOOD,1);break;
+    case 'windmill':{C(P(0,0,0),2.4,P(0,0,8),1.4,OM.CREAM,0);C(P(0,0,8),1.9,P(0,0,10.6),0.4,OM.RED,1);const hub=P(0,1.6,8.4);
+      for(let q=0;q<4;q++){const a=(d.t||0)*1.2+q*Math.PI/2;C(hub,0.3,P(Math.cos(a)*5.5,1.7,8.4+Math.sin(a)*5.5),0.9,OM.WHITE,3);}D(hub,0.7,OM.METAL,4);break;}
+    case 'tent':C(P(-3.6,0,0.5),1.2,P(0,0,5.6),0.5,OM.CANVAS,0);C(P(3.6,0,0.5),1.2,P(0,0,5.6),0.5,OM.CANVAS,0);C(P(-2.4,0.4,1.4),2.0,P(2.4,0.4,1.4),2.0,OM.CANVAS,0.3);
+      D(P(0,2.1,1.4),1.3,OM.BLACK,1.5);break;
+    case 'bench':for(const[u,v]of[[-3,1],[3,1],[-3,-1],[3,-1]])C(P(u,v,0),0.4,P(u,v,2.3),0.4,OM.METAL,0);C(P(-3.6,0,2.4),1.0,P(3.6,0,2.4),1.0,OM.WOOD,1);
+      for(const u of[-3,3])C(P(u,-1.3,2.4),0.35,P(u,-1.4,4.4),0.35,OM.METAL,0.4);C(P(-3.6,-1.4,4.4),0.8,P(3.6,-1.4,4.4),0.8,OM.WOOD,0.5);break;
+    case 'fountain':C(P(-4,0,1),2,P(4,0,1),2,OM.STONE,0);D(P(0,0,1.9),3.4,OM.WATER,1);C(P(0,0,1.5),0.8,P(0,0,5),0.6,OM.STONE,2);D(P(0,0,5.4),1.6,OM.STONE,2.5);D(P(0,0,5.9),0.9,OM.WATER,3);break;
+    case 'torii':for(const u of[-4,4])C(P(u,0,0),0.7,P(u,0,9),0.6,OM.RED,0);C(P(-4.8,0,7.6),0.5,P(4.8,0,7.6),0.5,OM.RED,1);C(P(-6,0,10),0.75,P(6,0,10),0.75,OM.BLACK,1.5);D(P(0,0,8.8),0.6,OM.RED,2);break;
+    case 'volcano':C(P(0,0,0),5.5,P(0,0,5),2,OM.STONE,0);D(P(0,0,5.3),1.6,OM.LAVA,1.5);C(P(0.6,1.5,4.6),0.6,P(1.4,3.6,1.4),0.5,OM.LAVA,1.6);break;
     case 'castle':{const T=[[-6,-3],[6,-3],[-6,3],[6,3]];
       C(P(-6,-3,2.5),2.2,P(6,-3,2.5),2.2,OM.STONE,0);C(P(-6,-3,2.5),2.2,P(-6,3,2.5),2.2,OM.STONE,0.2);C(P(6,-3,2.5),2.2,P(6,3,2.5),2.2,OM.STONE,0.2);
       C(P(-6,3,2.5),2.2,P(6,3,2.5),2.2,OM.STONE,0.6);C(P(-6,3,0.8),2.2,P(6,3,0.8),2.2,OM.STONE,0.6);
@@ -2403,6 +2483,7 @@ function drawDecor(fb,d){
 }
 function decorDetails(fb,d){const s=d.sc||1;
   if(d.id==='castle'){const col=hex('#e0343c'),pole=hex('#2a2a2e');for(const[u]of[[-6],[6]]){const x=d.x+u*s,y=d.y+(-3-11.5)*s;line(fb,x,y+2*s,x,y-3*s,pole);pset(fb,x+1,y-3*s,col);pset(fb,x+2,y-3*s+1,col);pset(fb,x+1,y-3*s+1,col);}}
+  if(d.id==='sign'){const k=hex('#2a1608');for(let i=-5;i<=5;i++)if(i%3!==0)pset(fb,d.x+i*s*0.55,d.y-6.4*s+((i&1)?0:1)*s*0.4,k);}
   if(d.id==='pumpkin'){const k=hex('#2a0e04');for(const[u,v]of[[-1.2,-0.6],[1.2,-0.6]])pset(fb,d.x+u*s,d.y+(v-2)*s,k);for(let i=-1;i<=1;i++)pset(fb,d.x+i*s,d.y+(1.2-2)*s,k);}
 }
 function decorGlow(fb,d,night,t){
@@ -2411,12 +2492,17 @@ function decorGlow(fb,d,night,t){
     for(let y=-14;y<=14;y++)for(let x=-14;x<=14;x++){const r=Math.hypot(x,y*1.2);if(r>14)continue;const k=(1-r/14)**2*f;if(((x+y)&1)&&k<0.25)continue;padd(fb,cx+x,cy+y,110*k,60*k,18*k);}}
   else if(d.id==='crystal'){for(const[u,v,h]of[[0,0,8],[-2.9,1.2,5.5],[2.6,1.6,6]]){const b=night*(0.6+0.4*Math.sin(t*2+u));padd(fb,d.x+u,d.y+v-h,60*b,180*b,220*b);}
     for(let i=0;i<24;i++){const a=i/24*TAU,r=6+Math.sin(t+i)*0.8;padd(fb,d.x+Math.cos(a)*r,d.y-3+Math.sin(a)*r*0.6,6*night,22*night,28*night);}}
+  else if(d.id==='tent'){const b=night*(0.8+0.2*Math.sin(t*5+d.x));for(let y=-3;y<=2;y++)for(let x=-3;x<=3;x++){const k=(1-Math.hypot(x,y)/4);if(k>0)padd(fb,d.x+x,d.y+2-1.4+y,150*k*b,90*k*b,30*k*b);}}
+  else if(d.id==='volcano'){const b=night*(0.7+0.3*Math.sin(t*3));for(let y=-6;y<=6;y++)for(let x=-6;x<=6;x++){const r=Math.hypot(x,y*1.3);if(r>6)continue;const k=(1-r/6)**2*b;padd(fb,d.x+x,d.y-5.3+y,200*k,70*k,10*k);}}
   else if(d.id==='pumpkin'){const b=night*(0.7+0.3*Math.sin(t*7));for(const[u,v]of[[-1.2,-0.6],[1.2,-0.6],[-1,1.2],[0,1.2],[1,1.2]])padd(fb,d.x+u,d.y+v-2,230*b,140*b,30*b);}
 }
 class Decor{
   constructor(id,x,y){this.id=id;this.x=x;this.y=y;this.t=rand(10);this.open=0;this.openT=rand(50,100);this.dragged=false;}
-  get r(){return{castle:9,chest:4,flamingo:3,gnome:3,lantern:3,crystal:4,mushrooms:5,pumpkin:4}[this.id]||4;}
+  get r(){return{castle:9,chest:4,flamingo:3,gnome:3,lantern:3,crystal:4,mushrooms:5,pumpkin:4,cactus:3,seashell:3,sign:4,windmill:4,tent:5,bench:5,fountain:6,torii:7,volcano:6}[this.id]||4;}
   update(dt,w){this.t+=dt;
+    if(this.id==='fountain'){this.fT=(this.fT||0)-dt;if(this.fT<=0){this.fT=0.07;const a=rand(TAU),v=rand(4,9);
+      spawn(w,'fdrop',this.x,this.y,{h:6.2,vh:rand(14,22),vx:Math.cos(a)*v,vy:Math.sin(a)*v*0.6,life:1.2});if(Math.random()<0.02&&!game.world?.pet?.preview)SFX.play('drip');}}
+    if(this.id==='volcano'){this.sT=(this.sT||0)-dt;if(this.sT<=0){this.sT=rand(0.35,0.8);spawn(w,'smoke',this.x+rand(-1,1),this.y-5.5,{vx:rand(-3,3),life:rand(1.6,2.6)});}}
     if(this.id==='chest'){this.openT-=dt;this.open*=Math.pow(0.35,dt);
       if(this.openT<=0){this.openT=rand(70,120);this.open=1;spawnCoin(w,this.x+rand(-2,2),this.y+4,Math.floor(rand(8,16)));SFX.play('chest');}}}
 }
@@ -2432,6 +2518,18 @@ function drawToy(fb,o){
     case 'windup':{const c=Math.cos(o.ang),s=Math.sin(o.ang);C(P(-c*1.2,-s*1.2,1.5),2.4,P(c*0.8,s*0.8,1.5),2.2,OM.BEETLE,0);D(P(c*2.4,s*2.4,1.3),1.1,OM.METAL,1);break;}
     case 'feeder':C(P(-2,0,2),2.8,P(2,0,2),2.8,OM.WOOD,0);for(const[u,v,m]of[[-1.6,1.8,OM.BLACK],[1.6,1.8,OM.BLACK],[0,-0.6,OM.PEG],[-1.8,-1,OM.BLUE],[1.8,-1,OM.YELLOW]])D(P(u,v,3.6),0.8,m,1+v*0.1);break;
     case 'disco':C(P(0,0,0),0.5,P(0,0,5),0.5,OM.METAL,0);D(P(0,0,0),1.8,OM.METAL,0);D(P(0,0,8.5),3.4,OM.SILVER,1);break;
+    case 'yarn':D(P(0,0,2.4),2.4,OM.YARN);break;
+    case 'plush':{const sq2=1-o.squash*0.35;for(let q=0;q<5;q++){const a=q/4*Math.PI;D(P(Math.cos(a)*2.5,Math.sin(a)*1.1+1.2,0.7),0.85,OM.FRAME,0.3);}
+      D(P(0,0,2.6*sq2),2.5*(2-sq2),OM.FRAME,1);break;}
+    case 'spinner':{const tl=o.spin>0?0:Math.min(1,o.tip||0);C(P(0,0,0.3),0.35,P(tl*1.5,0,2.6-tl*0.8),2.8,OM.RED,0);D(P(tl*2,0,3-tl*1),2.2,OM.YELLOW,1);
+      C(P(tl*2,0,3-tl),0.4,P(tl*3,0,4.6-tl*1.6),0.35,OM.WOOD,2);break;}
+    case 'rc':{const c=Math.cos(o.ang),s=Math.sin(o.ang),px=-s,py=c;for(const[f,sd]of[[1.8,1],[1.8,-1],[-1.8,1],[-1.8,-1]])D(P(c*f+px*sd*1.9,s*f+py*sd*1.9,0.9),0.9,OM.BLACK,0);
+      C(P(-c*2.2,-s*2.2,1.8),1.8,P(c*2.2,s*2.2,1.8),1.8,OM.RED,1);D(P(c*0.3,s*0.3,3.1),1.1,OM.MIRROR,2);break;}
+    case 'musicbox':C(P(-2.3,0,1.7),2.1,P(2.3,0,1.7),2.1,OM.PINK,0);C(P(-2.3,0,3.4),1.2,P(2.3,0,3.4),1.2,OM.GOLD,1);D(P(0,0,4.2),0.8,OM.WHITE,2);break;
+    case 'bubbler':C(P(0,0,0),2.3,P(0,0,2.5),1.9,OM.BLUE,0);D(P(0,0,3.3),1.6,OM.CRYS,1);break;
+    case 'butterfly':{const c=Math.cos(o.ang),s=Math.sin(o.ang),px=-s,py=c,fl=0.35+0.65*Math.abs(Math.sin(o.t*14)),hz=o.fly||0;
+      for(const sd of[-1,1]){D(P(px*sd*(1.1+1.5*fl)+c*0.5,py*sd*(1.1+1.5*fl)+s*0.5,hz+0.5+fl*1.2),1.5*fl+0.4,OM.ORANGE,1);D(P(px*sd*(0.9+1.0*fl)-c*0.9,py*sd*(0.9+1.0*fl)-s*0.9,hz+0.3+fl),1.0*fl+0.3,OM.YELLOW,1.2);}
+      C(P(-c*1.2,-s*1.2,hz+0.6),0.45,P(c*1.2,s*1.2,hz+0.6),0.45,OM.BLACK,2);break;}
   }
 }
 function toyDetails(fb,o){
@@ -2439,16 +2537,41 @@ function toyDetails(fb,o){
   const z=o.sc||1;
   if(o.id==='squeaky'){const c=Math.cos(o.ang),s=Math.sin(o.ang),sq=1-o.squash*0.3;pset(fb,o.x+(c*1.8-s*0.7)*z,o.y-o.h+(s*1.8+c*0.7-4.3*sq)*z,k);}
   if(o.id==='bell')line(fb,o.x-z,o.y-o.h-2*z,o.x+z,o.y-o.h-2*z,hex('#3a2804'));
+  if(o.id==='dice'){const S2=Math.max(5,Math.round(6*z)),x0=Math.round(o.x-S2/2),y0=Math.round(o.y-o.h-S2-1),wc=hex('#f4f1e8'),wd=hex('#c8c2b4'),pip=hex('#1a1418');
+    for(let y=0;y<=S2+1;y++)for(let x=0;x<=S2+1;x++)pdark(fb,x0+x+1,y0+y+2+Math.round(o.h),.7);
+    for(let y=-1;y<=S2;y++)for(let x=-1;x<=S2;x++){const edge=x<0||y<0||x>=S2||y>=S2;pset(fb,x0+x,y0+y,edge?k:(x>=S2-1||y>=S2-1?wd:wc));}
+    const L2={1:[[.5,.5]],2:[[.25,.25],[.75,.75]],3:[[.25,.25],[.5,.5],[.75,.75]],4:[[.25,.25],[.75,.25],[.25,.75],[.75,.75]],5:[[.25,.25],[.75,.25],[.5,.5],[.25,.75],[.75,.75]],6:[[.25,.2],[.75,.2],[.25,.5],[.75,.5],[.25,.8],[.75,.8]]}[o.face||5];
+    const ps=Math.max(1,Math.round(S2/7));for(const[u,v]of L2)for(let yy=0;yy<ps;yy++)for(let xx=0;xx<ps;xx++)pset(fb,x0+Math.round(u*(S2-1)-ps/2+0.5)+xx,y0+Math.round(v*(S2-1)-ps/2+0.5)+yy,pip);}
+  if(o.id==='plush'){const sq2=1-o.squash*0.35;for(const sd of[-1,1]){pset(fb,o.x+sd*1*z,o.y-o.h-2.9*sq2*z,hex('#ffffff'));pset(fb,o.x+sd*1*z,o.y-o.h-2.9*sq2*z+1,k);}}
+  if(o.id==='yarn'){const c=hex('#ff94c0');for(let i=0;i<4;i++)pset(fb,o.x+(2.4+i)*z*Math.cos(o.rot+2),o.y-o.h-z+(i&1),c);}
+  if(o.id==='spinner'&&o.spin>0){const a=o.t*22;for(const q of[0,Math.PI])pset(fb,o.x+Math.cos(a+q)*1.6*z,o.y-o.h-3*z+Math.sin(a+q)*0.6*z,hex('#ff5a3a'));}
+  if(o.id==='rc'){const c=Math.cos(o.ang),s=Math.sin(o.ang),ax=o.x-c*2*z,ay=o.y-o.h-3.4*z;line(fb,ax,ay,ax-c*z,ay-4*z,hex('#2e3036'));if((o.t*3|0)&1)pset(fb,ax-c*z,ay-4*z,hex('#ff3030'));}
+  if(o.id==='musicbox'){const a=o.t*(o.play>0?9:0.5);pset(fb,o.x+4.6*z+Math.cos(a),o.y-o.h-2*z+Math.sin(a),hex('#f0c030'));pset(fb,o.x+4.4*z,o.y-o.h-2*z,k);}
+  if(o.id==='bubbler'){const cy=hex('#9fe8ff');for(let i=0;i<10;i++){const a=i/10*TAU;pset(fb,o.x+Math.cos(a)*1.3*z,o.y-o.h-5.4*z+Math.sin(a)*1.3*z,i&1?cy:hex('#ffb0e0'));}}
   if(o.id==='windup'){const a=o.t*(o.wind>0?14:0),c=Math.cos(o.ang),s=Math.sin(o.ang),bx=o.x-c*2.6,by=o.y-s*2.6-o.h-3,g=hex('#f0c030');
     line(fb,bx,by,bx+Math.cos(a)*2,by+Math.sin(a)*0.8-1,g);line(fb,bx,by,bx-Math.cos(a)*2,by-Math.sin(a)*0.8-1,g);}
 }
 class Toy{
   constructor(id,x,y){this.id=id;this.kind=id;this.label=TOY_LABEL[id];this.x=x;this.y=y;this.h=0;this.vx=0;this.vy=0;this.vh=0;this.play=true;this.dead=false;this.caught=false;
-    this.cool=rand(1,4);this.t=rand(10);this.rot=0;this.squash=0;this.ang=rand(TAU);this.wind=0;this.windT=rand(6,12);this.dragged=false;}
-  get r(){return{ball:2.8,bell:2.3,squeaky:2.8,mirror:3,windup:2.6,feeder:3.4,disco:3.4}[this.id]||3;}
+    this.cool=rand(1,4);this.t=rand(10);this.rot=0;this.squash=0;this.ang=rand(TAU);this.wind=0;this.windT=rand(6,12);this.dragged=false;
+    this.face=1+Math.floor(rand(6));this.spin=0;this.tip=0;this.drive=0;this.driveT=rand(3,7);this.play2=0;this.bubT=rand(3,6);this.fly=id==='butterfly'?6:0;this.play=true;}
+  get r(){return{ball:2.8,bell:2.3,squeaky:2.8,mirror:3,windup:2.6,feeder:3.4,disco:3.4,yarn:2.4,dice:3,plush:2.8,spinner:2.8,rc:3.2,musicbox:3.2,bubbler:2.8,butterfly:2.5}[this.id]||3;}
+  get lively(){return this.wind>0||this.spin>0||this.drive>0||this.id==='butterfly'||Math.hypot(this.vx,this.vy)>12;}
   update(dt,w){
     this.t+=dt;if(this.cool>0)this.cool-=dt;this.squash*=Math.pow(0.02,dt);this.caught=false;if(this.dragged)return;
-    const B=w.bounds,heavy=this.id==='mirror'||this.id==='feeder'||this.id==='disco';
+    const B=w.bounds,heavy=this.id==='mirror'||this.id==='feeder'||this.id==='disco'||this.id==='musicbox'||this.id==='bubbler';
+    if(this.id==='butterfly'){// flutters on its own: wandering heading, bobbing height, bounces off the glass
+      this.ang+=Math.sin(this.t*0.9)*dt*1.6+rand(-1,1)*dt*1.5;const sp=14+Math.sin(this.t*1.7)*5;
+      this.x+=Math.cos(this.ang)*sp*dt;this.y+=Math.sin(this.ang)*sp*dt;this.fly=lerp(this.fly,5+(Math.sin(this.t*0.8)+1)*3.5,Math.min(1,dt*2));this.h=0;
+      if(this.x<B.x0||this.x>B.x1){this.ang=Math.PI-this.ang;this.x=clamp(this.x,B.x0,B.x1);}if(this.y<B.y0||this.y>B.y1){this.ang=-this.ang;this.y=clamp(this.y,B.y0,B.y1);}
+      if(Math.random()<dt*0.6)SFX.play('flutter');return;}
+    if(this.id==='rc'){this.driveT-=dt;if(this.driveT<=0){this.drive=rand(2.5,4.5);this.driveT=rand(5,10);if(Math.random()<0.6)SFX.play('beep');}
+      if(this.drive>0){this.drive-=dt;this.ang+=Math.sin(this.t*1.9)*dt*2;this.vx=lerp(this.vx,Math.cos(this.ang)*38,Math.min(1,dt*4));this.vy=lerp(this.vy,Math.sin(this.ang)*38,Math.min(1,dt*4));}}
+    if(this.id==='spinner'){if(this.spin>0){this.spin-=dt;this.tip=0;this.ang+=dt*3;const v=10*Math.min(1,this.spin);this.vx=Math.cos(this.ang)*v;this.vy=Math.sin(this.ang)*v;if(Math.random()<dt*1.5)SFX.play('whirr');}
+      else this.tip=Math.min(1,this.tip+dt*3);}
+    if(this.id==='musicbox'&&this.play2>0){this.play2-=dt;this.nT=(this.nT||0)-dt;if(this.nT<=0){this.nT=0.35;spawn(w,'note',this.x+rand(-3,3),this.y-7,{life:1.4,c:Math.floor(rand(4))});}}
+    if(this.id==='bubbler'){this.bubT-=dt;if(this.bubT<=0){this.bubT=rand(4,7);this.burst=3;}
+      if(this.burst>0){this.bT=(this.bT||0)-dt;if(this.bT<=0){this.bT=0.22;this.burst--;makeBubble(w,this.x,this.y-2,5.5);SFX.play('blow');}}}
     if(this.id==='windup'){this.windT-=dt;if(this.windT<=0){this.wind=rand(3,5);this.windT=rand(8,14);}
       if(this.wind>0){this.wind-=dt;this.ang+=Math.sin(this.t*2.3)*dt*2.5;this.vx=lerp(this.vx,Math.cos(this.ang)*24,Math.min(1,dt*5));this.vy=lerp(this.vy,Math.sin(this.ang)*24,Math.min(1,dt*5));
         if(Math.random()<dt*8)SFX.play('cstep');}}
@@ -2476,10 +2599,24 @@ class Toy{
           if(opts.length&&w.prey.length<12){const q=makeFood(pick(opts),this.x+dx*7,this.y+dy*7+6,6);if(q.pts)q.pts.forEach(p=>p.y+=0);w.prey.push(q);w.onEvent&&w.onEvent('got a treat out of the puzzle feeder!');}}
         break;
       case 'disco':SFX.play('sparkle');break;
+      case 'yarn':{const v=rand(35,55);this.vx=dx*v;this.vy=dy*v;this.vh=rand(8,16);this.h=0.1;SFX.play('tap');break;}
+      case 'dice':{const v=rand(20,32);this.vx=dx*v;this.vy=dy*v;this.vh=rand(28,40);this.h=0.1;let f;do f=1+Math.floor(rand(6));while(f===this.face);this.face=f;SFX.play('clack');
+        if(f===6)w.onEvent&&w.onEvent('rolled a six!');break;}
+      case 'plush':this.squash=1;this.vx=dx*12;this.vy=dy*12;SFX.play('boop');spawn(w,'heart',this.x,this.y-7,{vy:-rand(10,16),life:1.2,ph:rand(TAU)});break;
+      case 'spinner':this.spin=rand(3,5);this.ang=Math.atan2(dy,dx);SFX.play('whirr');break;
+      case 'rc':this.drive=rand(2,3.5);this.ang=Math.atan2(dy,dx)+rand(-0.6,0.6);this.vh=12;this.h=0.1;SFX.play('beep');break;
+      case 'musicbox':this.cool=6;this.play2=4;SFX.play('musicbox');pet.danceNext=4;break;
+      case 'bubbler':this.burst=4;this.bT=0;break;
+      case 'butterfly':this.cool=2;this.ang=Math.atan2(dy,dx)+rand(-0.5,0.5);this.fly=12;this.x+=dx*6;this.y+=dy*6;SFX.play('flutter');break;
     }
   }
 }
+function makeBubble(w,x,y,h){if(w.bubbles.length>=14)return;
+  w.bubbles.push({kind:'bubble',label:'a bubble',play:true,dead:false,caught:false,x:x+rand(-2,2),y,h,vx:rand(-10,10),vy:rand(-8,8),r:rand(1.6,3),life:rand(6,10),ph:rand(TAU),
+    onCatch(){this.dead=true;popBubble(w,this);}});}
 function drawToolIcon(fb,id,x,y){
+  if(id==='feather'){const st=hex('#8a5a2a'),k=hex('#0a0806');line(fb,x-7,y+7,x-1,y-1,k);line(fb,x-6,y+7,x,y-1,st);
+    const cs=['#ff7eb3','#b884ff','#5ce0d0','#ffe066'];for(let i=0;i<7;i++){const t=i/6;pset(fb,x+1+t*6,y-2-t*5+Math.sin(t*6)*1,hex(cs[i%4]));pset(fb,x+t*6,y-1-t*5+Math.sin(t*6),hex(cs[(i+1)%4]));}return;}
   if(id==='laser'){const k=hex('#0a0806'),b=hex('#2e3036'),m=hex('#8a9098'),r=hex('#ff3030');for(let i=0;i<9;i++){pset(fb,x-6+i,y+4-i*0.8,k);pset(fb,x-6+i,y+3-i*0.8,m);pset(fb,x-6+i,y+2-i*0.8,b);}
     disc(fb,x+5,y-5,2.2,r);pset(fb,x+4,y-6,hex('#ffc0c0'));}
   else if(id==='bubbles'){const k=hex('#0a0806'),s=hex('#c8a060'),cy=hex('#9fe8ff'),pk=hex('#ffb0e0');line(fb,x-6,y+7,x,y+1,k);line(fb,x-5,y+7,x+1,y+1,s);
@@ -2533,11 +2670,13 @@ function createWorld(){
     hide:{x:88,y:140,ang:-0.12,len:48,r:11},lamp:{x:70,y:46},lampRock:{x:70,y:50},dayness:1,dayTarget:1,t:0,pet:null,
     wet:new Float32Array(N),plants:[],toys:[],decor:[],coins:[],bubbles:[],disco:false,
     laser:{kind:'laser',label:'the laser dot',play:true,on:false,x:0,y:0,h:0,dead:true,caught:false,onCatch(){}},
+    feather:{kind:'feather',label:'the feather',play:true,on:false,x:160,y:90,h:5,vx:0,vy:0,dead:true,caught:false,cool:0,
+      onCatch(){this.cool=0.9;this.vy-=90;this.vx+=rand(-60,60);this.h=12;SFX.play('flutter');}},
     onEvent:msg=>flash(`${game.name} ${msg}`)};
   w.onEat=(pet,p)=>{if(pet.preview)return;const m=pet.mouthScreen();addCoins(3,m.x,m.y);addXP(4);};
   w.onPlay=(pet,t)=>{if(pet.preview)return;const S=w.stats,k=t.kind;S.happy=Math.min(100,S.happy+(k==='bubble'?1.5:3));addXP(k==='bubble'?1:2);
     if(k==='laser'){SFX.play('zap');spawn(w,'star',t.x,t.y,{life:0.18});}
-    if(Math.random()<(k==='laser'?0.2:k==='bubble'?0.06:0.3))addCoins(k==='laser'||k==='bubble'?1:2,t.x,t.y-t.h);
+    if(Math.random()<(k==='laser'||k==='feather'?0.2:k==='bubble'?0.06:0.3))addCoins(k==='laser'||k==='bubble'||k==='feather'?1:2,t.x,t.y-t.h);
     if(Math.random()<0.4){const hd=pet.headPos();spawn(w,'heart',hd.x,hd.y-6-pet.h,{vy:-rand(10,16),life:1.2,ph:rand(TAU)});}};
   return w;
 }
@@ -2606,6 +2745,11 @@ function updatePlay(dt){
   P.moved=0;
   // laser dot
   const L=w.laser;L.on=tool==='laser'&&P.inside&&!game.placing&&!ui.modalOpen();L.dead=!L.on;if(L.on){L.x=P.x;L.y=P.y;}
+  // feather teaser: dangles on a springy string below the pointer
+  const F=w.feather;F.on=tool==='feather'&&P.inside&&!game.placing&&!ui.modalOpen();F.cool-=dt;F.dead=!F.on||F.cool>0;
+  if(F.on){const tx=P.x,ty=P.y+10;F.vx+=(tx-F.x)*dt*28;F.vy+=(ty-F.y)*dt*28;const dmp=Math.exp(-dt*4.5);F.vx*=dmp;F.vy*=dmp;F.x+=F.vx*dt;F.y+=F.vy*dt;
+    F.x=clamp(F.x,w.bounds.x0,w.bounds.x1);F.y=clamp(F.y,w.bounds.y0,w.bounds.y1);F.h=lerp(F.h,3+Math.abs(Math.sin(w.t*3))*4,Math.min(1,dt*6));}
+  else{F.x=P.x;F.y=P.y+10;F.vx=F.vy=0;}
   const hq=game.held;
   if(hq){hq.sx=P.x;hq.sy=P.y;hq.x=P.x;hq.y=P.y+8;hq.h=8;}
   pet.update(dt);
@@ -2618,7 +2762,7 @@ function updatePlay(dt){
   // toys, decor, bubbles, coins
   const hd=pet.headPos(),mv=pet.noise?pet.noise():0;
   for(const t of w.toys){t.update(dt,w);
-    if(!t.dragged&&(t.id==='ball'||t.id==='bell'||t.id==='squeaky'||t.id==='windup')&&mv>0.2){const dx=t.x-hd.x,dy=t.y-hd.y,d=Math.hypot(dx,dy);
+    if(!t.dragged&&['ball','bell','squeaky','windup','yarn','dice','plush','spinner','rc'].includes(t.id)&&mv>0.2){const dx=t.x-hd.x,dy=t.y-hd.y,d=Math.hypot(dx,dy);
       if(d<t.r+2.5&&d>0.01){t.vx+=dx/d*40*dt*mv*6;t.vy+=dy/d*40*dt*mv*6;}}}
   for(const d of w.decor)d.update(dt,w);
   for(let i=w.bubbles.length-1;i>=0;i--){const b=w.bubbles[i];b.life-=dt;b.ph+=dt;
@@ -2755,7 +2899,9 @@ function renderPlay(){
   if(game.placing&&P.inside){const it=ITEMS[game.placing],g=it.cat==='decor'?new Decor(game.placing,P.x,P.y):new Toy(game.placing,P.x,P.y);
     fb.clearLayer();(g instanceof Decor?drawDecor:drawToy)(fb,g);composite(fb,OBJ_PAINTER,{outline:(Math.floor(w.t*4)&1)?hex('#fff3b0'):hex('#9cd35e')});}
   if(game.held){const q=game.held;if(q.layered){fb.clearLayer();q.drawL(fb);composite(fb,FOOD_PAINTER);}else q.draw(fb,w.t);}
-  for(const p of w.parts){if(p.type==='drop')pset(fb,p.x,p.y-p.h,drop);else if(p.type==='mist')pmix(fb,p.x,p.y,mistc,clamp(p.life,0,1)*0.6);}
+  for(const p of w.parts){if(p.type==='drop')pset(fb,p.x,p.y-p.h,drop);else if(p.type==='mist')pmix(fb,p.x,p.y,mistc,clamp(p.life,0,1)*0.6);
+    else if(p.type==='fdrop')pmix(fb,p.x,p.y-p.h,hex('#bfefff'),0.85);
+    else if(p.type==='smoke'){const f=clamp(p.life/2,0,1)*0.45,r=1+(1-f)*2;for(const[dx,dy]of[[0,0],[1,0],[0,1],[-1,0],[0,-1]])pmix(fb,p.x+dx*r*0.6,p.y+dy*r*0.6,hex('#b8b0a8'),f);}}
   for(let k=0;k<R.frameIdx.length;k++){const i=R.frameIdx[k];px[i]=R.frame[i];}
   const GE=hex('#bfe6d6');for(let k=0;k<R.glassIdx.length;k++){const i=R.glassIdx[k];px[i]=mixc(px[i],GE,R.glassT[k]);}
   applyLight(w.dayness);
@@ -2774,6 +2920,10 @@ function renderPlay(){
   for(const b of w.bubbles){if(b.dead)continue;const x=b.x,y=b.y-b.h,n=Math.ceil(b.r*7);
     for(let i=0;i<n;i++){const a=i/n*TAU,hue=(a+w.t*2)%TAU;padd(fb,x+Math.cos(a)*b.r,y+Math.sin(a)*b.r,40+Math.sin(hue)*30,50+Math.sin(hue+2)*30,60+Math.sin(hue+4)*30);}
     padd(fb,x-b.r*0.4,y-b.r*0.4,110,110,120);}
+  if(w.feather.on){const F=w.feather,P2=game.pointer,fx=F.x,fy=F.y-F.h,str=hex('#e8e0c8'),cs=['#ff7eb3','#b884ff','#5ce0d0','#ffe066'];
+    pdark(fb,fx+1,F.y+1,0.7);pdark(fb,fx,F.y+1,0.7);
+    const n=Math.ceil(Math.hypot(fx-P2.x,fy-P2.y));for(let i=0;i<n;i+=1){const t=i/n,sag=Math.sin(t*Math.PI)*2;pmix(fb,lerp(P2.x,fx,t),lerp(P2.y,fy,t)+sag,str,0.7);}
+    const sw=Math.sin(w.t*7)*1.2;for(let i=0;i<6;i++){const t=i/5;pset(fb,fx+sw*t+(i&1),fy+i,hex(cs[i%4]));pset(fb,fx+sw*t-1+(i&1),fy+i+1,hex(cs[(i+2)%4]));}}
   if(w.laser.on){const L=w.laser;padd(fb,L.x,L.y,255,40,40);for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]])padd(fb,L.x+dx,L.y+dy,120,10,10);
     for(let i=0;i<12;i++){const a=i/12*TAU;padd(fb,L.x+Math.cos(a)*2.5,L.y+Math.sin(a)*2.5,40,0,0);}}
   const NOTE=['.kk','.kk','.k.','kk.','kk.'];
@@ -2800,11 +2950,14 @@ function renderPlay(){
 // =====================================================================
 const ITEM_IMG={};
 const ICON_FIT={ball:[3.6,24],bell:[4,24],squeaky:[3,25],mirror:[2.6,27],windup:[3.2,22],feeder:[2.8,24],disco:[1.9,28],
-  mushrooms:[2.3,25],pumpkin:[2.7,26],gnome:[2.1,29],flamingo:[1.55,29],lantern:[2.7,28],crystal:[2.2,29],chest:[2.4,24],castle:[1.2,28]};
+  mushrooms:[2.3,25],pumpkin:[2.7,26],gnome:[2.1,29],flamingo:[1.55,29],lantern:[2.7,28],crystal:[2.2,29],chest:[2.4,24],castle:[1.2,28],
+  cactus:[2.6,29],seashell:[3.2,22],sign:[2.4,29],windmill:[1.6,30],tent:[2.8,26],bench:[2.8,25],fountain:[2.2,25],torii:[1.9,29],volcano:[2.4,26],
+  yarn:[3.6,24],dice:[3,26],plush:[3,25],spinner:[3,25],rc:[2.6,24],musicbox:[2.8,25],bubbler:[3,27],butterfly:[2.4,30]};
 function itemImageData(id){
   if(ITEM_IMG[id])return ITEM_IMG[id];
   const f=new FB(32,32),it=ITEMS[id];f.px.fill(0);
-  if(it.cat==='hat'){const A={icon:1,x:16,y:id==='ufo'?31:(id==='wizard'||id==='party')?27:id==='halo'?25:21,a:Math.PI/2,s:id==='ufo'?1.25:id==='shades'||id==='bow'?2.6:2.1};
+  if(it.cat==='hat'){const tall=['wizard','party','bunny','chef','santa','jester','antlers'].includes(id);
+    const A={icon:1,x:16,y:id==='ufo'?31:tall?27:id==='halo'||id==='stars'?25:21,a:Math.PI/2,s:id==='ufo'?1.25:id==='shades'||id==='bow'?2.6:id==='strawhat'?1.7:id==='bunny'||id==='antlers'?1.8:2.1};
     f.clearLayer();drawHat(f,id,A,0.3);composite(f,HAT_PAINTER);hatGlow(f,id,A,0.3);}
   else if(it.cat==='decor'){const[s,y]=ICON_FIT[id],d=new Decor(id,16,y);d.sc=s;f.clearLayer();drawDecor(f,d);composite(f,OBJ_PAINTER);decorDetails(f,d);}
   else if(it.cat==='toy'){const[s,y]=ICON_FIT[id],o=new Toy(id,16,y);o.sc=s;o.ang=0.4;o.rot=0.5;const keep=OBJ_PAINTER.balls;OBJ_PAINTER.balls=[];
@@ -2826,12 +2979,20 @@ const gfb=new FB(128,176);
 const G={m:'toys',state:'idle',t:0,crank:0,balls:[],cap:null,halves:[],parts:[],result:null,rt:0,ballsFor:null};
 const CAPCOL=['#ff6b6b','#ffc24a','#5cb4ff','#9cd35e','#b884ff','#ff7eb3','#45d1c1'];
 function gBalls(){G.balls=[];for(let i=0;i<15;i++)G.balls.push({x:64+rand(-26,26),y:62+rand(-12,18),vx:0,vy:0,r:7,c:pick(CAPCOL),rot:rand(TAU)});G.ballsFor=G.m;}
+// Friendlier gacha: things you don't own yet are NEW_BOOST times as likely (within the rarity odds),
+// decor/toys stack up to STACK_MAX, and any true repeat refunds 60% of the pull price.
+const NEW_BOOST=3,STACK_MAX=3,DUP_REFUND=0.6;
+const isUnique=id=>ITEMS[id].cat==='hat'||ITEMS[id].cat==='tool';
+const itemFull=id=>(save.inv[id]||0)>=(isUnique(id)?1:STACK_MAX);
+function itemWeights(m){const pool=MACHINES[m].pool,byR=[0,1,2,3].map(r=>pool.filter(id=>ITEMS[id].r===r).length||1);
+  return pool.map(id=>{const it=ITEMS[id],own=(save.inv[id]||0)>0;return[id,RAR[it.r].w/byR[it.r]*(own?1:NEW_BOOST)];});}
+function newChance(m){const W=itemWeights(m),tot=W.reduce((a,x)=>a+x[1],0);return W.filter(([id])=>!((save.inv[id]||0)>0)).reduce((a,x)=>a+x[1],0)/tot;}
 function rollItem(m){
-  const pool=MACHINES[m].pool;let roll=Math.random()*100,r=0,acc=0;for(r=0;r<3;r++){acc+=RAR[r].w;if(roll<acc)break;}
-  let c=pool.filter(id=>ITEMS[id].r===r);while(!c.length&&r>0){r--;c=pool.filter(id=>ITEMS[id].r===r);}
-  const id=pick(c),it=ITEMS[id],unique=it.cat==='hat'||it.cat==='tool',had=(save.inv[id]||0)>0;
-  let refund=0;if(unique&&had){refund=RAR[it.r].dup;}else save.inv[id]=(save.inv[id]||0)+1;
-  markDirty();return{id,dup:unique&&had,refund,isNew:!had,count:save.inv[id]||0};
+  const W=itemWeights(m),tot=W.reduce((a,x)=>a+x[1],0);let roll=Math.random()*tot,id=W[W.length-1][0];
+  for(const[k,w]of W){roll-=w;if(roll<=0){id=k;break;}}
+  const had=(save.inv[id]||0)>0,full=itemFull(id),refund=full?Math.round(MACHINES[m].price*DUP_REFUND):0;
+  if(!full)save.inv[id]=(save.inv[id]||0)+1;
+  markDirty();return{id,dup:full,refund,isNew:!had,count:save.inv[id]||0};
 }
 function rrect(f,x,y,w,h,r,c){for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){const cx=Math.max(0,Math.max(r-xx,xx-(w-1-r))),cy=Math.max(0,Math.max(r-yy,yy-(h-1-r)));if(cx*cx+cy*cy<=r*r)pset(f,x+xx,y+yy,c);}}
 function drawCapsule(f,x,y,r,col,rot,half){
@@ -3031,17 +3192,17 @@ const ui={
   },
   toolClick(id){
     SFX.play('ui');
-    if(id==='play'){const owned=['laser','bubbles'].filter(t=>save.inv[t]>0);
-      if(game.tool==='laser'||game.tool==='bubbles'||game.tool==='play'){game.trayOpen=!game.trayOpen;this.renderTray();return;}
+    if(id==='play'){const owned=TOY_TOOLS.filter(t=>save.inv[t]>0);
+      if(TOY_TOOLS.includes(game.tool)||game.tool==='play'){game.trayOpen=!game.trayOpen;this.renderTray();return;}
       setTool(owned.includes(game.toyTool)?game.toyTool:(owned[0]||'play'));return;}
     if(id===game.tool&&id==='feed'){game.trayOpen=!game.trayOpen;this.renderTray();return;}
     setTool(id);
   },
-  syncDock(){const t=game.tool,key=(t==='laser'||t==='bubbles'||t==='play')?'play':t;
+  syncDock(){const t=game.tool,key=(TOY_TOOLS.includes(t)||t==='play')?'play':t;
     for(const d of TOOLS)$('d-'+d.id).classList.toggle('on',d.id===key);
     const g=$('d-gacha');let dot=g.querySelector('.dot');const can=save.coins>=50;if(can&&!dot){dot=document.createElement('i');dot.className='dot';g.appendChild(dot);}else if(!can&&dot)dot.remove();},
   renderTray(){
-    const tr=$('tray'),t=game.tool,isPlay=t==='laser'||t==='bubbles'||t==='play';
+    const tr=$('tray'),t=game.tool,isPlay=TOY_TOOLS.includes(t)||t==='play';
     this.syncDock();
     if(!(t==='feed'||isPlay)||!game.trayOpen){tr.hidden=true;return;}
     tr.hidden=false;tr.innerHTML='';
@@ -3051,12 +3212,12 @@ const ui={
       const sep=document.createElement('div');sep.className='tsep';tr.appendChild(sep);
       const tb=document.createElement('button');tb.className='ti trash';tb.id='trashBtn';tb.title='Trash: click to clear all food, or drag food here to throw it away';
       tb.innerHTML=`<img class="px" src="${iconURL('trash')}" alt=""><span class="tl">trash</span>`;tb.addEventListener('click',()=>trashAll());tr.appendChild(tb);}
-    else{const owned=['laser','bubbles'].filter(x=>save.inv[x]>0);
-      if(!owned.length){const n=document.createElement('div');n.className='tray-note';n.innerHTML='No play tools yet. The toy machine has lasers and bubbles! <button>Open Gacha</button>';
+    else{const owned=TOY_TOOLS.filter(x=>save.inv[x]>0);
+      if(!owned.length){const n=document.createElement('div');n.className='tray-note';n.innerHTML='No play tools yet. The toy machine has lasers, bubbles and feathers! <button>Open Gacha</button>';
         n.querySelector('button').addEventListener('click',()=>{G.m='toys';this.openModal('mGacha');});tr.appendChild(n);}
       for(const x of owned){const b=document.createElement('button');b.className='ti'+(t===x?' on':'');b.title=ITEMS[x].name;b.appendChild(toolCanvas(x));
         const l=document.createElement('span');l.className='tl';l.textContent=x;b.appendChild(l);b.addEventListener('click',()=>{setTool(x);SFX.play('tick');});tr.appendChild(b);}
-      if(owned.length){const n=document.createElement('div');n.className='tray-note';n.textContent=t==='laser'?'Move over the tank. Your pet will chase the dot!':t==='bubbles'?'Hold in the tank to blow bubbles.':'';tr.appendChild(n);}}
+      if(owned.length){const n=document.createElement('div');n.className='tray-note';n.textContent=t==='laser'?'Move over the tank. Your pet will chase the dot!':t==='bubbles'?'Hold in the tank to blow bubbles.':t==='feather'?'Wiggle the feather around. Pounce!':'';tr.appendChild(n);}}
   },
   toast(msg,ev){const t=$('toast');t.textContent=msg;if(ev){t.classList.remove('event');void t.offsetWidth;t.classList.add('event');this.evT=2.8;}},
   update(){
@@ -3131,7 +3292,9 @@ const ui={
     if(G.ballsFor!==G.m||!G.balls.length)gBalls();
     const M2=MACHINES[G.m];$('gTitle').textContent=M2.name;$('gDesc').textContent=M2.desc;
     const p=$('gPull');p.style.background=M2.col;p.innerHTML=`<img class="px" src="${iconURL('coin')}" alt="">Turn the crank · ${M2.price}`;p.disabled=G.state!=='idle';
-    $('gOdds').innerHTML=RAR.map(r=>`<span style="--c:${r.c}">${r.n} ${r.w}%</span>`).join('');
+    const nc=newChance(G.m);
+    $('gOdds').innerHTML=RAR.map(r=>`<span style="--c:${r.c}">${r.n} ${r.w}%</span>`).join('')+
+      `<span class="boost" style="--c:#9cd35e">New-item boost ×${NEW_BOOST} · ${nc>0?Math.round(nc*100)+'% chance of something new':'collection complete!'}</span><span style="--c:#c8c2b0">Repeats refund ${Math.round(MACHINES[G.m].price*DUP_REFUND)} coins</span>`;
     const own=M2.pool.filter(id=>save.inv[id]>0).length;$('gCollH').textContent=`Collection ${own}/${M2.pool.length}`;
     const cg=$('gColl');cg.innerHTML='';for(const id of M2.pool){const d=document.createElement('div'),has=save.inv[id]>0;d.className='cg'+(has?'':' unk');if(has)d.style.setProperty('--rc',RAR[ITEMS[id].r].c);
       d.title=has?ITEMS[id].name:'???';d.appendChild(itemCanvas(id));cg.appendChild(d);}
@@ -3146,7 +3309,7 @@ const ui={
   showReveal(r){
     this.revealShown=true;const it=ITEMS[r.id],rc=RAR[it.r].c,box=$('gReveal'),card=$('gCard');box.style.setProperty('--rc',rc);card.style.setProperty('--rc',rc);
     SFX.play('reveal'+it.r);
-    const tag=r.dup?`<span class="tag dup">Duplicate · +${r.refund} coins</span>`:r.isNew?'<span class="tag">New!</span>':`<span class="tag dup">You now have ${r.count}</span>`;
+    const tag=r.dup?`<span class="tag dup">Repeat · +${r.refund} coins back</span>`:r.isNew?'<span class="tag">New!</span>':`<span class="tag dup">You now have ${r.count}</span>`;
     card.innerHTML=`<div class="rar">${RAR[it.r].n}</div>`;card.appendChild(itemCanvas(r.id));
     card.insertAdjacentHTML('beforeend',`<h3>${it.name}</h3><p>${it.desc}</p>${tag}<div class="acts"></div>`);
     const acts=card.querySelector('.acts'),btn=(t,fn,alt)=>{const b=document.createElement('button');b.className='btn'+(alt?' alt':'');b.textContent=t;b.addEventListener('click',fn);acts.appendChild(b);};
@@ -3192,7 +3355,7 @@ const ui={
 //  Input
 // =====================================================================
 function setTool(t){
-  if(game.held)dropHeld();game.placing=null;game.tool=t;if(t==='laser'||t==='bubbles')game.toyTool=t;game.trayOpen=true;ui.renderTray();
+  if(game.held)dropHeld();game.placing=null;game.tool=t;if(TOY_TOOLS.includes(t))game.toyTool=t;game.trayOpen=true;ui.renderTray();
 }
 function toggleLight(){const w=game.world;if(!w)return;w.dayTarget=w.dayTarget>0.5?0:1;SFX.play(w.dayTarget?'lightsOn':'lightsOff');
   flash(w.dayTarget?'Lights on. Good morning, jar.':'Lights off. The night shift wakes up.');ui.refreshLight();}
