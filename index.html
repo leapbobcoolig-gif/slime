@@ -167,6 +167,8 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
 .pcard{display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--panel-2);border:3px solid #060a07;border-radius:10px;box-shadow:inset 0 0 0 2px var(--line)}
 .pcard.here{box-shadow:inset 0 0 0 2px var(--moss)}
+.pcard.locked canvas{filter:grayscale(.55) brightness(.75)}
+.pcard .btn.buy{background:linear-gradient(#f4c64a,#c8901e);color:#2a1a04}
 .pcard canvas{width:100%;aspect-ratio:112/72;border-radius:6px;box-shadow:0 0 0 2px #060a07}
 .pcard h3{margin:0;font-family:var(--display);font-size:13px}
 .pcard .sub{color:var(--mute);font-size:18px;margin-top:-4px}
@@ -270,7 +272,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
   <div class="srow"><label>Thought bubbles<small>Little icons when your pet wants something.</small></label><button class="sw" id="setBubbles" aria-label="Thought bubbles"></button></div>
   <div class="srow"><label>Pixel-perfect scaling<small>Crisper pixels, smaller tank.</small></label><button class="sw" id="setPixel" aria-label="Pixel-perfect scaling"></button></div>
   <div class="srow" id="resetRow"><label>Reset save<small>Coins, items and bonds start over.</small></label><button class="btn alt danger" id="resetBtn" style="flex:none">Reset</button></div>
-  <div class="srow" id="unlockRow" hidden><label>Unlock everything<small>Secret menu! Every hat, toy, tool and decoration.</small></label><button class="btn" id="unlockBtn" style="flex:none">Unlock all</button></div>
+  <div class="srow" id="unlockRow" hidden><label>Unlock everything<small>Secret menu! Every critter, hat, toy, tool and decoration.</small></label><button class="btn" id="unlockBtn" style="flex:none">Unlock all</button></div>
 </div></div>
 
 <script>
@@ -1704,14 +1706,16 @@ class Spider extends Pet{
     super();this.initCommon(world,'tarantula');
     this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.tuck=0;this.threat=0;this.threatT=0;
     this.burst=rand(1,2);this.burstOn=true;this.outline=hex(PAL.spider.outline);this.n=1;this.pts=[{x,y}];this.seam=0.8;this.chewPh=0;this.gt=0;this.sc=1.38;
-    this.legs=[];const TA=[0.45,0.98,2.18,2.7],TR=[0.4,0.98,2.14,2.74],RR=[15.0,14.2,13.8,15.6];this.gp=0;
+    this.legs=[];const TA=[0.3,0.95,2.2,2.85],TR=[0.4,0.98,2.14,2.74],RR=[15.0,14.2,13.8,15.6];this.gp=0;
     for(let i=0;i<4;i++)for(const side of[-1,1])this.legs.push({i,side,ta:TA[i],tr:TR[i],rr:RR[i],grp:(i+(side>0?1:0))&1,
       fx:0,fy:0,sx:0,sy:0,st:0,dur:.12,stepping:false,lift:0,ax:0,ay:0,rx:0,ry:0});
     this.updateLegs(0,false);for(const L of this.legs){L.fx=L.rx;L.fy=L.ry;}
     // knee side is fixed per leg (picked once from the rest pose) so it can never flip mid-walk
-    const[cx,cy]=this.Wg(1.6,0),l=7.1*this.sc;
-    for(const L of this.legs){const k1=ik2(L.ax,L.ay,L.rx,L.ry,l,l,1),k2=ik2(L.ax,L.ay,L.rx,L.ry,l,l,-1);
-      L.bend=Math.hypot(k1[0]-cx,k1[1]-cy)>=Math.hypot(k2[0]-cx,k2[1]-cy)?1:-1;L.kx=null;}
+    // front legs' knees bow forward and rear legs' bow back, so neighbours never cross
+    const[cx,cy]=this.Wg(1.6,0),c0=Math.cos(this.ang),s0=Math.sin(this.ang);
+    const polar=(L,x,y)=>Math.atan2((-s0*(x-cx)+c0*(y-cy))*L.side,c0*(x-cx)+s0*(y-cy));
+    for(const L of this.legs){L.len=Math.hypot(L.rx-L.ax,L.ry-L.ay)/(2*Math.cos(0.32));const k1=ik2(L.ax,L.ay,L.rx,L.ry,L.len,L.len,1),a1=polar(L,k1[0],k1[1]),af=polar(L,L.rx,L.ry);
+      L.bend=((L.i<2)===(a1<af))?1:-1;L.kx=null;}
     this.walking=false;
   }
   color(m,q,s,l,x,y){const P=PAL.spider;
@@ -1740,7 +1744,7 @@ class Spider extends Pet{
   goTo(tx,ty,dt,mode,arrive=3){
     const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y);
     const max=mode==='run'?32:mode==='stalk'?5:mode==='slow'?6:mode==='lunge'?34:11;
-    const diff=wrapA(Math.atan2(ty-hd.y,tx-hd.x)-this.ang),tr=(this.speed<2?2.2:4)*dt;this.ang+=clamp(diff,-tr,tr);
+    const diff=wrapA(Math.atan2(ty-hd.y,tx-hd.x)-this.ang),tr=(this.speed<2?2.2:3)*dt;this.ang+=clamp(diff,-tr,tr);
     let want=d>arrive?max:0;if(Math.abs(diff)>1)want*=0.3;if(d<arrive+6&&mode!=='lunge')want*=clamp((d-arrive)/6,0.25,1);
     if((mode==='walk'||mode==='slow')&&!this.burstOn)want=0;if(this.tuck>0.2||this.threat>0.3)want=0;
     this.speed+=(want-this.speed)*Math.min(1,dt*(want>this.speed?5:7));
@@ -1791,7 +1795,7 @@ class Spider extends Pet{
     const moving=this.walking;
     if(moving)this.gp=(this.gp+this.speed*dt/(2*stride))%1;
     for(let k=0;k<8;k++){const L=this.legs[k];
-      [L.ax,L.ay]=this.Wg(1.6+Math.cos(L.ta)*2.2,L.side*Math.sin(L.ta)*2.1);
+      [L.ax,L.ay]=this.Wg(1.6+Math.cos(L.ta)*2.5,L.side*Math.sin(L.ta)*2.4);
       const rr=L.rr*(1-tk*0.55);[L.rx,L.ry]=this.Wg(1.6+Math.cos(L.tr)*rr,L.side*Math.sin(L.tr)*rr);
       if(flail){const a=this.t*14+k*1.3;L.fx=L.rx+Math.sin(a)*1.6;L.fy=L.ry+Math.cos(a*1.2)*1.3+1;L.lift=0.6;L.stepping=false;L.swing=false;continue;}
       if(tk>0.1){L.fx=lerp(L.fx,L.rx,Math.min(1,dt*14));L.fy=lerp(L.fy,L.ry,Math.min(1,dt*14));L.stepping=false;L.swing=false;L.lift=0;continue;}
@@ -1813,6 +1817,12 @@ class Spider extends Pet{
           if(!busy||d>5){L.stepping=true;L.st=0;L.sx=L.fx;L.sy=L.fy;L.dur=0.2;}}
       }
     }
+    // keep every foot inside its own wedge around the body so legs never sweep across each other
+    if(!flail&&tk<=0.1){const[ccx,ccy]=this.Wg(1.6,0);
+      for(const L of this.legs){const dx=L.fx-ccx,dy=L.fy-ccy,u=(c*dx+sn*dy)/sc,v=(-sn*dx+c*dy)/sc*L.side;
+        const a=Math.atan2(v,u),r=Math.hypot(u,v),a2=clamp(a,L.tr-0.22,L.tr+0.22),r2=clamp(r,L.rr*0.72,L.rr*1.18);
+        if(a2!==a||r2!==r){const nu=Math.cos(a2)*r2,nv=Math.sin(a2)*r2*L.side;
+          L.fx=lerp(L.fx,ccx+(c*nu-sn*nv)*sc,0.5);L.fy=lerp(L.fy,ccy+(sn*nu+c*nv)*sc,0.5);}}}
   }
   hitTest(x,y){const[cx,cy]=this.W(-1,0);return Math.hypot(x-cx,y-cy)<8*this.sc?0:-1;}
   tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;
@@ -1833,7 +1843,7 @@ class Spider extends Pet{
         fx=lerp(fx,tx,th);fy=lerp(fy,ty,th);lift+=th*(L.i?2.5:6)*sc;}
       const ax=L.ax,ay=L.ay+oy,vx=fx-ax,vy=fy-lift-ay;
       // knees bow gently away from the body
-      let[kx,ky,ex,ey]=ik2(ax,ay,fx,fy-lift,7.1*sc,7.1*sc,L.bend);
+      let[kx,ky,ex,ey]=ik2(ax,ay,fx,fy-lift,L.len,L.len,L.bend);
       // safety: never let a knee pop more than a few px in one frame
       if(L.kx!=null&&!this.preview){const jx=kx-L.kx,jy=ky-(L.ky+oy),j=Math.hypot(jx,jy);if(j>3.5){kx=L.kx+jx*3.5/j;ky=L.ky+oy+jy*3.5/j;}}
       L.kx=kx;L.ky=ky-oy;const kyu=ky-0.3*sc;
@@ -2227,10 +2237,10 @@ const ROSTER=['frog','lizard','salamander','snake','chameleon','tarantula','crab
 //  Save (localStorage, wrapped so the game still works without it)
 // =====================================================================
 const SAVE_KEY='mossjar.v6';
-const save={coins:120,inv:{},placed:[],pets:{},cur:null,set:{vol:0.8,sfx:true,music:true,shake:true,bubbles:true,pixel:false}};
+const save={coins:120,inv:{},placed:[],pets:{},owned:[],cur:null,set:{vol:0.8,sfx:true,music:true,shake:true,bubbles:true,pixel:false}};
 function loadSave(){
   let d=null;try{d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');}catch(e){}
-  if(d){const set=Object.assign({},save.set,d.set||{});Object.assign(save,d);save.set=set;save.inv=save.inv||{};save.pets=save.pets||{};save.placed=save.placed||[];}
+  if(d){const set=Object.assign({},save.set,d.set||{});Object.assign(save,d);save.set=set;save.inv=save.inv||{};save.pets=save.pets||{};save.placed=save.placed||[];save.owned=save.owned||[];}
   else{try{const old=JSON.parse(localStorage.getItem('mossjar.pet')||'null');if(old&&SPECIES[old.kind]){save.cur=old.kind;save.pets[old.kind]={name:old.name,xp:0,lvl:1,hat:null,stats:null};}}catch(e){}}
 }
 let dirty=false,saveT=0;
@@ -2245,6 +2255,9 @@ function writeSave(){
 }
 function petSave(kind=game.kind){return save.pets[kind]||(save.pets[kind]={name:pick(SPECIES[kind].names),xp:0,lvl:1,hat:null,stats:null});}
 const xpNeed=l=>40+l*25;
+// Frog, lizard and salamander are free; the rest cost coins (anyone adopted before pricing stays owned).
+const FREE_PETS=['frog','lizard','salamander'],PET_PRICE=100;
+const petOwned=k=>FREE_PETS.includes(k)||!!save.pets[k]||save.owned.includes(k);
 
 // =====================================================================
 //  Hats: shaded capsules with a height offset so tall hats stand up
@@ -2899,6 +2912,7 @@ const ui={
       if(taps.length>=5&&$('unlockRow').hidden){$('unlockRow').hidden=false;SFX.play('sparkle');taps=[];}});
     $('unlockBtn').addEventListener('click',()=>{
       for(const[id,it]of Object.entries(ITEMS))save.inv[id]=(it.cat==='hat'||it.cat==='tool')?1:Math.max(save.inv[id]||0,3);
+      for(const k of ROSTER)if(!save.owned.includes(k))save.owned.push(k);
       markDirty();writeSave();SFX.play('levelup');this.renderTray();const b=$('unlockBtn');b.textContent='Unlocked!';b.disabled=true;
       flash('Everything unlocked! Check your Bag.');});
     this.refreshLight();
@@ -3033,16 +3047,19 @@ const ui={
   // ---------- pets ----------
   renderPets(first){
     const first2=first===true||game.firstRun;$('petsTitle').textContent=first2?'Choose your first critter':'Your critters';
-    $('petsSub').textContent=first2?'You can adopt everyone later. Each keeps its own name, bond and hat.':'Visit anyone. Everyone keeps their name, bond and hat.';
+    $('petsSub').textContent=first2?`Frog, lizard and salamander are free. The others cost ${PET_PRICE} coins each.`:`Free critters are always here. Others cost ${PET_PRICE} coins to adopt. Everyone keeps their name, bond and hat.`;
     $('petsX').hidden=first2;
     const ro=$('roster');ro.innerHTML='';this.previews=[];
-    for(const kind of ROSTER){const sp=SPECIES[kind],ps=save.pets[kind],here=kind===game.kind,c=document.createElement('div');c.className='pcard'+(here?' here':'');
+    for(const kind of ROSTER){const sp=SPECIES[kind],ps=save.pets[kind],here=kind===game.kind,own=petOwned(kind),c=document.createElement('div');c.className='pcard'+(here?' here':'')+(own?'':' locked');
       const cv=document.createElement('canvas');cv.width=112;cv.height=72;cv.className='px';c.appendChild(cv);
       c.insertAdjacentHTML('beforeend',`<h3>${ps?ps.name:sp.label}</h3><div class="sub">${ps?sp.label:sp.latin}</div><p>${sp.blurb}</p>
-        <div class="meta"><span>${ps?'Bond Lv '+ps.lvl:'Not adopted yet'}</span><span>${ps&&ps.hat?ITEMS[ps.hat].name:''}</span></div>`);
-      const b=document.createElement('button');b.className='btn';b.textContent=here?'Here now':ps?'Visit':'Adopt';b.disabled=here;
-      b.addEventListener('click',()=>{const was=game.firstRun;game.firstRun=false;this.close(true);startGame(kind);
-        if(was)setTimeout(()=>flash('Welcome! You have 120 coins. Try the Gacha machines!'),2900);});
+        <div class="meta"><span>${ps?'Bond Lv '+ps.lvl:own?'Free to adopt':PET_PRICE+' coins'}</span><span>${ps&&ps.hat?ITEMS[ps.hat].name:''}</span></div>`);
+      const b=document.createElement('button');b.className='btn'+(own?'':' buy');b.textContent=here?'Here now':ps?'Visit':own?'Adopt':`Adopt · ${PET_PRICE}`;b.disabled=here;
+      b.addEventListener('click',()=>{
+        if(!petOwned(kind)){if(save.coins<PET_PRICE){SFX.play('nope');b.textContent=`Need ${PET_PRICE-save.coins} more`;setTimeout(()=>{b.textContent=`Adopt · ${PET_PRICE}`;},1600);return;}
+          save.coins-=PET_PRICE;save.owned.push(kind);markDirty();this.bumpCoins();SFX.play('coin');}
+        const was=game.firstRun;game.firstRun=false;this.close(true);startGame(kind);
+        if(was)setTimeout(()=>flash(`Welcome! You have ${save.coins} coins. Try the Gacha machines!`),2900);});
       c.appendChild(b);ro.appendChild(c);
       const pfb=new FB(112,72),bg=new Uint32Array(112*72);bakeSoil(bg,112,72,0,0,112,72,kind.length*40);
       const pw={stats:{fed:60,happy:80,water:80},prey:[],parts:[],ripples:[],bounds:{x0:16,y0:14,x1:96,y1:58},dayness:1,t:0,dish:null,hide:null,lampRock:null,toys:[],bubbles:[]};
