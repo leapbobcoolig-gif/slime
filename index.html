@@ -750,6 +750,10 @@ const FOODS={cricket:{name:'a cricket',label:'cricket',value:18},worm:{name:'a m
   greens:{name:'some greens',label:'greens',value:14},roach:{name:'a roach',label:'roaches',value:20}};
 const FOOD_ORDER=['cricket','roach','worm','waxworm','fly','snail','fruit','greens','egg'];
 const CRUMB={cricket:hex('#6a4a2a'),worm:hex('#c89a4a'),waxworm:hex('#f0e0c0'),snail:hex('#8a7a6a'),fruit:hex('#d83040'),egg:hex('#f0e8d0'),fly:hex('#303030'),greens:hex('#6ab038'),roach:hex('#5a3418')};
+// Hunting styles: how long they stalk, how close before they commit, and how they rush.
+const HUNT={lizard:{st:[0.3,1.4],near:42,rush:'run'},salamander:{st:[0.6,2.0],near:28,rush:'run'},snake:{st:[0.8,2.2],near:32,rush:'run'},
+  chameleon:{st:[1.0,2.4],near:40,rush:'run'},frog:{st:[0.2,1.0],near:40,rush:'run'},tarantula:{st:[0.6,1.8],near:40,rush:'pounce',ambush:true},
+  crab:{st:[0,0.5],near:30,rush:'run'},turtle:{st:[0,0],near:0,rush:'walk'},gsnail:{st:[0,0],near:0,rush:'walk'}};
 const BITER={crab:{iv:.62,snd:'snap',t:2.6},turtle:{iv:.6,snd:'chomp',t:2.4},gsnail:{iv:.9,snd:'squelch',t:3.2},tarantula:{iv:.35,snd:'chew',t:2.2}};
 const PREY_NAME=Object.fromEntries(Object.entries(FOODS).map(([k,v])=>[k,v.name]));
 
@@ -785,13 +789,13 @@ class Pet{
     this.scanT-=dt;if(this.scanT>0)return false;this.scanT=0.3;
     const w=this.world,S=w.stats;if(!w.prey.length)return false;
     if(S.fed>94)return false;if(S.fed>78&&Math.random()<0.5)return false;
-    rad=rad||(this.isActive()?130:70);
+    rad=rad||(this.isActive()?130:85);
     const hd=this.headPos();let best=null,bd=rad;
     const diet=DIET[this.kind];
     for(const p of w.prey){if(p.dead||p.caught||p.hidden||!(diet[p.type]>0))continue;if(this.kind!=='frog'&&p.h>14)continue;
       const d=Math.hypot(p.x-hd.x,p.y-hd.y)*(p.inHand?0.5:1);if(d<bd){bd=d;best=p;}}
     if(!best)return false;
-    this.prey=best;this.state='hunt';this.timer=14;return true;
+    this.prey=best;this.state='hunt';this.timer=14;this.hp=null;return true;
   }
   scanPlay(dt,close){
     if(this.preview)return false;
@@ -826,8 +830,21 @@ class Pet{
         if(!p||p.dead||p.caught||this.timer<=0){this.state='idle';this.timer=rand(.3,1);this.prey=null;break;}
         if(this.canStrike(p)){this.startStrike(p);this.state='strike';break;}
         const hd=this.headPos(),d=Math.hypot(p.x-hd.x,p.y-hd.y);
-        this.goTo(p.x,p.y,dt,p.play?(d>22?'run':'walk'):(d<40?'stalk':'walk'),1);
-        if(this.kind!=='frog'&&Math.random()<dt*1.2)this.flick();
+        if(p.play||p.inHand){this.goTo(p.x,p.y,dt,p.play?(d>22?'run':'walk'):'walk',1);}
+        else{
+          // stalk for a species-flavoured while (or until close), then commit to a rush aimed where the prey is heading
+          const H=HUNT[this.kind]||HUNT.lizard;
+          if(!this.hp||this.hp.p!==p)this.hp={p,t:0,stalkT:rand(H.st[0],H.st[1]),rush:false,rt:0,lx:p.x,ly:p.y,vx:0,vy:0};
+          const hp=this.hp,k=Math.min(1,dt*6);hp.t+=dt;
+          hp.vx=lerp(hp.vx,(p.x-hp.lx)/Math.max(dt,1e-3),k);hp.vy=lerp(hp.vy,(p.y-hp.ly)/Math.max(dt,1e-3),k);hp.lx=p.x;hp.ly=p.y;
+          if(!hp.rush&&(hp.t>hp.stalkT||d<H.near)){hp.rush=true;hp.rt=0;if(this.onRush)this.onRush();}
+          if(hp.rush){hp.rt+=dt;const lead=Math.min(0.45,d/90);
+            this.goTo(p.x+hp.vx*lead,p.y+hp.vy*lead,dt,H.rush,1);
+            if(d>100||hp.rt>4){hp.rush=false;hp.t=0;hp.stalkT=rand(0.3,1.2);}}
+          else if(H.ambush&&d<70){this.stop(dt);if(this.faceToward)this.faceToward(p.x,p.y,dt);}
+          else this.goTo(p.x,p.y,dt,d<50?'stalk':'walk',1);
+        }
+        if(this.kind!=='frog'&&this.kind!=='tarantula'&&Math.random()<dt*1.2)this.flick();
         break;}
       case 'strike':{const r=this.updateStrike(dt);
         if(r==='caught'&&this.held&&this.held.play){const t=this.held;this.held=null;t.caught=false;this.tg=null;this.prey=null;
@@ -1757,8 +1774,8 @@ class Spider extends Pet{
   noise(){return clamp(this.speed/11,0,1.5);}
   goTo(tx,ty,dt,mode,arrive=3){
     const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y);
-    const max=mode==='run'?32:mode==='stalk'?5:mode==='slow'?6:mode==='lunge'?34:11;
-    const diff=wrapA(Math.atan2(ty-hd.y,tx-hd.x)-this.ang),tr=(this.speed<2?2.2:3)*dt;this.ang+=clamp(diff,-tr,tr);
+    const max=mode==='pounce'?72:mode==='run'?34:mode==='stalk'?5:mode==='slow'?6:mode==='lunge'?64:11;
+    const diff=wrapA(Math.atan2(ty-hd.y,tx-hd.x)-this.ang),tr=(mode==='pounce'||mode==='lunge'?7:this.speed<2?2.2:3)*dt;this.ang+=clamp(diff,-tr,tr);
     let want=d>arrive?max:0;if(Math.abs(diff)>1)want*=0.3;if(d<arrive+6&&mode!=='lunge')want*=clamp((d-arrive)/6,0.25,1);
     if((mode==='walk'||mode==='slow')&&!this.burstOn)want=0;if(this.tuck>0.2||this.threat>0.3)want=0;
     this.speed+=(want-this.speed)*Math.min(1,dt*(want>this.speed?5:7));
@@ -1948,18 +1965,27 @@ class Worm extends Food{
       P[0].x=this.sx;P[0].y=this.sy;
       for(let i=1;i<n;i++){const q=P[i-1],p=P[i];p.y+=0.7;p.x+=Math.sin(this.t*(this.wax?5:9)+i*0.8)*0.35;
         const dx=p.x-q.x,dy=p.y-q.y,d=Math.hypot(dx,dy)||1;p.x=q.x+dx/d*seg;p.y=q.y+dy/d*seg;}
-      return;}
+      this.trail=null;return;}
     this.fall(dt);
     const s=preyScare(this,w,this.wax?10:14),freq=this.wax?3:5.5,pulse=0.5+0.5*Math.sin(this.t*freq);
     if(this.wax){this.curlT-=dt;if(this.curlT<-rand(3,6))this.curlT=rand(1.2,2.2);}
     const curling=this.wax&&this.curlT>0;
-    this.ang+=(curling?2.8:Math.sin(this.t*1.3)*1.2+rand(-1,1)*1.5)*dt;
+    // smooth wandering heading (no per-frame jitter), the head leads and the body retraces its path
+    this.turnV=(this.turnV||0)+(rand(-1,1)*9-(this.turnV||0)*2.2)*dt;
+    this.ang+=(curling?2.4:this.turnV)*dt;
     if(s)this.ang+=wrapA(Math.atan2(this.y-s.hd.y,this.x-s.hd.x)-this.ang)*dt*2;
     const sp=(this.h>0?0:1)*(this.wax?(curling?3:1.6):4.5)*pulse;
     this.x+=Math.cos(this.ang)*sp*dt;this.y+=Math.sin(this.ang)*sp*dt;this.keepIn(w);P[0].x=this.x;P[0].y=this.y;
-    for(let i=1;i<n;i++){const q=P[i-1],p=P[i],L=seg*(1+0.14*Math.sin(this.t*freq-i*0.9));
-      const dx=p.x-q.x,dy=p.y-q.y,d=Math.hypot(dx,dy)||1,wig=Math.sin(this.t*4-i*1.1)*0.12;
-      p.x=q.x+dx/d*L-dy/d*wig;p.y=q.y+dy/d*L+dx/d*wig;}
+    if(!this.trail)this.trail=P.map(p=>({x:p.x,y:p.y}));
+    const T=this.trail;T[0].x=this.x;T[0].y=this.y;
+    if(T.length<2||Math.hypot(T[0].x-T[1].x,T[0].y-T[1].y)>0.45)T.unshift({x:this.x,y:this.y});
+    // peristalsis: a compression wave runs head to tail, segments bunch and stretch along the path
+    let want=0,k=1,acc=0;
+    for(let i=1;i<n;i++){want+=seg*(1+0.16*Math.sin(this.t*freq-i*0.9));
+      while(k<T.length){const a=T[k-1],b=T[k],L=Math.hypot(b.x-a.x,b.y-a.y);if(acc+L>=want){const f=L>0?(want-acc)/L:0;P[i].x=a.x+(b.x-a.x)*f;P[i].y=a.y+(b.y-a.y)*f;break;}acc+=L;k++;}
+      if(k>=T.length){const a=P[i-1],b=T[T.length-1],q=P[i-2]||a,dx=a.x-q.x,dy=a.y-q.y,d=Math.hypot(dx,dy)||1;
+        P[i].x=a.x-dx/d*seg;P[i].y=a.y-dy/d*seg;if(i===n-1||Math.hypot(b.x-P[i].x,b.y-P[i].y)>0)T.push({x:P[i].x,y:P[i].y});k=T.length;acc=want;}}
+    if(T.length>n*4){let tot=0;for(let j=1;j<T.length;j++){tot+=Math.hypot(T[j].x-T[j-1].x,T[j].y-T[j-1].y);if(tot>want+seg*2){T.length=j+1;break;}}}
   }
   drawShadow(fb){if(this.caught)return;if(this.inHand||this.h>0.5)ddisc(fb,this.x+1,this.y+1,2.4,.62);}
   drawL(fb){
