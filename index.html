@@ -25,7 +25,9 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 /* ---------- stage ---------- */
 #stage{position:fixed;inset:0;overflow:hidden;background:#0a0f0c}
 #c{display:block;image-rendering:pixelated;image-rendering:crisp-edges;cursor:none;touch-action:none;transform-origin:0 0}
-#zoomChip{position:fixed;z-index:25;display:flex;align-items:center;gap:4px;padding:4px;transition:opacity .2s}
+#zoomChip{position:fixed;z-index:25;display:flex;align-items:center;gap:4px;padding:4px;transition:opacity .2s,box-shadow .15s;touch-action:none;cursor:grab}
+#zoomChip.drag{cursor:grabbing;box-shadow:inset 0 0 0 2px var(--moss),0 10px 24px rgba(0,0,0,.5)}
+#zGrip{width:12px;align-self:stretch;min-height:26px;border-radius:4px;background:radial-gradient(circle,#7c8c74 1.3px,transparent 1.8px) 1px 1px/5px 5px}
 #zoomChip .ibtn{width:34px;height:34px}#zoomChip .ibtn img{width:22px;height:22px}
 #zoomChip .ibtn.on{background:#2c4a24;box-shadow:inset 0 0 0 2px var(--moss),0 4px 0 #040604}
 #zLvl{font-family:var(--display);font-size:11px;min-width:42px;text-align:center}
@@ -234,6 +236,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
 </div>
 <div id="toast" class="chunk">…</div>
 <div id="zoomChip" class="chunk" aria-label="Zoom">
+  <span id="zGrip" title="Drag to move (double-click to put back)"></span>
   <button class="ibtn" id="zOut" title="Zoom out (-)"><img class="px" alt="Zoom out"></button>
   <span id="zLvl">1.0×</span>
   <button class="ibtn" id="zIn" title="Zoom in (+)"><img class="px" alt="Zoom in"></button>
@@ -2909,7 +2912,17 @@ const ui={
     for(const[id,ic]of[['zIn','zin'],['zOut','zout'],['zFollow','follow'],['zReset','zreset']])$(id).querySelector('img').src=iconURL(ic);
     $('zIn').addEventListener('click',()=>{setZoom(cam.z*1.35);SFX.play('ui');});$('zOut').addEventListener('click',()=>{setZoom(cam.z/1.35);SFX.play('ui');});
     $('zReset').addEventListener('click',()=>{camReset();SFX.play('ui');});
-    $('zFollow').addEventListener('click',()=>{cam.follow=!cam.follow;camApply();SFX.play('ui');ui.toast(cam.follow?'Following your critter':'Stopped following',true);});
+    // follow keeps the camera centred on the critter; at near-full view there is no room to move, so zoom in a bit
+    $('zFollow').addEventListener('click',()=>{cam.follow=!cam.follow;if(cam.follow&&cam.z<1.6)setZoom(2);camApply();SFX.play('ui');
+      ui.toast(cam.follow?`Camera is following ${game.name}`:'Camera stopped following',true);});
+    // the zoom bar can be dragged anywhere by its body/grip; double-click the grip to put it back
+    const zc=$('zoomChip');let zd=null;
+    zc.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;e.preventDefault();zc.setPointerCapture(e.pointerId);
+      const r=zc.getBoundingClientRect();zd={dx:e.clientX-r.left,dy:e.clientY-r.top};zc.classList.add('drag');});
+    zc.addEventListener('pointermove',e=>{if(zd)placeZoomChip(e.clientX-zd.dx,e.clientY-zd.dy);});
+    const zEnd=()=>{if(!zd)return;zd=null;zc.classList.remove('drag');const r=zc.getBoundingClientRect();save.set.zoomPos=[r.left/innerWidth,r.top/innerHeight];markDirty();};
+    zc.addEventListener('pointerup',zEnd);zc.addEventListener('pointercancel',zEnd);
+    zc.addEventListener('dblclick',e=>{if(e.target.closest('button'))return;delete save.set.zoomPos;markDirty();fit();});
     const mk=(d,menu)=>{const b=document.createElement('button');b.className='db'+(menu?' menu '+d.id:'');b.id='d-'+d.id;b.title=`${d.label} (${d.key})`;
       b.innerHTML=`<img class="px" src="${iconURL(d.id)}" alt=""><span>${d.label}</span><kbd>${d.key}</kbd>`;return b;};
     for(const d of TOOLS){const b=mk(d,false);b.addEventListener('click',()=>this.toolClick(d.id));$('tools').appendChild(b);}
@@ -3103,7 +3116,7 @@ function toggleLight(){const w=game.world;if(!w)return;w.dayTarget=w.dayTarget>0
 // ---- Camera: the tank fills the window (cover); zoom/pan is a CSS transform, so toPix follows it for free.
 // z=1 is "fill the screen"; zooming out down to zmin shows the whole tank; HUD margins let edges scroll clear of the bars.
 const cam={z:1,zmin:0.5,tx:0,ty:0,follow:false,hinted:false,cw:W,ch:H,init:false,mT:0,mB:0};
-function camApply(){const vw=innerWidth,vh=innerHeight;cam.z=clamp(cam.z,cam.zmin,4);const sw=cam.cw*cam.z,sh=cam.ch*cam.z;
+function camApply(){const vw=innerWidth,vh=innerHeight;if(!isFinite(cam.tx)||!isFinite(cam.ty)){cam.tx=0;cam.ty=0;}cam.z=clamp(cam.z,cam.zmin,4);const sw=cam.cw*cam.z,sh=cam.ch*cam.z;
   cam.tx=sw<=vw?(vw-sw)/2:clamp(cam.tx,vw-sw,0);
   cam.ty=sh<=vh?(vh-sh)/2:clamp(cam.ty,vh-sh-cam.mB,cam.mT);
   canvas.style.transform=`translate(${cam.tx}px,${cam.ty}px) scale(${cam.z})`;
@@ -3114,7 +3127,7 @@ function setZoom(z,px,py){if(px===undefined){px=innerWidth/2;py=(cam.mT+innerHei
 function panBy(dx,dy){cam.tx+=dx;cam.ty+=dy;cam.follow=false;camApply();}
 function stageXY(x,y){return[x,y];}
 function camCenterOn(x,y,k){const s=cam.cw/W;cam.tx=lerp(cam.tx,innerWidth/2-x*s*cam.z,k);cam.ty=lerp(cam.ty,(cam.mT+innerHeight-cam.mB)/2-y*s*cam.z,k);camApply();}
-function camFollow(dt){const pet=game.world&&game.world.pet;if(!cam.follow||!pet||game.mode!=='play')return;camCenterOn(pet.x,pet.y-pet.h-4,Math.min(1,dt*3.5));}
+function camFollow(dt){const pet=game.world&&game.world.pet;if(!cam.follow||!pet||game.mode!=='play')return;const hp=pet.headPos();camCenterOn(hp.x,hp.y-(pet.h||0)-2,Math.min(1,dt*3.5));}
 $('stage').addEventListener('wheel',e=>{if(game.mode!=='play'||ui.open)return;e.preventDefault();
   const[px,py]=stageXY(e.clientX,e.clientY),dy=e.deltaMode===1?e.deltaY*16:e.deltaY;setZoom(cam.z*Math.exp(-clamp(dy,-120,120)*0.0018),px,py);},{passive:false});
 const touches=new Map();let pinch=null,touchBlock=false;
@@ -3190,6 +3203,8 @@ window.addEventListener('keydown',e=>{
   else if(k==='b')ui.openModal('mBag');else if(k==='g')ui.openModal('mGacha');else if(k==='p')ui.openModal('mPets');
   else if(k==='f'){const fs=FOOD_ORDER;game.food=fs[(fs.indexOf(game.food)+1)%fs.length];if(game.tool!=='feed')setTool('feed');else ui.renderTray();}
 });
+function placeZoomChip(x,y){const zc=$('zoomChip'),w=zc.offsetWidth,h=zc.offsetHeight;
+  zc.style.right='auto';zc.style.left=Math.round(clamp(x,4,innerWidth-w-4))+'px';zc.style.top=Math.round(clamp(y,4,innerHeight-h-4))+'px';}
 function camReset(){cam.follow=innerHeight>innerWidth*1.1;cam.z=1;camCenterOn(W/2,H/2,1);}
 function fit(){
   const vw=innerWidth,vh=innerHeight,small=vw<=760;
@@ -3202,7 +3217,8 @@ function fit(){
   const topH=$('top').getBoundingClientRect().bottom,dockH=vh-$('dock').getBoundingClientRect().top;
   cam.mT=Math.round(topH+6);cam.mB=Math.round(dockH+64);
   $('toast').style.top=Math.round(topH+8)+'px';
-  const zc=$('zoomChip');zc.style.right='10px';zc.style.top=Math.round(vh-cam.mB-zc.offsetHeight-6)+'px';
+  const zc=$('zoomChip'),zp=save.set.zoomPos;
+  if(zp)placeZoomChip(zp[0]*vw,zp[1]*vh);else{zc.style.left='auto';zc.style.right='10px';zc.style.top=Math.round(vh-cam.mB-zc.offsetHeight-6)+'px';}
   if(!cam.init){cam.init=true;camReset();}else camApply();
 }
 window.addEventListener('resize',fit);
