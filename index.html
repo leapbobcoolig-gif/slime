@@ -368,9 +368,9 @@ const PAL={
   snake:{body:ramp('#161c12','#28331d','#3e4d2b','#607040'),head:ramp('#141a10','#232d19','#364427','#56663a'),
          lip:ramp('#4a4a24','#8a8a40','#c4c070','#eeeaa8'),stripe:ramp('#5c5222','#a89a42','#e0d072','#fff2b0'),
          dark:ramp('#070907','#0f130c','#1a2014','#283020'),eye:ramp('#1a1206','#4a3410','#8a6a24','#d8b860'),outline:'#060805'},
-  crab:{body:ramp('#4e160a','#8e3014','#cc5a26','#f29a5a'),leg:ramp('#3e1208','#6e240e','#a4461c','#d8784a'),
-        claw:ramp('#261034','#482060','#74389a','#b07ad2'),shA:ramp('#4a3824','#8a6c48','#c8a474','#f2dcb0'),
-        shB:ramp('#2e1a10','#5a3420','#80503a','#a86e52'),outline:'#120806'},
+  crab:{body:ramp('#4e160a','#8e3014','#cc5a26','#f29a5a'),leg:ramp('#2a0c06','#521a0c','#7e2e14','#a8502c'),
+        claw:ramp('#6a200c','#b8461a','#ee7a34','#ffc07a'),tip:ramp('#140806','#241008','#3a1a0e','#5a2c18'),
+        shA:ramp('#5a4630','#9a8060','#d4bc94','#f6e8c8'),shB:ramp('#3a2214','#6e4228','#9a603a','#c08050'),outline:'#120806'},
   food:{meal:ramp('#5a3a10','#9a6a24','#cf9a3c','#f4cc72'),mealDark:ramp('#3a2408','#6a4414','#94642a','#b88a44'),
         head:ramp('#2a1406','#4a2a10','#6e421c','#9a6230'),wax:ramp('#8a7a5a','#c8b890','#ece0bc','#fffbea'),
         waxDark:ramp('#6a5c40','#a09070','#c8b894','#e4d8b8'),snail:ramp('#4a4038','#7a6c5c','#a8988a','#d4c6b8'),
@@ -492,7 +492,7 @@ const SPECIES={
         case M.TONGUE:return PAL.tongue[q];
       }return INK;}},
   crab:{label:'Hermit crab',latin:'Coenobita clypeatus',
-    blurb:'A scuttling roommate in a borrowed shell. Waves its antennae, nibbles food with tiny claws and hides when spooked. Loves fruit.',
+    blurb:'A scuttling roommate in a borrowed shell. Waves its antennae, nibbles food with its little claw and, when spooked, hides and shuts the door with its big one. Loves fruit.',
     names:['Shelly','Pinch','Barnaby','Clawdia','Nacho','Hermes','Biscuit'],outline:PAL.crab.outline},
   frog:{label:'Red-eyed tree frog',latin:'Agalychnis callidryas',
     blurb:'Springy and wide-eyed. Hops with squash and stretch and snaps flies out of the air with a long tongue. A night owl.',
@@ -986,24 +986,24 @@ class Crab extends Pet{
   constructor(world,x,y){
     super();this.initCommon(world,'crab');
     this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.tuck=0;this.hideT=0;this.reach=0;this.chewPh=0;
-    this.antLag=0;this.outline=hex(PAL.crab.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.bx=0;this.sc=1.3;this.seam=0.9;
+    this.antLag=0;this.outline=hex(PAL.crab.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.bx=0;this.sc=1.55;this.seam=0.9;
     this.legs=[];for(let k=0;k<4;k++)this.legs.push({front:k<2,side:k%2?1:-1,fx:0,fy:0,sx:0,sy:0,st:0,dur:.12,stepping:false,lift:0,ax:0,ay:0,rx:0,ry:0});
     this.updateLegs(0,false);for(const L of this.legs){L.fx=L.rx;L.fy=L.ry;}
   }
   color(m,q,s,l,x,y){const P=PAL.crab;
     switch(m){
       case M.BODY:return P.body[q];
-      case M.LIMB:return((Math.floor(s*0.9)&1)?P.leg:P.body)[q];
-      case M.TOE:return P.leg[0];
-      case M.CLAW:return(q>=2&&hash(x*5,y*7)>0.86)?P.claw[3]:P.claw[q];
-      case M.CLAW2:return P.body[q];
-      case M.SHELLA:return(this.shellC&&spiralStripe(x,y,this.shellC)?P.shB:P.shA)[q];
+      case M.LIMB:return s>3.1&&s<3.9?P.tip[Math.min(3,q+1)]:P.leg[q];
+      case M.TOE:return P.tip[q];
+      case M.CLAW:return(q>=2&&hash(x*5,y*7)>0.9)?P.claw[3]:P.claw[q];
+      case M.CLAW2:return P.claw[q];
+      case M.SHELLA:{if(s<0.8)return P.shB[Math.max(0,q-1)];const v=s*0.45+l*0.6;return(v-Math.floor(v)<0.33?P.shB:P.shA)[q];}
       case M.SHELLB:return P.shB[q];
     }return INK;}
   W(lx,ly){const c=Math.cos(this.ang)*this.sc,s=Math.sin(this.ang)*this.sc;return[this.x+c*lx-s*ly,this.y-this.h+s*lx+c*ly];}
   Wg(lx,ly){const c=Math.cos(this.ang)*this.sc,s=Math.sin(this.ang)*this.sc;return[this.x+c*lx-s*ly,this.y+s*lx+c*ly];}
-  headPos(){const[x,y]=this.Wg(3.4,0);return{x,y};}
-  mouthScreen(){const[x,y]=this.W(3.8-this.tuck*2.2,0);return{x,y};}
+  headPos(){const[x,y]=this.Wg(4.0,0);return{x,y};}
+  mouthScreen(){const[x,y]=this.W(4.3-this.tuck*3.2,0);return{x,y};}
   noise(){return clamp(this.speed/14,0,1.5);}
   flick(){this.antLag+=rand(-0.7,0.7);}
   goTo(tx,ty,dt,mode,arrive=3){
@@ -1058,9 +1058,9 @@ class Crab extends Pet{
   updateLegs(dt,flail){
     const vx=Math.cos(this.ang)*this.speed,vy=Math.sin(this.ang)*this.speed,moving=this.speed>1.2,tk=this.tuck;
     for(let k=0;k<4;k++){const L=this.legs[k];
-      const alx=L.front?0.6:-1.4,rlx=L.front?4.2:-1.4,rly=L.front?8.0:8.6;
-      [L.ax,L.ay]=this.Wg(alx,L.side*2.3);
-      [L.rx,L.ry]=this.Wg(lerp(rlx,alx-0.8,tk),L.side*lerp(rly,3.0,tk));
+      const alx=(L.front?0.6:-0.9)-tk*3.2,rlx=L.front?2.4:-2.0,rly=L.front?7.0:7.2;
+      [L.ax,L.ay]=this.Wg(alx,L.side*2.0);
+      [L.rx,L.ry]=this.Wg(lerp(rlx,alx-0.5,tk),L.side*lerp(rly,2.6,tk));
       if(flail){const a=this.t*16+k*2;L.fx=L.rx+Math.sin(a)*1.7;L.fy=L.ry+Math.cos(a*1.2)*1.4+1.5;L.lift=0.6;L.stepping=false;continue;}
       if(tk>0.1){L.fx=lerp(L.fx,L.rx,Math.min(1,dt*16));L.fy=lerp(L.fy,L.ry,Math.min(1,dt*16));L.stepping=false;L.lift=0;continue;}
       if(L.stepping){
@@ -1068,14 +1068,14 @@ class Crab extends Pet{
         L.fx=lerp(L.sx,tx,e);L.fy=lerp(L.sy,ty,e);L.lift=Math.sin(Math.PI*Math.min(1,L.st));
         if(L.st>=1){L.stepping=false;L.lift=0;if(!this.preview&&moving){SFX.play('cstep');if(this.speed>20&&Math.random()<0.3)dust(this.world,L.fx,L.fy,1);}}
       }else{
-        L.lift=0;const d=Math.hypot(L.fx-L.rx,L.fy-L.ry),th=moving?3.2:1.2;
+        L.lift=0;const d=Math.hypot(L.fx-L.rx,L.fy-L.ry),th=moving?2.3:1.0;
         if(d>th){const grp=(k===0||k===3)?0:1;let busy=false;
           for(let j=0;j<4;j++){const g2=(j===0||j===3)?0:1;if(g2!==grp&&this.legs[j].stepping)busy=true;}
           if(!busy||d>th*2.4){L.stepping=true;L.st=0;L.sx=L.fx;L.sy=L.fy;L.dur=moving?clamp(0.11*14/Math.max(this.speed,7),0.05,0.16):0.12;}}
       }
     }
   }
-  hitTest(x,y){const[sx,sy]=this.W(-5,0);return Math.hypot(x-sx,y-sy)<8*this.sc?0:-1;}
+  hitTest(x,y){const[sx,sy]=this.W(-6,0);return Math.hypot(x-sx,y-sy)<7*this.sc?0:-1;}
   tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;
     this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;this.tucked=false;return true;}
   dragTo(x,y){this.grabX=x;this.grabY=y;}
@@ -1083,56 +1083,60 @@ class Crab extends Pet{
   grabStep(dt){
     this.gt+=dt;this.h+=(12-this.h)*Math.min(1,dt*10);
     this.ang+=wrapA(Math.PI/2-this.ang)*Math.min(1,dt*5);
-    this.x=this.grabX+Math.cos(this.ang)*5*this.sc;this.y=this.grabY+this.h+Math.sin(this.ang)*5*this.sc;
-    const tt=this.gt<0.9?0:1;this.tuck+=(tt-this.tuck)*Math.min(1,dt*12);
+    this.x=this.grabX+Math.cos(this.ang)*6*this.sc;this.y=this.grabY+this.h+Math.sin(this.ang)*6*this.sc;
+    const tt=this.gt<0.3?0:1;this.tuck+=(tt-this.tuck)*Math.min(1,dt*12);
     if(tt&&!this.tucked){this.tucked=true;SFX.play('tok');}
     this.updateLegs(dt,this.tuck<0.5);
   }
   draw(fb0){
     const sc=this.sc,fb={cap:(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r)};
-    const tk=this.tuck,bx=-tk*2.2,W=(a,b)=>this.W(a,b);this.bx=bx;
-    // walking legs
+    const tk=this.tuck,bx=-tk*3.2,W=(a,b)=>this.W(a,b),door=clamp((tk-0.3)/0.5,0,1);this.bx=bx;
+    const c=Math.cos(this.ang),s=Math.sin(this.ang);
+    // walking legs: knees always forward so the four legs read as a tidy fan
     for(const L of this.legs){
-      const oy=-this.h,bend=L.side*(L.front?-1:1);
-      const[kx,ky,ex,ey]=ik2(L.ax,L.ay+oy,L.fx,L.fy-L.lift*1.2+oy,4.4*sc,4.8*sc,bend);
-      fb.cap(L.ax,L.ay+oy,1.0,kx,ky,.85,M.LIMB,1,0,4.4);fb.cap(kx,ky,.8,ex,ey,.45,M.LIMB,1,4.4,9.2);
-      fb.cap(ex,ey,.5,ex,ey,.5,M.TOE,1,0,0,1);
+      const oy=-this.h;
+      const[kx,ky,ex,ey]=ik2(L.ax,L.ay+oy,L.fx,L.fy-L.lift*1.0+oy,3.6*sc,4.4*sc,-L.side);
+      fb.cap(L.ax,L.ay+oy,.95,kx,ky,.8,M.LIMB,1,0,3.6);fb.cap(kx,ky,.75,ex,ey,.45,M.LIMB,1,3.6,8);
+      const tdx=ex-kx,tdy=ey-ky,tl=Math.hypot(tdx,tdy)||1;fb.cap(ex-tdx/tl*1.2*sc,ey-tdy/tl*1.2*sc,.5,ex,ey,.35,M.TOE,1,0,0,1);
     }
-    // claws: big purple one on the left, small one on the right
+    // carapace + head
+    let[a1,b1]=W(bx-1.0,0),[a2,b2]=W(bx+2.4,0);fb.cap(a1,b1,2.3,a2,b2,1.8,M.BODY,2);
+    [a1,b1]=W(bx+3.6,0);fb.cap(a1,b1,1.3,a1,b1,1.3,M.BODY,2);
+    // eye stalks
+    if(tk<0.35){const el=1-tk/0.35;
+      for(const sd of[-1,1]){const[e0x,e0y]=W(bx+3.2,sd*0.8),[e1x,e1y]=W(bx+3.2+1.7*el,sd*(0.8+0.8*el));
+        fb.cap(e0x,e0y,.45,e1x,e1y,.45,M.BODY,4);fb.cap(e1x,e1y,.8,e1x,e1y,.8,M.PUPIL,4,0,0,1);}}
+    // pincers held forward; big one on the left folds across the shell mouth as a door when hiding
     const m=this.mouthScreen();
     for(const sd of[-1,1]){const big=sd<0;
-      const[shx,shy]=W(bx+1.8,sd*2.1);
-      let[cx,cy]=W(lerp(5.0,2.4,tk)+bx*0.3,sd*lerp(big?3.6:2.8,1.8,tk));
-      if(!big&&this.reach>0&&this.prey){const p=this.prey;cx=lerp(cx,p.x,this.reach*0.8);cy=lerp(cy,p.y-p.h,this.reach*0.8);}
-      if(!big&&this.state==='chew'){const k=Math.sin(Math.PI*(this.chewPh%1));cx=lerp(cx,m.x,k*0.9);cy=lerp(cy,m.y,k*0.9);}
-      const[ex,ey,bx2,by2]=ik2(shx,shy,cx,cy,2.6*sc,2.8*sc,sd);
-      fb.cap(shx,shy,.9,ex,ey,.8,M.LIMB,1,0,0,.5);fb.cap(ex,ey,.8,bx2,by2,.9,M.LIMB,1,0,0,.5);
-      let dx=bx2-ex,dy=by2-ey;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;
-      const pl=(big?2.6:1.7)*sc,pr=big?1.7:1.05,tx=bx2+dx*pl,ty=by2+dy*pl,mat=big?M.CLAW:M.CLAW2;
-      fb.cap(bx2,by2,pr*0.8,tx,ty,pr,mat,1,0,0,1.2);
-      const fl=(big?2.4:1.5)*sc,open=big?0.18+0.12*Math.sin(this.t*1.3):(this.state==='chew'?0.45*Math.abs(Math.cos(Math.PI*(this.chewPh%1))):this.reach>0&&this.reach<1?0.6:0.15);
-      const a0=Math.atan2(dy,dx);
-      fb.cap(tx,ty,pr*0.5,tx+Math.cos(a0+sd*0.2)*fl,ty+Math.sin(a0+sd*0.2)*fl,.35,mat,1,0,0,1.2);
-      fb.cap(tx,ty,pr*0.45,tx+Math.cos(a0-sd*open)*fl*0.9,ty+Math.sin(a0-sd*open)*fl*0.9,.35,mat,1,0,0,1.2);
+      if(!big&&tk>0.5)continue;
+      const[shx,shy]=W(1.6+bx*0.6,sd*1.9);
+      let base,dir,cls=2;
+      if(big){const nb=W(4.0,-2.6),db=W(-0.2,-3.0);base=[lerp(nb[0],db[0],door),lerp(nb[1],db[1],door)];dir=this.ang+lerp(0.1,Math.PI/2,door);if(door>0.5)cls=4;}
+      else{base=W(4.2+bx*0.4,2.3);dir=this.ang-0.12;
+        if(this.reach>0&&this.prey){const p=this.prey;base=[lerp(base[0],p.x-Math.cos(dir)*2*sc,this.reach*0.85),lerp(base[1],p.y-p.h-Math.sin(dir)*2*sc,this.reach*0.85)];}
+        if(this.state==='chew'){const k=Math.sin(Math.PI*(this.chewPh%1));base=[lerp(base[0],m.x-c*1.5*sc,k*0.8),lerp(base[1],m.y-s*1.5*sc,k*0.8)];dir+=k*0.6;}}
+      const al=Math.hypot(base[0]-shx,base[1]-shy)/sc;
+      const[ex,ey,bx2,by2]=ik2(shx,shy,base[0],base[1],Math.max(1.2,al*0.6)*sc,Math.max(1.2,al*0.6)*sc,sd);
+      fb.cap(shx,shy,.8,ex,ey,.8,M.CLAW,cls,0,0,0.6);fb.cap(ex,ey,.8,bx2,by2,.9,M.CLAW,cls,0,0,0.6);
+      const pl=(big?2.6:1.8),pr=big?2.0:1.3,dx=Math.cos(dir),dy=Math.sin(dir),tx=bx2+dx*pl*sc,ty=by2+dy*pl*sc;
+      fb.cap(bx2,by2,pr*0.85,tx,ty,pr,M.CLAW,cls,0,0,1.2);
+      const fl=(big?2.5:1.7)*sc,open=this.state==='chew'?0.35+0.35*Math.abs(Math.cos(Math.PI*(this.chewPh%1))):(this.reach>0&&this.reach<1?0.8:0.42+0.08*Math.sin(this.t*1.7+sd));
+      const shut=big&&door>0.5,op=shut?0.08:open,fl2=shut?fl*0.7:fl;
+      for(const f of[-1,1]){const fa=dir+f*op*0.5,fx=tx+Math.cos(fa)*fl2,fy=ty+Math.sin(fa)*fl2;
+        fb.cap(tx+Math.cos(fa)*pr*0.3*sc,ty+Math.sin(fa)*pr*0.3*sc,pr*0.42,fx,fy,.32,M.CLAW,cls,0,0,1.4);
+        if(!shut)fb.cap(fx-Math.cos(fa)*0.9*sc,fy-Math.sin(fa)*0.9*sc,.36,fx,fy,.3,M.TOE,cls,0,0,1.8);}
     }
-    // body + head
-    let[a1,b1]=W(bx-1.2,0),[a2,b2]=W(bx+1.8,0);fb.cap(a1,b1,2.9,a2,b2,2.3,M.BODY,2,0,3);
-    [a1,b1]=W(bx+2.9,0);fb.cap(a1,b1,1.6,a1,b1,1.6,M.BODY,2);
-    // eye stalks
-    if(tk<0.45){const el=2.2*(1-tk*2);
-      for(const sd of[-1,1]){const[e0x,e0y]=W(bx+3.0,sd*0.7),[e1x,e1y]=W(bx+3.0+el*0.9,sd*(0.7+el*0.45));
-        fb.cap(e0x,e0y,.42,e1x,e1y,.42,M.LIMB,4);fb.cap(e1x,e1y,.78,e1x,e1y,.78,M.PUPIL,4,0,0,1);}}
-    // shell: aperture lip + dome, spiral stripe painted from its centre
-    const[lx0,ly0]=W(-1.4,0);fb.cap(lx0,ly0,2.9,lx0,ly0,2.9,M.SHELLB,3);
-    const[sx0,sy0]=W(-5.3,0.3);fb.cap(sx0,sy0,5.4,sx0,sy0,5.4,M.SHELLA,3,0,0,1.2);
-    const[ax0,ay0]=W(-6.2,1.2);this.shellC={x:ax0,y:ay0,r:5.4*sc,ang:this.ang};
+    // shell: a curved cone, mouth at the front, spire trailing back, banded along its length
+    const[A0,A1]=W(-4.4,0),[M0,M1]=W(-8.4,0.4),[T0,T1]=W(-12.0,1.3);
+    fb.cap(A0,A1,4.4,M0,M1,3.2,M.SHELLA,3,0,4);fb.cap(M0,M1,3.2,T0,T1,1.1,M.SHELLA,3,4,8);
   }
   drawExtras(fb){// antennae as fine pixel lines
-    if(this.tuck>0.45)return;const L=7*this.sc*(1-this.tuck*2),col=hex('#e8a878');
-    for(const sd of[-1,1]){const[x0,y0]=this.W(this.bx+3.6,sd*0.4);
-      const a=this.ang+sd*(0.34+Math.sin(this.t*2.3+sd)*0.13)+this.antLag*0.7;
-      const mx=x0+Math.cos(a)*L*0.5+Math.cos(a+sd*1.57)*Math.sin(this.t*3+sd)*0.6,my=y0+Math.sin(a)*L*0.5+Math.sin(a+sd*1.57)*Math.sin(this.t*3+sd)*0.6;
-      const a2=a+this.antLag*0.5+sd*0.1;line(fb,x0,y0,mx,my,col);line(fb,mx,my,mx+Math.cos(a2)*L*0.5,my+Math.sin(a2)*L*0.5,col);}
+    if(this.tuck>0.35)return;const L=4.6*this.sc*(1-this.tuck/0.35),col=hex('#c87848');
+    for(const sd of[-1,1]){const[x0,y0]=this.W(this.bx+3.9,sd*0.4);
+      const a=this.ang+sd*(0.3+Math.sin(this.t*2.3+sd)*0.12)+this.antLag*0.7;
+      const mx=x0+Math.cos(a)*L*0.5+Math.cos(a+sd*1.57)*Math.sin(this.t*3+sd)*0.5,my=y0+Math.sin(a)*L*0.5+Math.sin(a+sd*1.57)*Math.sin(this.t*3+sd)*0.5;
+      const a2=a+this.antLag*0.5+sd*0.12;line(fb,x0,y0,mx,my,col);line(fb,mx,my,mx+Math.cos(a2)*L*0.5,my+Math.sin(a2)*L*0.5,col);}
   }
 }
 
@@ -1536,7 +1540,7 @@ const CUR_PAL={k:hex('#0d110d'),w:hex('#f2f1e2'),p:hex('#f3c2a6'),g:hex('#9ccf6a
 const CUR={
   pet:['.k.k.k.','kwkwkwk','kwkwkwk','kwwwwwk','kwwwwk.','.kwwwk.','..kkk..'],
   grab:['kkk.kkk','kw...wk','k.....k','.......','k.....k','kw...wk','kkk.kkk'],
-  grabbing:['.......','.kk.kk.','.kw.wk.','.......','.kw.wk.','.kk.kk.','.......'],
+  grabbing:['.k.k.k.','kwkwkwk','kwwwwwk','kwwwwwk','.kwwwk.','..kkk..'],
   tap:['..kk....','.kwwk...','.kwwk...','.kwwkkk.','kkwwwwwk','kwwwwwwk','.kwwwwk.','..kkkk..'],
 };
 function drawCursor(w){
@@ -1544,7 +1548,7 @@ function drawCursor(w){
   if(t==='feed'){drawTweezers(x,y,!!game.held||P.down);if(!game.held)foodIcon(game.food,x+7,y+7,w.t);}
   else if(t==='mist'){const r=12;for(let i=0;i<24;i++){const a=i/24*TAU+w.t*0.8;if(i%2)pset(fb,x+Math.cos(a)*r,y+Math.sin(a)*r*0.8,CUR_PAL.w);}pset(fb,x,y,CUR_PAL.w);pset(fb,x+1,y+1,CUR_PAL.k);}
   else if(t==='pet')sprite(fb,CUR.pet,x-3,y-3,CUR_PAL);
-  else if(t==='grab')sprite(fb,game.grabbing?CUR.grabbing:CUR.grab,x-3,y-3,CUR_PAL);
+  else if(t==='grab')sprite(fb,game.grabbing?CUR.grabbing:CUR.grab,x-3,game.grabbing?y-7:y-3,CUR_PAL);
   else if(t==='tap')sprite(fb,CUR.tap,x-3,y,CUR_PAL);
 }
 function drawTweezers(x,y,closed){
