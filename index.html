@@ -612,6 +612,8 @@ const PAL={
   dragon:{base:ramp('#4e3218','#8a5c2e','#bb8a4c','#e6bd7c'),dark:ramp('#2a180a','#50321a','#744c28','#96683c'),light:ramp('#8c6c40','#caa66a','#eed29c','#fff2cc'),
           orange:ramp('#6a300c','#b0561c','#e08c3c','#ffc674'),beard:ramp('#1c1a1c','#3c3a40','#6a6670','#a8a4ae'),eye:ramp('#241406','#6a4416','#b88a36','#f0cc6a'),
           dull:ramp('#3a2c20','#5e4a36','#7e6850','#9c8670'),outline:'#120a04'},
+  scorp:{straw:ramp('#6a5018','#b08a34','#e0bc5c','#fbe79a'),back:ramp('#221c0c','#3c3418','#5a4e2a','#7c6e44'),hair:ramp('#8a7440','#c8ac6a','#f0dc9c','#fff6d0'),
+          sting:ramp('#3a1c08','#6e3a12','#a8621e','#d89a48'),barb:ramp('#0a0604','#1a120c','#2a1e14','#3a2c1e'),outline:'#0c0804'},
   gecko:{base:ramp('#6a4c10','#b88c22','#e8c246','#fff08c'),cream:ramp('#8a7a54','#c8b484','#efe0b4','#fffbe8'),spot:ramp('#0c0a08','#1c1814','#2c2620','#443a30'),
          lav:ramp('#3a2a52','#6a5092','#9a80c2','#c8b4ea'),band:ramp('#5a3a0e','#98621c','#c88a30','#e8b458'),eye:ramp('#060608','#121216','#22222a','#3c3c4a'),outline:'#140e04'},
   axo:{skin:ramp('#8a4452','#cc7282','#f6a8b6','#ffdce2'),belly:ramp('#9a5a66','#dc8e9c','#ffc2cc','#fff0f2'),gill:ramp('#7a1030','#c42a54','#ff5c84','#ffa8c0'),
@@ -758,6 +760,9 @@ const SPECIES={
   tarantula:{label:'Red-knee tarantula',latin:'Brachypelma hamorii',
     blurb:'Fuzzy, dramatic and surprisingly gentle. Eight legs walking in perfect rhythm, bursts of speed and a very theatrical threat pose.',
     names:['Fuzz','Knees','Velvet','Octavia','Bristle','Mocha','Peanut'],outline:PAL.spider.outline},
+  scorpion:{label:'Desert hairy scorpion',latin:'Hadrurus arizonensis',
+    blurb:'A little sand-coloured tank with pincers. Scuttles in short bursts, arcs its tail over its back, grabs dinner with its claws and glows blue-green at night.',
+    names:['Pinchy','Sting','Clawdia','Sandy','Amber','Nib','Buckle'],outline:PAL.scorp.outline},
   chameleon:{label:'Veiled chameleon',latin:'Chamaeleo calyptratus',
     blurb:'A swaying leaf with opinions. Turret eyes swivel on their own, the tail curls into a spiral and the tongue fires across the tank. Changes colour with its mood.',
     names:['Pascal','Swivel','Kiwi','Mood','Leafy','Twiggy','Sage'],
@@ -804,6 +809,7 @@ const SPECIES={
 // how much each species likes each food (0 = won't eat it)
 const DIET={
   dragon:{cricket:9,roach:9,waxworm:8,worm:6,greens:7,fruit:5,snail:2,fly:3,egg:0},
+  scorpion:{cricket:10,roach:9,waxworm:8,worm:6,fly:3,snail:1,fruit:0,egg:0,greens:0},
   gecko:{cricket:9,roach:8,waxworm:9,worm:7,fly:4,snail:0,fruit:0,egg:0,greens:0},
   axolotl:{worm:9,waxworm:7,cricket:5,roach:5,snail:4,fly:2,fruit:0,egg:0,greens:0},
   millipede:{greens:9,fruit:8,egg:3,worm:2,cricket:0,roach:0,waxworm:0,fly:0,snail:0},
@@ -826,9 +832,9 @@ const FOOD_ORDER=['cricket','roach','worm','waxworm','fly','snail','fruit','gree
 const CRUMB={cricket:hex('#6a4a2a'),worm:hex('#c89a4a'),waxworm:hex('#f0e0c0'),snail:hex('#8a7a6a'),fruit:hex('#d83040'),egg:hex('#f0e8d0'),fly:hex('#303030'),greens:hex('#6ab038'),roach:hex('#5a3418')};
 // Hunting styles: how long they stalk, how close before they commit, and how they rush.
 const HUNT={lizard:{st:[0.3,1.4],near:42,rush:'run'},salamander:{st:[0.6,2.0],near:28,rush:'run'},snake:{st:[0.8,2.2],near:32,rush:'run'},
-  chameleon:{st:[1.0,2.4],near:40,rush:'run'},dragon:{st:[0.5,1.6],near:36,rush:'run'},gecko:{st:[0.8,2.0],near:30,rush:'run'},slime:{st:[0.2,0.8],near:40,rush:'run'},axolotl:{st:[0.3,1.0],near:26,rush:'run'},millipede:{st:[0,0],near:0,rush:'walk'},frog:{st:[0.2,1.0],near:40,rush:'run'},tarantula:{st:[0.6,1.8],near:40,rush:'pounce',ambush:true},
+  chameleon:{st:[1.0,2.4],near:40,rush:'run'},dragon:{st:[0.5,1.6],near:36,rush:'run'},gecko:{st:[0.8,2.0],near:30,rush:'run'},slime:{st:[0.2,0.8],near:40,rush:'run'},axolotl:{st:[0.3,1.0],near:26,rush:'run'},millipede:{st:[0,0],near:0,rush:'walk'},frog:{st:[0.2,1.0],near:40,rush:'run'},tarantula:{st:[0.6,1.8],near:40,rush:'pounce',ambush:true},scorpion:{st:[0.5,1.6],near:36,rush:'pounce',ambush:true},
   crab:{st:[0,0.5],near:30,rush:'run'},turtle:{st:[0,0],near:0,rush:'walk'},gsnail:{st:[0,0],near:0,rush:'walk'}};
-const BITER={crab:{iv:.62,snd:'snap',t:2.6},turtle:{iv:.6,snd:'chomp',t:2.4},gsnail:{iv:.9,snd:'squelch',t:3.2},tarantula:{iv:.35,snd:'chew',t:2.2}};
+const BITER={crab:{iv:.62,snd:'snap',t:2.6},turtle:{iv:.6,snd:'chomp',t:2.4},gsnail:{iv:.9,snd:'squelch',t:3.2},tarantula:{iv:.35,snd:'chew',t:2.2},scorpion:{iv:.42,snd:'snap',t:2.4}};
 const PREY_NAME=Object.fromEntries(Object.entries(FOODS).map(([k,v])=>[k,v.name]));
 
 // =====================================================================
@@ -930,7 +936,7 @@ class Pet{
           else if(H.ambush&&d<70){this.stop(dt);if(this.faceToward)this.faceToward(p.x,p.y,dt);}
           else this.goTo(p.x,p.y,dt,d<50?'stalk':'walk',1);
         }
-        if(this.kind!=='frog'&&this.kind!=='tarantula'&&Math.random()<dt*1.2)this.flick();
+        if(this.kind!=='frog'&&this.kind!=='tarantula'&&this.kind!=='scorpion'&&Math.random()<dt*1.2)this.flick();
         break;}
       case 'strike':{const r=this.updateStrike(dt);
         if(r==='caught'&&this.held&&this.held.play){const t=this.held;this.held=null;t.caught=false;this.tg=null;this.prey=null;
@@ -2153,19 +2159,21 @@ class Slime extends Pet{
 //  Red-knee tarantula: 8 IK legs in an alternating tetrapod gait, bursts, threat pose.
 // =====================================================================
 class Spider extends Pet{
-  constructor(world,x,y){
-    super();this.initCommon(world,'tarantula');
+  // leg layout: hip/foot angles (TA/TR) and reach (RR) around a centre lc, hips on an ellipse hr
+  legCfg(){return{TA:[0.55,1.12,2.02,2.6],TR:[0.78,1.28,1.86,2.36],RR:[14.6,15.2,14.8,15.4],lc:1.6,hr:[2.5,2.4],sc:1.38,stride:1,knee:0.32};}
+  constructor(world,x,y,kind='tarantula'){
+    super();this.initCommon(world,kind);const LC=this.legCfg();this.lc=LC.lc;this.hr=LC.hr;this.strideK=LC.stride;
     this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.tuck=0;this.threat=0;this.threatT=0;
-    this.burst=rand(1,2);this.burstOn=true;this.outline=hex(PAL.spider.outline);this.n=1;this.pts=[{x,y}];this.seam=0.8;this.chewPh=0;this.gt=0;this.sc=1.38;
-    this.legs=[];const TA=[0.55,1.12,2.02,2.6],TR=[0.78,1.28,1.86,2.36],RR=[14.6,15.2,14.8,15.4];this.gp=0;
+    this.burst=rand(1,2);this.burstOn=true;this.outline=hex(PAL.spider.outline);this.n=1;this.pts=[{x,y}];this.seam=0.8;this.chewPh=0;this.gt=0;this.sc=LC.sc;
+    this.legs=[];const{TA,TR,RR}=LC;this.gp=0;
     for(let i=0;i<4;i++)for(const side of[-1,1])this.legs.push({i,side,ta:TA[i],tr:TR[i],rr:RR[i],grp:(i+(side>0?1:0))&1,
       fx:0,fy:0,sx:0,sy:0,st:0,dur:.12,stepping:false,lift:0,ax:0,ay:0,rx:0,ry:0});
     this.updateLegs(0,false);for(const L of this.legs){L.fx=L.rx;L.fy=L.ry;}
     // knee side is fixed per leg (picked once from the rest pose) so it can never flip mid-walk
     // front legs' knees bow forward and rear legs' bow back, so neighbours never cross
-    const[cx,cy]=this.Wg(1.6,0),c0=Math.cos(this.ang),s0=Math.sin(this.ang);
+    const[cx,cy]=this.Wg(this.lc,0),c0=Math.cos(this.ang),s0=Math.sin(this.ang);
     const polar=(L,x,y)=>Math.atan2((-s0*(x-cx)+c0*(y-cy))*L.side,c0*(x-cx)+s0*(y-cy));
-    for(const L of this.legs){L.len=Math.hypot(L.rx-L.ax,L.ry-L.ay)/(2*Math.cos(0.32));const k1=ik2(L.ax,L.ay,L.rx,L.ry,L.len,L.len,1),a1=polar(L,k1[0],k1[1]),af=polar(L,L.rx,L.ry);
+    for(const L of this.legs){L.len=Math.hypot(L.rx-L.ax,L.ry-L.ay)/(2*Math.cos(LC.knee));const k1=ik2(L.ax,L.ay,L.rx,L.ry,L.len,L.len,1),a1=polar(L,k1[0],k1[1]),af=polar(L,L.rx,L.ry);
       L.bend=((L.i<2)===(a1<af))?1:-1;L.kx=null;}
     this.walking=false;
   }
@@ -2240,14 +2248,14 @@ class Spider extends Pet{
   // arcs forward, so the body glides instead of the legs snapping between poses.
   updateLegs(dt,flail){
     const sc=this.sc,c=Math.cos(this.ang),sn=Math.sin(this.ang),tk=this.tuck;
-    const stride=Math.min(3.8,2.2+this.speed*0.12)*sc;
+    const stride=Math.min(3.8,2.2+this.speed*0.12)*sc*this.strideK,lc=this.lc,hr=this.hr;
     if(!this.walking&&this.speed>1.5){this.walking=true;this.gp=0.02;for(const L of this.legs)L.swing=false;}
     else if(this.walking&&this.speed<0.6)this.walking=false;
     const moving=this.walking;
     if(moving)this.gp=(this.gp+this.speed*dt/(2*stride))%1;
     for(let k=0;k<8;k++){const L=this.legs[k];
-      [L.ax,L.ay]=this.Wg(1.6+Math.cos(L.ta)*2.5,L.side*Math.sin(L.ta)*2.4);
-      const rr=L.rr*(1-tk*0.55);[L.rx,L.ry]=this.Wg(1.6+Math.cos(L.tr)*rr,L.side*Math.sin(L.tr)*rr);
+      [L.ax,L.ay]=this.Wg(lc+Math.cos(L.ta)*hr[0],L.side*Math.sin(L.ta)*hr[1]);
+      const rr=L.rr*(1-tk*0.55);[L.rx,L.ry]=this.Wg(lc+Math.cos(L.tr)*rr,L.side*Math.sin(L.tr)*rr);
       if(flail){const a=this.t*14+k*1.3;L.fx=L.rx+Math.sin(a)*1.6;L.fy=L.ry+Math.cos(a*1.2)*1.3+1;L.lift=0.6;L.stepping=false;L.swing=false;continue;}
       if(tk>0.1){L.fx=lerp(L.fx,L.rx,Math.min(1,dt*14));L.fy=lerp(L.fy,L.ry,Math.min(1,dt*14));L.stepping=false;L.swing=false;L.lift=0;continue;}
       if(moving){L.stepping=false;
@@ -2269,7 +2277,7 @@ class Spider extends Pet{
       }
     }
     // keep every foot inside its own wedge around the body so legs never sweep across each other
-    if(!flail&&tk<=0.1){const[ccx,ccy]=this.Wg(1.6,0);
+    if(!flail&&tk<=0.1){const[ccx,ccy]=this.Wg(lc,0);
       for(const L of this.legs){const dx=L.fx-ccx,dy=L.fy-ccy,u=(c*dx+sn*dy)/sc,v=(-sn*dx+c*dy)/sc*L.side;
         const a=Math.atan2(v,u),r=Math.hypot(u,v),a2=clamp(a,L.tr-0.2,L.tr+0.2),r2=clamp(r,L.rr*0.72,L.rr*1.18);
         if(a2!==a||r2!==r){const nu=Math.cos(a2)*r2,nv=Math.sin(a2)*r2*L.side;
@@ -2325,6 +2333,92 @@ class Spider extends Pet{
       if(i>=0&&i<fb.px.length)pmix(fb,x,y,hc,0.55);}
     const[e0,e1]=this.W(3.2,-0.2);pset(fb,e0,e1-0.6,hex('#c8b8a0'));
   }
+}
+
+// =====================================================================
+//  Desert hairy scorpion: tarantula gait on a long plated body, big pincers,
+//  a segmented tail that arcs over the back and jabs on a catch. Glows cyan at night (UV!).
+// =====================================================================
+class Scorpion extends Spider{
+  legCfg(){return{TA:[0.69,1.30,1.84,2.45],TR:[0.62,1.12,1.9,2.5],RR:[6.8,7.0,7.2,7.8],lc:-1.0,hr:[3.0,1.9],sc:1.3,stride:0.6,knee:0.62};}
+  constructor(world,x,y){super(world,x,y,'scorpion');this.outline=hex(PAL.scorp.outline);this.stingT=0;this.pinch=0;this.pinchT=rand(2,5);this.open=0.3;this.glowPx=[];}
+  headPos(){const[x,y]=this.Wg(8.6,0);return{x,y};}
+  mouthScreen(){const[x,y]=this.W(5.6,0);return{x,y};}
+  hatAnchor(){const[x,y]=this.W(2.9,0);return{x,y:y-1,a:this.ang,s:0.8};}
+  hitTest(x,y){const[cx,cy]=this.W(0,0);return Math.hypot(x-cx,y-cy)<8.5*this.sc?0:-1;}
+  updateStrike(dt){const r=super.updateStrike(dt);if(r==='caught'){this.stingT=0.45;this.open=0;}return r;}
+  update(dt){
+    if(this.preview&&!this._pv){this._pv=1;this.ang=-2.6;this.updateLegs(0,false);for(const L of this.legs){L.fx=L.rx;L.fy=L.ry;L.kx=null;}}
+    super.update(dt);
+    this.stingT=Math.max(0,this.stingT-dt);
+    this.pinchT-=dt;if(this.pinchT<=0){this.pinch=0.35;this.pinchT=rand(2.5,6);}this.pinch=Math.max(0,this.pinch-dt);
+    const hunting=this.state==='hunt'||this.state==='strike'||this.state==='stalk';
+    let want=this.threat>0.3?1:hunting?0.75:this.state==='chew'?0.12+0.1*Math.sin(this.chewPh*9):this.pinch>0?(this.pinch>0.2?0.9:0):0.3;
+    if(this.stingT>0)want=0;
+    this.open+=(want-this.open)*Math.min(1,dt*(want<this.open?22:8));
+  }
+  color(m,q,s,l,x,y){const P=PAL.scorp,hr=hash(x*5.1,y*3.7);
+    switch(m){
+      case M.BODY:if(s>=99)return s>=100.5&&q>0?P.back[Math.min(3,q+1)]:P.back[q];
+        if(Math.abs(l)>0.7)return P.straw[Math.max(0,q-1)];
+        return(hr>0.9?P.straw:P.back)[Math.max(0,q-(hr>0.9?1:0))];
+      case M.LIMB:if(s>5.8&&s<7.0)return P.straw[Math.max(0,q-1)];return(hr>0.93?P.hair:P.straw)[q];
+      case M.CLAW:if(s>=20)return s>23.5?P.sting[q]:P.straw[Math.max(0,q-1)];return(hr>0.9?P.hair:P.straw)[q];
+      case M.CLAW2:return s>=4?P.sting[Math.min(3,q+1)]:(hr>0.92?P.hair:P.straw)[q];
+      case M.TOE:return P.sting[q];
+      case M.LID:return P.barb[q];
+      case M.PUPIL:return P.barb[0];
+    }return INK;}
+  draw(fb0){
+    const sc=this.sc,fb={cap:(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r)};
+    const th=this.threat,t=this.t,V=(u,v,z=0)=>{const p=this.W(u,v);p[1]-=z*sc;return p;};
+    // legs: thin straw legs, knees bowed away from the body
+    for(const L of this.legs){
+      L.dl=L.dl==null?L.lift:L.dl+(L.lift-L.dl)*0.5;const oy=-this.h,fx=L.fx,fy=L.fy+oy,lift=L.dl*1.8;
+      const ax=L.ax,ay=L.ay+oy;let[kx,ky,ex,ey]=ik2(ax,ay,fx,fy-lift,L.len,L.len,L.bend);
+      if(L.kx!=null&&!this.preview){const jx=kx-L.kx,jy=ky-(L.ky+oy),j=Math.hypot(jx,jy);if(j>3){kx=L.kx+jx*3/j;ky=L.ky+oy+jy*3/j;}}
+      L.kx=kx;L.ky=ky-oy;const kyu=ky-1.1*sc;
+      fb.cap(ax,ay,0.75,kx,kyu,0.6,M.LIMB,1,0,6.4);fb.cap(kx,kyu,0.6,ex,ey,0.38,M.LIMB,1,6.4,14);}
+    // mesosoma: 7 overlapping plates, dark olive with pale margins, tapering to the tail
+    const br=1+Math.sin(t*1.6)*0.02,PW=[2.6,2.8,2.95,2.95,2.8,2.5,2.1];
+    for(let k=0;k<7;k++){const u=1.0-k*1.08,[a0,a1]=V(u+0.35,0),[b0,b1]=V(u-0.35,0);fb.cap(a0,a1,PW[k]*br,b0,b1,PW[k]*br,M.BODY,2,0,0,0.6-k*0.08);}
+    // carapace with a paler front edge
+    {const[a0,a1]=V(4.2,0),[b0,b1]=V(2.0,0);fb.cap(a0,a1,1.8,b0,b1,2.35,M.BODY,2,101,99,0.9);}
+    for(const sd of[-1,1]){const[e0,e1]=V(3.0,sd*0.5);fb.cap(e0,e1,0.42,e0,e1,0.42,M.PUPIL,2,0,0,2.2);}
+    // tail: 5 segments arcing up and forward over the back, then the bulb and barb
+    const walk=clamp(this.speed/10,0,1),jab=this.stingT>0?Math.sin(Math.PI*(1-this.stingT/0.45)):0;
+    const step=-0.62-th*0.12+walk*0.16-jab*0.2,sway=Math.sin(t*0.9)*0.5*(1-walk);
+    let u=-6.3,z=0.3+th*0.8,v=0,ang=3.05-walk*0.05,prev=V(u,v,z);const LEN=[1.45,1.55,1.65,1.75,1.85],RAD=[1.05,1.0,0.98,0.95,0.95];
+    for(let k=0;k<5;k++){ang+=step*(k?1:0.3);u+=Math.cos(ang)*LEN[k]*(1+th*0.08);z+=Math.sin(ang)*LEN[k]*(1+th*0.08);v=sway*(k+1)/5;
+      const nx=V(u,v,z);fb.cap(prev[0],prev[1],RAD[k],nx[0],nx[1],RAD[k]*0.96,M.CLAW2,3,k,k,k*0.2);prev=nx;}
+    ang+=step*1.05+jab*0.5;const bu=u+Math.cos(ang)*1.3,bz=z+Math.sin(ang)*1.3,bulb=V(bu,v,bz);
+    fb.cap(prev[0],prev[1],1.0,bulb[0],bulb[1],1.25,M.TOE,3,0,0,1.2);
+    ang+=step*1.1;const tip=V(bu+Math.cos(ang)*1.5,v,bz+Math.sin(ang)*1.5);fb.cap(bulb[0],bulb[1],0.55,tip[0],tip[1],0.25,M.LID,3,0,0,1.6);
+    this._tail=[tip[0],tip[1]];
+    // pincers: arm, forearm, a fat palm and two fingers that open and close
+    const op=this.open,chew=this.state==='chew'?1:0,pz=th*3.2;
+    for(const sd of[-1,1]){
+      const tw=Math.sin(t*1.3+sd)*0.15,sp=th*1.6-chew*1.4;
+      const S=V(3.8,sd*1.5,0.4),E=V(5.2,sd*(4.6+sp),0.8+pz*0.6),Wu=7.3-chew*0.6,Wv=sd*(4.3+sp*1.2+tw),Wr=V(Wu,Wv,1+pz),
+        Pu=9.0-chew*0.4,Pv=sd*(3.7+sp-chew*0.8+tw),Pe=V(Pu,Pv,1+pz*1.1);
+      fb.cap(S[0],S[1],0.7,E[0],E[1],0.8,M.CLAW,3,0,0,0.2);fb.cap(E[0],E[1],0.8,Wr[0],Wr[1],0.95,M.CLAW,3,0,0,0.4);
+      fb.cap(Wr[0],Wr[1],1.2,Pe[0],Pe[1],1.5,M.CLAW,3,0,0,0.8);
+      const da=Math.atan2(Pv-Wv,Pu-Wu);
+      for(const f of[-1,1]){// f=-1 inner (fixed) finger, f=+1 outer (movable) finger
+        const a=da+f*sd*(0.1+op*0.42),bu2=Pu+Math.cos(da)*0.6,bv=Pv+f*sd*0.55,L2=2.5,fz=1+pz*1.15,
+          B=V(bu2,bv,fz),T=V(bu2+Math.cos(a)*L2,bv+Math.sin(a)*L2,fz);
+        fb.cap(B[0],B[1],0.62,T[0],T[1],0.3,M.CLAW,3,20,25,0.9);}}
+  }
+  drawExtras(fb){// remember our pixels for the night glow; a glint on the eyes
+    const W=fb.w,g=this.glowPx;g.length=0;for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++)if(fb.mat[y*W+x])g.push(y*W+x);
+    // dark seams between the back plates (only where the plate itself shows)
+    const seen=new Set();for(let k=1;k<7;k++){const u=1.0-k*1.08+0.54;for(let v=-2.2;v<=2.2;v+=0.3){const[x,y]=this.W(u,v),i=Math.floor(y)*W+Math.floor(x);
+      if(i>=0&&i<fb.mat.length&&fb.mat[i]===M.BODY&&fb.cls[i]===2&&!seen.has(i)){seen.add(i);pdark(fb,x,y,0.62);}}}
+    const[e0,e1]=this.W(3.1,-0.4);pset(fb,e0,e1-0.5,hex('#e8e0c0'));
+  }
+  // real scorpions fluoresce blue-green under UV; at night ours does too
+  glow(fb,night){if(night<0.25||this.preview)return;const k=(night-0.25)/0.75,W=fb.w,p=0.85+0.15*Math.sin(this.t*1.7);
+    for(const i of this.glowPx)padd(fb,i%W,(i/W)|0,10*k*p,70*k*p,64*k*p);}
 }
 
 // =====================================================================
@@ -2728,7 +2822,7 @@ const TOY_LABEL={ball:'the beach ball',squeaky:'the squeaky duck',bell:'the jing
   yarn:'the yarn ball',dice:'the foam die',plush:'the octopus plush',spinner:'the spinning top',rc:'the RC car',musicbox:'the music box',bubbler:'the bubble machine',butterfly:'the clockwork butterfly'};
 const TOY_TOOLS=['laser','bubbles','feather','remote'];
 const toolOwned=x=>x==='remote'?(save.inv.rc||0)>0:(save.inv[x]||0)>0;
-const ROSTER=['frog','lizard','salamander','snake','chameleon','dragon','gecko','axolotl','millipede','slime','tarantula','crab','turtle','gsnail'];
+const ROSTER=['frog','lizard','salamander','snake','chameleon','dragon','gecko','axolotl','millipede','slime','tarantula','scorpion','crab','turtle','gsnail'];
 
 // =====================================================================
 //  Save (localStorage, wrapped so the game still works without it)
@@ -3233,7 +3327,7 @@ const game={mode:'boot',tool:'feed',food:'cricket',toyTool:null,world:null,point
   shake:0,flashT:0,flashMsg:'',name:'',kind:'',uiT:0,grabbing:false,chirpT:4,croakT:6,held:null,placing:null,dragObj:null,
   coinT:rand(15,30),thinkT:6,thought:null,hearts:0,bubbleT:0,trayOpen:true,firstRun:false};
 const makePet=(w,kind,x,y)=>kind==='frog'?new Frog(w,x,y):kind==='crab'?new Crab(w,x,y):kind==='turtle'?new Turtle(w,x,y):kind==='gsnail'?new GSnail(w,x,y):
-  kind==='tarantula'?new Spider(w,x,y):kind==='chameleon'?new Chameleon(w,x,y):kind==='dragon'?new Dragon(w,x,y):kind==='gecko'?new Gecko(w,x,y):kind==='axolotl'?new Axolotl(w,x,y):kind==='millipede'?new Millipede(w,x,y):kind==='slime'?new Slime(w,x,y):new Walker(w,kind,x,y);
+  kind==='tarantula'?new Spider(w,x,y):kind==='scorpion'?new Scorpion(w,x,y):kind==='chameleon'?new Chameleon(w,x,y):kind==='dragon'?new Dragon(w,x,y):kind==='gecko'?new Gecko(w,x,y):kind==='axolotl'?new Axolotl(w,x,y):kind==='millipede'?new Millipede(w,x,y):kind==='slime'?new Slime(w,x,y):new Walker(w,kind,x,y);
 function createWorld(){
   const w={stats:{fed:72,happy:70,water:68},prey:[],parts:[],ripples:[],glassDrops:[],glassRings:[],fireflies:[],motes:[],
     bounds:{x0:TANK.x0+6,y0:TANK.y0+6,x1:TANK.x1-6,y1:TANK.y1-6},dish:{x:248,y:52,rw:12.5,rr:16.5},
@@ -3298,7 +3392,7 @@ function updatePlay(dt){
         if(Math.random()<0.5)spawn(w,'mist',P.x+rand(-3,3),P.y+rand(-3,3),{vx:rand(-20,20),vy:rand(-16,16),life:rand(.4,.8)});}
       if(Math.random()<dt*14)w.glassDrops.push({x:P.x+rand(-26,26),y:P.y+rand(-18,18),life:rand(7,14),r:Math.random()<0.25?2:1});
       S.water=Math.min(100,S.water+3.5*dt);
-      const hd=pet.headPos();if(Math.hypot(hd.x-P.x,hd.y-P.y)<26)S.happy=Math.min(100,S.happy+({lizard:0.6,snake:0.6,chameleon:1,tarantula:0.3,turtle:1.5}[pet.kind]??3)*dt);
+      const hd=pet.headPos();if(Math.hypot(hd.x-P.x,hd.y-P.y)<26)S.happy=Math.min(100,S.happy+({lizard:0.6,snake:0.6,chameleon:1,tarantula:0.3,scorpion:0.4,turtle:1.5}[pet.kind]??3)*dt);
       for(const pl of w.plants)if(Math.hypot(pl.x-P.x,pl.y-P.y)<pl.reach+10)pl.dist=Math.max(pl.dist,0.8);
     }else if(tool==='pet'){
       if(pet.hitTest(P.x,P.y)>=0&&P.moved>0.5&&pet.petMe()){P.rub=(P.rub||0)+P.moved;
@@ -3488,6 +3582,7 @@ function renderPlay(){
       for(let yy=-4;yy<=4;yy++)for(let xx=-6;xx<=6;xx++){const d=Math.sqrt(xx*xx/36+yy*yy/16);if(d>=1)continue;const f=k*(1-d)**1.4;if(((xx+yy)&1)&&f<0.12)continue;
         padd(fb,Math.round(x)+xx,Math.round(y)+yy,c[0]*f,c[1]*f,c[2]*f);}}}
   for(const d of w.decor)decorGlow(fb,d,night,w.t);
+  if(pet.glow)pet.glow(fb,night);
   for(const o of w.toys)toyGlow(fb,o,night,w.t);
   for(const q of w.fireflies){const b=(0.5+0.5*Math.sin(w.t*3+q.ph))*night*Math.min(1,q.life);
     padd(fb,q.x,q.y,200*b,255*b,110*b);for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]])padd(fb,q.x+dx,q.y+dy,60*b,90*b,30*b);}
