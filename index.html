@@ -1706,7 +1706,7 @@ class Spider extends Pet{
     super();this.initCommon(world,'tarantula');
     this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.tuck=0;this.threat=0;this.threatT=0;
     this.burst=rand(1,2);this.burstOn=true;this.outline=hex(PAL.spider.outline);this.n=1;this.pts=[{x,y}];this.seam=0.8;this.chewPh=0;this.gt=0;this.sc=1.38;
-    this.legs=[];const TA=[0.3,0.95,2.2,2.85],TR=[0.4,0.98,2.14,2.74],RR=[15.0,14.2,13.8,15.6];this.gp=0;
+    this.legs=[];const TA=[0.55,1.12,2.02,2.6],TR=[0.78,1.28,1.86,2.36],RR=[14.6,15.2,14.8,15.4];this.gp=0;
     for(let i=0;i<4;i++)for(const side of[-1,1])this.legs.push({i,side,ta:TA[i],tr:TR[i],rr:RR[i],grp:(i+(side>0?1:0))&1,
       fx:0,fy:0,sx:0,sy:0,st:0,dur:.12,stepping:false,lift:0,ax:0,ay:0,rx:0,ry:0});
     this.updateLegs(0,false);for(const L of this.legs){L.fx=L.rx;L.fy=L.ry;}
@@ -1789,7 +1789,7 @@ class Spider extends Pet{
   // arcs forward, so the body glides instead of the legs snapping between poses.
   updateLegs(dt,flail){
     const sc=this.sc,c=Math.cos(this.ang),sn=Math.sin(this.ang),tk=this.tuck;
-    const stride=Math.min(4.2,2.2+this.speed*0.12)*sc;
+    const stride=Math.min(3.8,2.2+this.speed*0.12)*sc;
     if(!this.walking&&this.speed>1.5){this.walking=true;this.gp=0.02;for(const L of this.legs)L.swing=false;}
     else if(this.walking&&this.speed<0.6)this.walking=false;
     const moving=this.walking;
@@ -1820,7 +1820,7 @@ class Spider extends Pet{
     // keep every foot inside its own wedge around the body so legs never sweep across each other
     if(!flail&&tk<=0.1){const[ccx,ccy]=this.Wg(1.6,0);
       for(const L of this.legs){const dx=L.fx-ccx,dy=L.fy-ccy,u=(c*dx+sn*dy)/sc,v=(-sn*dx+c*dy)/sc*L.side;
-        const a=Math.atan2(v,u),r=Math.hypot(u,v),a2=clamp(a,L.tr-0.22,L.tr+0.22),r2=clamp(r,L.rr*0.72,L.rr*1.18);
+        const a=Math.atan2(v,u),r=Math.hypot(u,v),a2=clamp(a,L.tr-0.2,L.tr+0.2),r2=clamp(r,L.rr*0.72,L.rr*1.18);
         if(a2!==a||r2!==r){const nu=Math.cos(a2)*r2,nv=Math.sin(a2)*r2*L.side;
           L.fx=lerp(L.fx,ccx+(c*nu-sn*nv)*sc,0.5);L.fy=lerp(L.fy,ccy+(sn*nu+c*nv)*sc,0.5);}}}
   }
