@@ -560,8 +560,8 @@ const PAL={
   gsnail:{skin:ramp('#5a4c40','#8e7c68','#bca890','#e6d6c0'),skinD:ramp('#46382e','#6e5e4e','#968470','#bcaa92'),
           shA:ramp('#5a3a1a','#9a642a','#d49a48','#f4cc86'),flame:ramp('#2a180c','#4a2c14','#6e421e','#8e5a2c'),
           seam:ramp('#140a04','#1e1208','#2c1c0e','#3c2814'),outline:'#0e0806'},
-  spider:{body:ramp('#0e0b09','#1c1712','#2c241c','#44382c'),leg:ramp('#17110c','#30241a','#4c3a2a','#6e5a44'),rim:ramp('#3a2a16','#6e5230','#a4804a','#d4b070'),
-          band:ramp('#6a1c08','#b43a10','#e8641c','#ff9a4a'),hair:ramp('#2a1810','#4a2c1c','#704430','#9a6448'),outline:'#050403'},
+  spider:{body:ramp('#0c0a0a','#1a1616','#2c2624','#463c36'),leg:ramp('#0e0c0b','#221c18','#3a302a','#584a40'),rim:ramp('#3a2a16','#6e5230','#a4804a','#d4b070'),
+          cara:ramp('#5a3a14','#9a6a2a','#d09a48','#f4cc80'),band:ramp('#7a1e06','#c8420e','#f06a1a','#ffa452'),hair:ramp('#2a2019','#4a3c30','#6e5c4a','#98846c'),outline:'#050403'},
   cham:{body:ramp('#1a3a16','#2e6a24','#4ea03a','#8cd46a'),band:ramp('#123a2a','#1e6a50','#34a07a','#6ad4aa'),
         exBody:ramp('#0e3a3a','#16706a','#28b0a0','#6ae8d4'),exBand:ramp('#4a4a0a','#8a8a14','#d4c830','#fff07a'),
         dark:ramp('#140e08','#2a1c10','#443018','#645028'),pale:ramp('#3a4a3a','#6a806a','#a0b8a0','#d4e8d4'),
@@ -1702,25 +1702,34 @@ class Spider extends Pet{
   constructor(world,x,y){
     super();this.initCommon(world,'tarantula');
     this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.tuck=0;this.threat=0;this.threatT=0;
-    this.burst=rand(1,2);this.burstOn=true;this.outline=hex(PAL.spider.outline);this.n=1;this.pts=[{x,y}];this.seam=0.8;this.chewPh=0;this.gt=0;this.sc=1.3;
-    this.legs=[];const TA=[0.55,1.1,1.85,2.45],TR=[0.42,1.08,1.98,2.62],RR=[15,13.6,13.4,15.2];
+    this.burst=rand(1,2);this.burstOn=true;this.outline=hex(PAL.spider.outline);this.n=1;this.pts=[{x,y}];this.seam=0.8;this.chewPh=0;this.gt=0;this.sc=1.38;
+    this.legs=[];const TA=[0.5,1.15,1.95,2.55],TR=[0.4,1.05,2.05,2.72],RR=[15.5,14.6,14.2,16.2];
     for(let i=0;i<4;i++)for(const side of[-1,1])this.legs.push({i,side,ta:TA[i],tr:TR[i],rr:RR[i],grp:(i+(side>0?1:0))&1,
       fx:0,fy:0,sx:0,sy:0,st:0,dur:.12,stepping:false,lift:0,ax:0,ay:0,rx:0,ry:0});
     this.updateLegs(0,false);for(const L of this.legs){L.fx=L.rx;L.fy=L.ry;}
   }
   color(m,q,s,l,x,y){const P=PAL.spider;
     switch(m){
-      case M.BODY:return(hash(x*3,y*7)>0.72?P.hair:P.body)[q];
-      case M.LIMB:if(s>5.4&&s<7.6)return P.band[q];return(hash(x*5,y*3)>0.8?P.hair:P.leg)[q];
-      case M.TOE:return P.body[Math.max(0,q-1)];
+      case M.BODY:{// abdomen: black velvet, rusty setae, fuzzy light fringe
+        const A=this._ab;let r=0;if(A){const dx=x+.5-A[0],dy=y+.5-A[1];r=Math.hypot(dx,dy)/A[2];}
+        const hr=hash(x*3,y*7);if(r>0.8&&hr>0.4)return P.hair[Math.min(3,q+1)];
+        return(hr>0.82?P.hair:P.body)[q];}
+      case M.LIMB:if(s>5.6&&s<7.9)return P.band[q];if(s>10.8&&s<11.5)return P.cara[Math.max(0,q-1)];
+        return(hash(x*5,y*3)>0.9?P.hair:P.leg)[q];
+      case M.TOE:return P.leg[Math.max(0,q-1)];
       case M.CLAW:return P.body[q];
-      case M.CLAW2:return P.rim[q];
+      case M.CLAW2:{// carapace: golden rim around a dark radiating star
+        const C=this._cc;if(!C)return P.cara[q];
+        const dx=x+.5-C[0],dy=y+.5-C[1],c=Math.cos(this.ang),sn=Math.sin(this.ang),u=(c*dx+sn*dy)/this.sc,v=(-sn*dx+c*dy)/this.sc;
+        const r=Math.hypot((u-0.2)/3.0,v/2.8),a=Math.atan2(v,u-0.2),f=Math.abs(((a*8/TAU+0.5)%1+1)%1-0.5);
+        if(r<0.28||(r<0.72&&f<0.12))return P.body[Math.min(3,q+1)];
+        return P.cara[q];}
     }return INK;}
   W(lx,ly){const c=Math.cos(this.ang)*this.sc,s=Math.sin(this.ang)*this.sc;return[this.x+c*lx-s*ly,this.y-this.h+s*lx+c*ly];}
   Wg(lx,ly){const c=Math.cos(this.ang)*this.sc,s=Math.sin(this.ang)*this.sc;return[this.x+c*lx-s*ly,this.y+s*lx+c*ly];}
   headPos(){const[x,y]=this.Wg(5.5,0);return{x,y};}
   mouthScreen(){const[x,y]=this.W(5.2,0);return{x,y};}
-  hatAnchor(){const[x,y]=this.W(1.8,0);return{x,y:y-1,a:this.ang,s:0.95};}
+  hatAnchor(){const[x,y]=this.W(1.6,0);return{x,y:y-1,a:this.ang,s:0.95};}
   noise(){return clamp(this.speed/11,0,1.5);}
   goTo(tx,ty,dt,mode,arrive=3){
     const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y);
@@ -1769,8 +1778,8 @@ class Spider extends Pet{
   updateLegs(dt,flail){
     const vx=Math.cos(this.ang)*this.speed,vy=Math.sin(this.ang)*this.speed,moving=this.speed>1.5,tk=this.tuck;
     for(let k=0;k<8;k++){const L=this.legs[k];
-      [L.ax,L.ay]=this.Wg(1.8+Math.cos(L.ta)*2.6,L.side*Math.sin(L.ta)*2.6);
-      const rr=L.rr*(1-tk*0.55);[L.rx,L.ry]=this.Wg(1.8+Math.cos(L.tr)*rr,L.side*Math.sin(L.tr)*rr);
+      [L.ax,L.ay]=this.Wg(1.6+Math.cos(L.ta)*2.2,L.side*Math.sin(L.ta)*2.1);
+      const rr=L.rr*(1-tk*0.55);[L.rx,L.ry]=this.Wg(1.6+Math.cos(L.tr)*rr,L.side*Math.sin(L.tr)*rr);
       if(flail){const a=this.t*14+k*1.3;L.fx=L.rx+Math.sin(a)*1.6;L.fy=L.ry+Math.cos(a*1.2)*1.3+1;L.lift=0.6;L.stepping=false;continue;}
       if(tk>0.1){L.fx=lerp(L.fx,L.rx,Math.min(1,dt*14));L.fy=lerp(L.fy,L.ry,Math.min(1,dt*14));L.stepping=false;L.lift=0;continue;}
       if(L.stepping){
@@ -1795,21 +1804,41 @@ class Spider extends Pet{
   }
   draw(fb0){
     const sc=this.sc,fb={cap:(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r)};
-    const oy=-this.h,th=this.threat;
+    const oy=-this.h,th=this.threat,[cx,cy]=this.W(1.6,0);
+    // legs: femur rises from the carapace rim, knee bows away from the body, tibia/tarsus reach down
     for(const L of this.legs){
       let fx=L.fx,fy=L.fy+oy,lift=L.lift*1.3;
-      if(th>0.01&&L.i<2){const[tx,ty]=this.W(1.8+Math.cos(0.35+L.i*0.3)*(L.i?8:9.5),L.side*Math.sin(0.35+L.i*0.4)*(L.i?7:6));
+      if(th>0.01&&L.i<2){const[tx,ty]=this.W(1.6+Math.cos(0.3+L.i*0.35)*(L.i?9:10.5),L.side*Math.sin(0.3+L.i*0.45)*(L.i?7.5:6));
         fx=lerp(fx,tx,th);fy=lerp(fy,ty,th);lift+=th*(L.i?2.5:6)*sc;}
-      const[kx,ky,ex,ey]=ik2(L.ax,L.ay+oy,fx,fy-lift,7.4*sc,7.8*sc,L.i<2?-L.side:L.side),kyu=ky-0.5*sc;
-      fb.cap(L.ax,L.ay+oy,1.05,kx,kyu,.85,M.LIMB,1,0,6.4);fb.cap(kx,kyu,.8,ex,ey,.5,M.LIMB,1,6.4,14);fb.cap(ex,ey,.45,ex,ey,.45,M.TOE,1,0,0,1);
+      const ax=L.ax,ay=L.ay+oy,vx=fx-ax,vy=fy-lift-ay,crs=vx*(cy-ay)-vy*(cx-ax);
+      const[kx,ky,ex,ey]=ik2(ax,ay,fx,fy-lift,7.6*sc,7.6*sc,crs>0?-1:1),kyu=ky-0.6*sc;
+      fb.cap(ax,ay,1.25,kx,kyu,1.0,M.LIMB,1,0,6.4);
+      fb.cap(kx,kyu,0.95,ex,ey,0.55,M.LIMB,1,6.4,14);
+      fb.cap(ex,ey,0.55,ex,ey,0.55,M.TOE,1,0,0,1);
     }
-    for(const sd of[-1,1]){const[p0x,p0y]=this.W(4.0,sd*0.9),[p1x,p1y]=this.W(6.2+th*1.5,sd*(1.7+th));fb.cap(p0x,p0y,.8,p1x,p1y-th*3,.6,M.LIMB,2,0,5,0.2);}
-    const[a0,a1]=this.W(-4.6,0),[b0,b1]=this.W(-5.8,0);fb.cap(a0,a1,3.5,b0,b1,3.2,M.BODY,2);
-    const[w0,w1]=this.W(-0.6,0),[w2,w3]=this.W(-1.2,0);fb.cap(w0,w1,0.9,w2,w3,0.9,M.CLAW,2);
-    const[c0,c1]=this.W(1.8,0);fb.cap(c0,c1,2.8,c0,c1,2.8,M.CLAW2,2,0,0,0.6);fb.cap(c0,c1,2.0,c0,c1,2.0,M.CLAW,2,0,0,1.4);
+    // pedipalps: short feelers with pale tips
+    const tw=Math.sin(this.t*3.1)*0.35;
+    for(const sd of[-1,1]){const[p0x,p0y]=this.W(4.2,sd*1.2),[p1x,p1y]=this.W(5.4+th*1.2,sd*(2.4+th+tw*sd)),[p2x,p2y]=this.W(7.0+th*1.8,sd*(2.0+th*0.6+tw*sd*0.5));
+      fb.cap(p0x,p0y,.8,p1x,p1y-th*2,.65,M.LIMB,2,0,3);fb.cap(p1x,p1y-th*2,.62,p2x,p2y-th*3,.55,M.LIMB,2,6.2,7.6);fb.cap(p2x,p2y-th*3,.55,p2x,p2y-th*3,.55,M.TOE,2,0,0,1);}
+    // abdomen: the big round rear, gently breathing
+    const br=1+Math.sin(this.t*1.7)*0.025,[a0,a1]=this.W(-5.2,0),[b0,b1]=this.W(-6.4,0);
+    this._ab=[(a0+b0)/2,(a1+b1)/2,4.5*br*sc];
+    fb.cap(a0,a1,4.4*br,b0,b1,4.1*br,M.BODY,2);
+    const[w0,w1]=this.W(-0.6,0),[w2,w3]=this.W(-1.3,0);fb.cap(w0,w1,0.8,w2,w3,0.8,M.CLAW,2);
+    // carapace
+    this._cc=[cx,cy];const[q0,q1]=this.W(0.5,0),[q2,q3]=this.W(2.7,0);fb.cap(q0,q1,2.8,q2,q3,2.6,M.CLAW2,2,0,0,1.1);
+    // chelicerae + eye tubercle
     const fang=this.state==='chew'?Math.sin(this.chewPh*TAU*2)*0.3:0;
-    for(const sd of[-1,1]){const[f0,f1]=this.W(4.5,sd*(0.7+fang));fb.cap(f0,f1,.95,f0,f1,.95,M.CLAW,2,0,0,1.8);}
-    const[e0,e1]=this.W(3.1,0);fb.cap(e0,e1,.55,e0,e1,.55,M.PUPIL,2,0,0,2.4);
+    for(const sd of[-1,1]){const[f0,f1]=this.W(5.0,sd*(0.7+fang+th*0.3));fb.cap(f0,f1,0.9,f0,f1,0.9,M.CLAW,2,0,0,1.8);}
+    const[e0,e1]=this.W(3.3,0);fb.cap(e0,e1,.55,e0,e1,.55,M.PUPIL,2,0,0,2.4);
+  }
+  drawExtras(fb){// stray setae poking out of the abdomen outline, and an eye glint
+    const A=this._ab;if(!A)return;const hc=PAL.spider.hair[2];
+    for(let k=0;k<22;k++){const a=k/22*TAU+0.13,r=A[2]+0.9;if(hash(k*7.3,3.1)<0.45)continue;
+      const x=A[0]+Math.cos(a)*r,y=A[1]+Math.sin(a)*r*0.95,i=Math.floor(y)*fb.w+Math.floor(x);
+      if(i>=0&&i<fb.px.length)pmix(fb,x,y,hc,0.55);}
+    if(this._cc){const[cx,cy]=this.W(1.5,0);for(const[dx,dy]of[[0,0],[1,0],[0,1],[1,1]])pdark(fb,cx-0.5+dx,cy-0.5+dy,0.45);}
+    const[e0,e1]=this.W(3.2,-0.2);pset(fb,e0,e1-0.6,hex('#c8b8a0'));
   }
 }
 
