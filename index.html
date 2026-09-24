@@ -2930,9 +2930,11 @@ const ICON_DRAW={
     g.line(15.2,1.8,10.2,4.2,STEEL,1.4);g.line(10.2,4.2,6.6,9.4,STEEL,1.4);
     g.line(16.2,2.8,13.8,7.8,STEEL2,1.4);g.line(13.8,7.8,8.2,10.8,STEEL2,1.4);g.disc(15.8,2.3,1.5,STEEL);
     const W=[[7.2,11],[5.8,12.3],[4.8,13.8],[3.4,14.9],[1.9,15.4]];W.forEach(([x,y],i)=>g.disc(x,y,1.35,i%2?'#e89a3c':'#f6b85a'));g.disc(8.6,9.9,1.1,'#6a3c1c');},
-  pet(g){g.ell(8.6,12.2,5.6,4.4,SKIN);for(const[x,t]of[[3,5],[6,3],[9,3],[12,4]])g.rect(x,t,x+1,11,SKIN);g.line(2.6,12.5,1.4,9.2,SKIN,2.2);
-    for(const x of[5,8,11])g.line(x,6,x,10,'#d8c0a4');
-    g.rect(7,11,8,11,'#ff6f91');g.rect(10,11,11,11,'#ff6f91');g.rect(7,12,11,12,'#ff6f91');g.rect(8,13,10,13,'#ff6f91');g.px(9,14,'#ff6f91');g.px(7,11,'#ffb3c6');},
+  pet(g){// a big squishy heart with a shine and sparkles
+    const c='#ff6f91';g.disc(5.3,6.4,3.8,c);g.disc(11.7,6.4,3.8,c);
+    for(let y=7;y<17;y++)for(let x=0;x<18;x++){const t=(y-7)/8.8;if(t<=1&&Math.abs(x+.5-8.5)<=7.6*(1-t)+0.2)g.px(x,y,c);}g.px(8,4,null);g.px(9,4,null);
+    g.rect(4,4,5,5,'#ffc2d2');g.px(3,6,'#ffc2d2');
+    for(const[x,y,col]of[[15,1,'~#fff3b0'],[16,2,'~#ffe066'],[14,2,'~#ffe066'],[15,3,'~#ffe066'],[15,2,'~#ffffff'],[1,13,'~#ffe066'],[2,14,'~#fff3b0']])g.px(x,y,col);},
   grab(g){g.rect(8,1,9,4,STEEL2);g.ell(8.9,6.4,3.6,2.3,'#b8c2cc');g.rect(6,5,11,5,'#8a96a3');
     g.line(6.2,7.6,3.4,11.8,STEEL,2);g.line(3.4,11.8,5,15.6,STEEL,2);g.line(11.8,7.6,14.6,11.8,STEEL,2);g.line(14.6,11.8,13,15.6,STEEL,2);
     g.disc(9,13.4,2.2,'#e5484d');},
