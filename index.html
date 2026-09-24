@@ -608,6 +608,9 @@ const PAL={
           seam:ramp('#140a04','#1e1208','#2c1c0e','#3c2814'),outline:'#0e0806'},
   spider:{body:ramp('#0c0a0a','#1a1616','#2c2624','#463c36'),leg:ramp('#0e0c0b','#221c18','#3a302a','#584a40'),rim:ramp('#3a2a16','#6e5230','#a4804a','#d4b070'),
           cara:ramp('#5a3a14','#9a6a2a','#d09a48','#f4cc80'),band:ramp('#7a1e06','#c8420e','#f06a1a','#ffa452'),hair:ramp('#2a2019','#4a3c30','#6e5c4a','#98846c'),outline:'#050403'},
+  dragon:{base:ramp('#4e3218','#8a5c2e','#bb8a4c','#e6bd7c'),dark:ramp('#2a180a','#50321a','#744c28','#96683c'),light:ramp('#8c6c40','#caa66a','#eed29c','#fff2cc'),
+          orange:ramp('#6a300c','#b0561c','#e08c3c','#ffc674'),beard:ramp('#1c1a1c','#3c3a40','#6a6670','#a8a4ae'),eye:ramp('#241406','#6a4416','#b88a36','#f0cc6a'),
+          dull:ramp('#3a2c20','#5e4a36','#7e6850','#9c8670'),outline:'#120a04'},
   cham:{body:ramp('#1a3a16','#2e6a24','#4ea03a','#8cd46a'),band:ramp('#123a2a','#1e6a50','#34a07a','#6ad4aa'),
         exBody:ramp('#0e3a3a','#16706a','#28b0a0','#6ae8d4'),exBand:ramp('#4a4a0a','#8a8a14','#d4c830','#fff07a'),
         dark:ramp('#140e08','#2a1c10','#443018','#645028'),pale:ramp('#3a4a3a','#6a806a','#a0b8a0','#d4e8d4'),
@@ -757,12 +760,21 @@ const SPECIES={
     legIdx:[5,10],l1:3.4,l2:3.2,rfF:3.0,roF:4.6,rfB:0.6,roB:5.0,stepDist:4,stepTime:0.22,legR:[1.15,0.95],toes:2,toeLen:1.7,toeSpread:1.4,
     eyeS:2.8,eyeR:1.7,eyeOut:0.92,tongue:0,strike:26,flickRate:0,outline:PAL.cham.outline,
     paint(){return INK;}},
+  dragon:{label:'Bearded dragon',latin:'Pogona vitticeps',
+    blurb:'A spiky, sun-soaked pancake with a big personality. Head-bobs, waves hello, puffs out its beard when startled and flattens out under the heat lamp.',
+    names:['Spike','Sandy','Pancake','Toast','Nacho','Biscuit','Ziggy'],
+    n:28,seg:1.5,walk:16,run:40,stalk:6,slow:9,turn:3.4,maxBend:0.22,wave:0.12,waveFreq:0.26,
+    profile:[[0,1.3],[.025,2.3],[.05,3.1],[.078,3.8],[.1,4.2],[.117,3.7],[.137,2.6],[.17,4.3],[.23,5.7],[.31,6.3],[.39,6.2],[.45,5.4],[.5,3.9],[.56,2.8],[.7,1.8],[.86,0.95],[1,.4]],
+    legIdx:[5,12],l1:3.5,l2:3.4,rfF:2.6,roF:5.6,rfB:0.2,roB:6.0,stepDist:4.5,stepTime:0.18,legR:[1.9,1.5],toes:5,toeLen:1.9,toeSpread:0.42,
+    eyeS:3.3,eyeR:1.05,eyeOut:0.84,tongue:3,fork:0.5,strike:10,flickRate:0.08,outline:PAL.dragon.outline,
+    paint(){return INK;}},
   frog:{label:'Red-eyed tree frog',latin:'Agalychnis callidryas',
     blurb:'Springy and wide-eyed. Hops with squash and stretch and snaps flies out of the air with a long tongue. A night owl.',
     names:['Pip','Lily','Bog','Mango','Pickle','Nori','Bean'],outline:PAL.frog.outline},
 };
 // how much each species likes each food (0 = won't eat it)
 const DIET={
+  dragon:{cricket:9,roach:9,waxworm:8,worm:6,greens:7,fruit:5,snail:2,fly:3,egg:0},
   frog:{fly:9,cricket:6,waxworm:7,worm:4,roach:5,snail:0,fruit:0,egg:0,greens:0},
   lizard:{cricket:9,roach:8,waxworm:8,worm:6,fly:4,snail:3,fruit:3,egg:0,greens:2},
   salamander:{worm:9,waxworm:8,snail:6,roach:6,cricket:5,fly:3,fruit:0,egg:0},
@@ -781,7 +793,7 @@ const FOOD_ORDER=['cricket','roach','worm','waxworm','fly','snail','fruit','gree
 const CRUMB={cricket:hex('#6a4a2a'),worm:hex('#c89a4a'),waxworm:hex('#f0e0c0'),snail:hex('#8a7a6a'),fruit:hex('#d83040'),egg:hex('#f0e8d0'),fly:hex('#303030'),greens:hex('#6ab038'),roach:hex('#5a3418')};
 // Hunting styles: how long they stalk, how close before they commit, and how they rush.
 const HUNT={lizard:{st:[0.3,1.4],near:42,rush:'run'},salamander:{st:[0.6,2.0],near:28,rush:'run'},snake:{st:[0.8,2.2],near:32,rush:'run'},
-  chameleon:{st:[1.0,2.4],near:40,rush:'run'},frog:{st:[0.2,1.0],near:40,rush:'run'},tarantula:{st:[0.6,1.8],near:40,rush:'pounce',ambush:true},
+  chameleon:{st:[1.0,2.4],near:40,rush:'run'},dragon:{st:[0.5,1.6],near:36,rush:'run'},frog:{st:[0.2,1.0],near:40,rush:'run'},tarantula:{st:[0.6,1.8],near:40,rush:'pounce',ambush:true},
   crab:{st:[0,0.5],near:30,rush:'run'},turtle:{st:[0,0],near:0,rush:'walk'},gsnail:{st:[0,0],near:0,rush:'walk'}};
 const BITER={crab:{iv:.62,snd:'snap',t:2.6},turtle:{iv:.6,snd:'chomp',t:2.4},gsnail:{iv:.9,snd:'squelch',t:3.2},tarantula:{iv:.35,snd:'chew',t:2.2}};
 const PREY_NAME=Object.fromEntries(Object.entries(FOODS).map(([k,v])=>[k,v.name]));
@@ -795,7 +807,7 @@ class Pet{
     this.held=null;this.tg=null;this.t=rand(10);this.blinkT=rand(2,5);this.blink=0;this.zzT=0;this.fxT=0;
     this.eyesClosed=false;this.preview=false;this.prey=null;this.tx=0;this.ty=0;this.pace='walk';
   }
-  isActive(){if(this.preview)return true;const d=this.world.dayness;return(this.kind==='lizard'||this.kind==='snake'||this.kind==='turtle'||this.kind==='chameleon')?d>0.5:d<0.5;}
+  isActive(){if(this.preview)return true;const d=this.world.dayness;return(this.kind==='lizard'||this.kind==='snake'||this.kind==='turtle'||this.kind==='chameleon'||this.kind==='dragon')?d>0.5:d<0.5;}
   flick(){}
   randomSpot(m=18){const B=this.world.bounds;return[rand(B.x0+m,B.x1-m),rand(B.y0+m,B.y1-m)];}
   decide(){
@@ -809,7 +821,7 @@ class Pet{
       if(this.kind==='snake'){this.tx=w.hide.x+w.hide.len/2+16;this.ty=w.hide.y-8;}
       else{this.tx=w.hide.x+rand(-8,8);this.ty=w.hide.y+rand(-3,3);}
       this.state='sleep';this.timer=20;return;}
-    if(w.lampRock&&(this.kind==='lizard'||this.kind==='snake'||this.kind==='turtle'||this.kind==='chameleon')&&w.dayness>0.5&&Math.random()<0.35){
+    if(w.lampRock&&(this.kind==='lizard'||this.kind==='snake'||this.kind==='turtle'||this.kind==='chameleon'||this.kind==='dragon')&&w.dayness>0.5&&Math.random()<(this.kind==='dragon'?0.5:0.35)){
       this.tx=w.lampRock.x+rand(-6,6);this.ty=w.lampRock.y+rand(-3,3);this.state='bask';this.timer=15;return;}
     if(!act&&Math.random()<0.3){this.state='idle';this.timer=rand(2,4);return;}
     [this.tx,this.ty]=this.randomSpot();this.pace=act?(Math.random()<0.2?'slow':'walk'):'slow';
@@ -1786,6 +1798,100 @@ class Chameleon extends Walker{
 }
 
 // =====================================================================
+//  Bearded dragon: a broad, flat Walker with a spiky beard collar, flank fringes,
+//  a diamond-patterned back, head bobs, arm waves, beard puffs and pancake basking.
+// =====================================================================
+class Dragon extends Walker{
+  constructor(world,x,y){
+    super(world,'dragon',x,y);this.puff=0;this.puffT=0;this.pan=0;this.bobT=0;this.bobPh=0;this.waveT=0;this.waveSide=1;this.warm=0;this.cool=0;this.lastSt='idle';this.cr=null;this.headEnd=this.len*0.13;this.updateColors();
+  }
+  updateColors(){const P=PAL.dragon,mix=(a,b,t)=>t<=0.001?a:a.map((c,i)=>mixc(c,b[i],t)),w=this.warm,c=this.cool;
+    const warmUp=r=>mix(r,r.map(v=>mixc(v,hex('#ffd89a'),0.35)),w),cool=r=>mix(r,P.dull,c*0.55);
+    this.cr={base:cool(warmUp(P.base)),dark:cool(P.dark),light:cool(warmUp(P.light)),head:cool(warmUp(mix(P.base,P.orange,0.32))),orange:cool(P.orange),
+      beard:mix(mix(P.base,P.dark,0.5),P.beard,this.puff),tip:cool(P.light),eye:P.eye};}
+  color(m,q,s,l,x,y){const C=this.cr,al=Math.abs(l),hs=hash(x*3,y*5);
+    switch(m){
+      case M.BODY:{const he=this.headEnd,tail=this.len*0.52;
+        if(s<he){// head plate: warm, a dark stripe through the eye line, pale crown scales
+          if(s>2.2&&s<4.2&&al>0.52&&al<0.86)return C.dark[q];if(al<0.28&&s>1.2&&hs>0.62)return C.light[Math.min(3,q+1)];return C.head[q];}
+        if(s<tail){// back: two rows of pale diamonds, dark spine line, dark mottled flanks
+          const k=(((s-he-0.4)%4.2)+4.2)%4.2/4.2,wd=0.24*(1-Math.abs(k-0.5)*2);
+          const dd=Math.abs(al-0.36);if(dd<wd)return C.light[Math.min(3,q+1)];if(dd<wd+0.07&&wd>0.05)return C.dark[q];
+          if(al<0.08)return C.dark[q];
+          if(al>0.62){const m2=hash(Math.floor(s/1.3),l>0?3:5);if(m2>0.5)return C.dark[q];if(al>0.84)return C.orange[q];}
+          return(hs>0.93?C.light:C.base)[q];}
+        const band=Math.floor((s-tail)/2.2)%2===0;return(band?C.dark:C.base)[q];}
+      case M.LIMB:return(hs>0.9?C.light:C.base)[q];
+      case M.TOE:return C.dark[q];
+      case M.CLAW:return(s>0.55?C.tip:C.base)[q];// flank + head spikes: pale tips
+      case M.CLAW2:return(s>0.6&&this.puff<0.5?C.tip:C.beard)[q];
+      case M.EYE:return C.eye[q];
+      case M.LID:return C.head[q];
+      case M.TONGUE:return PAL.tongue[q];
+    }return INK;}
+  rad(i){let r=super.rad(i);const t=i/(this.n-1);if(t>0.14&&t<0.55)r*=1+0.12*this.pan;return r;}
+  startle(x,y){super.startle(x,y);this.puffT=2.6;if(!this.preview)SFX.play('hiss');}
+  flick(){if(this.tongueT<=0){this.tongueT=this.tongueDur;if(!this.preview)SFX.play('flick');}}
+  update(dt){
+    super.update(dt);const st=this.state,pv=this.preview;
+    if(st==='idle'&&this.speed<1){
+      if(this.bobT<=0&&this.waveT<=0&&Math.random()<dt*0.09)this.startBob();
+      else if(this.bobT<=0&&this.waveT<=0&&Math.random()<dt*0.05){this.waveT=rand(2.4,3.4);this.waveSide=Math.random()<0.5?-1:1;}
+      else if(Math.random()<dt*0.012&&!pv)this.puffT=rand(1.6,2.4);}
+    if(st==='hunt'&&this.lastSt!=='hunt'&&Math.random()<0.4)this.startBob();
+    if(this.lastSt==='chew'&&st!=='chew'&&Math.random()<0.7)this.startBob();
+    if(st!=='idle')this.waveT=0;
+    this.lastSt=st;
+    if(this.bobT>0){this.bobT-=dt;const prev=Math.sin(this.bobPh*16);this.bobPh+=dt;if(prev<0&&Math.sin(this.bobPh*16)>=0&&!pv)SFX.play('tok');}
+    if(this.waveT>0)this.waveT-=dt;
+    this.puffT-=dt;const want=(st==='grabbed'||this.puffT>0)?1:0;this.puff+=(want-this.puff)*Math.min(1,dt*(want?7:1.6));
+    this.pan+=((st==='basking'?1:0)-this.pan)*Math.min(1,dt*1.4);
+    this.warm+=((st==='basking'?1:0)-this.warm)*Math.min(1,dt*0.5);this.cool+=((st==='sleeping'||st==='sleep'?1:0)-this.cool)*Math.min(1,dt*0.5);
+    this.updateColors();
+  }
+  startBob(){this.bobT=rand(0.9,1.5);this.bobPh=0;}
+  updateLegs(dt,flail){super.updateLegs(dt,flail);
+    if(this.waveT>0&&!flail){const L=this.legs.find(l=>l.front&&l.side===this.waveSide);if(L){const p=this.pts[L.idx],q=this.pts[L.idx+1],fx=(p.x-q.x)/this.seg,fy=(p.y-q.y)/this.seg,px=-fy,py=fx,a=this.t*5.5;
+      L.fx=L.rx+fx*(1.2+Math.cos(a)*1.3)+px*L.side*Math.sin(a)*0.8;L.fy=L.ry+fy*(1.2+Math.cos(a)*1.3)+py*L.side*Math.sin(a)*0.8;L.lift=1.6+Math.sin(a)*0.5;L.stepping=false;}}}
+  statusText(){if(this.state==='grabbed'||this.state==='fall')return super.statusText();
+    if(this.puff>0.6)return 'puffed out its beard!';if(this.bobT>0)return 'is head-bobbing';if(this.waveT>0)return 'is waving hello';
+    if(this.state==='basking')return 'is pancaking under the lamp';return super.statusText();}
+  draw(fb){
+    const P=this.pts,oy=-this.h,bob=this.bobT>0?Math.abs(Math.sin(this.bobPh*16))*1.7:0,saved=[];
+    if(bob>0)for(let i=0;i<7;i++){const k=1-i/7;saved.push(P[i].y);P[i].y-=bob*k;}
+    super.draw(fb);
+    // gaping mouth when the beard is up
+    if(this.puff>0.45){const g=(this.puff-0.45)/0.55,c=Math.cos(this.headAng),sn=Math.sin(this.headAng),h=P[0];fb.cap(h.x+c*0.4,h.y+sn*0.4+oy,0.6+0.9*g,h.x-c*0.6,h.y-sn*0.6+oy,0.4+0.6*g,M.TONGUE,3,0,0,1);}
+    if(bob>0)for(let i=0;i<saved.length;i++)P[i].y=saved[i];
+  }
+  // Spiky fringe + beard as crisp pixel art, drawn after lighting and only where the body isn't (uses the layer mask)
+  drawExtras(fb){
+    const oy=-this.h,W=fb.w,H=fb.h,mat=fb.mat,C=this.cr,ol=hex('#120a04'),pf=this.puff,own=new Set();
+const cls=fb.cls;let overLegs=false;
+    const free=(x,y)=>x>=0&&y>=0&&x<W&&y<H&&(!mat[y*W+x]||(overLegs&&cls[y*W+x]===1&&mat[y*W+x]!==M.CLAW));
+    const put=(x,y,c)=>{x=Math.round(x);y=Math.round(y);if(!free(x,y))return;fb.px[y*W+x]=c;own.add(y*W+x);};
+    const spikes=[];// [x,y,dx,dy,len,width,fill,tip]
+    const flank=(s,side,len,w)=>{const p=this.pointAt(s),px=-p.fy,py=p.fx,r=p.r*(s>this.headEnd&&s<this.len*0.55?1+0.12*this.pan:1);
+      const dx=px*side-p.fx*0.45,dy=py*side-p.fy*0.45,dl=Math.hypot(dx,dy);spikes.push([p.x+px*side*(r-0.6),p.y+py*side*(r-0.6)+oy,dx/dl,dy/dl,len+0.6,w,C.base[2],C.tip[3]]);};
+    for(const side of[-1,1]){
+      for(let s=6.8;s<this.len*0.5;s+=1.15)flank(s,side,1.8+0.7*this.pan+((Math.round(s/1.15)&1)?0.6:0),1.1);
+      for(let s=this.len*0.52;s<this.len*0.66;s+=1.4)flank(s,side,1.2,0.8);
+      flank(5.2,side,2.2,1.1);flank(4.3,side,1.6,0.9);flank(3.0,side,1.0,0.7);}
+    // beard: spiky fan around the throat; small and sandy when relaxed, big and black when puffed
+    const nFlank=spikes.length;
+    {const e=this.pointAt(4.8),ha=Math.atan2(e.fy,e.fx),n=17;
+      for(let j=0;j<n;j++){const u=j/(n-1)*2-1,d=ha+(u>0?1:-1)*(0.95+Math.abs(u)*1.15),len=(1.1+pf*3.6)*((j&1)?1:0.72),r=e.r-0.5;
+        spikes.push([e.x+Math.cos(d)*r,e.y+Math.sin(d)*r+oy,Math.cos(d)-e.fx*0.3,Math.sin(d)-e.fy*0.3,len+0.6,1.0+pf*0.7,pf>0.4?C.beard[1]:C.base[1],pf>0.4?C.beard[3]:C.tip[3]]);}
+      if(pf>0.15){overLegs=true;const ext=pf*2.8;for(let a=-2.2;a<=2.2;a+=0.07){if(Math.abs(a)<0.9)continue;const d=ha+a;for(let t=0;t<=ext;t+=0.5){const rr=e.r-0.3+t;put(e.x+Math.cos(d)*rr,e.y+Math.sin(d)*rr+oy,C.beard[t>ext*0.6?2:1]);}}overLegs=false;}}
+    spikes.forEach(([x,y,dx,dy,len,w,fill,tip],si)=>{overLegs=si>=nFlank&&pf>0.15;const px=-dy,py=dx;
+      for(let t=0;t<=len;t+=0.35){const ww=w*(1-t/len);for(let o=-ww;o<=ww;o+=0.5)put(x+dx*t+px*o,y+dy*t+py*o,t>len*0.55?tip:fill);}});overLegs=false;
+    for(const i of own){const x=i%W,y=(i/W)|0;for(const[ddx,ddy]of[[1,0],[-1,0],[0,1],[0,-1]]){const j=(y+ddy)*W+x+ddx;if(free(x+ddx,y+ddy)&&!own.has(j))fb.px[j]=ol;}}
+    const e2=this.pointAt(4.9),qx=-e2.fy,qy=e2.fx,k=hex('#1a1008');for(const sd of[-1,1])pset(fb,e2.x+qx*sd*e2.r*0.78,e2.y+qy*sd*e2.r*0.78+oy,k);
+  }
+}
+const mix1=(r,col,t)=>r.map(c=>mixc(c,col[3]===undefined?col:col[3],t));
+
+// =====================================================================
 //  Red-knee tarantula: 8 IK legs in an alternating tetrapod gait, bursts, threat pose.
 // =====================================================================
 class Spider extends Pet{
@@ -2364,7 +2470,7 @@ const TOY_LABEL={ball:'the beach ball',squeaky:'the squeaky duck',bell:'the jing
   yarn:'the yarn ball',dice:'the foam die',plush:'the octopus plush',spinner:'the spinning top',rc:'the RC car',musicbox:'the music box',bubbler:'the bubble machine',butterfly:'the clockwork butterfly'};
 const TOY_TOOLS=['laser','bubbles','feather','remote'];
 const toolOwned=x=>x==='remote'?(save.inv.rc||0)>0:(save.inv[x]||0)>0;
-const ROSTER=['frog','lizard','salamander','snake','chameleon','tarantula','crab','turtle','gsnail'];
+const ROSTER=['frog','lizard','salamander','snake','chameleon','dragon','tarantula','crab','turtle','gsnail'];
 
 // =====================================================================
 //  Save (localStorage, wrapped so the game still works without it)
@@ -2869,7 +2975,7 @@ const game={mode:'boot',tool:'feed',food:'cricket',toyTool:null,world:null,point
   shake:0,flashT:0,flashMsg:'',name:'',kind:'',uiT:0,grabbing:false,chirpT:4,croakT:6,held:null,placing:null,dragObj:null,
   coinT:rand(15,30),thinkT:6,thought:null,hearts:0,bubbleT:0,trayOpen:true,firstRun:false};
 const makePet=(w,kind,x,y)=>kind==='frog'?new Frog(w,x,y):kind==='crab'?new Crab(w,x,y):kind==='turtle'?new Turtle(w,x,y):kind==='gsnail'?new GSnail(w,x,y):
-  kind==='tarantula'?new Spider(w,x,y):kind==='chameleon'?new Chameleon(w,x,y):new Walker(w,kind,x,y);
+  kind==='tarantula'?new Spider(w,x,y):kind==='chameleon'?new Chameleon(w,x,y):kind==='dragon'?new Dragon(w,x,y):new Walker(w,kind,x,y);
 function createWorld(){
   const w={stats:{fed:72,happy:70,water:68},prey:[],parts:[],ripples:[],glassDrops:[],glassRings:[],fireflies:[],motes:[],
     bounds:{x0:TANK.x0+6,y0:TANK.y0+6,x1:TANK.x1-6,y1:TANK.y1-6},dish:{x:248,y:52,rw:12.5,rr:16.5},
