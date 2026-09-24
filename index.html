@@ -68,7 +68,7 @@ button[aria-pressed="true"] kbd{color:var(--moss);border-color:var(--moss-dim)}
 .picker-inner{max-width:1180px;width:100%;display:flex;flex-direction:column;gap:18px}
 .picker h1{font-family:var(--display);font-size:30px;margin:0;color:var(--moss);text-wrap:balance}
 .picker p.lede{margin:0;color:var(--muted);font-size:21px;max-width:60ch}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
 .card{background:var(--panel);border:2px solid var(--line);border-radius:3px;padding:12px;display:flex;flex-direction:column;gap:10px}
 .card canvas{width:100%;aspect-ratio:112/72;image-rendering:pixelated;display:block;background:#000;border:2px solid #050806}
 .card h2{font-family:var(--display);font-size:16px;margin:0}
@@ -118,6 +118,7 @@ button[aria-pressed="true"] kbd{color:var(--moss);border-color:var(--moss-dim)}
           <button id="food-snail" data-food="snail">Snail</button>
           <button id="food-fruit" data-food="fruit">Berry</button>
           <button id="food-egg" data-food="egg">Egg</button>
+          <button id="food-greens" data-food="greens">Greens</button>
         </div>
       </div>
       <p class="hint" id="hint"></p>
@@ -218,9 +219,13 @@ const SFX=(()=>{
     squish:()=>{noise(0.08,{filter:'lowpass',freq:900,to:300,gain:0.18});tone(260,0.06,{to:180,gain:0.06});},
     swallow:()=>{tone(210,0.45,{to:95,gain:0.18,attack:0.05});tone(150,0.4,{delay:0.35,to:70,gain:0.13,attack:0.05});},
     squelch:()=>noise(0.1,{freq:700,q:3,gain:0.09}),
+    sss:()=>noise(0.24,{freq:6800,q:1.3,gain:0.045,attack:0.04}),
+    chomp:()=>{noise(0.05,{filter:'lowpass',freq:1400,gain:0.16});tone(180,0.05,{to:120,gain:0.08});},
+    thunk:()=>{tone(140,0.12,{type:'triangle',to:88,gain:0.22});noise(0.06,{filter:'lowpass',freq:500,gain:0.18});},
+    tstep:()=>noise(0.03,{filter:'lowpass',freq:420,gain:0.06}),
     sparkle:()=>{tone(1760,0.12,{type:'triangle',gain:0.05});tone(2217,0.12,{delay:0.06,type:'triangle',gain:0.045});tone(2637,0.2,{delay:0.12,type:'triangle',gain:0.04});},
   };
-  const GAP={step:0.05,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.06,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4};
+  const GAP={step:0.05,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.06,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,chomp:0.1};
   let slit=null;
   function play(name,arg){
     if(!ac||muted||!S[name])return;const now=ac.currentTime;
@@ -353,7 +358,7 @@ function ik2(ax,ay,fx,fy,l1,l2,bend){
 // =====================================================================
 //  Palettes & materials
 // =====================================================================
-const M={BODY:1,LIMB:2,EYE:3,PUPIL:4,TONGUE:5,TOE:6,LID:7,CLAW:8,CLAW2:9,F_MEAL:20,F_WAX:21,F_HEAD:22,F_SNAIL:23,F_BERRY:24,F_LEAF:25,F_EGG:26,SHELLA:30,SHELLB:31,LEAF1:10,LEAF2:11,LEAF3:12,STEM:13,ROCK:14,SLATE:15,LOG:16,LITTER:17,RIM:18};
+const M={BODY:1,LIMB:2,EYE:3,PUPIL:4,TONGUE:5,TOE:6,LID:7,CLAW:8,CLAW2:9,F_MEAL:20,F_WAX:21,F_HEAD:22,F_SNAIL:23,F_BERRY:24,F_LEAF:25,F_EGG:26,F_GREEN:27,SHELLA:30,SHELLB:31,LEAF1:10,LEAF2:11,LEAF3:12,STEM:13,ROCK:14,SLATE:15,LOG:16,LITTER:17,RIM:18};
 const INK=hex('#07080a');
 const PAL={
   tongue:ramp('#5a1224','#a3243c','#d8505e','#f7939a'),
@@ -371,11 +376,18 @@ const PAL={
   crab:{body:ramp('#4e160a','#8e3014','#cc5a26','#f29a5a'),leg:ramp('#2a0c06','#521a0c','#7e2e14','#a8502c'),
         claw:ramp('#6a200c','#b8461a','#ee7a34','#ffc07a'),tip:ramp('#140806','#241008','#3a1a0e','#5a2c18'),
         shA:ramp('#5a4630','#9a8060','#d4bc94','#f6e8c8'),shB:ramp('#3a2214','#6e4228','#9a603a','#c08050'),outline:'#120806'},
+  turtle:{shell:ramp('#24160c','#432a16','#664222','#8e6232'),blot:ramp('#6a4a10','#ae7e1e','#dcae3c','#f6d878'),
+          seam:ramp('#0e0804','#180e06','#24160c','#342212'),marg:ramp('#34200e','#583818','#7e5426','#a67438'),
+          skin:ramp('#262012','#453c22','#6a5c34','#92824c'),spot:ramp('#6a5410','#ae9224','#dcc03e','#f6e27c'),
+          eye:ramp('#5a0e06','#a82010','#e04a1e','#ff9050'),claw:ramp('#100c08','#1e1810','#302618','#463824'),outline:'#0a0704'},
+  gsnail:{skin:ramp('#5a4c40','#8e7c68','#bca890','#e6d6c0'),skinD:ramp('#46382e','#6e5e4e','#968470','#bcaa92'),
+          shA:ramp('#5a3a1a','#9a642a','#d49a48','#f4cc86'),flame:ramp('#2a180c','#4a2c14','#6e421e','#8e5a2c'),
+          seam:ramp('#140a04','#1e1208','#2c1c0e','#3c2814'),outline:'#0e0806'},
   food:{meal:ramp('#5a3a10','#9a6a24','#cf9a3c','#f4cc72'),mealDark:ramp('#3a2408','#6a4414','#94642a','#b88a44'),
         head:ramp('#2a1406','#4a2a10','#6e421c','#9a6230'),wax:ramp('#8a7a5a','#c8b890','#ece0bc','#fffbea'),
         waxDark:ramp('#6a5c40','#a09070','#c8b894','#e4d8b8'),snail:ramp('#4a4038','#7a6c5c','#a8988a','#d4c6b8'),
         berry:ramp('#5a0a14','#9e1424','#dc3040','#ff7a80'),seed:hex('#f4e070'),leaf:ramp('#1a3a14','#2c6420','#48942e','#80c850'),
-        egg:ramp('#8a7a60','#c8b898','#ece2c8','#fffaf0'),speck:ramp('#3a2414','#5a3a22','#7a5230','#9a6a40')},
+        egg:ramp('#8a7a60','#c8b898','#ece2c8','#fffaf0'),green:ramp('#1e4a10','#3e8020','#72bc3c','#b8ee78'),speck:ramp('#3a2414','#5a3a22','#7a5230','#9a6a40')},
   rock:ramp('#3a3a3c','#57575a','#7a7a7a','#a3a19b'),slate:ramp('#3b3430','#5a4f47','#7c6f63','#a39584'),
   moss:ramp('#1f3a1a','#2e5424','#447332','#6a9a45'),
   bark:ramp('#231509','#3f2816','#634227','#8e6540'),barkIn:ramp('#120a05','#1e120a','#2e1d10','#43301c'),
@@ -413,6 +425,7 @@ const FOOD_PAINTER={outline:hex('#140c06'),seam:1.0,shells:[],color(m,q,s,l,x,y)
     case M.SHELLA:{const c=nearestShell(this.shells,x,y);return(c&&spiralStripe(x,y,c)?PAL.crab.shB:PAL.crab.shA)[q];}
     case M.F_BERRY:if(q>=1&&hash(x*7+3,y*5)>0.84)return F.seed;return F.berry[q];
     case M.F_LEAF:return F.leaf[q];
+    case M.F_GREEN:if(Math.abs(l)<0.12&&s>0.5)return F.green[Math.min(3,q+1)];if(Math.abs(l)>0.78&&hash(x*3,y*7)>0.5)return F.green[Math.min(3,q+1)];return F.green[q];
     case M.F_EGG:if(vnoise(x*.9,y*.9)>0.68||hash(x*3,y*11)>0.9)return F.speck[Math.max(0,q-1)];return F.egg[q];
   }return INK;}};
 const PLANT_PAINTER={outline:hex('#08140a'),seam:0.7,color(m,q,s,l,x,y){
@@ -494,23 +507,36 @@ const SPECIES={
   crab:{label:'Hermit crab',latin:'Coenobita clypeatus',
     blurb:'A scuttling roommate in a borrowed shell. Waves its antennae, nibbles food with its little claw and, when spooked, hides and shuts the door with its big one. Loves fruit.',
     names:['Shelly','Pinch','Barnaby','Clawdia','Nacho','Hermes','Biscuit'],outline:PAL.crab.outline},
+  turtle:{label:'Box turtle',latin:'Terrapene carolina',
+    blurb:'An unhurried little tank. Plods on stumpy legs, stretches its neck to look around, basks under the lamp and pulls everything in when startled.',
+    names:['Tank','Shelby','Mossy','Dumpling','Tortellini','Boulder','Clementine'],outline:PAL.turtle.outline},
+  gsnail:{label:'Giant land snail',latin:'Lissachatina fulica',
+    blurb:'Big, slow and gentle. Glides on a rippling foot, leaves a shiny slime trail and waves its eye stalks around. Tucks them in when you pet it.',
+    names:['Pebble','Slimothy','Button','Gloop','Toffee','Marble','Sheldon'],
+    n:16,seg:1.35,walk:4,run:7,stalk:2.5,slow:3,turn:1.4,maxBend:0.25,wave:0.05,waveFreq:0.2,
+    profile:[[0,1.8],[.1,2.4],[.4,2.8],[.8,2.2],[1,1.0]],legIdx:[],eyeS:1,eyeR:.5,eyeOut:.5,tongue:0,strike:4,flickRate:0,noLids:true,outline:PAL.gsnail.outline,
+    paint(){return INK;}},
   frog:{label:'Red-eyed tree frog',latin:'Agalychnis callidryas',
     blurb:'Springy and wide-eyed. Hops with squash and stretch and snaps flies out of the air with a long tongue. A night owl.',
     names:['Pip','Lily','Bog','Mango','Pickle','Nori','Bean'],outline:PAL.frog.outline},
 };
 // how much each species likes each food (0 = won't eat it)
 const DIET={
-  frog:{fly:9,cricket:6,waxworm:7,worm:4,snail:0,fruit:0,egg:0},
-  lizard:{cricket:9,waxworm:8,worm:6,fly:4,snail:3,fruit:3,egg:0},
+  frog:{fly:9,cricket:6,waxworm:7,worm:4,snail:0,fruit:0,egg:0,greens:0},
+  lizard:{cricket:9,waxworm:8,worm:6,fly:4,snail:3,fruit:3,egg:0,greens:2},
   salamander:{worm:9,waxworm:8,snail:6,cricket:5,fly:3,fruit:0,egg:0},
   snake:{egg:10,waxworm:8,worm:6,snail:6,cricket:3,fly:0,fruit:0},
-  crab:{fruit:10,waxworm:7,egg:6,worm:6,snail:4,cricket:3,fly:0},
+  crab:{fruit:10,greens:7,waxworm:7,egg:6,worm:6,snail:4,cricket:3,fly:0},
+  turtle:{greens:9,fruit:8,snail:8,worm:7,waxworm:7,cricket:5,egg:2,fly:0},
+  gsnail:{greens:10,fruit:9,egg:3,worm:0,waxworm:0,snail:0,cricket:0,fly:0},
 };
 const FOODS={cricket:{name:'a cricket',label:'cricket',value:18},worm:{name:'a mealworm',label:'mealworms',value:22},
   waxworm:{name:'a waxworm',label:'waxworms',value:26},fly:{name:'a fly',label:'flies',value:10},
-  snail:{name:'a snail',label:'snails',value:20},fruit:{name:'a strawberry',label:'fruit',value:16},egg:{name:'a quail egg',label:'eggs',value:30}};
-const FOOD_ORDER=['cricket','worm','waxworm','fly','snail','fruit','egg'];
-const CRUMB={cricket:hex('#6a4a2a'),worm:hex('#c89a4a'),waxworm:hex('#f0e0c0'),snail:hex('#8a7a6a'),fruit:hex('#d83040'),egg:hex('#f0e8d0'),fly:hex('#303030')};
+  snail:{name:'a snail',label:'snails',value:20},fruit:{name:'a strawberry',label:'fruit',value:16},egg:{name:'a quail egg',label:'eggs',value:30},
+  greens:{name:'some greens',label:'greens',value:14}};
+const FOOD_ORDER=['cricket','worm','waxworm','fly','snail','fruit','egg','greens'];
+const CRUMB={cricket:hex('#6a4a2a'),worm:hex('#c89a4a'),waxworm:hex('#f0e0c0'),snail:hex('#8a7a6a'),fruit:hex('#d83040'),egg:hex('#f0e8d0'),fly:hex('#303030'),greens:hex('#6ab038')};
+const BITER={crab:{iv:.62,snd:'snap',t:2.6},turtle:{iv:.6,snd:'chomp',t:2.4},gsnail:{iv:.9,snd:'squelch',t:3.2}};
 const PREY_NAME=Object.fromEntries(Object.entries(FOODS).map(([k,v])=>[k,v.name]));
 
 // =====================================================================
@@ -522,7 +548,7 @@ class Pet{
     this.held=null;this.tg=null;this.t=rand(10);this.blinkT=rand(2,5);this.blink=0;this.zzT=0;this.fxT=0;
     this.eyesClosed=false;this.preview=false;this.prey=null;this.tx=0;this.ty=0;this.pace='walk';
   }
-  isActive(){if(this.preview)return true;const d=this.world.dayness;return(this.kind==='lizard'||this.kind==='snake')?d>0.5:d<0.5;}
+  isActive(){if(this.preview)return true;const d=this.world.dayness;return(this.kind==='lizard'||this.kind==='snake'||this.kind==='turtle')?d>0.5:d<0.5;}
   flick(){}
   randomSpot(m=18){const B=this.world.bounds;return[rand(B.x0+m,B.x1-m),rand(B.y0+m,B.y1-m)];}
   decide(){
@@ -535,7 +561,7 @@ class Pet{
       if(this.kind==='snake'){this.tx=w.hide.x+w.hide.len/2+16;this.ty=w.hide.y-8;}
       else{this.tx=w.hide.x+rand(-8,8);this.ty=w.hide.y+rand(-3,3);}
       this.state='sleep';this.timer=20;return;}
-    if(w.lampRock&&(this.kind==='lizard'||this.kind==='snake')&&w.dayness>0.5&&Math.random()<0.35){
+    if(w.lampRock&&(this.kind==='lizard'||this.kind==='snake'||this.kind==='turtle')&&w.dayness>0.5&&Math.random()<0.35){
       this.tx=w.lampRock.x+rand(-6,6);this.ty=w.lampRock.y+rand(-3,3);this.state='bask';this.timer=15;return;}
     if(!act&&Math.random()<0.5){this.state='idle';this.timer=rand(3,6);return;}
     [this.tx,this.ty]=this.randomSpot();this.pace=act?(Math.random()<0.2?'slow':'walk'):'slow';
@@ -569,15 +595,15 @@ class Pet{
         if(this.kind!=='frog'&&Math.random()<dt*1.2)this.flick();
         break;}
       case 'strike':{const r=this.updateStrike(dt);
-        if(r==='caught'){this.state='chew';this.timer=this.kind==='frog'?0.7:this.kind==='snake'?1.8:this.kind==='crab'?2.6:1.3;this.fxT=0.3;
+        if(r==='caught'){this.state='chew';this.timer=this.kind==='frog'?0.7:this.kind==='snake'?1.8:BITER[this.kind]?BITER[this.kind].t:1.3;this.fxT=0.3;
           if(this.kind==='snake'&&!this.preview)SFX.play('swallow');}
         else if(r==='miss'){this.state='idle';this.timer=rand(.4,1);}
         break;}
       case 'chew':
         this.stop(dt);if(this.kind==='frog')this.eyesClosed=true;
-        this.fxT-=dt;if(this.fxT<=0&&this.kind!=='frog'&&this.kind!=='snake'){const crab=this.kind==='crab';this.fxT=crab?0.62:0.25;const m=this.mouthScreen();
-          if(!this.preview)SFX.play(crab?'snap':'chew');if(crab&&this.held)this.held.bites=Math.min(3,(this.held.bites||0)+1);
-          const cc=CRUMB[this.held?.type];for(let i=0;i<(crab?2:1);i++)spawn(w,'crumb',m.x,m.y+this.h,{h:this.h+1,vh:rand(10,30),vx:rand(-12,12),vy:rand(-8,8),life:1.5,c:cc});}
+        this.fxT-=dt;if(this.fxT<=0&&this.kind!=='frog'&&this.kind!=='snake'){const bt=BITER[this.kind];this.fxT=bt?bt.iv:0.25;const m=this.mouthScreen();
+          if(!this.preview)SFX.play(bt?bt.snd:'chew');if(bt&&this.held)this.held.bites=Math.min(3,(this.held.bites||0)+1);
+          const cc=CRUMB[this.held?.type];for(let i=0;i<(bt?2:1);i++)spawn(w,'crumb',m.x,m.y+this.h,{h:this.h+1,vh:rand(10,30),vx:rand(-12,12),vy:rand(-8,8),life:1.5,c:cc});}
         if(this.timer<=0){this.finishEating();this.state='idle';this.timer=rand(1,2);}
         break;
       case 'drink':
@@ -703,7 +729,7 @@ class Walker extends Pet{
   headPos(){return this.pts[0];}
   mouthScreen(){const h=this.pts[0];return{x:h.x+Math.cos(this.headAng)*0.6,y:h.y+Math.sin(this.headAng)*0.6-this.h};}
   noise(){return clamp(this.speed/this.sp.walk,0,1.5);}
-  flick(){if(this.tongueT<=0){this.tongueT=this.tongueDur;if(!this.preview)SFX.play('flick');}}
+  flick(){if(this.tongueT<=0){this.tongueT=this.tongueDur;if(!this.preview)SFX.play(this.kind==='snake'?'sss':'flick');}}
   goTo(tx,ty,dt,mode,arrive=3){
     const sp=this.sp,hd=this.pts[0],d=Math.hypot(tx-hd.x,ty-hd.y);
     const max=mode==='run'?sp.run:mode==='stalk'?sp.stalk:mode==='slow'?sp.slow:mode==='lunge'?sp.run*1.5:sp.walk;
@@ -1141,6 +1167,224 @@ class Crab extends Pet{
 }
 
 // =====================================================================
+//  Box turtle: scute-patterned dome, stumpy planted legs, telescoping neck.
+// =====================================================================
+class Turtle extends Pet{
+  constructor(world,x,y){
+    super();this.initCommon(world,'turtle');
+    this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.tuck=0;this.hideT=0;this.reach=0;this.chewPh=0;
+    this.look=0;this.phase=0;this.outline=hex(PAL.turtle.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.seam=0.9;this.frame={x,y,c:1,s:0};
+    this.legs=[];for(let k=0;k<4;k++)this.legs.push({front:k<2,side:k%2?1:-1,fx:0,fy:0,sx:0,sy:0,st:0,dur:.3,stepping:false,lift:0,ax:0,ay:0,rx:0,ry:0});
+    this.updateLegs(0,false);for(const L of this.legs){L.fx=L.rx;L.fy=L.ry;}
+  }
+  get tk(){return Math.max(this.tuck,this.state==='sleeping'?0.65:0);}
+  color(m,q,s,l,x,y){const P=PAL.turtle;
+    switch(m){
+      case M.SHELLA:return this.scute(q,x,y);
+      case M.BODY:return(hash(x*3,y*7)>0.88?P.spot:P.skin)[q];
+      case M.LIMB:return hash(x*5,y*3)>0.8?P.skin[Math.max(0,q-1)]:P.skin[q];
+      case M.TOE:return P.claw[q];
+      case M.EYE:return P.eye[q];
+    }return INK;}
+  // box-turtle scutes worked out in shell-local coordinates
+  scute(q,x,y){
+    const F=this.frame,P=PAL.turtle,dx=x+.5-F.x,dy=y+.5-F.y,lx=dx*F.c+dy*F.s,ly=-dx*F.s+dy*F.c;
+    const e=Math.hypot(lx/10.2,ly/7);
+    if(e>0.8){const k=Math.atan2(ly/7,lx/10.2)/TAU*22,f=k-Math.floor(k);return(f<0.18||e<0.85?P.seam:P.marg)[q];}
+    const aly=Math.abs(ly);if(Math.abs(aly-2.3)<0.5)return P.seam[q];
+    let u,cell;if(aly<2.3){u=(lx+1.7)/3.4;cell=Math.floor(u)*3;}else{u=lx/4.2+0.5;cell=Math.floor(u)*3+(ly>0?1:2);}
+    const f=u-Math.floor(u);if(f<0.14)return P.seam[q];
+    const cx=f-0.55,cy=aly<2.3?ly/2.3:(aly-4.4)/2.1;
+    if(Math.hypot(cx,cy)>0.2&&Math.sin(Math.atan2(cy,cx)*3+hash(cell,3)*6)>0.55)return P.blot[q];
+    return P.shell[q];
+  }
+  W(lx,ly){const c=Math.cos(this.ang),s=Math.sin(this.ang);return[this.x+c*lx-s*ly,this.y-this.h+s*lx+c*ly];}
+  Wg(lx,ly){const c=Math.cos(this.ang),s=Math.sin(this.ang);return[this.x+c*lx-s*ly,this.y+s*lx+c*ly];}
+  neckE(){return(1-this.tk)*(1+this.reach*0.35)+(this.state==='chew'?Math.sin(this.chewPh*TAU)*0.08:0);}
+  headPos(){const[x,y]=this.Wg(13.5,0);return{x,y};}
+  mouthScreen(){const e=this.neckE(),[x,y]=this.W(7+5.5*e+1.4,Math.sin(this.look)*2*e);return{x,y};}
+  noise(){return clamp(this.speed/6,0,1.5);}
+  goTo(tx,ty,dt,mode,arrive=3){
+    const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y);
+    const max=mode==='run'?13:mode==='stalk'?3:mode==='slow'?4:mode==='lunge'?6:6.5;
+    const diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);this.ang+=clamp(diff,-1.8*dt,1.8*dt);
+    let want=d>arrive?max:0;if(Math.abs(diff)>1)want*=0.3;if(d<arrive+5)want*=clamp((d-arrive)/5,0.25,1);if(this.tk>0.2)want=0;
+    this.speed+=(want-this.speed)*Math.min(1,dt*4);
+    return d<=arrive;
+  }
+  stop(dt){this.speed+=(0-this.speed)*Math.min(1,dt*6);}
+  faceToward(x,y,dt){this.ang+=clamp(wrapA(Math.atan2(y-this.y,x-this.x)-this.ang),-1.2*dt,1.2*dt);}
+  canStrike(p){if(this.tk>0.2)return false;const m=this.headPos(),d=Math.hypot(p.x-m.x,p.y-m.y);
+    return d<5&&(p.h<3||(p.inHand&&p.h<11))&&Math.abs(wrapA(Math.atan2(p.y-this.y,p.x-this.x)-this.ang))<0.6;}
+  startStrike(p){this.tg={t:0,p};}
+  updateStrike(dt){
+    const T=this.tg;if(!T)return 'miss';const p=T.p;T.t+=dt;this.stop(dt);
+    if(p.dead||p.caught){this.tg=null;return 'miss';}
+    this.reach=Math.min(1,T.t/0.18);
+    if(T.t>=0.22){this.tg=null;const m=this.mouthScreen();
+      if(Math.hypot(p.x-m.x,p.y-(m.y+this.h))<7){p.caught=true;this.held=p;catchFx(this,p);if(!this.preview)SFX.play('chomp');return 'caught';}
+      return 'miss';}
+    return null;
+  }
+  retreat(dur){this.state='hiding';this.hideT=dur||rand(3.5,6);this.tg=null;this.prey=null;this.speed=0;if(!this.preview)SFX.play('thunk');}
+  startle(x,y){if(this.state==='grabbed'||this.state==='fall')return;if(this.held)this.finishEating();this.retreat();}
+  update(dt){
+    this.t+=dt;
+    this.blinkT-=dt;if(this.blinkT<0){this.blink=0.15;this.blinkT=rand(3,7);}if(this.blink>0)this.blink-=dt;
+    if(this.state==='grabbed'){this.grabStep(dt);this.syncHeld();return;}
+    if(this.state==='fall'){
+      this.vh-=320*dt;this.h+=this.vh*dt;
+      if(this.h<=0){this.h=0;this.vh=0;SFX.play('thunk');dust(this.world,this.x,this.y,6);this.retreat(rand(1.6,2.4));}
+      this.updateLegs(dt,false);return;
+    }
+    if(this.state==='hiding'){
+      this.hideT-=dt;this.stop(dt);const tt=this.hideT>1.5?1:this.hideT>0.4?0.5:0;
+      this.tuck+=(tt-this.tuck)*Math.min(1,dt*(tt>this.tuck?14:2.5));
+      if(this.hideT<=0&&this.tuck<0.06){this.state='idle';this.timer=rand(.8,2);}
+    }else{this.brain(dt);this.tuck+=(0-this.tuck)*Math.min(1,dt*3);}
+    const B=this.world.bounds;
+    this.x+=Math.cos(this.ang)*this.speed*dt;this.y+=Math.sin(this.ang)*this.speed*dt;
+    let bump=this.x<B.x0+4||this.x>B.x1-4||this.y<B.y0+4||this.y>B.y1-4;
+    this.x=clamp(this.x,B.x0+4,B.x1-4);this.y=clamp(this.y,B.y0+4,B.y1-4);
+    if(bump&&this.state==='wander')[this.tx,this.ty]=this.randomSpot();
+    this.pts[0].x=this.x;this.pts[0].y=this.y;this.phase+=this.speed*dt*0.9;
+    const lt=this.prey&&(this.state==='hunt'||this.state==='strike')?clamp(wrapA(Math.atan2(this.prey.y-this.y,this.prey.x-this.x)-this.ang),-0.6,0.6):Math.sin(this.t*0.45)*0.45;
+    this.look+=(lt-this.look)*Math.min(1,dt*3);
+    if(this.state!=='strike')this.reach+=(0-this.reach)*Math.min(1,dt*5);
+    this.chewPh=this.state==='chew'?this.chewPh+dt/0.6:0;
+    this.updateLegs(dt,false);this.syncHeld();
+  }
+  syncHeld(){if(this.held){const m=this.mouthScreen();this.held.sx=m.x;this.held.sy=m.y;}}
+  updateLegs(dt,flail){
+    const vx=Math.cos(this.ang)*this.speed,vy=Math.sin(this.ang)*this.speed,moving=this.speed>0.8,tk=this.tk;
+    for(let k=0;k<4;k++){const L=this.legs[k];
+      const alx=L.front?4.4:-4.4;[L.ax,L.ay]=this.Wg(alx,L.side*4.6);
+      [L.rx,L.ry]=this.Wg(lerp(L.front?7.0:-6.6,alx*0.8,tk),L.side*lerp(L.front?8.0:7.8,4.2,tk));
+      if(flail){const a=this.t*9+k*1.6,c=Math.cos(this.ang),s=Math.sin(this.ang),f=Math.sin(a)*2.4;L.fx=L.rx+c*f;L.fy=L.ry+s*f+1;L.lift=0.5;L.stepping=false;continue;}
+      if(tk>0.1){L.fx=lerp(L.fx,L.rx,Math.min(1,dt*12));L.fy=lerp(L.fy,L.ry,Math.min(1,dt*12));L.stepping=false;L.lift=0;continue;}
+      if(L.stepping){
+        L.st+=dt/L.dur;const tx=L.rx+vx*L.dur*0.5,ty=L.ry+vy*L.dur*0.5,e=ease(Math.min(1,L.st));
+        L.fx=lerp(L.sx,tx,e);L.fy=lerp(L.sy,ty,e);L.lift=Math.sin(Math.PI*Math.min(1,L.st));
+        if(L.st>=1){L.stepping=false;L.lift=0;if(!this.preview&&moving)SFX.play('tstep');}
+      }else{
+        L.lift=0;const d=Math.hypot(L.fx-L.rx,L.fy-L.ry),th=moving?2.4:1.0;
+        if(d>th){const grp=(k===0||k===3)?0:1;let busy=false;
+          for(let j=0;j<4;j++){const g2=(j===0||j===3)?0:1;if(g2!==grp&&this.legs[j].stepping)busy=true;}
+          if(!busy||d>th*2.4){L.stepping=true;L.st=0;L.sx=L.fx;L.sy=L.fy;L.dur=moving?clamp(0.3*6/Math.max(this.speed,3),0.15,0.4):0.25;}}
+      }
+    }
+  }
+  hitTest(x,y){return Math.hypot(x-this.x,y-(this.y-this.h))<9?0:-1;}
+  tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;
+    this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;this.tucked=false;return true;}
+  dragTo(x,y){this.grabX=x;this.grabY=y;}
+  release(){if(this.state!=='grabbed')return;this.state='fall';this.vh=0;}
+  grabStep(dt){
+    this.gt+=dt;this.h+=(12-this.h)*Math.min(1,dt*10);this.x=this.grabX;this.y=this.grabY+this.h;
+    const tt=this.gt<1.1?0:1;this.tuck+=(tt-this.tuck)*Math.min(1,dt*10);
+    if(tt&&!this.tucked){this.tucked=true;SFX.play('thunk');}
+    this.updateLegs(dt,this.tuck<0.5);
+  }
+  draw(fb){
+    const tk=this.tk,oy=-this.h;
+    if(tk<0.9)for(const L of this.legs){
+      const[kx,ky,ex,ey]=ik2(L.ax,L.ay+oy,L.fx,L.fy-L.lift+oy,2.8,3.0,L.side*(L.front?1:-1));
+      fb.cap(L.ax,L.ay+oy,1.8,kx,ky,1.6,M.LIMB,1);fb.cap(kx,ky,1.6,ex,ey,1.4,M.LIMB,1);
+      const a=Math.atan2(ey-ky,ex-kx);
+      for(let j=-1;j<=1;j++){const ca=a+j*0.45;fb.cap(ex+Math.cos(ca)*0.9,ey+Math.sin(ca)*0.9,.45,ex+Math.cos(ca)*2.1,ey+Math.sin(ca)*2.1,.3,M.TOE,1,0,0,1);}
+    }
+    if(tk<0.8){const[t0x,t0y]=this.W(-8.4,0),[t1x,t1y]=this.W(-11.2,Math.sin(this.t*1.1)*0.8);fb.cap(t0x,t0y,1.1,t1x,t1y,.35,M.LIMB,1);}
+    const e=this.neckE();
+    if(e>0.05){
+      const ly=Math.sin(this.look)*2*e,[n0x,n0y]=this.W(5,0),[hx,hy]=this.W(7+5.5*e,ly),ha=this.ang+this.look;
+      fb.cap(n0x,n0y,1.6,hx,hy,1.4,M.BODY,2);
+      fb.cap(hx,hy,2.2,hx+Math.cos(ha)*1.7,hy+Math.sin(ha)*1.7,1.6,M.BODY,2,0,0,0.3);
+      if(!(this.eyesClosed||this.blink>0))for(const sd of[-1,1]){
+        const ex=hx+Math.cos(ha)*1.0+Math.cos(ha+sd*1.57)*1.55,ey=hy+Math.sin(ha)*1.0+Math.sin(ha+sd*1.57)*1.55;
+        fb.cap(ex,ey,.62,ex,ey,.62,M.EYE,2,0,0,1.6);fb.cap(ex+Math.cos(ha)*.2,ey+Math.sin(ha)*.2,.32,ex+Math.cos(ha)*.2,ey+Math.sin(ha)*.2,.32,M.PUPIL,2,0,0,2.2);}
+    }
+    const rock=Math.sin(this.phase)*0.4*clamp(this.speed/4,0,1);
+    const[a0,a1]=this.W(-3.2,rock),[b0,b1]=this.W(3.2,rock);fb.cap(a0,a1,7,b0,b1,7,M.SHELLA,3);
+    const[cx,cy]=this.W(0,rock);this.frame={x:cx,y:cy,c:Math.cos(this.ang),s:Math.sin(this.ang)};
+  }
+}
+
+// =====================================================================
+//  Giant land snail: a rippling foot on a spine chain, whorled shell, eye stalks.
+// =====================================================================
+class GSnail extends Walker{
+  constructor(world,x,y){super(world,'gsnail',x,y);this.tuck=0;this.hideT=0;this.tent=1;this.trailT=0;this.seam=0.9;this.shellC=null;}
+  color(m,q,s,l,x,y){const P=PAL.gsnail;
+    switch(m){
+      case M.BODY:return(hash(x*3,y*5)>0.78?P.skinD:P.skin)[q];
+      case M.LIMB:return P.skin[Math.min(3,q+1)];
+      case M.SHELLA:{const C=this.shellC;if(!C)return P.shA[q];
+        const dx=x+.5-C.x,dy=y+.5-C.y,d=Math.hypot(dx,dy)/C.r,th=Math.atan2(dy,dx)-C.ang;
+        const v=d*1.9+th/TAU;if(d>0.12&&v-Math.floor(v)<0.13)return P.seam[q];
+        const fl=th*7/TAU+d*1.4;if(d>0.2&&fl-Math.floor(fl)<0.3)return P.flame[q];
+        return P.shA[q];}
+    }return INK;}
+  flick(){}
+  get tk(){return this.tuck;}
+  canStrike(p){const hd=this.pts[0];return Math.hypot(p.x-hd.x,p.y-hd.y)<4.5&&(p.h<3||(p.inHand&&p.h<11));}
+  startStrike(p){this.tg={t:0,p};}
+  updateStrike(dt){
+    const T=this.tg;if(!T)return 'miss';const p=T.p;T.t+=dt;
+    if(p.dead||p.caught){this.tg=null;return 'miss';}
+    this.goTo(p.x,p.y,dt,'stalk',0);
+    if(T.t>0.5){this.tg=null;const hd=this.pts[0];
+      if(Math.hypot(p.x-hd.x,p.y-hd.y)<6){p.caught=true;this.held=p;catchFx(this,p);return 'caught';}
+      return 'miss';}
+    return null;
+  }
+  retreat(dur){this.state='hiding';this.hideT=dur||rand(4,7);this.tg=null;this.prey=null;this.speed=0;if(!this.preview)SFX.play('squelch');}
+  startle(x,y){if(this.state==='grabbed'||this.state==='fall')return;if(this.held)this.finishEating();this.retreat();}
+  update(dt){
+    this.t+=dt;
+    if(this.state==='grabbed'){this.grabStep(dt);this.syncHeld();return;}
+    if(this.state==='fall'){this.vh-=320*dt;this.h+=this.vh*dt;
+      if(this.h<=0){this.h=0;this.vh=0;SFX.play('squelch');this.retreat(rand(2,3));}return;}
+    if(this.state==='hiding'){
+      this.hideT-=dt;this.stop(dt);const tt=this.hideT>1.2?1:0;
+      this.tuck+=(tt-this.tuck)*Math.min(1,dt*(tt>this.tuck?10:1.2));
+      if(this.hideT<=0&&this.tuck<0.05){this.state='idle';this.timer=1;}
+    }else{this.brain(dt);const tt=this.state==='sleeping'?1:0;this.tuck+=(tt-this.tuck)*Math.min(1,dt*(tt?2:1.2));}
+    const tn=this.state==='petted'?0.25:(this.tuck>0.3?0:1);this.tent+=(tn-this.tent)*Math.min(1,dt*(tn<this.tent?10:1.5));
+    if(this.tuck>0.3)this.speed=0;
+    this.integrate(dt);this.syncHeld();
+    if(this.speed>0.4&&this.world.wet){this.trailT-=this.speed*dt;
+      if(this.trailT<=0){this.trailT=1.3;const tl=this.pts[this.n-1];slime(this.world,tl.x,tl.y);if(!this.preview&&Math.random()<0.12)SFX.play('squelch');}}
+  }
+  hitTest(x,y){const c=this.pts[7];if(Math.hypot(x-c.x,y-(c.y-this.h))<7)return 7;return super.hitTest(x,y);}
+  tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;
+    this.state='grabbed';this.grabX=x;this.grabY=y;return true;}
+  release(){if(this.state!=='grabbed')return;this.state='fall';this.vh=0;this.speed=0;}
+  grabStep(dt){
+    this.h+=(10-this.h)*Math.min(1,dt*10);this.tuck+=(1-this.tuck)*Math.min(1,dt*8);this.tent=0;
+    const c=this.pts[7],dx=this.grabX-c.x,dy=this.grabY+this.h-c.y;for(const p of this.pts){p.x+=dx;p.y+=dy;p.px=p.x;p.py=p.y;}
+  }
+  draw(fb){
+    const P=this.pts,oy=-this.h,tk=this.tuck,n=this.n,sp=P[7];
+    const Q=P.map(p=>({x:lerp(p.x,sp.x,tk),y:lerp(p.y,sp.y,tk)}));
+    if(tk<0.95){
+      for(let i=0;i<n-1;i++){const k=1-tk*0.5,r0=this.rad(i)*k+Math.sin(this.t*5-i*0.9)*0.13,r1=this.rad(i+1)*k+Math.sin(this.t*5-(i+1)*0.9)*0.13;
+        fb.cap(Q[i].x,Q[i].y+oy,r0,Q[i+1].x,Q[i+1].y+oy,r1,M.BODY,1,i*this.seg,(i+1)*this.seg);}
+      const hd=Q[0],a=this.headAng,L1=4.6*this.tent*(1-tk),L2=1.7*this.tent*(1-tk);
+      for(const sd of[-1,1]){
+        const bx=hd.x+Math.cos(a+sd*1.57)*0.8,by=hd.y+Math.sin(a+sd*1.57)*0.8+oy;
+        if(L1>0.4){const ta=a+sd*(0.38+Math.sin(this.t*1.3+sd*2)*0.12),tx=bx+Math.cos(ta)*L1,ty=by+Math.sin(ta)*L1;
+          fb.cap(bx,by,.5,tx,ty,.38,M.LIMB,2);fb.cap(tx,ty,.62,tx,ty,.62,M.PUPIL,2,0,0,1.5);}
+        if(L2>0.3){const la=a+sd*0.95;fb.cap(bx,by,.42,bx+Math.cos(la)*L2,by+Math.sin(la)*L2,.3,M.LIMB,2);}
+      }
+    }
+    const b=P[8];let dx=sp.x-b.x,dy=sp.y-b.y;const dl=Math.hypot(dx,dy)||1;dx/=dl;dy/=dl;
+    const cx=sp.x,cy=sp.y+oy,r=5.4;
+    fb.cap(cx,cy,r,cx,cy,r,M.SHELLA,3);
+    this.shellC={x:cx-dx*1.5-dy*1.2,y:cy-dy*1.5+dx*1.2,r,ang:Math.atan2(dy,dx)};
+  }
+}
+
+// =====================================================================
 //  Prey
 // =====================================================================
 function preyScare(p,w,rad){const pet=w.pet;if(!pet||p.caught||p.inHand)return null;const hd=pet.headPos();
@@ -1257,6 +1501,12 @@ class Egg extends Food{
   drawL(fb){const{x,y}=this.scr(),c=Math.cos(this.ang),s=Math.sin(this.ang),k=1-this.bites*0.22;
     fb.cap(x-c*0.8,y-s*0.8,2.3*k,x+c*0.9,y+s*0.9,1.8*k,M.F_EGG,1,0,3);}
 }
+class Greens extends Food{
+  constructor(x,y,h=0){super();this.initFood('greens',x,y,h);}
+  update(dt,w){if(this.caught||this.inHand)return;this.fall(dt);}
+  drawL(fb){const{x,y}=this.scr(),c=Math.cos(this.ang),s=Math.sin(this.ang),k=1-this.bites*0.22;
+    fb.cap(x-c*3*k,y-s*3*k,.6,x,y,3.0*k,M.F_GREEN,1,0,3);fb.cap(x,y,3.0*k,x+c*3.2*k,y+s*3.2*k,1.4*k,M.F_GREEN,1,3,6.2);}
+}
 class Fly{
   constructor(x,y,h){this.type='fly';this.value=FOODS.fly.value;this.x=x;this.y=y;this.h=h;this.ang=rand(TAU);this.t=rand(100);this.seed=rand(100);
     this.landT=0;this.targetH=rand(8,20);this.dead=false;this.caught=false;this.inHand=false;this.layered=false;}
@@ -1282,7 +1532,7 @@ class Fly{
 }
 function makeFood(type,x,y,h){
   switch(type){case 'cricket':return new Cricket(x,y,h);case 'fly':return new Fly(x,y,h);case 'snail':return new Snail(x,y,h);
-    case 'fruit':return new Fruit(x,y,h);case 'egg':return new Egg(x,y,h);default:return new Worm(x,y,h,type);}
+    case 'fruit':return new Fruit(x,y,h);case 'egg':return new Egg(x,y,h);case 'greens':return new Greens(x,y,h);default:return new Worm(x,y,h,type);}
 }
 function slime(w,x,y){const r=1.6;for(let yy=Math.floor(y-r);yy<=y+r;yy++)for(let xx=Math.floor(x-r);xx<=x+r;xx++){
   if(xx<0||yy<0||xx>=W||yy>=H)continue;const d=Math.hypot(xx+.5-x,yy+.5-y);if(d>r)continue;const i=yy*W+xx;w.wet[i]=Math.min(1,w.wet[i]+0.5*(1-d/r));}}
@@ -1427,7 +1677,7 @@ const fb=new FB(W,H);
 const $=id=>document.getElementById(id);
 const game={mode:'pick',tool:'feed',food:'cricket',world:null,pointer:{x:-99,y:-99,down:false,inside:false,moved:0,sprayT:0},
   shake:0,flashT:0,flashMsg:'',name:'',kind:'',uiT:0,grabbing:false,chirpT:4,croakT:6,held:null};
-const makePet=(w,kind,x,y)=>kind==='frog'?new Frog(w,x,y):kind==='crab'?new Crab(w,x,y):new Walker(w,kind,x,y);
+const makePet=(w,kind,x,y)=>kind==='frog'?new Frog(w,x,y):kind==='crab'?new Crab(w,x,y):kind==='turtle'?new Turtle(w,x,y):kind==='gsnail'?new GSnail(w,x,y):new Walker(w,kind,x,y);
 function createWorld(){
   return{stats:{fed:72,happy:70,water:68},prey:[],parts:[],ripples:[],glassDrops:[],glassRings:[],fireflies:[],motes:[],
     bounds:{x0:TANK.x0+6,y0:TANK.y0+6,x1:TANK.x1-6,y1:TANK.y1-6},dish:{x:248,y:52,rw:12.5,rr:16.5},
@@ -1468,7 +1718,7 @@ function updatePlay(dt){
         if(Math.random()<0.5)spawn(w,'mist',P.x+rand(-3,3),P.y+rand(-3,3),{vx:rand(-20,20),vy:rand(-16,16),life:rand(.4,.8)});}
       if(Math.random()<dt*14)w.glassDrops.push({x:P.x+rand(-26,26),y:P.y+rand(-18,18),life:rand(7,14),r:Math.random()<0.25?2:1});
       S.water=Math.min(100,S.water+3.5*dt);
-      const hd=pet.headPos();if(Math.hypot(hd.x-P.x,hd.y-P.y)<26)S.happy=Math.min(100,S.happy+(pet.kind==='lizard'||pet.kind==='snake'?0.6:3)*dt);
+      const hd=pet.headPos();if(Math.hypot(hd.x-P.x,hd.y-P.y)<26)S.happy=Math.min(100,S.happy+(pet.kind==='lizard'||pet.kind==='snake'?0.6:pet.kind==='turtle'?1.5:3)*dt);
       for(const pl of w.plants)if(Math.hypot(pl.x-P.x,pl.y-P.y)<pl.reach+10)pl.dist=Math.max(pl.dist,0.8);
     }else if(game.tool==='pet'){
       if(pet.hitTest(P.x,P.y)>=0&&P.moved>0.5){if(pet.petMe()){P.rub=(P.rub||0)+P.moved;
@@ -1619,7 +1869,7 @@ function renderPlay(){
 const previews=[];
 function buildPicker(){
   const cards=$('cards');cards.innerHTML='';previews.length=0;
-  for(const kind of['frog','lizard','salamander','snake','crab']){
+  for(const kind of['frog','lizard','salamander','snake','crab','turtle','gsnail']){
     const sp=SPECIES[kind],card=document.createElement('div');card.className='card';
     card.innerHTML=`<canvas width="112" height="72"></canvas><h2>${sp.label}</h2><div class="latin">${sp.latin}</div><p>${sp.blurb}</p><button id="adopt-${kind}">Adopt</button>`;
     cards.appendChild(card);
