@@ -1704,10 +1704,15 @@ class Spider extends Pet{
     super();this.initCommon(world,'tarantula');
     this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.tuck=0;this.threat=0;this.threatT=0;
     this.burst=rand(1,2);this.burstOn=true;this.outline=hex(PAL.spider.outline);this.n=1;this.pts=[{x,y}];this.seam=0.8;this.chewPh=0;this.gt=0;this.sc=1.38;
-    this.legs=[];const TA=[0.45,0.98,2.18,2.7],TR=[0.4,0.98,2.14,2.74],RR=[15.2,14.4,14,15.8];this.gp=0;
+    this.legs=[];const TA=[0.45,0.98,2.18,2.7],TR=[0.4,0.98,2.14,2.74],RR=[15.0,14.2,13.8,15.6];this.gp=0;
     for(let i=0;i<4;i++)for(const side of[-1,1])this.legs.push({i,side,ta:TA[i],tr:TR[i],rr:RR[i],grp:(i+(side>0?1:0))&1,
       fx:0,fy:0,sx:0,sy:0,st:0,dur:.12,stepping:false,lift:0,ax:0,ay:0,rx:0,ry:0});
     this.updateLegs(0,false);for(const L of this.legs){L.fx=L.rx;L.fy=L.ry;}
+    // knee side is fixed per leg (picked once from the rest pose) so it can never flip mid-walk
+    const[cx,cy]=this.Wg(1.6,0),l=7.1*this.sc;
+    for(const L of this.legs){const k1=ik2(L.ax,L.ay,L.rx,L.ry,l,l,1),k2=ik2(L.ax,L.ay,L.rx,L.ry,l,l,-1);
+      L.bend=Math.hypot(k1[0]-cx,k1[1]-cy)>=Math.hypot(k2[0]-cx,k2[1]-cy)?1:-1;L.kx=null;}
+    this.walking=false;
   }
   color(m,q,s,l,x,y){const P=PAL.spider;
     switch(m){
@@ -1735,7 +1740,7 @@ class Spider extends Pet{
   goTo(tx,ty,dt,mode,arrive=3){
     const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y);
     const max=mode==='run'?32:mode==='stalk'?5:mode==='slow'?6:mode==='lunge'?34:11;
-    const diff=wrapA(Math.atan2(ty-hd.y,tx-hd.x)-this.ang);this.ang+=clamp(diff,-4*dt,4*dt);
+    const diff=wrapA(Math.atan2(ty-hd.y,tx-hd.x)-this.ang),tr=(this.speed<2?2.2:4)*dt;this.ang+=clamp(diff,-tr,tr);
     let want=d>arrive?max:0;if(Math.abs(diff)>1)want*=0.3;if(d<arrive+6&&mode!=='lunge')want*=clamp((d-arrive)/6,0.25,1);
     if((mode==='walk'||mode==='slow')&&!this.burstOn)want=0;if(this.tuck>0.2||this.threat>0.3)want=0;
     this.speed+=(want-this.speed)*Math.min(1,dt*(want>this.speed?5:7));
@@ -1779,8 +1784,11 @@ class Spider extends Pet{
   // Phase-driven alternating tetrapod: one group of four feet stays planted while the other
   // arcs forward, so the body glides instead of the legs snapping between poses.
   updateLegs(dt,flail){
-    const sc=this.sc,c=Math.cos(this.ang),sn=Math.sin(this.ang),moving=this.speed>1.2,tk=this.tuck;
-    const stride=Math.min(5.5,2.6+this.speed*0.16)*sc;
+    const sc=this.sc,c=Math.cos(this.ang),sn=Math.sin(this.ang),tk=this.tuck;
+    const stride=Math.min(4.2,2.2+this.speed*0.12)*sc;
+    if(!this.walking&&this.speed>1.5){this.walking=true;this.gp=0.02;for(const L of this.legs)L.swing=false;}
+    else if(this.walking&&this.speed<0.6)this.walking=false;
+    const moving=this.walking;
     if(moving)this.gp=(this.gp+this.speed*dt/(2*stride))%1;
     for(let k=0;k<8;k++){const L=this.legs[k];
       [L.ax,L.ay]=this.Wg(1.6+Math.cos(L.ta)*2.2,L.side*Math.sin(L.ta)*2.1);
@@ -1789,9 +1797,9 @@ class Spider extends Pet{
       if(tk>0.1){L.fx=lerp(L.fx,L.rx,Math.min(1,dt*14));L.fy=lerp(L.fy,L.ry,Math.min(1,dt*14));L.stepping=false;L.swing=false;L.lift=0;continue;}
       if(moving){L.stepping=false;
         const tx=L.rx+c*stride*0.5,ty=L.ry+sn*stride*0.5,lp=((this.gp-L.grp*0.5-(3-L.i)*0.035)%1+1)%1,sw=0.46;
-        if(lp<sw){if(!L.swing){L.swing=true;L.sx=L.fx;L.sy=L.fy;}
-          const u=lp/sw,e=ease(u);L.fx=lerp(L.sx,tx,e);L.fy=lerp(L.sy,ty,e);L.lift=Math.sin(Math.PI*u);}
-        else{if(L.swing){L.swing=false;L.fx=tx;L.fy=ty;if(!this.preview&&k===0)SFX.play('cstep');}L.lift=0;
+        if(lp<sw&&(L.swing||lp/sw<0.3)){if(!L.swing){L.swing=true;L.sx=L.fx;L.sy=L.fy;L.u0=lp/sw;}
+          const u=clamp((lp/sw-L.u0)/(1-L.u0),0,1),e=ease(u);L.fx=lerp(L.sx,tx,e);L.fy=lerp(L.sy,ty,e);L.lift=Math.sin(Math.PI*u);}
+        else if(lp>=sw||!L.swing){if(L.swing){L.swing=false;L.fx=tx;L.fy=ty;if(!this.preview&&k===0)SFX.play('cstep');}L.lift=0;
           if(Math.hypot(L.fx-L.rx,L.fy-L.ry)>stride*1.6){L.fx=lerp(L.fx,L.rx,Math.min(1,dt*6));L.fy=lerp(L.fy,L.ry,Math.min(1,dt*6));}}
         continue;}
       if(L.swing){L.swing=false;L.stepping=true;L.st=0;L.sx=L.fx;L.sy=L.fy;L.dur=0.16;}
@@ -1820,13 +1828,15 @@ class Spider extends Pet{
     const oy=-this.h,th=this.threat,[cx,cy]=this.W(1.6,0);
     // legs: femur rises from the carapace rim, knee bows away from the body, tibia/tarsus reach down
     for(const L of this.legs){
-      let fx=L.fx,fy=L.fy+oy,lift=L.lift*2.4;
+      L.dl=L.dl==null?L.lift:L.dl+(L.lift-L.dl)*0.5;let fx=L.fx,fy=L.fy+oy,lift=L.dl*2.4;
       if(th>0.01&&L.i<2){const[tx,ty]=this.W(1.6+Math.cos(0.3+L.i*0.35)*(L.i?9:10.5),L.side*Math.sin(0.3+L.i*0.45)*(L.i?7.5:6));
         fx=lerp(fx,tx,th);fy=lerp(fy,ty,th);lift+=th*(L.i?2.5:6)*sc;}
       const ax=L.ax,ay=L.ay+oy,vx=fx-ax,vy=fy-lift-ay;
       // knees bow gently away from the body
-      const bend=vx*(cy-ay)-vy*(cx-ax)>0?-1:1;
-      const[kx,ky,ex,ey]=ik2(ax,ay,fx,fy-lift,6.9*sc,6.9*sc,bend),kyu=ky-0.6*sc;
+      let[kx,ky,ex,ey]=ik2(ax,ay,fx,fy-lift,7.1*sc,7.1*sc,L.bend);
+      // safety: never let a knee pop more than a few px in one frame
+      if(L.kx!=null&&!this.preview){const jx=kx-L.kx,jy=ky-(L.ky+oy),j=Math.hypot(jx,jy);if(j>3.5){kx=L.kx+jx*3.5/j;ky=L.ky+oy+jy*3.5/j;}}
+      L.kx=kx;L.ky=ky-oy;const kyu=ky-0.3*sc;
       fb.cap(ax,ay,1.2,kx,kyu,0.95,M.LIMB,1,0,6.4);
       fb.cap(kx,kyu,0.95,ex,ey,0.55,M.LIMB,1,6.4,14);
       fb.cap(ex,ey,0.55,ex,ey,0.55,M.TOE,1,0,0,1);
