@@ -99,6 +99,9 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .ti canvas{width:44px;height:32px}
 .ti:hover{transform:translateY(-3px)}
 .ti.on{box-shadow:inset 0 0 0 2px var(--amber),0 0 12px rgba(255,194,74,.35);background:#33301c}
+.tsep{flex:none;width:3px;align-self:stretch;margin:4px 2px;border-radius:2px;background:#060a07}
+.ti.trash img{width:30px;height:30px}
+.ti.trash.hot{background:#5a1e20;box-shadow:inset 0 0 0 2px var(--red,#e5484d),0 0 14px rgba(229,72,77,.6);transform:translateY(-4px) scale(1.08)}
 .ti .tl{position:absolute;bottom:-2px;left:0;right:0;font-size:8px;text-transform:uppercase;color:var(--mute);text-align:center}
 .tray-note{font-size:19px;color:var(--mute);padding:6px 10px;white-space:nowrap;display:flex;align-items:center;gap:10px}
 .tray-note button{font-size:11px;padding:6px 10px;background:#3a1f30;border:2px solid #060a07;border-radius:6px}
@@ -2546,8 +2549,6 @@ function startGame(kind){
   w.prey=w.prey.filter(q=>!q.caught);w.parts.length=0;
   w.pet=makePet(w,kind,160,96);game.held=null;game.grabbing=false;
   const st=ps.stats||{fed:72,water:68,happy:70};w.stats.fed=st.fed;w.stats.water=st.water;w.stats.happy=st.happy;
-  if(!w.prey.length){const starter=Object.entries(DIET[kind]).sort((a,b)=>b[1]-a[1])[0][0];
-    for(let i=0;i<2;i++)w.prey.push(makeFood(i?starter:(DIET[kind].cricket>0?'cricket':starter),rand(60,280),rand(40,150),0));}
   game.mode='play';save.cur=kind;writeSave();
   ui.refreshPet();ui.renderTray();
   flash(ps.visited?`${game.name} is happy to see you!`:`${game.name} moved in. Say hi!`);ps.visited=true;
@@ -2918,6 +2919,7 @@ const SPR={
   zout:['............','............','............','............','.kkkkkkkkkk.','kwwwwwwwwwwk','kwwwwwwwwwwk','.kkkkkkkkkk.','............','............','............','............'],
   follow:['....kkkk....','..kkggggkk..','.kggkkkkggk.','.kgk....kgk.','kgk..kk..kgk','kgk.kwwk.kgk','kgk.kwwk.kgk','kgk..kk..kgk','.kgk....kgk.','.kggkkkkggk.','..kkggggkk..','....kkkk....'],
   zreset:['kkkk....kkkk','kwwk....kwwk','kwk......kwk','kk........kk','............','............','............','............','kk........kk','kwk......kwk','kwwk....kwwk','kkkk....kkkk'],
+  trash:['....kkkk....','.kkkSSSSkkk.','kSSSSSSSSSSk','kkkkkkkkkkkk','.kssSssSssk.','.kssSssSssk.','.kssSssSssk.','.kssSssSssk.','.kssSssSssk.','.kssSssSssk.','..kssssssk..','...kkkkkk...'],
   heart:['.kk..kk.','kppkkppk','kpwppppk','kppppppk','.kppppk.','..kppk..','...kk...','........'],
 };
 const ICON_URL={};
@@ -2993,7 +2995,10 @@ const ui={
     tr.hidden=false;tr.innerHTML='';
     if(t==='feed'){for(const f of FOOD_ORDER){const b=document.createElement('button');b.className='ti'+(game.food===f?' on':'');b.title=FOODS[f].name;
       b.appendChild(foodCanvas(f));const l=document.createElement('span');l.className='tl';l.textContent=f==='fruit'?'berry':f==='worm'?'meal':f==='waxworm'?'wax':f;b.appendChild(l);
-      b.addEventListener('click',()=>{game.food=f;SFX.play('tick');this.renderTray();});tr.appendChild(b);}}
+      b.addEventListener('click',()=>{game.food=f;SFX.play('tick');this.renderTray();});tr.appendChild(b);}
+      const sep=document.createElement('div');sep.className='tsep';tr.appendChild(sep);
+      const tb=document.createElement('button');tb.className='ti trash';tb.id='trashBtn';tb.title='Trash: click to clear all food, or drag food here to throw it away';
+      tb.innerHTML=`<img class="px" src="${iconURL('trash')}" alt=""><span class="tl">trash</span>`;tb.addEventListener('click',()=>trashAll());tr.appendChild(tb);}
     else{const owned=['laser','bubbles'].filter(x=>save.inv[x]>0);
       if(!owned.length){const n=document.createElement('div');n.className='tray-note';n.innerHTML='No play tools yet. The toy machine has lasers and bubbles! <button>Open Gacha</button>';
         n.querySelector('button').addEventListener('click',()=>{G.m='toys';this.openModal('mGacha');});tr.appendChild(n);}
@@ -3203,11 +3208,22 @@ canvas.addEventListener('pointerdown',e=>{
 canvas.addEventListener('pointermove',e=>{
   if(e.pointerType==='touch'&&touches.has(e.pointerId)){touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pinch&&touches.size>=2){movePinch();return;}if(pinch||touchBlock)return;}
   if(game.panning){panBy(e.clientX-game.panning.x,e.clientY-game.panning.y);game.panning={x:e.clientX,y:e.clientY};return;}
+  game.pointer.cx=e.clientX;game.pointer.cy=e.clientY;
+  if(game.held){const tb=$('trashBtn');if(tb)tb.classList.toggle('hot',overTrash(e.clientX,e.clientY));}
   const P=game.pointer,[x,y]=toPix(e),now=performance.now(),dt=Math.max(8,now-P.lt)/1000;
   P.vx=lerp(P.vx,(x-P.x)/dt,0.5);P.vy=lerp(P.vy,(y-P.y)/dt,0.5);P.lt=now;P.moved+=Math.hypot(x-P.x,y-P.y);P.x=x;P.y=y;P.inside=true;P.touch=e.pointerType==='touch';});
+function trashFood(q){const w=game.world,i=w.prey.indexOf(q);if(i<0)return;w.prey.splice(i,1);if(game.held===q)game.held=null;
+  dust(w,q.x,q.y-(q.h||0),7);}
+function trashAll(){const w=game.world,L=w.prey.filter(q=>!q.caught);
+  if(!L.length){ui.toast('No food in the tank to clear.',true);SFX.play('tick');return;}
+  for(const q of L)trashFood(q);SFX.play('thunk');ui.toast(`Cleared ${L.length} food${L.length>1?'s':''} from the tank.`,true);}
+function overTrash(cx,cy){const t=$('trashBtn');if(!t||t.offsetParent===null||cx===undefined)return false;const r=t.getBoundingClientRect();return cx>=r.left-6&&cx<=r.right+6&&cy>=r.top-6&&cy<=r.bottom+6;}
 function dropHeld(){const q=game.held;if(!q)return;game.held=null;q.inHand=false;q.h=8;q.vh=0;
   if(q.pts){q.toWorld(8);q.x=q.pts[0].x;q.y=q.pts[0].y;}if(q.type==='fly')q.targetH=rand(10,20);}
-function up(){const P=game.pointer;P.down=false;SFX.mistOn(false);dropHeld();
+function up(){const P=game.pointer;P.down=false;SFX.mistOn(false);
+  const tb=$('trashBtn');if(tb)tb.classList.remove('hot');
+  if(game.held&&overTrash(P.cx,P.cy)){const q=game.held;trashFood(q);SFX.play('thunk');ui.toast(`Threw away the ${FOODS[q.type].name.replace(/^an? /,'')}.`,true);}
+  dropHeld();
   if(game.grabbing){game.world.pet.release();game.grabbing=false;}
   if(game.dragObj){const o=game.dragObj;o.dragged=false;if(o instanceof Toy){o.vx=clamp(P.vx*0.5,-150,150);o.vy=clamp(P.vy*0.5,-150,150);const sp=Math.hypot(o.vx,o.vy);o.vh=Math.min(45,sp*0.25);o.h=0.1;}
     SFX.play('place');game.dragObj=null;markDirty();}}
