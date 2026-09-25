@@ -4764,7 +4764,7 @@ const ui={
   showMsg(text,ev){const box=$('toast');
     if(text===this.curMsg){if(ev){const top=box.querySelector('.tmsg:not(.old):not(.gone)');if(top){top.classList.add('event');top.style.animation='none';void top.offsetWidth;top.style.animation='';}}return;}
     this.curMsg=text;this.msgAt=performance.now();
-    [...box.querySelectorAll('.tmsg:not(.gone)')].forEach((e,i)=>{if(i===0)e.classList.add('old');else{e.classList.add('gone');setTimeout(()=>e.remove(),700);}});
+    [...box.querySelectorAll('.tmsg:not(.gone)')].forEach((e,i)=>{if(i===0){e.classList.add('old');clearTimeout(e._fade);e._fade=setTimeout(()=>{if(e.isConnected&&!e.classList.contains('gone')){e.classList.add('gone');setTimeout(()=>e.remove(),700);}},3000);}else{e.classList.add('gone');setTimeout(()=>e.remove(),700);}});
     const n=document.createElement('div');n.className='tmsg chunk'+(ev?' event':'');n.textContent=text;box.prepend(n);},
   toast(msg,ev){this.showMsg(msg,ev);if(ev)this.evT=2.8;},
   update(){
