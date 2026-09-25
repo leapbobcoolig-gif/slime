@@ -70,10 +70,15 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .meter .bar i{display:block;height:100%;width:50%;background:var(--c);transition:width .3s}
 .meter.low{animation:pulse 1s infinite}
 @keyframes pulse{50%{opacity:.45}}
-#toast{position:fixed;left:50%;top:calc(var(--top) + 4px);opacity:.93;transform:translateX(-50%);z-index:9;pointer-events:none;max-width:min(560px,calc(100vw - 32px));
-  padding:7px 14px 6px;font-size:21px;text-align:center;transition:transform .2s,background .2s}
-#toast.event{background:#3a2e10;box-shadow:inset 0 0 0 2px var(--amber-d),0 4px 0 #040604;color:#ffe7a6;animation:toastpop .35s}
-@keyframes toastpop{0%{transform:translateX(-50%) scale(.7)}60%{transform:translateX(-50%) scale(1.08)}100%{transform:translateX(-50%) scale(1)}}
+#toast{position:fixed;left:50%;top:calc(var(--top) + 4px);transform:translateX(-50%);z-index:9;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:3px;width:max-content;max-width:min(560px,calc(100vw - 32px))}
+/* newest message on top; the previous one slides under it, smaller and faded */
+.tmsg{padding:7px 14px 6px;font-size:21px;text-align:center;opacity:.93;transform-origin:50% 0;transition:transform .3s ease,opacity .3s ease,filter .3s;animation:tmsgin .3s ease}
+.tmsg.old{transform:scale(.82);opacity:.5;filter:saturate(.6)}
+.tmsg.gone{opacity:0;transform:scale(.7) translateY(-6px)}
+.tmsg.event{background:#3a2e10;box-shadow:inset 0 0 0 2px var(--amber-d),0 4px 0 #040604;color:#ffe7a6}
+.tmsg.event:not(.old){animation:toastpop .35s}
+@keyframes tmsgin{from{opacity:0;transform:translateY(-10px) scale(.96)}}
+@keyframes toastpop{0%{transform:scale(.7)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
 #topR{margin-left:auto;display:flex;align-items:center;gap:8px}
 #coins{display:flex;align-items:center;gap:6px;padding:6px 12px 6px 8px;font-family:var(--display);font-size:18px;color:var(--amber);cursor:pointer}
 #coins img{width:24px;height:24px}
@@ -229,7 +234,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
 @media (max-width:760px){
   :root{--top:150px;--bot:140px}
   #top{flex-wrap:wrap;height:auto;padding-top:8px;row-gap:8px}
-  #toast{font-size:18px;max-width:calc(100vw - 40px)}
+  #toast{max-width:calc(100vw - 40px)}.tmsg{font-size:18px}
   .db{width:52px;height:52px}.db img{width:36px;height:36px}.db span{display:none}.db kbd{display:none}.db.on{transform:translateY(-3px)}
   #dock{gap:6px;padding:5px;flex-wrap:wrap;justify-content:center;width:max-content}.dgroup{gap:4px}.dsep{display:none}
   #petCard{flex-wrap:wrap;row-gap:6px;width:100%}#meters{width:100%;margin-left:0;gap:12px}#meters .meter{flex:1;min-width:0}#meters .bar{flex:1;width:auto;height:12px}#meters .meter img{width:20px;height:20px}
@@ -264,7 +269,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
     <button class="ibtn" id="btnSettings" title="Settings"><img class="px" alt="Settings"></button>
   </div>
 </div>
-<div id="toast" class="chunk">…</div>
+<div id="toast"></div>
 <div id="zoomChip" class="chunk" aria-label="Zoom">
   <span id="zGrip" title="Drag to move (double-click to put back)"></span>
   <button class="ibtn" id="zOut" title="Zoom out (-)"><img class="px" alt="Zoom out"></button>
@@ -3130,7 +3135,7 @@ class Minnow extends Food{
   constructor(x,y,h=0){super();this.initFood('minnow',x,y,h);this.speed=0;this.want=10;this.turnT=rand(0.5,2);this.flopT=0.3;this.wig=0;this.curve=0;}
   update(dt,w){if(this.caught||this.inHand)return;this.t+=dt;this.fall(dt);if(this.h>0.3)return;
     const d=waterAt(w,this.x,this.y);
-    if(d>0){this.inWater=true;this.sink=0.45;const s=preyScare(this,w,24);this.turnT-=dt;
+    if(d>0){this.inWater=true;this.sink=0.8;const s=preyScare(this,w,24);this.turnT-=dt;
       this.tired=Math.max(0,(this.tired||0)-dt);if(s&&this.tired<=0){const a=Math.atan2(this.y-s.hd.y,this.x-s.hd.x);this.ang+=wrapA(a-this.ang)*Math.min(1,dt*8);this.want=30;this.dartT=(this.dartT||0)+dt;if(this.dartT>0.9){this.dartT=0;this.tired=rand(1.2,2.2);this.want=4;}}
       else if(this.turnT<=0){this.turnT=rand(0.6,2.2);this.want=Math.random()<0.25?0:rand(8,18);this.ang+=rand(-1.2,1.2);}
       this.speed+=(this.want-this.speed)*Math.min(1,dt*5);
@@ -4755,15 +4760,23 @@ const ui={
         const l=document.createElement('span');l.className='tl';l.textContent=x;b.appendChild(l);b.addEventListener('click',()=>{setTool(x);SFX.play('tick');});tr.appendChild(b);}
       if(owned.length){const n=document.createElement('div');n.className='tray-note';n.textContent=t==='laser'?'Move over the tank. Your pet will chase the dot!':t==='bubbles'?'Hold in the tank to blow bubbles.':t==='feather'?'Wiggle the feather around. Pounce!':t==='remote'?'Hold down in the tank to drive the RC car!':'';tr.appendChild(n);}}
   },
-  toast(msg,ev){const t=$('toast');t.textContent=msg;if(ev){t.classList.remove('event');void t.offsetWidth;t.classList.add('event');this.evT=2.8;}},
+  // two-deep message stack: new text slides in on top, the previous one shrinks and fades below it
+  showMsg(text,ev){const box=$('toast');
+    if(text===this.curMsg){if(ev){const top=box.querySelector('.tmsg:not(.old):not(.gone)');if(top){top.classList.add('event');top.style.animation='none';void top.offsetWidth;top.style.animation='';}}return;}
+    this.curMsg=text;this.msgAt=performance.now();
+    [...box.querySelectorAll('.tmsg:not(.gone)')].forEach((e,i)=>{if(i===0)e.classList.add('old');else{e.classList.add('gone');setTimeout(()=>e.remove(),330);}});
+    const n=document.createElement('div');n.className='tmsg chunk'+(ev?' event':'');n.textContent=text;box.prepend(n);},
+  toast(msg,ev){this.showMsg(msg,ev);if(ev)this.evT=2.8;},
   update(){
     const w=game.world;if(!w||!w.pet)return;const S=w.stats;
     for(const[k,id]of[['fed','mFed'],['water','mWater'],['happy','mHappy']]){const el=$(id);el.querySelector('i').style.width=S[k].toFixed(0)+'%';el.classList.toggle('low',S[k]<25);}
-    if(this.evT<=0){const t=$('toast');t.classList.remove('event');let msg;
+    if(this.evT<=0){let msg,now=true;
       if(game.placing)msg=`Click in the tank to place the ${ITEMS[game.placing].name.toLowerCase()} · Esc cancels`;
       else if(game.held&&!(DIET[game.kind][game.held.type]>0))msg=`${game.name} isn't interested in ${FOODS[game.held.type].label}.`;
-      else{let extra='';if(S.fed<25)extra=' It looks hungry.';else if(S.water<25)extra=' The tank feels dry.';const st=w.pet.statusText();msg=`${game.name} ${st}${/[!.?]$/.test(st)?'':'.'}${extra}`;}
-      t.textContent=msg;}
+      else{now=false;let extra='';if(S.fed<25)extra=' It looks hungry.';else if(S.water<25)extra=' The tank feels dry.';const st=w.pet.statusText();msg=`${game.name} ${st}${/[!.?]$/.test(st)?'':'.'}${extra}`;}
+      // status text has to settle for a moment before it replaces what's shown, so quick state flips don't flicker
+      const t=performance.now();if(msg!==this.candMsg){this.candMsg=msg;this.candAt=t;}
+      if(now||!this.curMsg||(msg!==this.curMsg&&t-this.candAt>600&&t-(this.msgAt||0)>1200))this.showMsg(msg,false);}
     this.syncDock();
   },
   tick(dt){
