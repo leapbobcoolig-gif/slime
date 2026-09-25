@@ -4070,23 +4070,25 @@ function subBegin(w,pet){subRect=null;if(!(w.tank==='aqua'||w.dish||pet.transluc
   if(pet.x!==undefined)add(pet.x,pet.y);if(pet.pts)for(const q of pet.pts)add(q.x,q.y);const r=28;
   const x0=Math.max(0,Math.floor(ax-r)),x1=Math.min(W-1,Math.ceil(bx+r)),y0=Math.max(0,Math.floor(ay-r-16-(pet.h||0))),y1=Math.min(H-1,Math.ceil(by+r));
   for(let y=y0;y<=y1;y++){const o=y*W;SUBBUF.set(fb.px.subarray(o+x0,o+x1+1),o+x0);}subRect=[x0,y0,x1,y1];}
-function subMid(){if(!subRect)return;const[x0,y0,x1,y1]=subRect;
+function subMid(pet){if(!subRect)return;const[x0,y0,x1,y1]=subRect;
+  // see-through goo happens before any details are drawn on top, so food inside stays visible and the gel stays clear
+  if(pet&&pet.translucent){const tr=pet.translucent,px=fb.px,mat=fb.mat;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;if(mat[i]&&px[i]!==SUBBUF[i])px[i]=mixc(px[i],SUBBUF[i],tr);}}
   for(let y=y0;y<=y1;y++){const o=y*W;SUB1.set(fb.px.subarray(o+x0,o+x1+1),o+x0);MASKM.set(fb.mat.subarray(o+x0,o+x1+1),o+x0);MASKC.set(fb.cls.subarray(o+x0,o+x1+1),o+x0);}}
 function subEnd(w,pet){if(!subRect)return;const[x0,y0,x1,y1]=subRect,px=fb.px,M=MASKM,C=MASKC;
-  if(pet.translucent){const tr=pet.translucent;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;if(M[i]&&px[i]===SUB1[i]&&px[i]!==SUBBUF[i])px[i]=mixc(px[i],SUBBUF[i],tr);}}
   if(!(w.tank==='aqua'||w.dish)||(pet.h||0)>2)return;
   const dive=pet.dive||0,T=w.t;
   // pass 1: body, extras and hat pixels; the body floats, so water only reaches about half way up unless it dives
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;PETM[i]=0;SUBV[i]=0;if(px[i]===SUBBUF[i])continue;
     const isM=M[i]>0,isX=!isM&&px[i]!==SUB1[i];if(!isM&&!isX)continue;PETM[i]=1;
-    const d=waterAt(w,x,y);if(d<=0)continue;const hp=isM?PART_H[Math.min(7,C[i])]:0.62,eff=Math.min(d*1.35,0.5)+dive*0.95,sub=clamp((eff-hp)/0.28,0,1);SUBV[i]=sub;
+    const d=waterAt(w,x,y);if(d<=0)continue;const hp=isM?PART_H[Math.min(7,C[i])]:0.62,eff=Math.min(d*1.35,0.37)+dive*0.95,sub=clamp((eff-hp)/0.1,0,1);SUBV[i]=sub;
     if(sub>0){const a=Math.min(0.58,sub*(0.3+0.3*d));px[i]=mixc(mixc(px[i],SUBBUF[i],a),SHEENC,sheen(x,y,T)*a*1.5);}}
   // pass 2: outline pixels: foam where a part breaks the surface, tinted where fully under, left alone where dry
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;if(PETM[i]||px[i]===SUBBUF[i]||M[i])continue;
     let ns=-1;for(const j of[i-1,i+1,i-W,i+W])if(j>=0&&j<N&&M[j]&&SUBV[j]>ns)ns=SUBV[j];if(ns<0)continue;// not next to the body: that's the shadow on the floor
     PETM[i]=2;const d=waterAt(w,x,y);if(d<=0)continue;
     if(ns>0.85){const a=Math.min(0.58,ns*(0.3+0.3*d));px[i]=mixc(px[i],SUBBUF[i],a);}
-    else if(ns>0.05||(d>0.05&&dive<0.4))px[i]=mixc(SUBBUF[i],FOAMC,0.5);}
+    else if(ns<0.35)px[i]=mixc(SUBBUF[i],FOAMC,0.5);// a dry part meeting the water
+    else{const a=Math.min(0.58,ns*(0.3+0.3*d));px[i]=mixc(px[i],SUBBUF[i],a);}}
   // pass 3: diving critters shrink slightly toward their middle so they look deeper
   if(w.tank==='aqua'&&dive>0.08){let sx=0,sy=0,n=0;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(PETM[y*W+x]){sx+=x;sy+=y;n++;}
     if(n>4){const cx=sx/n,cy=sy/n,sc=1-0.12*dive*clamp(waterAt(w,cx,cy)/0.45,0,1);if(sc<0.995){
@@ -4406,7 +4408,7 @@ function renderPlay(){
     const aq=w.tank==='aqua'&&!(pet.h>2),dv=pet.dive||0,hh=pet.h||0;
     const sfn=aq?(x,y)=>{const s=waterAt(w,x,y+hh)*(1-dv);return[Math.round(1+hh*0.35+s*4),Math.round(1+hh+s*5)];}:null;
     composite(fb,pet,{sAmt:aq?.72:.6,sdx:1+hh*0.35,sdy:1+hh,sfn,outline:hover||game.grabbing?hex('#e9f3c4'):undefined});
-    subMid();if(pet.drawExtras)pet.drawExtras(fb);
+    subMid(pet);if(pet.drawExtras)pet.drawExtras(fb);
     if(hat&&hat!=='halo'){fb.clearLayer();drawHat(fb,hat,pet.hatAnchor(),w.t);composite(fb,HAT_PAINTER,{sAmt:.55,sdx:1,sdy:2});}
     for(const q of w.prey)if(q.caught&&!q.layered)q.draw(fb,w.t);
     fb.clearLayer();for(const q of w.prey)if(q.caught&&q.layered)q.drawL(fb);composite(fb,FOOD_PAINTER);
