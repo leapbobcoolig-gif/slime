@@ -570,10 +570,10 @@ function composite(fb,painter,o={}){
   if(fb.bx1<0)return;
   const w=fb.w,h=fb.h,mat=fb.mat,cls=fb.cls,key=fb.key,out=o.out||fb.px,sOut=o.shadowOut||out;
   if(o.sAmt){
-    const sid=++fb.sid,st=fb.stamp,sdx=Math.round(o.sdx||0),sdy=Math.round(o.sdy||0),f=o.sAmt;
-    for(let y=fb.by0;y<=fb.by1;y++){const ty=y+sdy;if(ty<0||ty>=h)continue;
-      for(let x=fb.bx0;x<=fb.bx1;x++){if(!mat[y*w+x])continue;const tx=x+sdx;if(tx<0||tx>=w)continue;
-        const j=ty*w+tx;if(st[j]===sid)continue;st[j]=sid;sOut[j]=shade(sOut[j],f);}}
+    const sid=++fb.sid,st=fb.stamp,sdx=Math.round(o.sdx||0),sdy=Math.round(o.sdy||0),f=o.sAmt,SF=o.sfn;
+    for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++){if(!mat[y*w+x])continue;
+      let tx=x+sdx,ty=y+sdy;if(SF){const r=SF(x,y);tx=x+r[0];ty=y+r[1];}// shadow offset can vary per pixel (e.g. with the water depth underneath)
+      if(tx<0||tx>=w||ty<0||ty>=h)continue;const j=ty*w+tx;if(st[j]===sid)continue;st[j]=sid;sOut[j]=shade(sOut[j],f);}
   }
   const ol=o.outline!==undefined?o.outline:painter.outline,seam=painter.seam||0;
   const x0=Math.max(0,fb.bx0-1),x1=Math.min(w-1,fb.bx1+1),y0=Math.max(0,fb.by0-1),y1=Math.min(h-1,fb.by1+1);
@@ -3130,8 +3130,12 @@ class Minnow extends Food{
       this.tired=Math.max(0,(this.tired||0)-dt);if(s&&this.tired<=0){const a=Math.atan2(this.y-s.hd.y,this.x-s.hd.x);this.ang+=wrapA(a-this.ang)*Math.min(1,dt*8);this.want=30;this.dartT=(this.dartT||0)+dt;if(this.dartT>0.9){this.dartT=0;this.tired=rand(1.2,2.2);this.want=4;}}
       else if(this.turnT<=0){this.turnT=rand(0.6,2.2);this.want=Math.random()<0.25?0:rand(8,18);this.ang+=rand(-1.2,1.2);}
       this.speed+=(this.want-this.speed)*Math.min(1,dt*5);
+      // three whisker-feelers: steer smoothly toward whichever side is deeper, well before reaching the edge
+      const look=6+this.speed*0.35,fd=a=>waterAt(w,this.x+Math.cos(a)*look,this.y+Math.sin(a)*look),dC=fd(this.ang),dL=fd(this.ang-0.6),dR=fd(this.ang+0.6);
+      if(dC<0.28||d<0.2){const turn=(dR>dL?1:-1)*(dC<0.12?5:2.6);this.ang+=turn*dt;this.speed*=1-Math.min(1,dt*(dC<0.12?3:1));}
+      else if(dL>dC+0.1||dR>dC+0.1)this.ang+=(dR>dL?1:-1)*0.8*dt;
       let nx=this.x+Math.cos(this.ang)*this.speed*dt,ny=this.y+Math.sin(this.ang)*this.speed*dt;
-      if(waterAt(w,nx,ny)<0.08){this.ang+=Math.PI*0.8+rand(-0.4,0.4);nx=this.x;ny=this.y;}
+      if(waterAt(w,nx,ny)<0.06){nx=this.x;ny=this.y;this.ang+=(dR>dL?1:-1)*2*dt;}
       this.x=nx;this.y=ny;this.wig+=dt*(4+this.speed*0.8);this.curve=Math.sin(this.wig)*0.35;this.keepIn(w);}
     else{this.inWater=false;this.sink=0;this.speed=0;this.flopT-=dt;this.wig+=dt*14;this.curve=Math.sin(this.wig)*0.7;
       if(this.flopT<=0){this.flopT=rand(0.35,0.7);let tx=this.x,ty=this.y;
@@ -4002,7 +4006,10 @@ function randomWaterSpot(w,minD=0.3){if(w.tank==='aqua'&&R.deepList&&R.deepList.
 function randomLandSpot(w){if(w.tank==='aqua'&&R.landList&&R.landList.length){const i=pick(R.landList);return[i%W,(i/W)|0];}return null;}
 // nearest dry spot (decor and toys stay on land in the paludarium)
 // toys that float: they drift and bob on the pool instead of being pushed back to shore
-const FLOAT_TOYS=['ball','squeaky','dice','plush'];
+const FLOAT_TOYS=['ball','squeaky','dice','plush','yarn'];
+// sunk toys settle on the bottom (drawn under the water) and wind-up things stall
+function sinkToy(t,w,dt){if(t.id==='butterfly'&&t.energy>0){t.sunk=0;return;}t.sunk=Math.min(1,(t.sunk||0)+dt*1.2);t.vx*=1-Math.min(1,dt*5);t.vy*=1-Math.min(1,dt*5);t.spd=0;t.wind=0;t.spin=Math.max(0,(t.spin||0)-dt*3);t.h=0;t.vh=0;
+  if(t.sunk<0.9){t.bT=(t.bT||0)-dt;if(t.bT<=0){t.bT=rand(0.3,0.7);w.ripples.push({x:t.x+rand(-1,1),y:t.y-1,age:0.35,s:0.25});}}}
 function floatToy(t,w,dt){if(t.h>0.6)return;const k=Math.min(1,dt*2.2),ph=w.t*0.4+t.t*0.13;
   t.vx+=(Math.sin(ph)*2.2-t.vx)*k;t.vy+=(Math.cos(ph*0.8)*1.8-t.vy)*k;t.spd=0;t.wind=0;
   if(t.id==='squeaky')t.ang+=dt*0.35*Math.sin(ph*0.5);
@@ -4011,11 +4018,19 @@ function floatToy(t,w,dt){if(t.h>0.6)return;const k=Math.min(1,dt*2.2),ph=w.t*0.
 function landSnap(w,x,y){if(waterAt(w,x,y)<=0)return[x,y];const B=w.bounds;
   for(let r=2;r<90;r+=2)for(let k=0;k<24;k++){const a=k/24*TAU,nx=clamp(x+Math.cos(a)*r,B.x0,B.x1),ny=clamp(y+Math.sin(a)*r,B.y0,B.y1);if(waterAt(w,nx,ny)<=0)return[nx,ny];}return[x,y];}
 // food that lands in the water floats; crickets and roaches paddle for the shore
-const FLOAT_FOOD=['fruit','greens','moonberry'],STRUGGLE_FOOD=['cricket','roach'];
-function floatPrey(q,w,dt){if(q.type==='minnow')return;if(q.caught||q.inHand){q.sink=0;return;}if(q.type==='fly'||q.h>0.5||w.tank!=='aqua'){q.afloat=false;q.sink=0;return;}
+const FLOAT_FOOD=['fruit','greens','moonberry'],STRUGGLE_FOOD=['cricket','roach'],WRIGGLE_FOOD=['worm','waxworm'];
+function floatPrey(q,w,dt){if(q.type==='minnow')return;if(q.caught||q.inHand){q.sink=0;q.stuckW=false;return;}
+  if(q.type==='fly'){// a fly that lands on the water gets stuck, buzzing and struggling on the surface
+    if(w.tank==='aqua'&&(q.stuckW||(q.landT>0&&q.h<1.5&&waterAt(w,q.x,q.y)>0.05))){if(!q.stuckW){q.stuckW=true;q.ax=q.x;q.ay=q.y;w.ripples.push({x:q.x,y:q.y,age:0});}
+      q.landT=5;q.h=0;q.ax+=Math.sin(w.t*0.5+q.seed)*0.8*dt;q.ay+=Math.cos(w.t*0.4+q.seed)*0.6*dt;q.x=q.ax+Math.sin(w.t*23+q.seed)*0.4;q.y=q.ay;q.sink=0.06;q.afloat=true;
+      q.rT=(q.rT||0)-dt;if(q.rT<=0){q.rT=rand(0.2,0.5);w.ripples.push({x:q.x,y:q.y,age:0.3,s:0.3});if(Math.random()<0.25&&!(w.pet&&w.pet.preview))SFX.play('buzz');}}
+    else{q.afloat=false;q.sink=0;}return;}
+  if(q.h>0.5||w.tank!=='aqua'){q.afloat=false;q.sink=0;return;}
   const d=waterAt(w,q.x,q.y);if(d<=0){q.afloat=false;q.sink=0;q.sinking=false;q.strug=undefined;q.ax=undefined;return;}
   if(!q.afloat){q.afloat=true;w.ripples.push({x:q.x,y:q.y,age:0});if(!w.pet||!w.pet.preview)SFX.play('plip');q.rT=rand(0.6,1.4);
-    if(STRUGGLE_FOOD.includes(q.type))q.strug=rand(3,5);else if(!FLOAT_FOOD.includes(q.type))q.sinking=true;}
+    if(STRUGGLE_FOOD.includes(q.type))q.strug=rand(3,5);else if(WRIGGLE_FOOD.includes(q.type))q.wrig=rand(2.5,4.5);else if(!FLOAT_FOOD.includes(q.type))q.sinking=true;
+    if(q.type==='snail')q.hideT=99;}
+  if(q.wrig!==undefined&&!q.sinking){q.wrig-=dt;if(q.wrig<=0)q.sinking=true;else{q.rT-=dt;if(q.rT<=0){q.rT=rand(0.4,0.8);w.ripples.push({x:q.x,y:q.y,age:0.3,s:0.3});}q.sink=0.08;return;}}
   if(q.strug!==undefined&&q.strug<=0&&!q.sinking)q.sinking=true;
   if(q.sinking){// drifts down and settles on the bottom
     q.sink=Math.min(1,(q.sink||0)+dt*0.8);if(!q.pts){if(q.ax===undefined){q.ax=q.x;q.ay=q.y;}q.x=q.ax;q.y=q.ay;}
@@ -4037,18 +4052,43 @@ function subFactor(pet){const base=pet.submerge?pet.submerge():0.25+0.3*(pet.swi
 const SHEENC=hex('#e2f8f2'),FOAMC=hex('#d8efe6');
 function sheen(x,y,t){const v=Math.sin(x*0.045+y*0.03+t*0.35)*0.5+Math.sin(x*0.021-y*0.052-t*0.22)*0.5;return v>0.25?(v-0.25)*(v-0.25)*0.4:0;}
 const SUBBUF=new Uint32Array(N);let subRect=null;
-function subBegin(w,pet){subRect=null;if(!(w.tank==='aqua'||w.dish||pet.translucent))return;const h=pet.headPos(),r=52;
-  const x0=Math.max(0,Math.floor(h.x-r)),x1=Math.min(W-1,Math.ceil(h.x+r)),y0=Math.max(0,Math.floor(h.y-r-12)),y1=Math.min(H-1,Math.ceil(h.y+r));
+// ---- water pass for the pet: snapshot what's under it, draw it, then work out per pixel how deep each part sits ----
+const SUB1=new Uint32Array(N),SUBTMP=new Uint32Array(N),MASKM=new Uint8Array(N),MASKC=new Uint8Array(N),SUBV=new Float32Array(N),PETM=new Uint8Array(N);
+// how high each layer sits above the ground: legs, body, head/extras (hats and drawn-on details count as "head")
+const PART_H=[0.62,0.08,0.34,0.58,0.62,0.62,0.62,0.62];
+function subBegin(w,pet){subRect=null;if(!(w.tank==='aqua'||w.dish||pet.translucent))return;
+  const h=pet.headPos();let ax=h.x,ay=h.y,bx=h.x,by=h.y;const add=(x,y)=>{if(x<ax)ax=x;if(x>bx)bx=x;if(y<ay)ay=y;if(y>by)by=y;};
+  if(pet.x!==undefined)add(pet.x,pet.y);if(pet.pts)for(const q of pet.pts)add(q.x,q.y);const r=28;
+  const x0=Math.max(0,Math.floor(ax-r)),x1=Math.min(W-1,Math.ceil(bx+r)),y0=Math.max(0,Math.floor(ay-r-16-(pet.h||0))),y1=Math.min(H-1,Math.ceil(by+r));
   for(let y=y0;y<=y1;y++){const o=y*W;SUBBUF.set(fb.px.subarray(o+x0,o+x1+1),o+x0);}subRect=[x0,y0,x1,y1];}
-function subEnd(w,pet){if(!subRect)return;if(pet.translucent){const[a0,b0,a1,b1]=subRect,tr=pet.translucent;for(let y=b0;y<=b1;y++)for(let x=a0;x<=a1;x++){const i=y*W+x;if(fb.mat[i]&&fb.px[i]!==SUBBUF[i]&&fb.nz!==0)fb.px[i]=mixc(fb.px[i],SUBBUF[i],tr*(fb.nx[i]*fb.nx[i]+fb.ny[i]*fb.ny[i]<0.5?1:0.55));}}
-  const[x0,y0,x1,y1]=subRect,f=subFactor(pet),dive=pet.dive||0,hh=pet.h||0,px=fb.px,mat=fb.mat,cls=fb.cls,T=w.t;if(f<=0)return;
-  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;if(px[i]===SUBBUF[i])continue;const d=waterAt(w,x,y+hh);if(d<=0)continue;
-    if(mat[i]){// limbs (layer 1) hang below the surface even when the body floats on top
-      const a=Math.min(0.74,(cls[i]===1?Math.max(f,0.5):f)*(0.45+0.55*d));px[i]=mixc(mixc(px[i],SUBBUF[i],a),SHEENC,sheen(x,y,T)*a*1.5);continue;}
-    let body=false,edge=false;for(const j of[i-1,i+1,i-W,i+W]){if(j<0||j>=N||!mat[j])continue;edge=true;if(cls[j]>=2)body=true;}
-    if(!edge)continue;// shadow on the pool floor: leave it
-    if(body&&dive<0.45&&!(pet.h>2))px[i]=mixc(SUBBUF[i],FOAMC,0.5);// bright waterline where the body breaks the surface
-    else px[i]=mixc(px[i],SUBBUF[i],Math.min(0.74,f*(0.45+0.55*d)));}}
+function subMid(){if(!subRect)return;const[x0,y0,x1,y1]=subRect;
+  for(let y=y0;y<=y1;y++){const o=y*W;SUB1.set(fb.px.subarray(o+x0,o+x1+1),o+x0);MASKM.set(fb.mat.subarray(o+x0,o+x1+1),o+x0);MASKC.set(fb.cls.subarray(o+x0,o+x1+1),o+x0);}}
+function subEnd(w,pet){if(!subRect)return;const[x0,y0,x1,y1]=subRect,px=fb.px,M=MASKM,C=MASKC;
+  if(pet.translucent){const tr=pet.translucent;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;if(M[i]&&px[i]===SUB1[i]&&px[i]!==SUBBUF[i])px[i]=mixc(px[i],SUBBUF[i],tr);}}
+  if(!(w.tank==='aqua'||w.dish)||(pet.h||0)>2)return;
+  const dive=pet.dive||0,T=w.t;
+  // pass 1: body, extras and hat pixels; the body floats, so water only reaches about half way up unless it dives
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;PETM[i]=0;SUBV[i]=0;if(px[i]===SUBBUF[i])continue;
+    const isM=M[i]>0,isX=!isM&&px[i]!==SUB1[i];if(!isM&&!isX)continue;PETM[i]=1;
+    const d=waterAt(w,x,y);if(d<=0)continue;const hp=isM?PART_H[Math.min(7,C[i])]:0.62,eff=Math.min(d*1.35,0.5)+dive*0.95,sub=clamp((eff-hp)/0.28,0,1);SUBV[i]=sub;
+    if(sub>0){const a=Math.min(0.58,sub*(0.3+0.3*d));px[i]=mixc(mixc(px[i],SUBBUF[i],a),SHEENC,sheen(x,y,T)*a*1.5);}}
+  // pass 2: outline pixels: foam where a part breaks the surface, tinted where fully under, left alone where dry
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;if(PETM[i]||px[i]===SUBBUF[i]||M[i])continue;
+    let ns=-1;for(const j of[i-1,i+1,i-W,i+W])if(j>=0&&j<N&&M[j]&&SUBV[j]>ns)ns=SUBV[j];if(ns<0)continue;// not next to the body: that's the shadow on the floor
+    PETM[i]=2;const d=waterAt(w,x,y);if(d<=0)continue;
+    if(ns>0.85){const a=Math.min(0.58,ns*(0.3+0.3*d));px[i]=mixc(px[i],SUBBUF[i],a);}
+    else if(ns>0.05||(d>0.05&&dive<0.4))px[i]=mixc(SUBBUF[i],FOAMC,0.5);}
+  // pass 3: diving critters shrink slightly toward their middle so they look deeper
+  if(w.tank==='aqua'&&dive>0.08){let sx=0,sy=0,n=0;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(PETM[y*W+x]){sx+=x;sy+=y;n++;}
+    if(n>4){const cx=sx/n,cy=sy/n,sc=1-0.12*dive*clamp(waterAt(w,cx,cy)/0.45,0,1);if(sc<0.995){
+      for(let y=y0;y<=y1;y++){const o=y*W;SUBTMP.set(px.subarray(o+x0,o+x1+1),o+x0);}
+      for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x,qx=Math.round(cx+(x-cx)/sc),qy=Math.round(cy+(y-cy)/sc);
+        const ok=qx>=x0&&qx<=x1&&qy>=y0&&qy<=y1&&PETM[qy*W+qx];if(ok)px[i]=SUBTMP[qy*W+qx];else if(PETM[i])px[i]=SUBBUF[i];}}}}}
+function drawSubToy(w,t){const x0=Math.max(0,Math.floor(t.x-14)),x1=Math.min(W-1,Math.ceil(t.x+14)),y0=Math.max(0,Math.floor(t.y-18)),y1=Math.min(H-1,Math.ceil(t.y+10)),px=fb.px;
+  for(let y=y0;y<=y1;y++){const o=y*W;SUBBUF.set(px.subarray(o+x0,o+x1+1),o+x0);}
+  fb.clearLayer();drawToy(fb,t);composite(fb,OBJ_PAINTER,{sAmt:.8,sdx:1,sdy:1});toyDetails(fb,t);
+  const d=Math.max(0.2,waterAt(w,t.x,t.y)),a=Math.min(0.62,t.sunk*0.58*(0.5+0.5*d));
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;if(px[i]===SUBBUF[i])continue;px[i]=mixc(mixc(px[i],SUBBUF[i],a),SHEENC,sheen(x,y,w.t)*a*1.5);}}
 // prey lying on the bottom (or sinking) is drawn on its own and tinted by the water above it
 function drawSubPrey(w,q){const x0=Math.max(0,Math.floor(q.x-11)),x1=Math.min(W-1,Math.ceil(q.x+11)),y0=Math.max(0,Math.floor(q.y-12)),y1=Math.min(H-1,Math.ceil(q.y+10)),px=fb.px;
   for(let y=y0;y<=y1;y++){const o=y*W;SUBBUF.set(px.subarray(o+x0,o+x1+1),o+x0);}
@@ -4164,7 +4204,7 @@ function updatePlay(dt){
   for(let i=w.prey.length-1;i>=0;i--)if(w.prey[i].dead)w.prey.splice(i,1);
   // toys, decor, bubbles, coins
   const hd=pet.headPos(),mv=pet.noise?pet.noise():0;
-  for(const t of w.toys){t.update(dt,w);if(w.tank==='aqua'&&!t.dragged&&!t.carriedBy&&waterAt(w,t.x,t.y)>0){if(FLOAT_TOYS.includes(t.id))floatToy(t,w,dt);else{[t.x,t.y]=landSnap(w,t.x,t.y);t.vx=-(t.vx||0)*0.3;t.vy=-(t.vy||0)*0.3;}}
+  for(const t of w.toys){t.update(dt,w);const wet=w.tank==='aqua'&&!t.dragged&&!t.carriedBy&&waterAt(w,t.x,t.y)>0;if(wet){if(FLOAT_TOYS.includes(t.id)){floatToy(t,w,dt);t.sunk=0;}else sinkToy(t,w,dt);}else if(!t.carriedBy)t.sunk=0;
     if(!t.dragged&&['ball','bell','squeaky','windup','yarn','dice','plush','spinner','rc'].includes(t.id)&&mv>0.2){const dx=t.x-hd.x,dy=t.y-hd.y,d=Math.hypot(dx,dy);
       if(d<t.r+2.5&&d>0.01){t.vx+=dx/d*40*dt*mv*6;t.vy+=dy/d*40*dt*mv*6;}}}
   for(const d of w.decor)d.update(dt,w);
@@ -4341,18 +4381,21 @@ function renderPlay(){
   fb.clearLayer();for(const q of w.prey)if(q.layered&&q.grounded()&&!subQ(q))q.drawL(fb);composite(fb,FOOD_PAINTER,{sAmt:.6,sdx:1,sdy:1});
   for(const q of w.prey)if(subQ(q))drawSubPrey(w,q);
   fb.clearLayer();for(const q of w.prey)if(q.layered&&!q.caught&&!q.inHand&&q.h>0.5)q.drawL(fb);composite(fb,FOOD_PAINTER);
-  const py=pet.headPos().y,objs=[...w.decor,...w.toys],back=objs.filter(o=>o.y<=py&&!o.dragged),front=objs.filter(o=>o.y>py&&!o.dragged);
+  for(const t of w.toys)if((t.sunk||0)>0.05&&!t.dragged)drawSubToy(w,t);
+  const py=pet.headPos().y,objs=[...w.decor,...w.toys.filter(t=>!((t.sunk||0)>0.05)||t.dragged)],back=objs.filter(o=>o.y<=py&&!o.dragged),front=objs.filter(o=>o.y>py&&!o.dragged);
   renderObjects(back);
   const hover=(game.tool==='pet'||game.tool==='grab')&&P.inside&&pet.hitTest(P.x,P.y)>=0;
   const hat=petSave().hat;
   const drawPet=()=>{subBegin(w,pet);fb.clearLayer();pet.draw(fb);
     // swimming at the surface throws a shadow down onto the pool floor, further away the deeper the water
-    const phd=pet.headPos(),wd=w.tank==='aqua'&&!(pet.h>2)?waterAt(w,phd.x,phd.y):0,sur=wd*(1-(pet.dive||0));
-    composite(fb,pet,{sAmt:wd>0?.72:.6,sdx:1+pet.h*0.35+sur*4,sdy:1+pet.h+sur*5,outline:hover||game.grabbing?hex('#e9f3c4'):undefined});
-    if(pet.drawExtras)pet.drawExtras(fb);subEnd(w,pet);
+    const aq=w.tank==='aqua'&&!(pet.h>2),dv=pet.dive||0,hh=pet.h||0;
+    const sfn=aq?(x,y)=>{const s=waterAt(w,x,y+hh)*(1-dv);return[Math.round(1+hh*0.35+s*4),Math.round(1+hh+s*5)];}:null;
+    composite(fb,pet,{sAmt:aq?.72:.6,sdx:1+hh*0.35,sdy:1+hh,sfn,outline:hover||game.grabbing?hex('#e9f3c4'):undefined});
+    subMid();if(pet.drawExtras)pet.drawExtras(fb);
     if(hat&&hat!=='halo'){fb.clearLayer();drawHat(fb,hat,pet.hatAnchor(),w.t);composite(fb,HAT_PAINTER,{sAmt:.55,sdx:1,sdy:2});}
     for(const q of w.prey)if(q.caught&&!q.layered)q.draw(fb,w.t);
     fb.clearLayer();for(const q of w.prey)if(q.caught&&q.layered)q.drawL(fb);composite(fb,FOOD_PAINTER);
+    subEnd(w,pet);
     if(pet.dive>0.5&&w.pads.length)drawPads(fb,w);};
   if(pet.h<=3)drawPet();
   renderObjects(front);
@@ -4918,7 +4961,7 @@ canvas.addEventListener('pointerdown',e=>{
   const P=game.pointer,[x,y]=toPix(e);P.x=x;P.y=y;P.down=true;P.inside=true;P.touch=e.pointerType==='touch';P.sprayT=0;P.vx=P.vy=0;P.lt=performance.now();
   const w=game.world,pet=w.pet,B=w.bounds;
   if(game.placing){if(e.button!==0)return;const id=game.placing;game.placing=null;
-    if(placedCount(id)<(save.inv[id]||0)){const[lx,ly]=FLOAT_TOYS.includes(id)?[clamp(x,B.x0,B.x1),clamp(y,B.y0,B.y1)]:landSnap(w,clamp(x,B.x0,B.x1),clamp(y,B.y0,B.y1));placeObject(id,lx,ly);SFX.play('place');dust(w,x,y,6);markDirty();ui.toast(`Placed the ${ITEMS[id].name.toLowerCase()}!`+(save.set.tip1?'':' Tip: click toys and decor with the Pet tool to use them.'),true);save.set.tip1=true;}
+    if(placedCount(id)<(save.inv[id]||0)){const[lx,ly]=ITEMS[id].cat==='toy'?[clamp(x,B.x0,B.x1),clamp(y,B.y0,B.y1)]:landSnap(w,clamp(x,B.x0,B.x1),clamp(y,B.y0,B.y1));placeObject(id,lx,ly);SFX.play('place');dust(w,x,y,6);markDirty();ui.toast(`Placed the ${ITEMS[id].name.toLowerCase()}!`+(save.set.tip1?'':' Tip: click toys and decor with the Pet tool to use them.'),true);save.set.tip1=true;}
     return;}
   for(let i=0;i<w.coins.length;i++){const c=w.coins[i];if(Math.hypot(c.x-x,c.y-c.h-2.5-y)<6){w.coins.splice(i,1);addCoins(c.v,c.x,c.y-c.h);spawn(w,'star',c.x,c.y-c.h-2,{life:0.18});return;}}
   const tool=game.tool;
@@ -4964,7 +5007,7 @@ function up(){const P=game.pointer;P.down=false;SFX.mistOn(false);
   if(game.held&&overTrash(P.cx,P.cy)){const q=game.held;trashFood(q);SFX.play('thunk');ui.toast(`Threw away the ${FOODS[q.type].name.replace(/^an? /,'')}.`,true);}
   dropHeld();
   if(game.grabbing){game.world.pet.release();game.grabbing=false;}
-  if(game.dragObj){const o=game.dragObj;o.dragged=false;if(!FLOAT_TOYS.includes(o.id))[o.x,o.y]=landSnap(game.world,o.x,o.y);else if(waterAt(game.world,o.x,o.y)>0)game.world.ripples.push({x:o.x,y:o.y,age:0});if(o instanceof Toy){o.vx=clamp(P.vx*0.5,-150,150);o.vy=clamp(P.vy*0.5,-150,150);const sp=Math.hypot(o.vx,o.vy);o.vh=Math.min(45,sp*0.25);o.h=0.1;}
+  if(game.dragObj){const o=game.dragObj;o.dragged=false;if(o instanceof Decor)[o.x,o.y]=landSnap(game.world,o.x,o.y);else if(waterAt(game.world,o.x,o.y)>0)game.world.ripples.push({x:o.x,y:o.y,age:0});if(o instanceof Toy){o.vx=clamp(P.vx*0.5,-150,150);o.vy=clamp(P.vy*0.5,-150,150);const sp=Math.hypot(o.vx,o.vy);o.vh=Math.min(45,sp*0.25);o.h=0.1;}
     SFX.play('place');game.dragObj=null;markDirty();}}
 function pointerEnd(e){
   if(game.panning&&(e.pointerType==='mouse'||game.panning.free)){const pn=game.panning;game.panning=null;if(e.pointerType==='touch')touches.delete(e.pointerId);
