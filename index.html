@@ -72,13 +72,13 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 @keyframes pulse{50%{opacity:.45}}
 #toast{position:fixed;left:50%;top:calc(var(--top) + 4px);transform:translateX(-50%);z-index:9;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:3px;width:max-content;max-width:min(560px,calc(100vw - 32px))}
 /* newest message on top; the previous one slides under it, smaller and faded */
-.tmsg{padding:7px 14px 6px;font-size:21px;text-align:center;opacity:.93;transform-origin:50% 0;transition:transform .3s ease,opacity .3s ease,filter .3s;animation:tmsgin .3s ease}
+.tmsg{padding:7px 14px 6px;font-size:21px;text-align:center;opacity:.93;transform-origin:50% 0;transition:transform .65s cubic-bezier(.25,.8,.3,1),opacity .65s ease,filter .65s;animation:tmsgin .6s cubic-bezier(.25,.8,.3,1)}
 .tmsg.old{transform:scale(.82);opacity:.5;filter:saturate(.6)}
-.tmsg.gone{opacity:0;transform:scale(.7) translateY(-6px)}
+.tmsg.gone{opacity:0;transform:scale(.75) translateY(-4px)}
 .tmsg.event{background:#3a2e10;box-shadow:inset 0 0 0 2px var(--amber-d),0 4px 0 #040604;color:#ffe7a6}
-.tmsg.event:not(.old){animation:toastpop .35s}
-@keyframes tmsgin{from{opacity:0;transform:translateY(-10px) scale(.96)}}
-@keyframes toastpop{0%{transform:scale(.7)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+.tmsg.event:not(.old){animation:toastpop .55s cubic-bezier(.25,.8,.3,1)}
+@keyframes tmsgin{from{opacity:0;transform:translateY(-6px) scale(.98)}}
+@keyframes toastpop{0%{transform:scale(.88);opacity:0}60%{transform:scale(1.03);opacity:1}100%{transform:scale(1)}}
 #topR{margin-left:auto;display:flex;align-items:center;gap:8px}
 #coins{display:flex;align-items:center;gap:6px;padding:6px 12px 6px 8px;font-family:var(--display);font-size:18px;color:var(--amber);cursor:pointer}
 #coins img{width:24px;height:24px}
@@ -4764,7 +4764,7 @@ const ui={
   showMsg(text,ev){const box=$('toast');
     if(text===this.curMsg){if(ev){const top=box.querySelector('.tmsg:not(.old):not(.gone)');if(top){top.classList.add('event');top.style.animation='none';void top.offsetWidth;top.style.animation='';}}return;}
     this.curMsg=text;this.msgAt=performance.now();
-    [...box.querySelectorAll('.tmsg:not(.gone)')].forEach((e,i)=>{if(i===0)e.classList.add('old');else{e.classList.add('gone');setTimeout(()=>e.remove(),330);}});
+    [...box.querySelectorAll('.tmsg:not(.gone)')].forEach((e,i)=>{if(i===0)e.classList.add('old');else{e.classList.add('gone');setTimeout(()=>e.remove(),700);}});
     const n=document.createElement('div');n.className='tmsg chunk'+(ev?' event':'');n.textContent=text;box.prepend(n);},
   toast(msg,ev){this.showMsg(msg,ev);if(ev)this.evT=2.8;},
   update(){
