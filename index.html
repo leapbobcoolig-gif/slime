@@ -661,7 +661,7 @@ const PAL={
           orange:ramp('#6a300c','#b0561c','#e08c3c','#ffc674'),beard:ramp('#1c1a1c','#3c3a40','#6a6670','#a8a4ae'),eye:ramp('#241406','#6a4416','#b88a36','#f0cc6a'),
           dull:ramp('#3a2c20','#5e4a36','#7e6850','#9c8670'),outline:'#120a04'},
   cuttle:{body:ramp('#3a2a20','#6a4c38','#a07a5a','#d4b28a'),dark:ramp('#1a100c','#34221a','#523826','#6e5036'),pale:ramp('#8a8070','#c2b6a2','#e6dccc','#fff8ee'),
-          fin:ramp('#5e5652','#9a908a','#d2cac2','#f6f2ec'),irid:ramp('#1e4a58','#2e7a8a','#4ab0b8','#9ae8e0'),eye:ramp('#3a2a08','#7a5a18','#c89a38','#f4d878'),outline:'#120c08'},
+          fin:ramp('#5e5652','#9a908a','#d2cac2','#f6f2ec'),irid:ramp('#1e4a58','#2e7a8a','#4ab0b8','#9ae8e0'),eye:ramp('#6a6040','#a89a68','#d8cc98','#fbf4d0'),outline:'#120c08'},
   golem:{stone:ramp('#2c2926','#4a4540','#6e675d','#989080'),stoneD:ramp('#1c1a18','#302c28','#4a4540','#6a635a'),moss:ramp('#1c3614','#2c5620','#44802e','#6aa640'),
           mossL:ramp('#3a5a18','#5a8a26','#86b43a','#b4d85a'),head:ramp('#26282a','#3e4246','#5c6266','#848a8a'),eye:'#6cff8e',eyeC:'#e8fff0',outline:'#0c0a08'},
   kraken:{body:ramp('#2a1034','#4c2058','#7a3c80','#b068a8'),belly:ramp('#5e2c62','#8e5088','#bc80ac','#e8b8d0'),spot:ramp('#3a1a58','#5a2a80','#8048a8','#a878d0'),
@@ -2809,12 +2809,13 @@ class Kraken extends Pet{
 // =====================================================================
 class Cuttle extends Kraken{
   constructor(world,x,y){super(world,x,y);this.kind='cuttle';this.mind=mindFor('cuttle','');this.outline=hex(PAL.cuttle.outline);this.sc=1.45;
-    this.finPh=rand(TAU);this.display=0;this.camo=0;this.ft=null;this.reelT=0;
+    this.finPh=rand(TAU);this.display=0;this.camo=0;this.hunt=0;this.ft=null;this.reelT=0;
     this.arms=[];for(let i=0;i<8;i++){const off=(i-3.5)/3.5,nodes=[];for(let k=0;k<6;k++)nodes.push({x:this.x,y:this.y});this.arms.push({off,ph:rand(TAU),nodes});}
+    for(const sd of[-1,1]){const nodes=[];for(let k=0;k<9;k++)nodes.push({x:this.x,y:this.y});this.arms.push({off:sd*0.28,ph:rand(TAU),nodes,feed:true});}
     this.updateTent(0,false);}
   // head (and arms) lead; hunting distance is measured from the arm tips
-  headPos(){const c=Math.cos(this.ang),s=Math.sin(this.ang);return{x:this.x+c*5.2*this.sc,y:this.y+s*5.2*this.sc};}
-  mouthScreen(){const[x,y]=this.W(4.6,0);return{x,y};}
+  headPos(){const c=Math.cos(this.ang),s=Math.sin(this.ang);return{x:this.x+c*6*this.sc,y:this.y+s*6*this.sc};}
+  mouthScreen(){const[x,y]=this.W(5.4,0);return{x,y};}
   hatAnchor(){const[x,y]=this.W(-0.8,0);return{x,y:y-2,a:this.ang,s:1.0};}
   submerge(){return 0.3;}
   goTo(tx,ty,dt,mode,arrive=3){const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y),diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);
@@ -2836,7 +2837,7 @@ class Cuttle extends Kraken{
     this.faceToward(p.x,p.y,dt*0.6);const tip=this.ftTip();
     if(T.t>0.14&&Math.hypot(tip.x-p.x,tip.y-(p.y-p.h))<4.5){p.caught=true;this.held=p;this.tg=null;this.reelT=0.3;this.ft.caught=true;catchFx(this,p);return 'caught';}
     if(T.t>0.42){this.tg=null;this.ft=null;return 'miss';}return null;}
-  ftTip(){const F=this.ft,[rx,ry]=this.W(4.6,0);if(!F)return{x:rx,y:ry};const p=F.p,k=F.caught?clamp(this.reelT/0.3,0,1):Math.min(1,F.t/0.14);
+  ftTip(){const F=this.ft,[rx,ry]=this.W(5.4,0);if(!F)return{x:rx,y:ry};const p=F.p,k=F.caught?clamp(this.reelT/0.3,0,1):Math.min(1,F.t/0.14);
     return{x:lerp(rx,p.x,k),y:lerp(ry,p.y-p.h,k)};}
   syncHeld(){if(!this.held)return;if(this.reelT>0){const t=this.ftTip();this.held.sx=t.x;this.held.sy=t.y;}else{const m=this.mouthScreen();this.held.sx=m.x;this.held.sy=m.y;}}
   startle(x,y){if(this.state==='grabbed'||this.state==='fall')return;if(this.held)this.finishEating();this.tg=null;this.ft=null;this.prey=null;
@@ -2849,10 +2850,12 @@ class Cuttle extends Kraken{
     const hunting=this.state==='hunt'||this.state==='notice'||this.state==='strike';this.camo+=((this.state==='idle'||this.state==='sleeping'?1:0)-this.camo)*Math.min(1,dt*0.6);
     this.hunt=(this.hunt||0)+((hunting?1:0)-(this.hunt||0))*Math.min(1,dt*3);
     this.ashore=false;this.moist=1;super.update(dt);if(this.state==='flee'&&this.speed>6){const a=Math.atan2(this.vy,this.vx);this.ang+=wrapA(a+Math.PI-this.ang)*Math.min(1,dt*6);}}
-  updateTent(dt,dangle){if(!this.arms)return;const sc=this.sc,seg=1.25*sc;
-    for(const A of this.arms){const N=A.nodes,[rx,ry]=this.W(4.2,A.off*1.1);N[0].x=rx;N[0].y=ry;
-      const spread=this.hunt>0.3?0.25+this.hunt*0.35:0.35,base=dangle?Math.PI/2+A.off*0.4:this.ang+A.off*spread;
-      for(let k=1;k<N.length;k++){const f=k/(N.length-1),p=N[k],q=N[k-1],a=base+Math.sin(this.t*2.4+A.ph-k*0.7)*0.18*(1-this.hunt*0.5)+A.off*f*0.3;
+  updateTent(dt,dangle){if(!this.arms)return;const sc=this.sc;
+    for(const A of this.arms){const N=A.nodes,fd=A.feed,seg=(fd?1.45:1.2)*sc,[rx,ry]=this.W(5.2,A.off*1.1);N[0].x=rx;N[0].y=ry;
+      const spread=fd?0.5:0.95-this.hunt*0.35,base=dangle?Math.PI/2+A.off*0.4:this.ang+A.off*spread;
+      for(let k=1;k<N.length;k++){const f=k/(N.length-1),p=N[k],q=N[k-1];
+        // arm tips curl gently inward; the feeding tentacles trail and sway further out
+        const a=base+Math.sin(this.t*(fd?1.7:2.4)+A.ph-k*0.7)*(fd?0.28:0.16)*(1-this.hunt*0.5)-A.off*f*(fd?0.6:0.7);
         const dx=q.x+Math.cos(a)*seg,dy=q.y+Math.sin(a)*seg,st=dt>0?Math.min(1,dt*9):1;p.x+=(dx-p.x)*st;p.y+=(dy-p.y)*st;
         const lx=p.x-q.x,ly=p.y-q.y,l=Math.hypot(lx,ly)||1;p.x=q.x+lx/l*seg;p.y=q.y+ly/l*seg;}}}
   color(m,q,s,l,x,y){const P=PAL.cuttle,F=this.frame,dx=x+.5-F.x,dy=y+.5-F.y,u=(dx*F.c+dy*F.s)/this.sc,v=(-dx*F.s+dy*F.c)/this.sc;
@@ -2861,31 +2864,35 @@ class Cuttle extends Kraken{
         const wave=Math.sin(u*1.3-this.t*7);if(this.hunt>0.4&&wave>0.45)return P.dark[q];
         if(this.display>0.2||this.flush>0.5){if(Math.sin(v*2.2+u*0.4)>0.35)return P.dark[q];return P.pale[q];}
         if(m===M.BODY&&Math.abs(v)>2.3)return P.pale[Math.min(3,q+1)];
-        const mo=vnoise(u*0.9+7,v*0.9+3);if(mo>0.62-this.camo*0.1)return P.dark[Math.max(0,q-1)];if(hash(x*3,y*7)>0.9)return P.pale[q];return P.body[q];}
+        const mo=vnoise(u*0.9+7,v*0.9+3);if(mo>0.68-this.camo*0.1)return P.dark[Math.max(0,q-1)];if(hash(x*3,y*7)>0.95)return P.pale[q];return P.body[q];}
       case M.LIMB:return P.fin[q];
-      case M.TOE:{if(hash(x*5,y*3)>0.78)return P.irid[q];return(s>2?P.pale:P.body)[Math.max(0,q-(s>2?1:0))];}
+      case M.TOE:{if(s>=20)return P.pale[Math.min(3,q+1)];if(s>=10)return P.pale[q];if(hash(x*5,y*3)>0.88)return P.irid[q];return((s|0)%2?P.pale:P.body)[q];}
       case M.EYE:return P.eye[q];case M.PUPIL:return INK;case M.LID:return P.body[q];
     }return INK;}
   draw(fb0){
     const sc=this.sc,fb={cap:(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r)};
     // fin skirt: a thin rippling fringe all along both sides of the mantle
     const hw=u=>u<-1?lerp(2.0,3.3,(u+5.6)/4.6):lerp(3.3,2.8,(u+1)/3.8);
-    for(const sd of[-1,1])for(let u=-5.4;u<=2.6;u+=0.55){const wv=Math.sin(this.finPh-u*1.3+(sd>0?0.6:0))*0.5,[fx,fy]=this.W(u,sd*(hw(u)+0.75+wv));fb.cap(fx,fy,0.9,fx,fy,0.9,M.LIMB,1);}
+    for(const sd of[-1,1])for(let u=-5.4;u<=2.0;u+=0.55){const wv=Math.sin(this.finPh-u*1.3+(sd>0?0.6:0))*0.5,[fx,fy]=this.W(u,sd*(hw(u)+0.75+wv));fb.cap(fx,fy,0.9,fx,fy,0.9,M.LIMB,1);}
     // mantle (flat oval) and head
-    const br=1+Math.sin(this.t*1.8)*0.02,pz=this.pulse;const[a0,a1]=this.W(-5.6,0),[b0,b1]=this.W(-1,0),[c0,c1]=this.W(2.6,0);
+    const br=1+Math.sin(this.t*1.8)*0.02,pz=this.pulse;const[a0,a1]=this.W(-5.6,0),[b0,b1]=this.W(-1,0),[c0,c1]=this.W(2.2,0);
     this.frame={x:b0,y:b1,c:Math.cos(this.ang),s:Math.sin(this.ang)};
-    fb.cap(a0,a1,2.0*br,b0,b1,3.3*br*(1-pz*0.1),M.BODY,2,0,0,0.4);fb.cap(b0,b1,3.3*br*(1-pz*0.1),c0,c1,2.8,M.BODY,2,0,0,0.5);
-    const[h0,h1]=this.W(3.6,0);fb.cap(h0,h1,2.3,h0,h1,2.3,M.CLAW2,2,0,0,0.9);
-    for(const sd of[-1,1]){const[e0,e1]=this.W(3.3,sd*2.0);if(this.eyesClosed||this.blink>0)fb.cap(e0,e1,1.0,e0,e1,1.0,M.LID,3,0,0,1.2);else fb.cap(e0,e1,1.15,e0,e1,1.15,M.EYE,3,0,0,1.2);}
-    // arms, held forward in a bundle (they splay a little when hunting)
-    for(const A of this.arms){const N=A.nodes;for(let k=0;k<N.length-1;k++){const r0=0.75-k*0.1,r1=0.75-(k+1)*0.1;fb.cap(N[k].x,N[k].y,r0,N[k+1].x,N[k+1].y,r1,M.TOE,2,k,k+1,1.2);}}
-    // the two feeding tentacles shooting out to grab
-    if(this.ft){const[rx,ry]=this.W(4.6,0),tip=this.ftTip();for(const sd of[-1,1]){const px=-Math.sin(this.ang)*sd*0.6,py=Math.cos(this.ang)*sd*0.6;
-      fb.cap(rx+px,ry+py,0.4,tip.x+px*0.5,tip.y+py*0.5,0.35,M.TOE,3,0,0,1.5);fb.cap(tip.x+px*0.5,tip.y+py*0.5,0.7,tip.x+px*0.5,tip.y+py*0.5,0.7,M.TOE,3,0,0,1.6);}}
+    fb.cap(a0,a1,2.0*br,b0,b1,3.3*br*(1-pz*0.1),M.BODY,2,0,0,0.4);fb.cap(b0,b1,3.3*br*(1-pz*0.1),c0,c1,2.4,M.BODY,2,0,0,0.5);
+    // head: narrower than the mantle, with the eyes bulging out on either side
+    const[h0,h1]=this.W(3.6,0),[h2,h3]=this.W(4.9,0);fb.cap(h0,h1,1.9,h2,h3,1.4,M.CLAW2,2,0,0,0.9);
+    for(const sd of[-1,1]){const[e0,e1]=this.W(3.7,sd*2.2);if(this.eyesClosed||this.blink>0)fb.cap(e0,e1,1.25,e0,e1,1.25,M.LID,3,0,0,1.2);else fb.cap(e0,e1,1.35,e0,e1,1.35,M.EYE,3,0,0,1.2);}
+    // eight arms, fanned forward and banded so each one reads on its own
+    const seg=(N,k,r0,r1,s0,s1,b)=>fb.cap(N[k].x,N[k].y,r0,N[k+1].x,N[k+1].y,r1,M.TOE,2,s0,s1,b);
+    // two long feeding tentacles with clubbed tips: they trail at rest and shoot straight out to grab
+    for(const A of this.arms)if(A.feed){const N=A.nodes;
+      if(this.ft){const[rx,ry]=this.W(5.2,A.off*1.1),tip=this.ftTip(),px=-Math.sin(this.ang)*A.off*1.2,py=Math.cos(this.ang)*A.off*1.2;
+        fb.cap(rx,ry,0.35,tip.x+px,tip.y+py,0.3,M.TOE,3,10,10,1.5);fb.cap(tip.x+px,tip.y+py,0.65,tip.x+px,tip.y+py,0.65,M.TOE,3,20,20,1.6);}
+      else{for(let k=0;k<N.length-1;k++)seg(N,k,0.3,0.28,10,10,1.3);const t=N[N.length-1],u=N[N.length-2];fb.cap(u.x,u.y,0.5,t.x,t.y,0.6,M.TOE,3,20,20,1.4);}}
+    for(const A of this.arms)if(!A.feed){const N=A.nodes;for(let k=0;k<N.length-1;k++)seg(N,k,0.5-k*0.07,0.5-(k+1)*0.07,k,k+1,1.2);}
   }
-  drawExtras(fb){const E=hex('#0a0806');// W-shaped pupils + a glint
-    if(!(this.eyesClosed||this.blink>0))for(const sd of[-1,1]){const[e0,e1]=this.W(3.3,sd*2.0),c=Math.cos(this.ang),s=Math.sin(this.ang),px=-s,py=c;
-      for(const k of[-1,-0.5,0,0.5,1])pset(fb,e0+px*k*1.1*this.sc+c*(Math.abs(k)===0.5?0.5:0),e1+py*k*1.1*this.sc+s*(Math.abs(k)===0.5?0.5:0),E);pset(fb,e0+c*0.8-px*0.6,e1+s*0.8-py*0.6,hex('#fff4d8'));}}
+  drawExtras(fb){const E=hex('#0a0806'),sc=this.sc;// goat-like W-shaped pupils on the outward-facing side eyes
+    if(!(this.eyesClosed||this.blink>0))for(const sd of[-1,1]){const[e0,e1]=this.W(3.7,sd*2.4),c=Math.cos(this.ang),s=Math.sin(this.ang),nx=-s*sd,ny=c*sd;
+      for(const k of[-1,0,1]){const o=(k===0?0.15:0.55)*sc;pset(fb,e0+c*k*0.75*sc+nx*o,e1+s*k*0.75*sc+ny*o,E);}}}
   glow(){}
   statusText(){switch(this.state){case 'idle':return this.camo>0.6?'is hovering, blending in with the sand':'is hovering and rippling its fins';case 'wander':return 'is gliding along on rippling fins';
     case 'hunt':return 'is flashing hypnotic stripes at its prey';case 'strike':return 'shoots out its feeding tentacles!';case 'flee':return 'inked and jetted backwards!';
