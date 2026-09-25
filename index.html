@@ -2355,7 +2355,8 @@ class Slime extends Pet{
     if(this.inside||(this.held&&this.state==='chew')){const type=this.inside?this.inside.type:this.held.type,dg=this.inside?Math.min(1,this.inside.t/5):0,bx=this.x+Math.sin(this.t*1.3)*1.6,by=this.y+oy+1+Math.cos(this.t*1.1)*1;
       if(dg<0.95){// draw the food, then keep only the part inside the gel and tint it
         const W=fb.w,r=8,x0=Math.floor(bx-r),y0=Math.floor(by-r),keep=[];for(let y=y0;y<=y0+2*r;y++)for(let x=x0;x<=x0+2*r;x++){if(x<0||y<0||x>=W||y>=fb.h)continue;const i=y*W+x;keep.push([i,fb.px[i],!!fb.mat[i]&&fb.cls[i]===2]);}
-        drawFoodAt(fb,type,bx,by,this.t);for(const[i,old,inBody]of keep){if(!inBody)fb.px[i]=old;else fb.px[i]=mixc(fb.px[i],C[2],0.35+dg*0.6);}}}
+        drawFoodAt(fb,type,bx,by,this.t);// only the food itself is tinted; as it digests it melts into the clear gel
+        for(const[i,old,inBody]of keep){if(!inBody||fb.px[i]===old)fb.px[i]=old;else fb.px[i]=mixc(mixc(fb.px[i],C[2],0.35),old,dg);}}}
     // shine + face
     pset(fb,this.x-this.R*0.45,this.y+oy-this.R*0.45,hex('#ffffff'));pset(fb,this.x-this.R*0.45+1,this.y+oy-this.R*0.45,hex('#ffffff'));pset(fb,this.x-this.R*0.45,this.y+oy-this.R*0.45+1,C[3]);
     if(save.set.slimeFace===false)return;
