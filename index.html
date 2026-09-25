@@ -184,6 +184,9 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .pcard{display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--panel-2);border:3px solid #060a07;border-radius:10px;box-shadow:inset 0 0 0 2px var(--line)}
 .pcard.here{box-shadow:inset 0 0 0 2px var(--moss)}
 .pcard.locked canvas{filter:grayscale(.55) brightness(.75)}
+.pcard h3 .rn{font:inherit;font-size:13px;margin-left:6px;padding:0 5px;background:#2a2f22;color:#d8e6b8;border:2px solid #060a07;border-radius:5px;cursor:pointer;vertical-align:middle}
+.pcard .rnin{font:inherit;font-size:18px;padding:3px 6px;background:#10160e;color:#fff;border:2px solid var(--amber);border-radius:6px;width:100%}
+.pcard .temper{color:#ffd88a;font-weight:normal}
 .pcard .hab{font:inherit;font-size:12px;padding:4px 6px;border-radius:6px;background:#2a2f22;color:#d8e6b8;border:2px solid #060a07;cursor:pointer;text-align:center}
 .pcard .hab.on{background:#173a44;color:#bdeef0}
 .pcard div.hab{cursor:default}
@@ -298,6 +301,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
   <div class="srow"><label>Screen shake</label><button class="sw" id="setShake" aria-label="Screen shake"></button></div>
   <div class="srow"><label>Thought bubbles<small>Little icons when your pet wants something.</small></label><button class="sw" id="setBubbles" aria-label="Thought bubbles"></button></div>
   <div class="srow"><label>Slime face<small>Eyes and a smile on the jelly slime.</small></label><button class="sw" id="setSlimeFace" aria-label="Slime face"></button></div>
+  <div class="srow"><label>Thought marks<small>Little ? ! and ... above critters while they think.</small></label><button class="sw" id="setThoughts" aria-label="Thought marks"></button></div>
   <div class="srow"><label>Pixel-perfect scaling<small>Crisper pixels, smaller tank.</small></label><button class="sw" id="setPixel" aria-label="Pixel-perfect scaling"></button></div>
   <div class="srow"><label for="setUi">Interface size<small id="setUiV">Auto</small></label><div style="display:flex;gap:8px;align-items:center"><input type="range" id="setUi" min="0.6" max="1.4" step="0.05"><button class="btn alt" id="setUiAuto" style="flex:none">Auto</button></div></div>
   <div class="srow" id="resetRow"><label>Reset save<small>Coins, items and bonds start over.</small></label><button class="btn alt danger" id="resetBtn" style="flex:none">Reset</button></div>
@@ -893,7 +897,43 @@ class Pet{
     this.world=world;this.kind=kind;this.state='idle';this.timer=1;this.scanT=rand(.5);
     this.held=null;this.tg=null;this.t=rand(10);this.blinkT=rand(2,5);this.blink=0;this.zzT=0;this.fxT=0;
     this.eyesClosed=false;this.preview=false;this.prey=null;this.tx=0;this.ty=0;this.pace='walk';
+    this.mind=mindFor(kind,'');this.ignored=new Map();this.glance=null;this.glanceT=rand(2,5);
   }
+  facing(){return this.headAng!==undefined?this.headAng:(this.ang||0);}
+  // can this critter perceive the thing right now, and how?
+  sense(t,food){const M=this.mind,hd=this.headPos(),d=Math.hypot(t.x-hd.x,t.y-hd.y),mv=t._mv||0,moving=mv>3||t.inHand||t.kind==='laser';
+    const[R,F,Bst]=M.sight;
+    if(R>0){const off=Math.abs(wrapA(Math.atan2(t.y-hd.y,t.x-hd.x)-this.facing()));
+      if(off<F/2){const range=moving?R*Bst*(t.inHand?1.3:1):(M.motionOnly?0:R*0.7);if(d<range)return 'sight';}}
+    if(food&&M.smell&&d<M.smell*(t.inHand?1.6:1)*(this.world.stats.fed<45?1.6:1))return 'smell';
+    if(M.vib&&moving&&!(t.h>2)&&d<M.vib)return 'vib';
+    if(d<12)return 'touch';return null;}
+  ignoreIt(t,sec){this.ignored.set(t,this.world.t+sec);}
+  isIgnored(t){const u=this.ignored.get(t);return u!==undefined&&u>this.world.t;}
+  notice(t,kind,how){if(this.preview){this.commit(t,kind);return;}const M=this.mind;
+    this.att={t,kind,how,time:0,dur:M.think*rand(0.7,1.3)*(t.inHand?0.45:1)*(how==='sight'?1:1.25)*(t.kind==='laser'?0.5:1)};
+    this.state='notice';this.timer=this.att.dur+3;this.hp=null;think(this,this.mind.smart<0.2&&Math.random()<0.5?'...':'?');}
+  wantIt(t,kind){const S=this.world.stats,M=this.mind;if(t.inHand)return Math.random()<0.95;
+    if(kind==='prey'){const pref=(DIET[this.kind][t.type]||0)/10;return Math.random()<clamp(0.35+pref*0.4+(70-S.fed)/80,0.15,1);}
+    const fun=(t.kind==='laser'||t.kind==='feather'?0.35:0)+(t.lively?0.2:0)-(t.bore||0)*0.6;return Math.random()<clamp(M.energy*0.55+M.cur*0.3+fun+(80-S.happy)/100,0.08,0.97);}
+  commit(t,kind){this.prey=t;this.state='hunt';this.hp=null;this.timer=kind==='prey'?14:(t.kind==='laser'||t.kind==='feather'?20:9);if(!this.preview)think(this,kind==='play'&&Math.random()<0.4?'<3':'!',true);}
+  // body language while sizing something up
+  cue(dt,A){const k=this.kind;
+    if(!A.cued){A.cued=true;if(this.flick&&(k==='lizard'||k==='dragon'||k==='snake'||k==='salamander'))this.flick();if(k==='golem')this.blink=0.35;}
+    if(k==='gecko')this.wag=1;else if(k==='tarantula')this.threat=Math.max(this.threat||0,0.3);else if(k==='turtle')this.reach=Math.max(this.reach||0,0.55);
+    else if(k==='slime')this.sq=Math.sin(this.t*11)*0.18;else if(k==='kraken')this.flush=Math.max(this.flush||0,0.3+0.25*Math.sin(this.t*10));
+    else if(k==='axolotl')this.ex=Math.max(this.ex||0,0.8);else if(k==='crab'&&this.antLag!==undefined)this.antLag+=Math.sin(this.t*12)*dt*3;}
+  // idle glances: look at nearby things, or at your cursor if it's curious
+  idleLook(dt){const w=this.world,M=this.mind;this.glanceT-=dt;
+    if(this.glanceT<=0){this.glanceT=rand(1.5,4)*(1.4-M.cur);const P=game.pointer,hd=this.headPos(),opts=[];
+      if(!this.preview&&P.inside&&Math.hypot(P.x-hd.x,P.y-hd.y)<70&&M.cur>0.35)opts.push({x:P.x,y:P.y,ptr:true});
+      for(const o of[...(w.toys||[]),...(w.decor||[])])if(Math.hypot(o.x-hd.x,o.y-hd.y)<80)opts.push(o);
+      if(Math.random()<0.4)opts.push({x:hd.x+rand(-40,40),y:hd.y+rand(-30,30)});
+      this.glance=opts.length?pick(opts):null;this.glanceUntil=w.t+rand(0.8,2);}
+    if(this.glance&&w.t<this.glanceUntil){const g=this.glance.ptr?game.pointer:this.glance;if(this.faceToward&&this.kind!=='frog')this.faceToward(g.x,g.y,dt*0.6);}
+    // shy critters edge away from a cursor hovering right over them
+    const P=game.pointer;if(!this.preview&&P.inside&&M.bold<0.35&&(game.tool==='pet'||game.tool==='grab')){const hd=this.headPos(),d=Math.hypot(P.x-hd.x,P.y-hd.y);
+      if(d<16&&Math.random()<dt*0.6){const a=Math.atan2(hd.y-P.y,hd.x-P.x),B=w.bounds;this.tx=clamp(hd.x+Math.cos(a)*30,B.x0,B.x1);this.ty=clamp(hd.y+Math.sin(a)*30,B.y0,B.y1);this.state='wander';this.pace='walk';this.timer=3;think(this,'!');}}}
   isActive(){if(this.preview||this.kind==='slime')return true;const d=this.world.dayness;return(this.kind==='lizard'||this.kind==='snake'||this.kind==='turtle'||this.kind==='chameleon'||this.kind==='dragon')?d>0.5:d<0.5;}
   flick(){}
   randomSpot(m=18){const B=this.world.bounds;return[rand(B.x0+m,B.x1-m),rand(B.y0+m,B.y1-m)];}
@@ -913,8 +953,10 @@ class Pet{
       this.state='sleep';this.timer=20;return;}
     if(w.lampRock&&(this.kind==='lizard'||this.kind==='snake'||this.kind==='turtle'||this.kind==='chameleon'||this.kind==='dragon')&&w.dayness>0.5&&Math.random()<(this.kind==='dragon'?0.5:0.35)){
       this.tx=w.lampRock.x+rand(-6,6);this.ty=w.lampRock.y+rand(-3,3);this.state='bask';this.timer=15;return;}
-    if(!act&&Math.random()<0.3){this.state='idle';this.timer=rand(2,4);return;}
-    [this.tx,this.ty]=this.wanderSpot();this.pace=act?(Math.random()<0.2?'slow':'walk'):'slow';
+    const M=this.mind,mem=w.foodMem;
+    if(!this.preview&&mem&&mem.length&&S.fed<55&&Math.random()<M.smart*0.35){const m=mem[mem.length-1];this.tx=m.x+rand(-6,6);this.ty=m.y+rand(-6,6);this.pace='walk';this.state='wander';this.timer=12;think(this,'?');return;}
+    if(!act&&Math.random()<0.3*(1.3-M.energy)){this.state='idle';this.timer=rand(2,4);return;}
+    [this.tx,this.ty]=this.wanderSpot();this.pace=act?(Math.random()<0.5-M.energy*0.4?'slow':'walk'):'slow';
     this.state='wander';this.timer=14;
   }
   // Wander over to a piece of decor and do something with it
@@ -934,10 +976,12 @@ class Pet{
     rad=rad||(this.isActive()?130:85);
     const hd=this.headPos();let best=null,bd=rad;
     const diet=DIET[this.kind];
-    for(const p of w.prey){if(p.dead||p.caught||p.hidden||!(diet[p.type]>0))continue;if(this.kind!=='frog'&&p.h>14)continue;
-      const d=Math.hypot(p.x-hd.x,p.y-hd.y)*(p.inHand?0.5:1);if(d<bd){bd=d;best=p;}}
+    let how=null;
+    for(const p of w.prey){if(p.dead||p.caught||p.hidden||!(diet[p.type]>0))continue;if(this.kind!=='frog'&&p.h>14)continue;if(this.isIgnored(p))continue;
+      const sn=this.sense(p,true);if(!sn)continue;
+      const d=Math.hypot(p.x-hd.x,p.y-hd.y)*(p.inHand?0.5:1)/(0.6+diet[p.type]/20);if(d<bd){bd=d;best=p;how=sn;}}
     if(!best)return false;
-    this.prey=best;this.state='hunt';this.timer=14;this.hp=null;return true;
+    this.notice(best,'prey',how);return true;
   }
   scanPlay(dt,close){
     if(this.preview)return false;
@@ -948,14 +992,22 @@ class Pet{
     if(!best&&!slow&&w.bubbles)for(const b of w.bubbles){if(b.dead||b.caught)continue;const d=Math.hypot(b.x-hd.x,b.y-hd.y);if(d<(close?60:110)&&d<bd){bd=d;best=b;}}
     if(!best&&!close&&w.feather&&w.feather.on&&!w.feather.dead&&!slow){const d=Math.hypot(w.feather.x-hd.x,w.feather.y-hd.y);if(d<200){best=w.feather;bd=d;}}
     if(!best&&!close&&w.toys&&w.toys.length&&S.happy<97)
-      for(const t of w.toys){if(t.cool>0||t.dragged||!t.playable||Math.random()>(t.lively?0.45:0.1))continue;const d=Math.hypot(t.x-hd.x,t.y-hd.y);if(d<150&&d<bd){bd=d;best=t;}}
-    if(!best)return false;
-    this.prey=best;this.state='hunt';this.timer=best.kind==='laser'||best.kind==='feather'?20:9;return true;
+      for(const t of w.toys){if(t.cool>0||t.dragged||!t.playable||this.isIgnored(t)||Math.random()>(t.lively?0.45:0.1)*(1-(t.bore||0)*0.7))continue;const d=Math.hypot(t.x-hd.x,t.y-hd.y);if(d<150&&d<bd){bd=d;best=t;}}
+    if(!best||this.isIgnored(best))return false;
+    const how=this.sense(best,false);if(!how&&best.kind!=='laser')return false;
+    this.notice(best,'play',how||'sight');return true;
   }
   brain(dt){
     const w=this.world,S=w.stats;this.timer-=dt;if(this.sleepCD>0)this.sleepCD-=dt;this.eyesClosed=false;
     switch(this.state){
-      case 'idle':this.stop(dt);if(this.danceNext){this.state='dance';this.timer=this.danceNext;this.danceNext=0;this.musicDance=true;break;}if(this.scanPrey(dt))break;if(this.scanPlay(dt))break;
+      case 'notice':{const A=this.att,t=A&&A.t;
+        if(!t||t.dead||t.caught||t.carriedBy||(t.kind==='laser'&&!t.on)){this.state='idle';this.timer=rand(.3,.8);break;}
+        this.stop(dt);if(this.faceToward)this.faceToward(t.x,t.y,dt);this.cue(dt,A);A.time+=dt;
+        if(!A.checked&&A.time>A.dur*0.5){A.checked=true;// a scatterbrained moment
+          if(!t.inHand&&Math.random()<(1-this.mind.focus)*0.3){think(this,'...');this.ignoreIt(t,rand(2,5));this.state='idle';this.timer=rand(1,2.5);break;}}
+        if(A.time>=A.dur){if(this.wantIt(t,A.kind))this.commit(t,A.kind);else{this.ignoreIt(t,rand(3,8));if(Math.random()<0.5)think(this,'...');this.state='idle';this.timer=rand(0.8,2);}}
+        break;}
+      case 'idle':this.stop(dt);this.idleLook(dt);if(this.danceNext){this.state='dance';this.timer=this.danceNext;this.danceNext=0;this.musicDance=true;break;}if(this.scanPrey(dt))break;if(this.scanPlay(dt))break;
         if(w.disco&&w.dayness<0.5&&!this.preview&&Math.random()<dt*0.35){this.state='dance';this.timer=rand(3,5);break;}
         if(this.timer<=0)this.decide();break;
       case 'dance':
@@ -971,6 +1023,7 @@ class Pet{
         break;
       case 'hunt':{const p=this.prey;
         if(!p||p.dead||p.caught||this.timer<=0){this.state='idle';this.timer=rand(.3,1);this.prey=null;break;}
+        if(!p.inHand&&!this.preview&&this.mind.focus<0.5&&Math.random()<dt*(0.5-this.mind.focus)*0.12){think(this,'?');this.ignoreIt(p,rand(1.5,3));this.state='idle';this.timer=rand(0.8,1.6);this.prey=null;break;}
         if(this.canStrike(p)){this.startStrike(p);this.state='strike';break;}
         const hd=this.headPos(),d=Math.hypot(p.x-hd.x,p.y-hd.y);
         if(p.play||p.inHand){this.goTo(p.x,p.y,dt,p.play?(d>22?'run':'walk'):'walk',1);}
@@ -991,7 +1044,7 @@ class Pet{
         break;}
       case 'strike':{const r=this.updateStrike(dt);
         if(r==='caught'&&this.held&&this.held.play){const t=this.held;this.held=null;t.caught=false;this.tg=null;this.prey=null;
-          if(t.onCatch)t.onCatch(this);if(w.onPlay)w.onPlay(this,t);this.state='idle';this.timer=rand(.3,.9);break;}
+          if(t.onCatch)t.onCatch(this);if(w.onPlay)w.onPlay(this,t);this.state='idle';this.timer=rand(.3,.9);if(this.onToyCatch)this.onToyCatch(t);break;}
         if(r==='caught'){this.state='chew';this.timer=this.kind==='frog'?0.7:this.kind==='snake'?1.8:BITER[this.kind]?BITER[this.kind].t:1.3;this.fxT=0.3;
           if(this.kind==='snake'&&!this.preview)SFX.play('swallow');}
         else if(r==='miss'){this.state='idle';this.timer=rand(.4,1);}
@@ -1121,6 +1174,43 @@ class Pet{
     }return '';
   }
 }
+
+// =====================================================================
+//  Minds: what each critter can sense, how long it thinks, and its personality
+//  sight:[range, field of view (rad), boost for moving things]; smell/vib: ranges; think: seconds to size something up
+// =====================================================================
+const MIND={
+  lizard:{sight:[120,2.6,1.6],smell:14,vib:0,think:0.45,cur:0.7,bold:0.6,smart:0.6,focus:0.65,energy:0.75,patience:0.3},
+  gecko:{sight:[100,2.4,1.6],smell:16,vib:0,think:0.6,cur:0.6,bold:0.5,smart:0.55,focus:0.65,energy:0.5,patience:0.6},
+  chameleon:{sight:[170,3.4,1.2],smell:0,vib:0,think:1.1,cur:0.4,bold:0.4,smart:0.6,focus:0.9,energy:0.25,patience:0.95},
+  dragon:{sight:[120,2.4,1.4],smell:14,vib:0,think:0.75,cur:0.5,bold:0.85,smart:0.5,focus:0.6,energy:0.4,patience:0.5},
+  salamander:{sight:[60,2.2,1.5],smell:32,vib:0,think:0.85,cur:0.45,bold:0.4,smart:0.35,focus:0.5,energy:0.35,patience:0.5},
+  snake:{sight:[70,2.0,1.8],smell:42,vib:30,think:0.85,cur:0.5,bold:0.5,smart:0.6,focus:0.8,energy:0.4,patience:0.8},
+  frog:{sight:[110,3.0,1.0],motionOnly:true,smell:12,vib:0,think:0.3,cur:0.4,bold:0.4,smart:0.4,focus:0.7,energy:0.4,patience:0.9},
+  tarantula:{sight:[30,3.0,1.3],smell:14,vib:85,think:0.6,cur:0.35,bold:0.7,smart:0.65,focus:0.85,energy:0.35,patience:0.9},
+  scorpion:{sight:[35,3.0,1.3],smell:16,vib:80,think:0.55,cur:0.4,bold:0.75,smart:0.6,focus:0.85,energy:0.4,patience:0.85},
+  turtle:{sight:[95,2.2,1.2],smell:32,vib:0,think:1.3,cur:0.55,bold:0.45,smart:0.45,focus:0.8,energy:0.3,patience:0.6},
+  axolotl:{sight:[40,2.4,1.5],smell:48,vib:22,think:0.9,cur:0.6,bold:0.6,smart:0.2,focus:0.3,energy:0.45,patience:0.4},
+  crab:{sight:[80,2.8,1.4],smell:36,vib:25,think:0.5,cur:0.85,bold:0.55,smart:0.5,focus:0.45,energy:0.6,patience:0.3},
+  millipede:{sight:[0,0,0],smell:34,vib:16,think:0.7,cur:0.4,bold:0.3,smart:0.1,focus:0.4,energy:0.3,patience:0.5},
+  gsnail:{sight:[25,2.0,1],smell:65,vib:0,think:1.6,cur:0.5,bold:0.3,smart:0.2,focus:0.9,energy:0.15,patience:1},
+  slime:{sight:[75,3.6,2.0],smell:26,vib:22,think:0.35,cur:0.95,bold:0.9,smart:0.08,focus:0.15,energy:0.85,patience:0.1},
+  golem:{sight:[90,2.2,1.2],smell:22,vib:40,think:1.9,cur:0.6,bold:0.7,smart:0.15,focus:0.3,energy:0.35,patience:0.6},
+  kraken:{sight:[135,3.6,1.5],smell:42,vib:40,think:0.6,cur:1.0,bold:0.65,smart:0.95,focus:0.75,energy:0.7,patience:0.6},
+  default:{sight:[100,2.6,1.4],smell:20,vib:0,think:0.6,cur:0.5,bold:0.5,smart:0.5,focus:0.6,energy:0.5,patience:0.5},
+};
+const TRAITS=['cur','bold','smart','focus','energy','patience'];
+const TEMPER={cur:['Curious','Aloof'],bold:['Brave','Shy'],smart:['Clever','Goofy'],focus:['Focused','Scatterbrained'],energy:['Hyper','Lazy'],patience:['Patient','Impatient']};
+// the same name always gives the same personality, so friends who pick the same name get the "same" critter
+function nameSeed(s){let h=2166136261;for(const c of String(s).toLowerCase().trim())h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0;}
+function mindFor(kind,name){const B=MIND[kind]||MIND.default,seed=nameSeed(kind+':'+(name||''));let k=0;const j=()=>{k++;return hash((seed%1000003)+k*7919,(seed>>>11)+k*31)-0.5;};
+  const m=Object.assign({},B);for(const t of TRAITS)m[t]=clamp(B[t]+j()*0.4,0.03,1);m.think=B.think*(1+j()*0.5);
+  let best='cur',bd=-1;for(const t of TRAITS){const d=Math.abs(m[t]-B[t]);if(d>bd){bd=d;best=t;}}m.temper=TEMPER[best][m[best]>=B[best]?0:1];return m;}
+// little pixel thought marks above a critter's head
+const THINK_G={'?':['.qq.','q..q','..q.','.q..','....','.q..'],'!':['q','q','q','q','.','q'],'...':['q.q.q'],'<3':['.q.q.','qqqqq','.qqq.','..q..']};
+function think(pet,g,force){if(!save.set.thoughts||pet.preview)return;const w=pet.world;if(!force&&(pet._thinkT||0)>w.t)return;pet._thinkT=w.t+0.5;
+  for(const p of w.parts)if(p.type==='think'&&p.owner===pet)p.life=0;
+  const hd=pet.headPos();spawn(w,'think',hd.x,hd.y-10-(pet.h||0),{g,owner:pet,life:1.2});}
 
 // =====================================================================
 //  Walker: lizard + salamander.  Spine chain + 4 IK legs with gait.
@@ -1649,7 +1739,7 @@ class Turtle extends Pet{
   noise(){return clamp(this.speed/6,0,1.5);}
   goTo(tx,ty,dt,mode,arrive=3){
     const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y);
-    const sw=1+(this.swim||0)*1.5,max=(mode==='run'?13:mode==='stalk'?3:mode==='slow'?4:mode==='lunge'?6:6.5)*sw;
+    const sw=1+(this.swim||0)*1.5,max=(mode==='run'?13:mode==='stalk'?3.5:mode==='slow'?4:mode==='lunge'?6:8)*sw;
     const dc=Math.hypot(tx-this.x,ty-this.y),done=d<=arrive||dc<=arrive+6;
     const diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);if(!done&&dc>5)this.ang+=clamp(diff,-1.8*sw*dt,1.8*sw*dt);
     let want=done?0:max;if(Math.abs(diff)>1)want*=0.3;if(d<arrive+5)want*=clamp((d-arrive)/5,0.25,1);if(this.tk>0.2)want=0;
@@ -2515,11 +2605,16 @@ class Kraken extends Pet{
     if(world.tank==='aqua'&&!world.allWater)[x,y]=waterSnap(world,x,y,0.4);
     this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.vx=0;this.vy=0;this.speed=0;this.sc=1.2;this.n=1;this.pts=[{x,y}];
     this.outline=hex(PAL.kraken.outline);this.seam=0.8;this.jetT=0;this.pulse=0;this.flush=0;this.reel=0;this.gt=0;this.glowPx=[];this.frame={x,y,c:1,s:0};
+    this.moist=1;this.ashore=false;this.wetT=0;
     this.tent=[];for(let i=0;i<8;i++){const off=-1.9+i*(3.8/7),nodes=[];for(let k=0;k<8;k++)nodes.push({x:x-Math.cos(this.ang+off)*k*1.8,y:y-Math.sin(this.ang+off)*k*1.8});
       this.tent.push({off,curl:(i%2?1:-1)*rand(0.9,1.5),nodes});}
     this.updateTent(0,false);
   }
   isActive(){return true;}
+  commit(t,kind){const w=this.world;if(w.tank==='aqua'&&!w.allWater&&waterAt(w,t.x,t.y)<=0.05){if(this.moist<0.45&&!t.inHand){this.ignoreIt(t,6);think(this,'...');this.state='idle';this.timer=1;return;}this.ashore=true;}
+    super.commit(t,kind);}
+  onToyCatch(t){if(!(t instanceof Toy)||t.carriedBy||!['plush','ball','squeaky','dice','yarn','bell'].includes(t.id))return;
+    t.carriedBy=this;t.carryT=rand(6,10);if(this.world.tank==='aqua'){const s=randomWaterSpot(this.world,0.3);if(s){[this.tx,this.ty]=s;this.pace='walk';this.state='wander';this.timer=10;think(this,'<3');}}}
   headPos(){return{x:this.x,y:this.y};}
   mouthScreen(){const c=Math.cos(this.ang),s=Math.sin(this.ang);return{x:this.x-c*1.2*this.sc,y:this.y-s*1.2*this.sc-this.h};}
   hatAnchor(){const c=Math.cos(this.ang),s=Math.sin(this.ang);return{x:this.x+c*2.8*this.sc,y:this.y+s*2.8*this.sc-this.h-3,a:this.ang,s:1.0};}
@@ -2530,7 +2625,7 @@ class Kraken extends Pet{
     const d=Math.hypot(tx-this.x,ty-this.y),diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);
     this.ang+=clamp(diff,-2.6*dt,2.6*dt);
     if(d>arrive){this.jetT-=dt;
-      if(this.onLand()){const sp=mode==='run'?9:5;this.vx+=(Math.cos(this.ang)*sp-this.vx)*Math.min(1,dt*4);this.vy+=(Math.sin(this.ang)*sp-this.vy)*Math.min(1,dt*4);}
+      if(this.onLand()){const sp=mode==='run'||mode==='lunge'?18:mode==='slow'||mode==='stalk'?8:13;this.vx+=(Math.cos(this.ang)*sp-this.vx)*Math.min(1,dt*8);this.vy+=(Math.sin(this.ang)*sp-this.vy)*Math.min(1,dt*8);}
       else if(this.jetT<=0&&Math.abs(diff)<0.9){const imp=(mode==='run'||mode==='lunge'?44:mode==='slow'||mode==='stalk'?16:28)*Math.min(1,d/24+0.35);
         this.vx+=Math.cos(this.ang)*imp;this.vy+=Math.sin(this.ang)*imp;this.pulse=1;this.jetT=mode==='run'||mode==='lunge'?0.42:mode==='slow'||mode==='stalk'?1.3:0.85;
         if(!this.preview){const[bx,by]=this.W(-2,0);this.world.ripples.push({x:bx,y:by+this.h,age:0.1,s:0.6});if(Math.random()<0.5)SFX.play('plip');}}}
@@ -2539,8 +2634,10 @@ class Kraken extends Pet{
   stop(dt){}
   onLand(){return!this.world.allWater&&waterAt(this.world,this.x,this.y)<=0;}
   faceToward(x,y,dt){this.ang+=clamp(wrapA(Math.atan2(y-this.y,x-this.x)-this.ang),-2*dt,2*dt);}
-  decide(){const w=this.world;if(this.visitDecor&&Math.random()<0.2&&this.visitDecor())return;
+  decide(){const w=this.world;if(this.moist>0.7&&this.visitDecor&&Math.random()<0.25*this.mind.cur&&this.visitDecor()){this.ashore=true;think(this,'?');return;}
     if(Math.random()<0.25){this.state='idle';this.timer=rand(2,4);return;}
+    if(w.tank==='aqua'&&this.moist>0.8&&Math.random()<0.15*this.mind.cur){const t=randomLandSpot(w);if(t){[this.tx,this.ty]=t;this.ashore=true;this.pace='walk';this.state='wander';this.timer=14;return;}}
+    if(!this.onLand())this.ashore=false;
     const t=randomWaterSpot(w,0.3)||this.randomSpot();[this.tx,this.ty]=t;this.pace=Math.random()<0.3?'slow':'walk';this.state='wander';this.timer=12;}
   randomSpot(m=18){if(this.world.tank==='aqua'){const t=randomWaterSpot(this.world,0.3);if(t)return t;}return super.randomSpot(m);}
   canStrike(p){const d=Math.hypot(p.x-this.x,p.y-this.y);return d<17*this.sc&&(p.h<4||(p.inHand&&p.h<12)||(p.play&&p.h<9));}
@@ -2568,14 +2665,18 @@ class Kraken extends Pet{
         if(wet){w.ripples.push({x:this.x,y:this.y,age:0});w.ripples.push({x:this.x,y:this.y,age:0.3});if(!this.preview)SFX.play('plip');this.state='idle';this.timer=1;}
         else{SFX.play('squish');this.state='return';this.timer=10;}}
       this.updateTent(dt,true);return;}
-    if(this.state==='return'){const[tx,ty]=waterSnap(w,this.x,this.y,0.3);if(this.goTo(tx,ty,dt,'walk',3)||this.timer<=0||!this.onLand()&&waterAt(w,this.x,this.y)>0.2){this.state='idle';this.timer=1;}this.timer-=dt;}
+    if(!w.allWater&&w.tank==='aqua'){const land=this.onLand();
+      this.moist=clamp(this.moist+(land?-dt/30:dt/4)+(land&&game.tool==='mist'&&game.pointer.down&&Math.hypot(game.pointer.x-this.x,game.pointer.y-this.y)<30?dt/3:0),0,1);
+      if(land){this.wetT-=dt;if(this.wetT<=0){this.wetT=0.18;wetAt(w,this.x,this.y);}
+        if(this.moist<0.3&&!['return','grabbed','fall','strike','chew'].includes(this.state)){this.state='return';this.timer=12;this.ashore=false;think(this,'!');}}}
+    if(this.state==='return'){const[tx,ty]=waterSnap(w,this.x,this.y,0.3);if(this.goTo(tx,ty,dt,'walk',3)||this.timer<=0||!this.onLand()&&waterAt(w,this.x,this.y)>0.2){this.state='idle';this.timer=1;this.ashore=false;if(!this.preview){w.ripples.push({x:this.x,y:this.y,age:0});SFX.play('plip');}}this.timer-=dt;}
     else this.brain(dt);
     if(this.state==='sleeping'||this.state==='petted')this.eyesClosed=this.state==='sleeping';
     // glide with water drag; never swim up onto the shore (but crawl back if somehow on land)
-    const drag=this.onLand()?6:2.2;this.vx*=1-Math.min(1,dt*drag);this.vy*=1-Math.min(1,dt*drag);
+    const drag=this.onLand()?2:2.2;this.vx*=1-Math.min(1,dt*drag);this.vy*=1-Math.min(1,dt*drag);
     if(!this.preview&&!w.allWater){const hover=Math.sin(this.t*1.3)*0.8;this.vx+=Math.cos(this.t*0.7)*hover*dt;this.vy+=Math.sin(this.t*0.9)*hover*dt;}
     let nx=this.x+this.vx*dt,ny=this.y+this.vy*dt;const B=w.bounds;nx=clamp(nx,B.x0+4,B.x1-4);ny=clamp(ny,B.y0+4,B.y1-4);
-    if(!w.allWater&&waterAt(w,this.x,this.y)>0.1&&waterAt(w,nx,ny)<0.1){
+    if(!w.allWater&&!this.ashore&&waterAt(w,this.x,this.y)>0.1&&waterAt(w,nx,ny)<0.1){
       const gx=waterAt(w,this.x+3,this.y)-waterAt(w,this.x-3,this.y),gy=waterAt(w,this.x,this.y+3)-waterAt(w,this.x,this.y-3),gl=Math.hypot(gx,gy)||1;
       const dot=this.vx*gx/gl+this.vy*gy/gl;if(dot<0){this.vx-=1.6*dot*gx/gl;this.vy-=1.6*dot*gy/gl;}this.vx*=0.6;this.vy*=0.6;}
     else{this.x=nx;this.y=ny;}
@@ -2585,16 +2686,26 @@ class Kraken extends Pet{
   }
   syncHeld(){if(!this.held)return;if(this.reel>0){const tip=this.tent[this.reelTi].nodes[7];this.held.sx=tip.x;this.held.sy=tip.y;}else{const m=this.mouthScreen();this.held.sx=m.x;this.held.sy=m.y;}}
   updateTent(dt,dangle){
-    const sc=this.sc,jet=clamp(this.speed/24,0,1),K=lerp(1.32,0.3,jet),P=game.pointer;
+    const sc=this.sc,land=!dangle&&this.onLand(),jet=land?0:clamp(this.speed/24,0,1),K=lerp(1.32,0.3,jet),P=game.pointer;
+    const touch=this.state==='visiting'&&this.vd?this.vd:null,touchI=touch?this.pokeI(touch):-1;
     for(let i=0;i<8;i++){const T=this.tent[i],N=T.nodes;
       const[rx,ry]=this.W(-0.9+Math.cos(Math.PI+T.off*0.72)*2.3,Math.sin(Math.PI+T.off*0.72)*2.3);N[0].x=rx;N[0].y=ry;
       let base=dangle?Math.PI/2+T.off*0.3+Math.sin(this.t*3+i)*0.25:this.ang+Math.PI+T.off*K,seg=1.75*sc,stiff=5,target=null;
       if(this.tg&&this.tg.ti===i){const p=this.tg.p;target=[p.x,p.y-p.h];}
       else if(this.reel>0&&this.reelTi===i){const m=this.mouthScreen(),k=this.reel/0.55;target=[lerp(m.x,N[7].x,k*0.6),lerp(m.y,N[7].y,k*0.6)];}
       else if(this.poke>0&&!this.preview&&P.inside){const d=Math.hypot(P.x-rx,P.y-ry);if(d<22&&i===this.pokeI(P))target=[P.x,P.y];}
+      else if(i===touchI){const tp=this.t*3+i;target=[touch.x+Math.sin(tp)*2,touch.y-2+Math.cos(tp*1.3)*1.5];}
+      else if(land){// crawling: each arm tip plants on the ground and steps forward in turn
+        const fa=this.ang+Math.PI+T.off*1.28,fr=8.2*sc,fwd=Math.min(6,this.speed*0.45),dx=rx+Math.cos(fa)*fr+Math.cos(this.ang)*fwd,dy=ry+Math.sin(fa)*fr+Math.sin(this.ang)*fwd;
+        if(!T.foot){T.foot={x:dx,y:dy};T.fs=null;}
+        const other=this.tent.some((o,j)=>j!==i&&(j%2)!==(i%2)&&o.fs);
+        if(!T.fs&&Math.hypot(T.foot.x-dx,T.foot.y-dy)>(this.speed>1?5:9)&&!other)T.fs={x0:T.foot.x,y0:T.foot.y,t:0};
+        if(T.fs){T.fs.t+=dt/0.2;const e=ease(Math.min(1,T.fs.t));T.foot.x=lerp(T.fs.x0,dx,e);T.foot.y=lerp(T.fs.y0,dy,e)-Math.sin(Math.PI*Math.min(1,T.fs.t))*1.5;if(T.fs.t>=1)T.fs=null;}
+        target=[T.foot.x,T.foot.y];T.arch=true;}
+      if(!land&&T.foot){T.foot=null;T.fs=null;}
       if(target){const d=Math.hypot(target[0]-rx,target[1]-ry);seg=clamp(d/7,1.1*sc,2.9*sc);base=Math.atan2(target[1]-ry,target[0]-rx);stiff=22;}
       for(let k=1;k<8;k++){const f=k/7,p=N[k],q=N[k-1];
-        const a=base+(target?Math.sin(this.t*9+k)*0.05:Math.sin(this.t*1.8+i*0.9-k*0.55)*0.24*(1-jet*0.7)+T.curl*f*f*(1-jet*0.65)*(dangle?0.4:1));
+        const a=base+(target?(T.arch&&land?Math.cos(f*Math.PI)*0.45*(T.off>0?1:-1):Math.sin(this.t*9+k)*0.05):Math.sin(this.t*1.8+i*0.9-k*0.55)*0.24*(1-jet*0.7)+T.curl*f*f*(1-jet*0.65)*(dangle?0.4:1));
         const dx=q.x+Math.cos(a)*seg,dy=q.y+Math.sin(a)*seg,st=dt>0?Math.min(1,dt*stiff*(1.25-f*0.6)):1;
         p.x+=(dx-p.x)*st;p.y+=(dy-p.y)*st;
         const lx=p.x-q.x,ly=p.y-q.y,l=Math.hypot(lx,ly)||1;p.x=q.x+lx/l*seg;p.y=q.y+ly/l*seg;}}
@@ -2646,7 +2757,7 @@ class Kraken extends Pet{
   glow(fb,night){if(night<0.25)return;const k=(night-0.25)/0.75;
     g:for(const[x,y,s]of this.glowPx){const b=k*s*(0.6+0.4*Math.sin(this.t*2.3+x*0.7+y));padd(fb,x,y,40*b,190*b,220*b);
       for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])padd(fb,x+dx,y+dy,10*b,60*b,80*b);}}
-  statusText(){switch(this.state){case 'wander':return 'is jetting around the pool';case 'idle':return 'is hovering and waving its tentacles';
+  statusText(){if(this.onLand()&&this.state==='wander')return 'is exploring the land on its arms';switch(this.state){case 'wander':return 'is jetting around the pool';case 'idle':return 'is hovering and waving its tentacles';
     case 'flee':return 'squirted ink and bolted!';case 'strike':return 'shoots out a tentacle!';case 'return':return 'is squelching back to the water';
     case 'petted':return 'is holding your finger with a tentacle';}return super.statusText();}
 }
@@ -3042,6 +3153,7 @@ function updateParts(w,dt){
     switch(p.type){
       case 'heart':p.y+=p.vy*dt;p.x+=Math.sin(p.life*6+p.ph)*0.25;break;
       case 'zzz':p.x+=4*dt;p.y-=6*dt;break;
+      case 'think':p.y-=(p.life>0.9?12:1.5)*dt;if(p.owner&&p.owner.world&&p.owner.headPos){const h=p.owner.headPos();p.x+=(h.x-p.x)*Math.min(1,dt*8);}break;
       case 'crumb':p.vh-=200*dt;p.h+=p.vh*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.h<0){p.h=0;p.vh=0;p.vx*=.3;p.vy*=.3;}break;
       case 'drop':p.vh-=150*dt;p.h+=p.vh*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
         if(p.h<=0){p.life=0;
@@ -3327,7 +3439,7 @@ const ROSTER=['frog','lizard','salamander','snake','chameleon','dragon','golem',
 //  Save (localStorage, wrapped so the game still works without it)
 // =====================================================================
 const SAVE_KEY='mossjar.v6';
-const save={coins:120,inv:{},placed:[],placedAqua:[],pets:{},owned:[],cur:null,set:{vol:0.8,sfx:true,music:true,shake:true,bubbles:true,pixel:false,slimeFace:true}};
+const save={coins:120,inv:{},placed:[],placedAqua:[],pets:{},owned:[],cur:null,set:{vol:0.8,sfx:true,music:true,shake:true,bubbles:true,pixel:false,slimeFace:true,thoughts:true}};
 function loadSave(){
   let d=null;try{d=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');}catch(e){}
   if(d){const set=Object.assign({},save.set,d.set||{});Object.assign(save,d);save.set=set;save.inv=save.inv||{};save.pets=save.pets||{};save.placed=save.placed||[];save.placedAqua=save.placedAqua||[];save.owned=save.owned||[];}
@@ -3674,7 +3786,7 @@ class Toy{
     if(['idle','wander','visiting','visit','basking','hunt'].includes(P.state)&&!P.held){P.state='dance';P.timer=6;P.musicDance=true;P.prey=null;}else P.danceNext=6;
     flash(`The music box plays a little tune and ${game.name} dances!`);}
   update(dt,w){
-    this.t+=dt;if(this.cool>0)this.cool-=dt;this.squash*=Math.pow(0.02,dt);this.bump*=Math.pow(0.004,dt);this.caught=false;
+    this.t+=dt;if(this.cool>0)this.cool-=dt;if(this.bore)this.bore=Math.max(0,this.bore-dt*0.015);this.squash*=Math.pow(0.02,dt);this.bump*=Math.pow(0.004,dt);this.caught=false;
     if(this.id==='plush'){this.blinkT-=dt;if(this.blinkT<=0){this.blink=0.14;this.blinkT=rand(2,5);}if(this.blink>0)this.blink-=dt;}
     if(this.carriedBy){const p=this.carriedBy;
       if(w.pet!==p||p.state==='grabbed'||p.state==='fall'||p.state==='chew'||this.carryT<=0){this.carriedBy=null;this.vh=8;this.h=Math.max(this.h,1);this.cool=5;if(w.pet===p)w.onEvent&&w.onEvent('put the plush down.');}
@@ -3838,7 +3950,7 @@ function createWorld(){
       onCatch(){this.cool=0.9;this.vy-=90;this.vx+=rand(-60,60);this.h=12;SFX.play('flutter');}},
     onEvent:msg=>flash(`${game.name} ${msg}`)};
   w.onEat=(pet,p)=>{if(pet.preview)return;const m=pet.mouthScreen();addCoins(3,m.x,m.y);addXP(4);};
-  w.onPlay=(pet,t)=>{if(pet.preview)return;const S=w.stats,k=t.kind;S.happy=Math.min(100,S.happy+(k==='bubble'?1.5:3));addXP(k==='bubble'?1:2);
+  w.onPlay=(pet,t)=>{if(pet.preview)return;const S=w.stats,k=t.kind;if(t instanceof Toy)t.bore=Math.min(1,(t.bore||0)+0.22);S.happy=Math.min(100,S.happy+(k==='bubble'?1.5:3));addXP(k==='bubble'?1:2);
     if(k==='laser'){SFX.play('zap');spawn(w,'star',t.x,t.y,{life:0.18});}
     if(Math.random()<(k==='laser'||k==='feather'?0.2:k==='bubble'?0.06:0.3))addCoins(k==='laser'||k==='bubble'||k==='feather'?1:2,t.x,t.y-t.h);
     if(Math.random()<0.4){const hd=pet.headPos();spawn(w,'heart',hd.x,hd.y-6-pet.h,{vy:-rand(10,16),life:1.2,ph:rand(TAU)});}};
@@ -3919,7 +4031,7 @@ function drawSubPrey(w,q){const x0=Math.max(0,Math.floor(q.x-11)),x1=Math.min(W-
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;if(px[i]===SUBBUF[i])continue;px[i]=mixc(mixc(px[i],SUBBUF[i],a),SHEENC,sheen(x,y,w.t)*a*1.5);}}
 function setTank(tank,force){const w=game.world;if(w.tank===tank&&!force)return;
   if(w.tank)save[tankKey(w.tank)]=[...w.decor,...w.toys].map(o=>({id:o.id,x:Math.round(o.x),y:Math.round(o.y)}));
-  w.tank=tank;layoutTank(w,tank);w.decor=[];w.toys=[];w.prey=[];w.ripples=[];w.parts=[];w.coins=[];w.bubbles=[];w.wet.fill(0);w.disco=false;
+  w.tank=tank;layoutTank(w,tank);w.foodMem=[];w.decor=[];w.toys=[];w.prey=[];w.ripples=[];w.parts=[];w.coins=[];w.bubbles=[];w.wet.fill(0);w.disco=false;
   bakeWorld(w);staticDrawn=false;
   for(const p of(save[tankKey(tank)]||[]))if(ITEMS[p.id]&&(save.inv[p.id]||0)>placedCount(p.id))placeObject(p.id,p.x,p.y);
 }
@@ -3930,7 +4042,7 @@ function startGame(kind){
   setTank(habitatOf(kind));
   game.kind=kind;if(!((DIET[kind]||{})[game.food]>=5))game.food=Object.entries(DIET[kind]).sort((a,b)=>b[1]-a[1])[0][0];if(typeof ui!=='undefined')ui.foodCat=null;const ps=petSave(kind);game.name=ps.name;
   w.prey=w.prey.filter(q=>!q.caught);w.parts.length=0;
-  w.pet=makePet(w,kind,160,96);game.held=null;game.grabbing=false;
+  w.pet=makePet(w,kind,160,96);w.pet.mind=mindFor(kind,ps.name);game.held=null;game.grabbing=false;
   const st=ps.stats||{fed:72,water:68,happy:70};w.stats.fed=st.fed;w.stats.water=st.water;w.stats.happy=st.happy;
   game.mode='play';save.cur=kind;writeSave();
   ui.refreshPet();ui.renderTray();
@@ -4006,6 +4118,13 @@ function updatePlay(dt){
       for(let i=0;i<8;i++){const a=rand(TAU),v=rand(14,30);spawn(w,'spark2',P.x,P.y,{vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.35,.6)});}
       flash(`${game.name} took ${PREY_NAME[hq.type]} right from the tweezers!`);}}
   for(const p of w.prey){p.update(dt,w);floatPrey(p,w,dt);}
+  // how fast things are moving (critters notice motion from much further away)
+  const trackMv=o=>{if(!o)return;const x=o.x,y=o.y,v=o._px===undefined?0:Math.hypot(x-o._px,y-o._py)/Math.max(dt,1e-3);o._mv=(o._mv||0)+(v-(o._mv||0))*Math.min(1,dt*6);o._px=x;o._py=y;};
+  // food landing makes a little plop: nearby critters hear it and turn to look
+  for(const p of w.prey){if(p.h>0.8&&!p.inHand&&!p.caught)p._air=true;else if(p._air&&p.h<=0.5){p._air=false;const pt=w.pet;
+    if(pt&&!pt.preview&&['idle','wander','visiting','visit','basking'].includes(pt.state)&&pt.headPos&&(DIET[pt.kind][p.type]||0)>0&&w.stats.fed<94){const h=pt.headPos();
+      if(Math.hypot(p.x-h.x,p.y-h.y)<150&&!pt.isIgnored(p))pt.notice(p,'prey','hear');}}}
+  for(const p of w.prey)trackMv(p);for(const t of w.toys)trackMv(t);for(const b of w.bubbles)trackMv(b);trackMv(w.laser);trackMv(w.feather);
   for(let i=w.prey.length-1;i>=0;i--)if(w.prey[i].dead)w.prey.splice(i,1);
   // toys, decor, bubbles, coins
   const hd=pet.headPos(),mv=pet.noise?pet.noise():0;
@@ -4242,6 +4361,8 @@ function renderPlay(){
   const NOTE=['.kk','.kk','.k.','kk.','kk.'];
   for(const p of w.parts){
     if(p.type==='heart'){const f=clamp(p.life/0.4,0,1);sprite(fb,HEART,Math.round(p.x-2),Math.round(p.y-2),{r:mixc(hex('#3a1a1a'),hex('#ff7a92'),f)});pset(fb,Math.round(p.x-1),Math.round(p.y-1),hex('#ffd6de'));}
+    else if(p.type==='think'){const G=THINK_G[p.g]||THINK_G['?'],f=clamp(p.life/0.3,0,1),wd=G[0].length,x=Math.round(p.x-wd/2),y=Math.round(p.y-G.length);
+      const col=p.g==='<3'?hex('#ff7a92'):p.g==='!'?hex('#ffe066'):hex('#f4f0e0');sprite(fb,G,x+1,y+1,{q:hex('#10140e')});sprite(fb,G,x,y,{q:mixc(hex('#2a2a24'),col,f)});}
     else if(p.type==='zzz'){const f=clamp(p.life/0.6,0,1);sprite(fb,ZZZ,Math.round(p.x),Math.round(p.y),{z:mixc(hex('#202838'),hex('#cfe0ff'),f)});}
     else if(p.type==='note'){const cs=['#ff7ab4','#7ad4ff','#ffe066','#9cf07a'];sprite(fb,NOTE,Math.round(p.x),Math.round(p.y),{k:hex(cs[p.c||0])});}
     else if(p.type==='ring'){const r=(1-p.life/0.25)*5+1,n=Math.ceil(r*6);for(let i=0;i<n;i++){const a=i/n*TAU;padd(fb,p.x+Math.cos(a)*r,p.y+Math.sin(a)*r,80,90,100);}}
@@ -4498,7 +4619,7 @@ const ui={
     $('setUi').addEventListener('input',e=>{save.set.ui=+e.target.value;this.applyUI();fit();markDirty();});
     $('setUiAuto').addEventListener('click',()=>{delete save.set.ui;this.applyUI();fit();markDirty();SFX.play('ui');});
     window.addEventListener('resize',()=>{if(!save.set.ui){this.applyUI();fit();}});this.applyUI();
-    sw('setSfx','sfx',v=>SFX.setMuted(!v));sw('setMusic','music',v=>SFX.setMusic(v));sw('setShake','shake');sw('setBubbles','bubbles');sw('setSlimeFace','slimeFace');sw('setPixel','pixel',()=>fit());
+    sw('setSfx','sfx',v=>SFX.setMuted(!v));sw('setMusic','music',v=>SFX.setMusic(v));sw('setShake','shake');sw('setBubbles','bubbles');sw('setSlimeFace','slimeFace');sw('setThoughts','thoughts');sw('setPixel','pixel',()=>fit());
     $('resetBtn').addEventListener('click',()=>{const b=$('resetBtn');if(performance.now()-this.resetArm<3000){try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem('mossjar.pet');}catch(e){}location.reload();}
       else{this.resetArm=performance.now();b.textContent='Tap again to reset';setTimeout(()=>{b.textContent='Reset';},3000);}});
     // secret: tap the Settings title 5 times quickly to reveal the unlock-all row
@@ -4566,7 +4687,7 @@ const ui={
     if(this.open==='mGacha'){gStep(dt);gDraw();}
     if(this.open==='mPets')this.tickPreviews(dt);
   },
-  refreshPet(){if(!game.kind)return;$('petName').textContent=game.name;$('petKind').textContent=SPECIES[game.kind].label;this.refreshLevel();},
+  refreshPet(){if(!game.kind)return;$('petName').textContent=game.name;$('petKind').textContent=SPECIES[game.kind].label+(game.world&&game.world.pet&&game.world.pet.mind?' · '+game.world.pet.mind.temper:'');this.refreshLevel();},
   refreshLevel(){if(!game.kind)return;const ps=petSave();$('lvlNum').textContent=ps.lvl;$('lvl').style.setProperty('--p',(ps.xp/xpNeed(ps.lvl)).toFixed(3));},
   refreshLight(){const d=game.world?game.world.dayTarget>0.5:true;$('btnLight').querySelector('img').src=iconURL(d?'sun':'moon');},
   bumpCoins(){const c=$('coins');c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump');},
@@ -4660,7 +4781,7 @@ const ui={
     for(const kind of ROSTER){const sp=SPECIES[kind],ps=save.pets[kind],here=kind===game.kind,own=petOwned(kind),c=document.createElement('div');c.className='pcard'+(here?' here':'')+(own?'':' locked');
       const cv=document.createElement('canvas');cv.width=112;cv.height=72;cv.className='px';c.appendChild(cv);
       const pr=petPrice(kind);
-      c.insertAdjacentHTML('beforeend',`<h3>${ps?ps.name:sp.label}</h3><div class="sub">${ps?sp.label:sp.latin}</div><p>${sp.blurb}</p>
+      c.insertAdjacentHTML('beforeend',`<h3>${ps?ps.name:sp.label}</h3><div class="sub">${ps?sp.label+' · <b class="temper" title="Personality comes from the name. Same name, same personality!">'+mindFor(kind,ps.name).temper+'</b>':sp.latin}</div><p>${sp.blurb}</p>
         <div class="meta"><span>${ps?'Bond Lv '+ps.lvl:own?'Free to adopt':pr+' coins'}</span><span>${ps&&ps.hat?ITEMS[ps.hat].name:''}</span></div>`);
       const b=document.createElement('button');b.className='btn'+(own?'':' buy');b.textContent=here?'Here now':ps?'Visit':own?'Adopt':`Adopt · ${pr}`;b.disabled=here;
       b.addEventListener('click',()=>{
@@ -4671,6 +4792,10 @@ const ui={
       if(kind==='kraken')c.insertAdjacentHTML('beforeend','<div class="hab on" title="Lives in the water tank">~ Paludarium only</div>');
       else if(AMPHI.includes(kind)){const hb=document.createElement('button');hb.className='hab';const lab=()=>{const aq=habitatOf(kind)==='aqua';hb.textContent=aq?'~ Lives in: Paludarium':'* Lives in: Terrarium';hb.classList.toggle('on',aq);};lab();
         hb.title='Switch which tank this critter lives in';hb.addEventListener('click',()=>{const ps2=petSave(kind);ps2.tank=habitatOf(kind)==='aqua'?'terra':'aqua';markDirty();SFX.play('tick');lab();if(kind===game.kind){this.close(true);startGame(kind);}});c.appendChild(hb);}
+      if(ps){const h3=c.querySelector('h3'),rb=document.createElement('button');rb.className='rn';rb.title='Rename';rb.textContent='✎';h3.appendChild(rb);
+        rb.addEventListener('click',e=>{e.stopPropagation();const inp=document.createElement('input');inp.className='rnin';inp.maxLength=14;inp.value=ps.name;h3.replaceWith(inp);inp.focus();inp.select();
+          const done=ok=>{if(done.d)return;done.d=true;const nm=inp.value.trim().slice(0,14);if(ok&&nm){ps.name=nm;if(kind===game.kind){game.name=nm;if(game.world.pet)game.world.pet.mind=mindFor(kind,nm);this.refreshPet();}markDirty();writeSave();SFX.play('tick');}this.renderPets();};
+          inp.addEventListener('keydown',e=>{if(e.key==='Enter')done(true);else if(e.key==='Escape')done(false);e.stopPropagation();});inp.addEventListener('blur',()=>done(true));});}
       c.appendChild(b);ro.appendChild(c);
       const pfb=new FB(112,72),bg=new Uint32Array(112*72);bakeSoil(bg,112,72,0,0,112,72,kind.length*40);
       if(kind==='kraken'){const TW=hex('#1a5a62'),CA=hex('#8fdcc8');for(let y=0;y<72;y++)for(let x=0;x<112;x++){const i=y*112+x,a=Math.sin(x*0.3+Math.sin(y*0.22)*1.7)+Math.sin(y*0.36+Math.sin(x*0.19)*1.7),c=1-Math.min(1,Math.abs(a)*1.5);
@@ -4775,7 +4900,8 @@ function trashAll(){const w=game.world,L=w.prey.filter(q=>!q.caught);
   for(const q of L)trashFood(q);SFX.play('thunk');ui.toast(`Cleared ${L.length} food${L.length>1?'s':''} from the tank.`,true);}
 function overTrash(cx,cy){const t=$('trashBtn');if(!t||t.offsetParent===null||cx===undefined)return false;const r=t.getBoundingClientRect();return cx>=r.left-6&&cx<=r.right+6&&cy>=r.top-6&&cy<=r.bottom+6;}
 function dropHeld(){const q=game.held;if(!q)return;game.held=null;q.inHand=false;q.h=8;q.vh=0;
-  if(q.pts){q.toWorld(8);q.x=q.pts[0].x;q.y=q.pts[0].y;}if(q.type==='fly')q.targetH=rand(10,20);}
+  if(q.pts){q.toWorld(8);q.x=q.pts[0].x;q.y=q.pts[0].y;}if(q.type==='fly')q.targetH=rand(10,20);
+  const w=game.world;if(w){w.foodMem=w.foodMem||[];w.foodMem.push({x:q.x,y:q.y});if(w.foodMem.length>4)w.foodMem.shift();}}
 function up(){const P=game.pointer;P.down=false;SFX.mistOn(false);
   const tb=$('trashBtn');if(tb)tb.classList.remove('hot');
   if(game.held&&overTrash(P.cx,P.cy)){const q=game.held;trashFood(q);SFX.play('thunk');ui.toast(`Threw away the ${FOODS[q.type].name.replace(/^an? /,'')}.`,true);}
