@@ -3102,7 +3102,7 @@ class Puffer extends Pet{
   stop(dt){const k=Math.min(1,dt*2);this.vx-=this.vx*k;this.vy-=this.vy*k;}
   faceToward(x,y,dt){this.ang+=clamp(wrapA(Math.atan2(y-this.y,x-this.x)-this.ang),-2*dt,2*dt);}
   decide(){const w=this.world,act=this.isActive();
-    if(!act&&w.hide&&!this.preview&&Math.random()<0.6){this.tx=w.hide.x+rand(-10,10);this.ty=w.hide.y+rand(4,9);this.state='sleep';this.timer=20;return;}
+    if(!act&&w.hide&&!this.preview&&Math.random()<0.6){const c=Math.cos(w.hide.ang),s=Math.sin(w.hide.ang),k=rand(-10,10);this.tx=w.hide.x+c*k;this.ty=w.hide.y+s*k;this.state='sleep';this.timer=20;return;}
     if(Math.random()<0.25){this.state='idle';this.timer=rand(2,4);return;}
     const t=randomWaterSpot(w,0.3)||this.randomSpot();[this.tx,this.ty]=t;this.pace=Math.random()<0.6?'slow':'walk';this.state='wander';this.timer=12;}
   canStrike(p){if(this.pf>0.2)return false;const hd=this.headPos(),d=Math.hypot(p.x-hd.x,p.y-hd.y);
@@ -3166,11 +3166,11 @@ class Puffer extends Pet{
     for(let k=-2;k<=2;k++){const a=Math.PI+tw+k*0.3,L=lerp(2.5,1.9,pf)*(1-Math.abs(k)*0.08),[f0,f1]=W(tb+Math.cos(a)*L,Math.sin(a)*L);fb.cap(t0,t1,0.45,f0,f1,0.72,M.LIMB,1,0,0,0.3);}
     fb.cap(p0,p1,lerp(1.9,1.3,pf),t0,t1,0.95,M.BODY,2,0,0,0.4);
     // the body: an egg that becomes a ball
-    const[b0,b1]=W(C+lerp(0.7,0,pf),0),[c0,c1]=W(C-lerp(1.1,0,pf),0);fb.cap(b0,b1,R,c0,c1,lerp(R*0.82,R,pf),M.BODY,pf>0.5?3:2,0,0,0.8);
+    const[b0,b1]=W(C+lerp(0.7,0,pf),0),[c0,c1]=W(C-lerp(1.1,0,pf),0);fb.cap(b0,b1,R,c0,c1,lerp(R*0.82,R,pf),M.BODY,2,0,0,0.8);
     const[m0,m1]=W(C,0);this.frame={x:m0,y:m1,c:Math.cos(this.ang),s:Math.sin(this.ang),R};
     // beak and big eyes up on top of the head
     const[k0,k1]=W(C+R+0.1+this.beak*0.3,0);fb.cap(k0,k1,0.75,k0,k1,0.75,M.CLAW,3,0,0,1);
-    for(const sd of[-1,1]){const[e0,e1]=W(C+R*0.42,sd*R*0.56);fb.cap(e0,e1,lerp(1.4,1.6,pf),e0,e1,lerp(1.4,1.6,pf),M.EYE,pf>0.5?3:2,0,0,1.3);}
+    for(const sd of[-1,1]){const[e0,e1]=W(C+R*0.42,sd*R*0.56);fb.cap(e0,e1,lerp(1.4,1.6,pf),e0,e1,lerp(1.4,1.6,pf),M.EYE,2,0,0,1.3);}
   }
   drawExtras(fb){const W=(u,v)=>this.W(u,v),sc=this.sc,pf=ease(this.pf),R=this.bodyR(),C=this.bodyC(),K=hex('#08100a'),c=Math.cos(this.ang),s=Math.sin(this.ang);
     // pectoral fins: a translucent flutter just behind the eyes
@@ -3193,7 +3193,7 @@ class Puffer extends Pet{
   }
   statusText(){switch(this.state){
     case 'idle':return this.isActive()?'is hovering, fins a-buzz':'is drifting sleepily';case 'wander':return 'is puttering around the tank';
-    case 'puffed':return 'puffed up into a spiky ball!';case 'grabbed':return 'puffed up in protest!';
+    case 'puffed':return 'puffed up into a spiky ball!';case 'sleep':return 'is swimming to its spot under the branch';case 'grabbed':return 'puffed up in protest!';
     case 'hunt':return this.prey&&this.prey.play?`is chasing ${this.prey.label||'a toy'}`:`is eyeing ${PREY_NAME[this.prey?.type]||'something'}`;
     case 'chew':return `is crunching ${PREY_NAME[this.held?.type]||'something'}`;case 'petted':return 'is wiggling happily';
     case 'sleep':return 'is heading for the branch';case 'sleeping':return 'is snoozing by the sunken branch';}
@@ -3870,6 +3870,10 @@ function bakeAqua(world,S,bg,ov){
   const lr=world.lampRock;rock(lr.x,lr.y,9,M.ROCK,7);rock(lr.x+11,lr.y+4,5,M.ROCK,4);
   rock(236,44,6,M.ROCK,5);rock(247,49,3.5,M.ROCK,3);rock(292,128,5,M.ROCK,4);rock(206,158,4,M.ROCK,3);
   for(let i=0;i<N;i++)if(S.mat[i])R.depth[i]=0;
+  // the pool floor slopes up to the island instead of a sheer drop, so swimmers rise gradually as they approach it
+  {const rm=new Uint8Array(N);for(let i=0;i<N;i++)if(S.mat[i])rm[i]=1;const dR=chamfer(rm),DEEP=hex('#0a2630'),MID=hex('#1a5a62'),SHAL=hex('#3f8c86');
+    for(let y=TANK.y0;y<TANK.y1;y++)for(let x=TANK.x0;x<TANK.x1;x++){const i=y*W+x;if(!R.depth[i]||rm[i])continue;const e=Math.max(0.05,Math.pow(clamp(dR[i]/14,0,1),0.8));
+      if(e<R.depth[i]){R.depth[i]=e;const tint=e<0.5?mixc(SHAL,MID,e*2):mixc(MID,DEEP,(e-0.5)*2);bg[i]=mixc(bot[i],tint,0.3+0.6*e);}}}
   // wet ring where the island meets the water
   for(let i=0;i<N;i++)if(R.depth[i]>0){const x=i%W,y=(i/W)|0;let near=false;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1],[2,0],[-2,0],[0,2],[0,-2]]){const j=(y+dy)*W+x+dx;if(j>=0&&j<N&&S.mat[j])near=true;}if(near)bg[i]=shade(bg[i],0.72);}
   composite(S,STATIC_PAINTER,{out:bg,sAmt:.6,sdx:2,sdy:3});S.clearLayer();
@@ -3915,6 +3919,7 @@ function bakeSea(world,S,bg,ov){
   const hd=world.hide,c=Math.cos(hd.ang),sn=Math.sin(hd.ang);
   S.cap(hd.x-c*hd.len/2,hd.y-sn*hd.len/2,hd.r*0.8,hd.x+c*hd.len/2,hd.y+sn*hd.len/2,hd.r,M.LOG,1,0,hd.len);
   S.cap(hd.x+c*hd.len*0.15,hd.y+sn*hd.len*0.15,hd.r*0.45,hd.x+c*hd.len*0.15+sn*11,hd.y+sn*hd.len*0.15-c*11,hd.r*0.3,M.LOG,1,0,11);
+  const brM=new Uint8Array(N);for(let i=0;i<N;i++)if(S.mat[i]===M.LOG)for(const j of[i,i-1,i+1,i-W,i+W])if(j>=0&&j<N)brM[j]=1;
   const as=world.air;S.cap(as.x,as.y,2.4,as.x,as.y,2.4,M.ROCK,1);
   composite(S,STATIC_PAINTER,{out:bot,sAmt:.55,sdx:1,sdy:2});S.clearLayer();
   // depth: a sandy slope along the glass, deepest in the middle
@@ -3927,6 +3932,7 @@ function bakeSea(world,S,bg,ov){
   // the reef keeps its colour: it's composited after the water tint and only lightly tinted
   const pre=bg.slice();reef();composite(S,STATIC_PAINTER,{out:bg,sAmt:.55,sdx:1,sdy:2});S.clearLayer();
   for(let i=0;i<N;i++)if(bg[i]!==pre[i]){const e=R.depth[i]||0.5,tint=e<0.5?mixc(SHAL,MID,e*2):mixc(MID,DEEP,(e-0.5)*2);bg[i]=mixc(bg[i],tint,0.12+0.2*e);}
+  for(let i=0;i<N;i++)if(brM[i])ov[i]=bg[i];
   R.pIdx=[];R.pX=[];R.pY=[];R.pD=[];R.pS=[];
   for(let y=TANK.y0;y<TANK.y1;y++)for(let x=TANK.x0;x<TANK.x1;x++){const i=y*W+x;R.pIdx.push(i);R.pX.push(x);R.pY.push(y);R.pD.push(R.depth[i]);R.pS.push(0);}
   R.deepList=R.pIdx.filter(i=>R.depth[i]>0.45);R.shallowList=R.pIdx.filter(i=>R.depth[i]<0.45);R.landList=[];
@@ -4680,8 +4686,8 @@ function subEnd(w,pet){if(!subRect)return;const[x0,y0,x1,y1]=subRect,px=fb.px,M=
   // pass 1: body, extras and hat pixels; the body floats, so water only reaches about half way up unless it dives
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;PETM[i]=0;SUBV[i]=0;if(px[i]===SUBBUF[i])continue;
     const isM=M[i]>0,isX=!isM&&px[i]!==SUB1[i];if(!isM&&!isX)continue;PETM[i]=1;
-    const d=waterAt(w,x,y);if(d<=0)continue;const hp=isM?PART_H[Math.min(7,C[i])]:0.62,eff=Math.min(d*1.35,0.37)+dive*0.95,sub=clamp((eff-hp)/0.1,0,1);SUBV[i]=sub;
-    if(sub>0){const a=Math.min(AMX,sub*(0.3+0.3*d));px[i]=mixc(mixc(px[i],SUBBUF[i],a),SHEENC,sheen(x,y,T)*a*1.5);}}
+    const d=waterAt(w,x,y);if(d<=0)continue;const hp=isM?PART_H[Math.min(7,C[i])]:0.62,eff=Math.min(d*1.35,0.37+dive*0.95),above=eff-hp,sub=clamp(above/0.1,0,1);SUBV[i]=sub;
+    if(sub>0){const a=Math.min(AMX,sub*(0.2+0.5*clamp(above,0,1)));/* deeper under the surface = more water colour */px[i]=mixc(mixc(px[i],SUBBUF[i],a),SHEENC,sheen(x,y,T)*a*1.5);}}
   // pass 2: outline pixels: foam where a part breaks the surface, tinted where fully under, left alone where dry
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;if(PETM[i]||px[i]===SUBBUF[i]||M[i])continue;
     let ns=-1;for(const j of[i-1,i+1,i-W,i+W])if(j>=0&&j<N&&M[j]&&SUBV[j]>ns)ns=SUBV[j];if(ns<0)continue;// not next to the body: that's the shadow on the floor
@@ -4695,7 +4701,8 @@ function subEnd(w,pet){if(!subRect)return;const[x0,y0,x1,y1]=subRect,px=fb.px,M=
       for(let y=y0;y<=y1;y++){const o=y*W;SUBTMP.set(px.subarray(o+x0,o+x1+1),o+x0);}
       for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x,qx=Math.round(cx+(x-cx)/sc),qy=Math.round(cy+(y-cy)/sc);
         const ok=qx>=x0&&qx<=x1&&qy>=y0&&qy<=y1&&PETM[qy*W+qx];if(ok)px[i]=SUBTMP[qy*W+qx];else if(PETM[i])px[i]=SUBBUF[i];}}}}
-  if(w.tank==='aqua'&&dive>0.3){const k=clamp((dive-0.3)/0.4,0,1);for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;if(px[i]!==SUBBUF[i]&&!R.depth[i])px[i]=mixc(px[i],SUBBUF[i],k);}}}
+  const dc=pet.x!==undefined?waterAt(w,pet.x,pet.y):waterAt(w,pet.headPos().x,pet.headPos().y);
+  if(w.tank==='aqua'&&dive>0.3&&dc>0.35){const k=clamp((dive-0.3)/0.4,0,1)*clamp((dc-0.35)/0.2,0,1);for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;if(px[i]!==SUBBUF[i]&&!R.depth[i])px[i]=mixc(px[i],SUBBUF[i],k);}}}
 function drawSubToy(w,t){const x0=Math.max(0,Math.floor(t.x-14)),x1=Math.min(W-1,Math.ceil(t.x+14)),y0=Math.max(0,Math.floor(t.y-18)),y1=Math.min(H-1,Math.ceil(t.y+10)),px=fb.px;
   for(let y=y0;y<=y1;y++){const o=y*W;SUBBUF.set(px.subarray(o+x0,o+x1+1),o+x0);}
   fb.clearLayer();drawToy(fb,t);composite(fb,OBJ_PAINTER,{sAmt:.8,sdx:1,sdy:1});toyDetails(fb,t);
@@ -4843,11 +4850,12 @@ function updatePlay(dt){
     const samp=[h];if(pt.pts&&pt.pts.length>2)samp.push(pt.pts[Math.floor(pt.pts.length/2)]);else if(pt.x!==undefined)samp.push({x:pt.x,y:pt.y});
     const cap=clamp(Math.min(...samp.map(q=>waterAt(w,q.x,q.y)))/(pt.kind==='crab'?0.25:0.35),0,1),tg=pt.state==='notice'&&pt.att?pt.att.t:pt.prey;let up=false;
     if(wd>0.05&&!(pt.h>2)&&pt.state!=='grabbed'&&pt.state!=='fall'){pt.diveT=(pt.diveT||0)-dt;if(pt.diveT<=0){pt.diveT=rand(3,7);pt.diveWant=Math.random()<(DIVE_TEND[pt.kind]||0)?1:0;}
-      want=pt.diveWant||0;if(pt.state==='flee')want=1;if(pt.kind==='crab')want=1;if(pt.state==='basking'||pt.state==='sleeping')want=0;if(pt.state==='puffed'||pt.state==='grabbed'){want=0;up=true;}
+      want=pt.diveWant||0;if(pt.state==='flee')want=1;if(pt.kind==='crab')want=1;const fish=SEA_PETS.includes(pt.kind);if(pt.state==='basking'||pt.state==='sleeping')want=fish?1:0;if(pt.state==='puffed')want=Math.max(0.4,pt.dive||0);
       // food on the bottom means diving; anything floating or in the air (bubbles, the laser, a floating toy) has to be reached from the surface
-      if(pt.state!=='puffed'&&tg&&(pt.state==='hunt'||pt.state==='strike'||pt.state==='notice')){if(Math.max(tg.sink||0,tg.sunk||0)>0.5)want=1;else{want=0;up=true;}}}
-    want=Math.min(want,cap);
-    const was=pt.dive||0;pt.dive=Math.min(cap,was+(want-was)*Math.min(1,dt*(want<was?(up?6:2.5):1.8)));
+      if(fish)want=Math.max(want,0.38);/* fish stay under water: they come up just below the surface, never out of it */
+      if(pt.state!=='puffed'&&tg&&(pt.state==='hunt'||pt.state==='strike'||pt.state==='notice')){if(Math.max(tg.sink||0,tg.sunk||0)>0.5)want=1;else{want=fish?0.38:0;up=true;}}}
+    if(SEA_PETS.includes(pt.kind)&&!(pt.h>2))want=Math.max(want,0.38);want=Math.min(want,cap);
+    const was=pt.dive||0;let nd=was+(want-was)*Math.min(1,dt*(want<was?(up?4:2.5):1.8));if(nd>cap)nd=Math.max(cap,was-dt*3.5);pt.dive=nd;
     if((was>0.5)!==(pt.dive>0.5)&&wd>0.05){w.ripples.push({x:h.x,y:h.y,age:0});if(!pt.preview&&Math.random()<0.6)SFX.play('plip');}
     if(pt.dive>0.5){pt.bubT=(pt.bubT||0)-dt;if(pt.bubT<=0){pt.bubT=rand(0.6,1.3);w.ripples.push({x:h.x+rand(-2,2),y:h.y+rand(-3,0),age:0.35,s:0.2});}}
     if(wd>0.04&&!(pt.h>2)){w.stats.water=Math.min(100,w.stats.water+3*dt);
@@ -5036,7 +5044,7 @@ function renderPlay(){
     if(pet.dive>0.5&&w.pads.length)drawPads(fb,w);};
   if(pet.h<=3)drawPet();
   renderObjects(front);
-  for(let k=0;k<R.ovIdx.length;k++){const i=R.ovIdx[k];px[i]=R.ov[i];}
+  if(!w.sea||(pet.dive||0)>0.62)for(let k=0;k<R.ovIdx.length;k++){const i=R.ovIdx[k];px[i]=R.ov[i];}/* in the aquarium the branch only covers critters down by the bottom */
   for(const q of w.prey)if(!q.caught&&q.type==='fly'&&q.landT<=0&&!q.inHand)q.draw(fb,w.t);
   fb.clearLayer();for(const pl of w.plants)drawPlant(fb,pl,w.t);composite(fb,PLANT_PAINTER,{sAmt:.7,sdx:5,sdy:7});
   if(pet.h>3)drawPet();
