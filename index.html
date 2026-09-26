@@ -662,7 +662,7 @@ const PAL={
           dull:ramp('#3a2c20','#5e4a36','#7e6850','#9c8670'),outline:'#120a04'},
   cuttle:{body:ramp('#3a2a20','#6a4c38','#a07a5a','#d4b28a'),dark:ramp('#1a100c','#34221a','#523826','#6e5036'),pale:ramp('#8a8070','#c2b6a2','#e6dccc','#fff8ee'),
           fin:ramp('#5e5652','#9a908a','#d2cac2','#f6f2ec'),irid:ramp('#1e4a58','#2e7a8a','#4ab0b8','#9ae8e0'),eye:ramp('#6a6040','#a89a68','#d8cc98','#fbf4d0'),outline:'#120c08'},
-  bee:{yellow:ramp('#6a4408','#b8840e','#f0c030','#ffe680'),black:ramp('#1c1814','#312a22','#4a4034','#665a48'),white:ramp('#8a7e6a','#c8bca4','#ece2cc','#fffaee'),outline:'#0a0806'},
+  bee:{yellow:ramp('#6a4408','#b8840e','#f0c030','#ffe680'),black:ramp('#1c1814','#312a22','#4a4034','#665a48'),eye:ramp('#06080c','#141c28','#2a3648','#4a5a72'),white:ramp('#8a7e6a','#c8bca4','#ece2cc','#fffaee'),outline:'#0a0806'},
   golem:{stone:ramp('#2c2926','#4a4540','#6e675d','#989080'),stoneD:ramp('#1c1a18','#302c28','#4a4540','#6a635a'),moss:ramp('#1c3614','#2c5620','#44802e','#6aa640'),
           mossL:ramp('#3a5a18','#5a8a26','#86b43a','#b4d85a'),head:ramp('#26282a','#3e4246','#5c6266','#848a8a'),eye:'#6cff8e',eyeC:'#e8fff0',outline:'#0c0a08'},
   kraken:{body:ramp('#2a1034','#4c2058','#7a3c80','#b068a8'),belly:ramp('#5e2c62','#8e5088','#bc80ac','#e8b8d0'),spot:ramp('#3a1a58','#5a2a80','#8048a8','#a878d0'),
@@ -2909,26 +2909,28 @@ class Cuttle extends Kraken{
 }
 // =====================================================================
 //  Bumblebee: a chunky, fluffy flier. Bumbles around on blurred wings, lands to sip from flowers
-//  and fruit, visits the plants for pollen, does a waggle dance and naps with its wings folded.
+//  and fruit, trundles about on foot, does a waggle dance and naps with its wings folded.
 // =====================================================================
 class Bee extends Pet{
   constructor(world,x,y){
     super();this.initCommon(world,'bee');
     this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.dh=0;this.bob=0;this.vx=0;this.vy=0;this.speed=0;this.sc=1.3;
     this.outline=hex(PAL.bee.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.seam=0.5;this.frame={x,y,c:1,s:0};
-    this.wingPh=rand(TAU);this.fly=0;this.fluff=0;this.ant=0;this.perch=true;this.wasAir=false;this.buzzT=rand(6,12);this.seed=rand(100);this.ls='idle';
+    this.wingPh=rand(TAU);this.fly=0;this.fluff=0;this.ant=0;this.perch=true;this.wasAir=false;this.buzzT=rand(6,12);this.seed=rand(100);this.ls='idle';this.walking=false;this.stepPh=0;
     // fluffy tufts all round the edge of the thorax and abdomen (fixed per bee so the fuzz doesn't crawl)
     this.tufts=[];for(let i=0;i<30;i++){const onAb=i<18,k=onAb?i/18:(i-18)/12;this.tufts.push({ab:onAb,a:k*TAU+rand(-0.12,0.12),j:rand(0.85,1.15),r:rand(0.7,0.95)});}
   }
   isActive(){return this.preview||this.world.dayness>0.5;}
   W(lx,ly){const c=Math.cos(this.ang)*this.sc,s=Math.sin(this.ang)*this.sc;return[this.x+c*lx-s*ly,this.y-this.dh+s*lx+c*ly];}
-  headPos(){const c=Math.cos(this.ang),s=Math.sin(this.ang);return{x:this.x+c*3.6*this.sc,y:this.y+s*3.6*this.sc};}
-  mouthScreen(){const[x,y]=this.W(5.4,0);return{x,y};}
-  hatAnchor(){const[x,y]=this.W(1.2,0);return{x,y:y-2.4,a:this.ang,s:0.95};}
+  headPos(){const c=Math.cos(this.ang),s=Math.sin(this.ang);return{x:this.x+c*4.6*this.sc,y:this.y+s*4.6*this.sc};}
+  mouthScreen(){const[x,y]=this.W(6.4,0);return{x,y};}
+  hatAnchor(){const[x,y]=this.W(1.6,0);return{x,y:y-2.4,a:this.ang,s:0.95};}
   noise(){return clamp(this.speed/12,0,1)*(this.h>3?0.25:1);}
   airborne(){return this.h>0.3;}
   // flying: glides toward the target with a bit of inertia; has to take off before it can go anywhere
   goTo(tx,ty,dt,mode,arrive=3){const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y),a=Math.atan2(ty-hd.y,tx-hd.x);
+    if(this.walking&&this.h<0.3){const diff=wrapA(a-this.ang);if(d>arrive)this.ang+=clamp(diff,-2.2*dt,2.2*dt);
+      const want=d>arrive?(mode==='run'?9:5.5)*(Math.abs(diff)>1?0.3:1):0,k=Math.min(1,dt*5);this.vx+=(Math.cos(this.ang)*want-this.vx)*k;this.vy+=(Math.sin(this.ang)*want-this.vy)*k;return d<=arrive;}
     const max=mode==='run'||mode==='lunge'?42:mode==='slow'?11:mode==='stalk'?15:24,air=clamp(this.h/3,0,1);
     const want=d>arrive?max*clamp(d/16,0.3,1)*(0.2+0.8*air):0;
     if(d>arrive)this.ang+=clamp(wrapA(a-this.ang),-4*dt,4*dt);
@@ -2943,8 +2945,9 @@ class Bee extends Pet{
       case 'strike':{const q=this.tg&&this.tg.p;return q&&(q.inHand||q.play)?(q.h||0):0;}
       case 'hunt':{const p=this.prey;if(!p)return cruise;if(p.inHand||p.play)return clamp(p.h||0,1,12);const d=Math.hypot(p.x-hd.x,p.y-hd.y);return d<20?lerp(0,cruise,d/20):cruise;}
       case 'idle':return this.perch?0:6;
+      case 'wander':return this.walking?0:cruise;
       case 'notice':return this.h<0.3?0:Math.max(4,this.h);
-      case 'flee':return 14;case 'dance':return 4;case 'pollinating':return 6;
+      case 'flee':return 14;case 'dance':return 4;
     }return cruise;}
   canStrike(p){const hd=this.headPos(),d=Math.hypot(p.x-hd.x,p.y-hd.y),ph=(p.inHand||p.play)?(p.h||0):0;
     return d<5.5&&Math.abs(this.h-ph)<3&&(p.h<3||p.inHand||p.play);}
@@ -2959,18 +2962,10 @@ class Bee extends Pet{
   decide(){const w=this.world,act=this.isActive();
     // bumblebees rest at night: settle down wherever they are
     if(!act&&!this.preview&&Math.random()<0.8){if(Math.random()<0.55){this.state='sleeping';this.timer=rand(8,14);}else{this.perch=true;this.state='idle';this.timer=rand(3,6);}return;}
-    // off to the plants for a bit of pollen
-    if(act&&w.plants&&w.plants.length&&Math.random()<0.28){const pl=pick(w.plants),B=w.bounds;this.tx=clamp(pl.x,B.x0+14,B.x1-14);this.ty=clamp(pl.y,B.y0+14,B.y1-14);this.pl=pl;this.state='pollinate';this.timer=10;return;}
+    // often it just trundles about on foot for a bit
+    if(act&&Math.random()<0.4){const B=w.bounds,a=rand(TAU),r=rand(15,40);this.tx=clamp(this.x+Math.cos(a)*r,B.x0+12,B.x1-12);this.ty=clamp(this.y+Math.sin(a)*r,B.y0+12,B.y1-12);
+      this.walking=true;this.state='wander';this.pace='slow';this.timer=10;return;}
     super.decide();}
-  brain(dt){const w=this.world;
-    if(this.state==='pollinate'){this.timer-=dt;if(this.scanPrey(dt))return;
-      if(this.goTo(this.tx,this.ty,dt,'walk',4)){this.state='pollinating';this.timer=rand(3,5);}else if(this.timer<=0){this.state='idle';this.timer=1;}return;}
-    if(this.state==='pollinating'){this.timer-=dt;this.stop(dt);w.stats.happy=Math.min(100,w.stats.happy+1.2*dt);
-      this.fxT-=dt;if(this.fxT<=0){this.fxT=0.25;const[mx,my]=this.W(rand(-4,1),rand(-2,2));
-        spawn(w,'crumb',mx,my+this.dh,{h:this.dh,vh:rand(0,6),vx:rand(-6,6),vy:rand(-4,4),life:1.4,c:hex(pick(['#ffd84a','#ffe680','#f0b020']))});
-        if(this.pl)this.pl.dist=Math.max(this.pl.dist||0,0.35);}
-      if(this.scanPrey(dt,40))return;if(this.timer<=0){this.state='idle';this.timer=rand(1,2);}return;}
-    super.brain(dt);}
   // spooked: an indignant buzz straight up and away
   startle(x,y){if(this.state==='grabbed')return;if(this.held)this.finishEating();this.tg=null;this.prey=null;
     const hd=this.headPos(),B=this.world.bounds,dx=hd.x-x,dy=hd.y-y,d=Math.hypot(dx,dy)||1,fm=this.fleeMul||1;this.fleeMul=1;
@@ -2985,7 +2980,7 @@ class Bee extends Pet{
     this.t+=dt;this.blinkT-=dt;if(this.blinkT<0){this.blink=0.18;this.blinkT=rand(3,7);}if(this.blink>0)this.blink-=dt;
     this.fluff=Math.max(0,this.fluff-dt*0.08);this.ant=Math.max(0,this.ant-dt*1.5);this.wingPh+=dt*47;
     if(this.state==='grabbed'){this.gt+=dt;this.h+=(10-this.h)*Math.min(1,dt*6);this.dh=this.h;this.x=this.grabX;this.y=this.grabY+this.h;this.vx=this.vy=0;this.fly=1;this.syncHeld();return;}
-    if(this.state!==this.ls){if(this.state==='idle')this.perch=!this.isActive()||(this.h<0.5?Math.random()<0.6:Math.random()<0.3);this.ls=this.state;}
+    if(this.state!==this.ls){if(this.state!=='wander')this.walking=false;if(this.state==='idle')this.perch=!this.isActive()||(this.h<0.5?Math.random()<0.6:Math.random()<0.3);this.ls=this.state;}
     this.brain(dt);
     // height: climb and settle smoothly; wings fold once it has landed
     const tH=this.targetH();this.h+=clamp((tH-this.h)*dt*2.4,-12*dt,14*dt);if(tH===0&&this.h<0.08)this.h=0;
@@ -2994,7 +2989,8 @@ class Bee extends Pet{
     if(air&&!this.preview){this.buzzT-=dt;if(this.buzzT<=0){this.buzzT=rand(7,14);SFX.play('buzz');}}
     // hovering is never perfectly still: a lazy bumbling drift
     if(this.fly>0.5){this.vx+=Math.sin(this.t*1.9+this.seed)*dt*7;this.vy+=Math.cos(this.t*1.4+this.seed*2)*dt*5;}
-    else{const k=Math.min(1,dt*10);this.vx-=this.vx*k;this.vy-=this.vy*k;}
+    else if(!this.walking){const k=Math.min(1,dt*10);this.vx-=this.vx*k;this.vy-=this.vy*k;}
+    if(this.h<0.3)this.stepPh+=this.speed*dt*1.6;
     const B=w.bounds;this.x+=this.vx*dt;this.y+=this.vy*dt;
     const bump=this.x<B.x0+6||this.x>B.x1-6||this.y<B.y0+6||this.y>B.y1-6;this.x=clamp(this.x,B.x0+6,B.x1-6);this.y=clamp(this.y,B.y0+6,B.y1-6);
     if(bump&&this.state==='wander')[this.tx,this.ty]=this.randomSpot();
@@ -3007,12 +3003,15 @@ class Bee extends Pet{
     switch(m){
       case M.BODY:{const band=u>1.5?P.yellow:u>-0.6?P.black:u>-3.0?P.yellow:u>-5.3?P.black:P.white;return band[q2];}
       case M.CLAW2:return P.black[Math.min(3,q2)];
-      case M.LIMB:return P.black[Math.max(0,q-1)];
+      case M.LIMB:return P.black[Math.min(3,q+1)];
+      case M.EYE:return P.eye[q];
     }return INK;}
   draw(fb0){const sc=this.sc,fb={cap:(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r)};
     const fly=this.fly,W=(u,v)=>this.W(u,v),br=1+Math.sin(this.t*(fly>0.5?6:2))*0.03,fz=1+this.fluff*0.25;
-    // six little legs: splayed out when standing, tucked under while flying
-    for(const u of[1.6,0.6,-0.4])for(const sd of[-1,1]){const out=lerp(3.6,2.4,fly),back=lerp(0.3,1.2,fly),[a0,a1]=W(u,sd*1.6),[b0,b1]=W(u-back,sd*out);fb.cap(a0,a1,0.4,b0,b1,0.35,M.LIMB,1);}
+    // six jointed legs: splayed out and stepping (tripod gait) when on the ground, tucked and dangling back while flying
+    for(let i=0;i<3;i++)for(const sd of[-1,1]){const u=[1.9,0.9,-0.2][i],ph=this.stepPh+(i+(sd>0?1:0))%2*Math.PI,sw=fly<0.5&&this.speed>0.5?Math.sin(ph)*0.9:0,lift=fly<0.5&&this.speed>0.5?Math.max(0,Math.cos(ph))*0.5:0;
+      const splay=[0.9,0.1,-0.9][i],kx=lerp(u+splay*0.6+sw*0.5,u-1.0,fly),ky=sd*lerp(3.7+lift*0.3,2.9,fly),fx=lerp(u+splay*1.3+sw,u-2.2,fly),fy=sd*lerp(4.7,3.1,fly);
+      const[a0,a1]=W(u,sd*2.0),[k0,k1]=W(kx,ky),[f0,f1]=W(fx,fy);fb.cap(a0,a1,0.42,k0,k1,0.36,M.LIMB,1);fb.cap(k0,k1,0.36,f0,f1,0.28,M.LIMB,1);}
     // chunky abdomen and round thorax
     const[p0,p1]=W(-1.3,0),[q0,q1]=W(-4.4,0);fb.cap(p0,p1,3.3*br,q0,q1,2.5*br,M.BODY,2,0,0,0.5);
     const[t0,t1]=W(1.1,0);fb.cap(t0,t1,2.9,t0,t1,2.9,M.BODY,2,0,0,0.7);
@@ -3020,8 +3019,12 @@ class Bee extends Pet{
     // the fluff: soft tufts poking out all round the edge
     for(const T of this.tufts){const cu=T.ab?-2.9:1.1,rx=T.ab?4.0:2.9,ry=T.ab?3.1:2.9,wv=Math.sin(this.t*3+T.a*5)*0.08;
       const[x0,y0]=W(cu+Math.cos(T.a)*rx*T.j*(1+wv),Math.sin(T.a)*ry*T.j*(1+wv));fb.cap(x0,y0,T.r*fz,x0,y0,T.r*fz,M.BODY,2,0,0,0.3);}
-    // fuzzy round head
-    const[h0,h1]=W(3.7,0);fb.cap(h0,h1,1.8,h0,h1,1.8,M.CLAW2,3,0,0,0.9);
+    // round fuzzy head with big glossy eyes on the sides
+    const[h0,h1]=W(4.9,0);fb.cap(h0,h1,1.9,h0,h1,1.9,M.CLAW2,3,0,0,0.9);
+    for(const sd of[-1,1]){const[e0,e1]=W(5.0,sd*1.45);fb.cap(e0,e1,0.9,e0,e1,0.95,M.EYE,3,0,0,1.2);}
+    // elbowed antennae: a short base, a bend, then a slightly clubbed tip
+    for(const sd of[-1,1]){const perk=this.ant*0.35+Math.sin(this.t*2.6+sd)*0.1,[b0,b1]=W(6.3,sd*0.6),[m0,m1]=W(7.2,sd*(1.4+perk)),[t0,t1]=W(8.2-perk,sd*(1.2+perk*1.4));
+      fb.cap(b0,b1,0.32,m0,m1,0.3,M.LIMB,3,0,0,1.3);fb.cap(m0,m1,0.3,t0,t1,0.38,M.LIMB,3,0,0,1.3);}
   }
   drawExtras(fb){const W=(u,v)=>this.W(u,v),sc=this.sc,K=hex('#0a0806'),a=this.ang,fly=this.fly;
     // wings: a translucent blur while flying, folded neatly over the back when landed
@@ -3031,15 +3034,11 @@ class Bee extends Pet{
     for(const sd of[-1,1]){
       if(fly>0.5){for(const k of[0,Math.PI]){const f=Math.sin(this.wingPh+k);wing(0.7,sd*2.3,a+sd*(1.8+f*0.5),5.6*sc,2.4*sc,0.2);}}
       else{wing(1.0,sd*0.9,a+Math.PI-sd*0.32,5.0*sc,1.9*sc,0.5);wing(0.6,sd*0.8,a+Math.PI-sd*0.55,3.6*sc,1.4*sc,0.4);}}
-    // big dark eyes with a shine, and elbowed antennae that perk up when it notices something
-    const shut=this.eyesClosed||this.blink>0||this.state==='sleeping';
-    for(const sd of[-1,1]){const[e0,e1]=W(4.1,sd*1.25);if(!shut)pset(fb,e0,e1-0.6,hex('#fff4d8'));
-      const perk=this.ant*0.4+Math.sin(this.t*3+sd)*0.12,[b0,b1]=W(4.9,sd*0.7),[m0,m1]=W(5.9,sd*(1.3+perk)),[t0,t1]=W(6.8-perk*0.6,sd*(1.0+perk));
-      for(let i=0;i<=3;i++){const f=i/3;pset(fb,lerp(b0,m0,f),lerp(b1,m1,f),K);}for(let i=1;i<=2;i++){const f=i/2;pset(fb,lerp(m0,t0,f),lerp(m1,t1,f),K);}}}
+    // a shine on each eye (shut when napping or blinking)
+    if(!(this.eyesClosed||this.blink>0||this.state==='sleeping'))for(const sd of[-1,1]){const[e0,e1]=W(5.25,sd*1.4);pset(fb,e0,e1-0.5,hex('#fff4d8'));}}
   statusText(){switch(this.state){
     case 'idle':return this.h<0.5?(this.isActive()?'is resting its wings':'is dozing on the ground'):'is hovering in place';
-    case 'wander':return this.h<0.5?'is taking off':'is bumbling around';
-    case 'pollinate':return 'is bumbling over to the plants';case 'pollinating':return 'is dusting itself with pollen';
+    case 'wander':return this.walking?'is trundling around on foot':this.h<0.5?'is taking off':'is bumbling around';
     case 'chew':return `is sipping ${PREY_NAME[this.held?.type]||'nectar'}`;case 'petted':return 'is fluffing up happily';
     case 'flee':return 'buzzed off in a huff!';case 'sleeping':return 'is napping with its wings folded';
     case 'dance':return 'is doing a waggle dance!';case 'grabbed':return 'is buzzing indignantly';
