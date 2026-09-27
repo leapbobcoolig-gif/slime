@@ -3396,7 +3396,7 @@ class Mush extends Pet{
       fb.cap(fx,y-lift*0.3+0.4,1.2*sc,fx+0.6,y-lift*0.3+0.4,1.1*sc,M.TOE,1,0,0,0.2);}
     // chubby stem body with tiny arms
     const top=y+oy-stemH,bot=y+oy-0.9*sc;fb.cap(x,bot,sw,x+lean,top+sw*0.35,sw*0.92,M.BODY,2,0,0,0.6);
-    for(const sd of[-1,1]){const swing=moving_?Math.sin(sp+(sd>0?0:Math.PI))*0.9:0,cheer=this.cheer>0.5?Math.sin(this.t*9+sd)*1.2:0,ay=lerp(bot,top,0.55),hx=x+sd*(sw+0.6*sc)+swing*0.4,hy=ay+1.0*sc-cheer-(this.state==='chew'?1.4*sc:0);
+    for(const sd of[-1,1]){const swing=moving_?Math.sin(sp+(sd>0?0:Math.PI))*0.9:0,cheer=this.cheer>0.5?Math.sin(this.t*9+sd)*1.2:0,ay=lerp(bot,top,0.28),hx=x+sd*(sw+0.5*sc)+swing*0.4,hy=ay+1.3*sc-cheer*1.4-(this.state==='chew'?2.2*sc:0);
       fb.cap(x+sd*sw*0.8,ay,0.55*sc,hx,hy,0.62*sc,M.LIMB,3,0,0,0.9);}
     // the cap: a wide dome sitting on top (drops right over the body when hiding)
     const c=this.capC;fb.cap(c.x-c.rx+c.ry,c.y,c.ry,c.x+c.rx-c.ry,c.y,c.ry,M.CLAW2,4,0,0,1.2);fb.cap(c.x,c.y-c.ry*0.45,c.rx*0.7,c.x,c.y-c.ry*0.45,c.rx*0.7,M.CLAW2,4,0,0,1.4);
@@ -3406,18 +3406,19 @@ class Mush extends Pet{
     for(const[sx,sy,r]of MUSH_SPOTS)if(r>0.7)g.push([c.x+sx*sc,c.y+sy*sc,r]);
     if(this.wet>0.3){pset(fb,c.x-c.rx*0.45,c.y-c.ry*0.55,W1);pset(fb,c.x-c.rx*0.35,c.y-c.ry*0.6,hex('#ffd8d0'));}
     // face on the front of the stem, peeking out under the cap when hiding
-    if(f<0.3)return;const fx=x+Math.cos(this.ang)*1.3*sc*f+Math.cos(this.ang)*this.lean*1.2,fy=d>0.5?c.y+c.ry+0.6:this.y-this.h-lerp(3.0,1.2,d)*sc;
+    if(f<0.3)return;const fx=x+Math.cos(this.ang)*1.3*sc*f+Math.cos(this.ang)*this.lean*1.2,fy=d>0.5?c.y+c.ry+0.6:this.y-this.h-lerp(2.4,1.2,d)*sc;
     const asleep=this.state==='sleeping',happy=this.cheer>0.5||this.state==='petted',shut=asleep||this.blink>0;
-    for(const sd of[-1,1]){const ex=Math.round(fx+sd*1.4*sc),ey=Math.round(fy);
+    if(d<0.5){const FC=hex('#f6e8cc');for(let yy=-3;yy<=2;yy++)for(let xx=-4;xx<=4;xx++){const X=Math.round(fx)+xx,Y=Math.round(fy)+yy;if(X<0||Y<0||X>=fb.w||Y>=fb.h)continue;const i=Y*fb.w+X;if(fb.mat[i]===M.BODY)fb.px[i]=mixc(fb.px[i],FC,Math.abs(xx)>=4?0.4:0.88);}}
+    for(const sd of[-1,1]){const ex=Math.round(fx)+(sd<0?-2:1),ey=Math.round(fy);
       if(asleep){pset(fb,ex-1,ey,K);pset(fb,ex,ey+1,K);pset(fb,ex+1,ey,K);}// sleepy u-shaped eyes
       else if(happy){pset(fb,ex-1,ey,K);pset(fb,ex,ey-1,K);pset(fb,ex+1,ey,K);}// happy ^ eyes
-      else if(shut){pset(fb,ex,ey,K);pset(fb,ex+1,ey,K);}
-      else{pset(fb,ex,ey,K);pset(fb,ex,ey-1,K);pset(fb,ex+1,ey,K);pset(fb,ex+1,ey-1,K);pset(fb,ex+1,ey-1,W1);if(d>0.5){pset(fb,ex,ey-1,W1);}}}
-    if(d>0.5)return;const mx=Math.round(fx),my=Math.round(fy+1.5*sc);
-    if(!asleep){pmix(fb,fx-2.6*sc,fy+1,hex('#ff8a9a'),0.6);pmix(fb,fx+2.6*sc,fy+1,hex('#ff8a9a'),0.6);}
+      else if(shut){pset(fb,ex,ey-1,K);pset(fb,ex+1,ey-1,K);}
+      else{for(const[u,v]of[[0,0],[1,0],[0,-1],[1,-1],[0,-2],[1,-2]])pset(fb,ex+u,ey+v,K);pset(fb,ex+1,ey-2,W1);if(d>0.5)pset(fb,ex,ey-2,W1);}}
+    if(d>0.5)return;const mx=Math.round(fx)-1,my=Math.round(fy+1.3*sc);
+    if(!asleep)for(const sd of[-1,1]){pmix(fb,fx+sd*2.9*sc,fy+1,hex('#ff7a8a'),0.7);pmix(fb,fx+sd*2.9*sc+1,fy+1,hex('#ff7a8a'),0.5);}
     if(this.state==='chew'){const o=Math.sin(this.chewPh)>0;pset(fb,mx,my,K);if(o){pset(fb,mx+1,my,K);pset(fb,mx,my+1,K);pset(fb,mx+1,my+1,K);}}
     else if(happy){pset(fb,mx-1,my,K);pset(fb,mx,my+1,K);pset(fb,mx+1,my+1,K);pset(fb,mx+2,my,K);}
-    else if(!asleep){pset(fb,mx,my,K);pset(fb,mx+1,my,K);}}
+    else if(!asleep){pset(fb,mx,my,K);pset(fb,mx+1,my+1,K);pset(fb,mx+2,my,K);}}
   glow(fb,night){const k=night*0.9+this.cheer*0.4;if(k<0.05)return;for(const[x,y,r]of this.glowPx){const b=k*(0.75+0.25*Math.sin(this.t*1.6+x));padd(fb,x,y,40*b,170*b,120*b);
     if(r>0.7)for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])padd(fb,x+dx,y+dy,14*b,70*b,50*b);}}
   statusText(){switch(this.state){
@@ -4997,7 +4998,7 @@ function newRequest(){const w=game.world,pet=w.pet,M=pet.mind,S=w.stats,D=DIET[g
     const tools=TOY_TOOLS.filter(t=>t!=='remote'&&toolOwned(t)),toys=w.toys.filter(t=>t.playable).map(t=>t.id);
     if(tools.length||toys.length){const opt=[...tools,...toys];L.push({w:0.4+M.energy+M.cur*0.5,type:'play',arg:pick(opt)});}
     if(messCount(w)>=2)L.push({w:1.5,type:'clean'});}
-  const r=wpick(L);game.req={type:r.type,arg:r.arg,t:120,T:120,prog:0,need:r.type==='pets'?12:r.type==='mist'?4:1};
+  const r=wpick(L);game.req={type:r.type,arg:r.arg,t:120,T:120,prog:0,need:r.type==='pets'?12:r.type==='mist'?4:r.type==='play'?8:1};
   think(pet,'!');SFX.play('ask');if(!save.set.reqTip){save.set.reqTip=true;flash(`${game.name} wants something! Look at the bubble above its head.`);}}
 function reqDone(){const w=game.world,pet=w.pet,hd=pet.headPos();game.req=null;game.reqT=rand(180,360);
   const n=Math.floor(rand(8,13));for(let i=0;i<n;i++){const a=i/n*TAU+rand(-0.3,0.3),v=rand(12,22);spawnCoin(w,hd.x,hd.y,1,{vx:Math.cos(a)*v,vy:Math.sin(a)*v*0.7,vh:rand(38,56),auto:rand(1,1.5)});}
@@ -5017,7 +5018,8 @@ function updateGoals(w,dt){const pet=w.pet,T=save.track||(save.track={});
   if(pet.kind==='puffer'&&pet.state==='puffed')seen('puff');if(w.parts.some(p=>p.type==='ink'))seen('ink');if(w.shrooms&&w.shrooms.length)seen('shrooms');
   if(pet.kind==='kraken'&&pet.onLand&&pet.onLand()&&pet.speed>2)seen('krakenLand');
   // requests
-  const R=game.req;if(R){R.t-=dt;if(R.type==='clean'&&messCount(w)===0)reqDone();else if(R.t<=0){game.req=null;game.reqT=rand(120,240);think(pet,'...');}}
+  const R=game.req;if(R&&R.type==='play'&&pet&&!pet.preview){const WT=pet.wantTarget&&pet.wantTarget();if(WT&&pet.prey===WT&&(pet.state==='hunt'||pet.state==='strike')){R.prog+=dt;if(R.prog>=R.need){reqDone();}}}
+  if(game.req){const R=game.req;R.t-=dt;if(R.type==='clean'&&messCount(w)===0)reqDone();else if(R.t<=0){game.req=null;game.reqT=rand(120,240);think(pet,'...');}}
   else if(!ui.modalOpen()){game.reqT=(game.reqT??rand(60,120))-dt;if(w.mood==='grumpy')game.reqT=Math.min(game.reqT,20);if(game.reqT<=0)newRequest();}}
 // the request bubble, drawn above the critter's head
 const BUBBLE=['.kkkkkkkkkkkkkkkkk.',...Array(10).fill('kwwwwwwwwwwwwwwwwwk'),'.kkkkkkkwwkkkkkkkk.','........kwk........','.........k.........'],RQFB=new FB(30,24),BUBW=hex('#f6f3e6');
@@ -5983,7 +5985,7 @@ const ui={
   renderTray(){
     const tr=$('tray'),t=game.tool,isPlay=TOY_TOOLS.includes(t)||t==='play';
     this.syncDock();
-    if(!(t==='feed'||isPlay)||!game.trayOpen){tr.hidden=true;SUP.unmount();return;}
+    if(!(t==='feed'||isPlay)||!game.trayOpen||(isPlay&&FUN('tools'))){tr.hidden=true;SUP.unmount();return;}
     if(t==='feed'&&FUN('food')&&innerWidth>=300){tr.hidden=false;tr.classList.add('supply');SUP.mount(tr);return;}
     tr.classList.remove('supply');SUP.unmount();tr.hidden=false;tr.innerHTML='';
     if(t==='feed'){const D=DIET[game.kind]||{},catOf=f=>FOOD_CATS.find(c=>c.foods.includes(f));
@@ -6193,7 +6195,7 @@ const ui={
 //  Input
 // =====================================================================
 function setTool(t){
-  if(game.held)dropHeld();game.placing=null;if(FUN('tools')&&PEG.fb)PEG.swap(game.tool,t);game.tool=t;game.hand=null;canvas.style.cursor=t||FUN('tools')?'none':'grab';
+  if(game.held)dropHeld();if(game.tool==='remote'&&t!=='remote'&&placedCount('rc')>0){const rc=game.world.toys.find(o=>o.id==='rc');if(rc)dust(game.world,rc.x,rc.y,6);storeObject('rc');game.world.rcTarget=null;SFX.engine(0);}game.placing=null;if(FUN('tools')&&PEG.fb)PEG.swap(game.tool,t);game.tool=t;game.hand=null;canvas.style.cursor=t||FUN('tools')?'none':'grab';
   if(!t&&!game.panHinted&&!FUN('tools')){game.panHinted=true;ui.toast('No tool selected: drag to look around. Tap a tool to pick it up again.',true);}if(TOY_TOOLS.includes(t))game.toyTool=t;if(t==='remote'&&placedCount('rc')===0&&(save.inv.rc||0)>0){placeObject('rc',160,100);markDirty();}game.trayOpen=true;ui.renderTray();
 }
 function toggleLight(){const w=game.world;if(!w)return;w.dayTarget=w.dayTarget>0.5?0:1;SFX.play(w.dayTarget?'lightsOn':'lightsOff');
