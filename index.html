@@ -27,7 +27,8 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 #c{display:block;image-rendering:pixelated;image-rendering:crisp-edges;cursor:none;touch-action:none;transform-origin:0 0}
 #zoomChip{position:fixed;z-index:25;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px;transition:opacity .2s,box-shadow .15s;touch-action:none;cursor:grab}
 #zoomChip.drag{cursor:grabbing;box-shadow:inset 0 0 0 2px var(--moss),0 10px 24px rgba(0,0,0,.5)}
-#zGrip{height:10px;align-self:stretch;min-width:26px;border-radius:4px;background:radial-gradient(circle,#7c8c74 1.3px,transparent 1.8px) 1px 1px/5px 5px}
+#zGrip{height:22px;align-self:stretch;min-width:30px;margin:-2px -2px 0;border-radius:6px 6px 3px 3px;background:radial-gradient(circle,#9aac90 1.6px,transparent 2.1px) 2px 2px/6px 6px,#1a2218;box-shadow:inset 0 0 0 2px #060a07;cursor:grab}
+#zGrip:hover,#zoomChip.drag #zGrip{background-color:#2a3a24}
 #zoomChip .ibtn{width:34px;height:34px}#zoomChip .ibtn img{width:22px;height:22px}
 #zoomChip .ibtn.on{background:#2c4a24;box-shadow:inset 0 0 0 2px var(--moss),0 4px 0 #040604}
 #zLvl{font-family:var(--display);font-size:9px;min-width:0;text-align:center}
@@ -123,6 +124,17 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .tcat.on{background:#3a3418;color:#ffe9a8;box-shadow:inset 0 0 0 1px var(--amber)}
 .tcat i{font-style:normal;color:#ff7a9a;margin-left:4px}
 .ti.meh{opacity:.45}
+.seg{display:flex;gap:6px}.seg .btn{flex:none;padding-inline:14px}.seg .btn.on{background:#3a3418;color:#ffe9a8;box-shadow:inset 0 0 0 2px var(--amber)}
+/* Fun UI: supply tanks you pluck food from */
+#tray.supply{display:grid;grid-template-columns:repeat(4,auto) auto;align-items:start;overflow:visible;width:max-content;gap:6px 10px;padding:8px 10px 6px;background:linear-gradient(#3a2a1a,#2a1d12);box-shadow:inset 0 0 0 2px #5a4028,inset 0 3px 0 #6a4c30,0 0 0 3px #060a07,0 8px 0 #040604}
+#tray.supply .sp-t{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px}
+#tray.supply canvas{display:block;width:168px;height:96px;image-rendering:pixelated;border-radius:6px;box-shadow:0 0 0 3px #060a07,0 4px 0 3px #1a120a;cursor:grab;touch-action:none;background:#0a0f0c}
+#tray.supply canvas:active{cursor:grabbing}
+#tray.supply .sp-l{font-family:var(--display);font-size:9px;letter-spacing:.06em;color:#f2dcb0;background:#6a4a2a;padding:3px 8px 2px;border-radius:3px;box-shadow:0 0 0 2px #1a0f06,inset 0 1px 0 #8a6a42}
+#tray.supply .sp-l i{font-style:normal;color:#ff9ab4;margin-left:4px}
+#tray.supply .ti.trash{align-self:center;background:#241a10}
+#tray.supply .sp-info{grid-column:1/-1;text-align:center;font-size:16px;color:#e8d8b8;min-height:20px;line-height:20px}
+#tray.supply .sp-info b{color:#ffd86a;font-weight:normal}#tray.supply .sp-info em{color:#ff9ab4;font-style:normal}#tray.supply .sp-info u{color:#9a8a70;text-decoration:none}
 .ti.filler{visibility:hidden;pointer-events:none}
 .ti{touch-action:none}
 .ps-c{font-size:15px;margin:2px 0 6px;color:var(--mute)}.ps-c i{display:block;height:5px;background:#10140e;border-radius:3px;margin-top:3px;overflow:hidden}.ps-c em{display:block;height:100%;background:#ff7a9a}
@@ -254,7 +266,8 @@ input[type=range]{accent-color:var(--moss);width:180px}
   #toast{max-width:calc(100vw - 40px)}.tmsg{font-size:18px}
   .db{width:54px;height:54px}.db img{width:36px;height:36px}.db span{display:none}.db kbd{display:none}.db.on{transform:translateY(-3px)}
   #dock{gap:6px;padding:5px;justify-content:center;width:max-content}.dgroup{gap:5px}
-  #petCard{flex-wrap:wrap;row-gap:6px;width:100%}#meters{width:100%;margin-left:0;gap:12px}#meters .meter{flex:1;min-width:0}#meters .bar{flex:1;width:auto;height:12px}#meters .meter img{width:20px;height:20px}
+  #petCard{width:100%;gap:8px;padding:5px 8px 5px 6px}#petText{flex:1}#petName{max-width:100%}
+  #meters{margin-left:auto;display:grid;grid-template-columns:auto auto;gap:5px 8px;flex:none}#meters .bar{width:44px;height:10px}#meters .meter img{width:18px;height:18px}
   #topR{margin-left:0;width:100%;justify-content:space-between}#menusTop{gap:5px}
   #tray{flex-wrap:wrap;justify-content:center;overflow:visible;max-width:calc(100vw - 16px);width:max-content;gap:5px;padding:6px}
   #tray .tcats{flex-direction:row;flex-basis:100%;justify-content:center;margin:0 0 2px}#tray .tcat{flex:1;min-width:0;text-align:center;padding:5px 4px;font-size:11px}
@@ -262,7 +275,11 @@ input[type=range]{accent-color:var(--moss);width:180px}
   .tray-note{white-space:normal;flex-basis:100%;font-size:16px}
   .gwrap{grid-template-columns:1fr}.machine{justify-self:center}
   #gcv{width:256px;height:352px}
+  #tray.supply{grid-template-columns:auto auto auto;gap:6px;padding:6px}#tray.supply canvas{width:140px;height:80px}
+  #tray.supply .sp-t:nth-child(1){grid-area:1/1}#tray.supply .sp-t:nth-child(2){grid-area:1/2}#tray.supply .sp-t:nth-child(3){grid-area:2/1}#tray.supply .sp-t:nth-child(4){grid-area:2/2}
+  #tray.supply .ti.trash{grid-area:1/3/3/4;width:44px;height:auto;align-self:stretch}#tray.supply .sp-info{grid-column:1/4;font-size:14px;line-height:17px}#tray.supply .sp-l{font-size:8px;padding:2px 6px 1px}
 }
+@media (max-width:340px){#tray.supply canvas{width:112px;height:64px}}
 @media (orientation:portrait) and (min-width:761px) and (max-width:1100px){
   #top{flex-wrap:wrap;height:auto;padding-top:10px;row-gap:10px}
   #petCard{width:100%}#meters{margin-left:auto}
@@ -277,6 +294,8 @@ input[type=range]{accent-color:var(--moss);width:180px}
   #tray{bottom:calc(100% + 6px);padding:4px;gap:4px}#tray .ti{width:40px;height:40px}#tray .ti canvas{width:34px;height:24px;margin-top:-5px}#tray .ti .tl{font-size:7px;bottom:1px}#tray .ti .tpr{font-size:8px}
   #tray .tcats{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-right:2px}#tray .tcat{min-width:0;padding:2px 5px;font-size:9px}
   .tmsg{font-size:17px;padding:5px 12px 4px}
+  #tray.supply{gap:5px;padding:4px 5px 3px}#tray.supply canvas{width:112px;height:64px}#tray.supply .sp-l{font-size:7px;padding:1px 5px 0}#tray.supply .sp-t{gap:2px}
+  #tray.supply .sp-info{font-size:13px;min-height:15px;line-height:15px}#tray.supply .ti.trash{width:40px;height:40px}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -363,6 +382,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
   <div class="srow"><label>Thought marks<small>Little ? ! and ... above critters while they think.</small></label><button class="sw" id="setThoughts" aria-label="Thought marks"></button></div>
   <div class="srow"><label>Pixel-perfect scaling<small>Crisper pixels, smaller tank.</small></label><button class="sw" id="setPixel" aria-label="Pixel-perfect scaling"></button></div>
   <div class="srow"><label for="setUi">Interface size<small id="setUiV">Auto</small></label><div style="display:flex;gap:8px;align-items:center"><input type="range" id="setUi" min="0.6" max="1.4" step="0.05"><button class="btn alt" id="setUiAuto" style="flex:none">Auto</button></div></div>
+  <div class="srow"><label>Interface style<small>Fun (beta): pluck food from little supply tanks.</small></label><div class="seg" id="setIface"><button class="btn alt" data-v="basic">Basic</button><button class="btn alt" data-v="fun">Fun</button></div></div>
   <div class="srow" id="resetRow"><label>Reset save<small>Coins, items and bonds start over.</small></label><button class="btn alt danger" id="resetBtn" style="flex:none">Reset</button></div>
   <div class="srow" id="unlockRow" hidden><label>Unlock everything<small>Secret menu! Every critter, hat, toy, tool and decoration.</small></label><button class="btn" id="unlockBtn" style="flex:none">Unlock all</button></div>
 </div></div>
@@ -5399,6 +5419,105 @@ function foodCanvas(type){
 function toolCanvas(id){const f=new FB(22,16);f.px.fill(0);drawToolIcon(f,id,11,8);const c=document.createElement('canvas');c.width=22;c.height=16;c.className='px';c.getContext('2d').putImageData(f.img,0,0);return c;}
 
 // =====================================================================
+//  Supply tanks (Fun UI): four tiny live worlds you pluck food from
+// =====================================================================
+const SUP={on:false,el:null,tanks:null,SW:56,SH:32,
+  pos(q){return q.scr?q.scr():{x:q.x,y:q.y-(q.h||0)};},
+  build(){
+    const SW=this.SW,SH=this.SH,el=[];this.tanks=[];
+    const LAY={bugs:[['cricket',12,21],['roach',28,25],['worm',43,18],['waxworm',18,14],['fly',36,12],['snail',46,26]],
+      water:[['bloodworm',12,24],['shrimp',27,21],['minnow',41,17],['minnow',21,14]],
+      garden:[['fruit',11,13],['greens',26,24],['egg',43,23],['flower',36,14],['grape',15,25]],
+      magic:[['stars',14,18],['moonberry',29,23],['geode',43,19]]};
+    const NAME={bugs:'BUG BIN',water:'WATER TUB',garden:'GARDEN',magic:'MAGIC JAR'};
+    for(const c of FOOD_CATS){
+      const wrap=document.createElement('div');wrap.className='sp-t';const cv=document.createElement('canvas');cv.width=SW;cv.height=SH;
+      const lab=document.createElement('b');lab.className='sp-l';wrap.append(cv,lab);el.push(wrap);
+      const mw={bounds:{x0:5,y0:10,x1:SW-5,y1:SH-3},pet:null,wet:new Float32Array(W*H),allWater:c.id==='water',tank:'terra',dish:null,hide:null,t:rand(9),prey:[]};
+      const T={id:c.id,name:NAME[c.id],cv,ctx:cv.getContext('2d'),lab,fb:new FB(SW,SH),bg:new Uint32Array(SW*SH),mw,hover:null,hot:null,
+        slots:(LAY[c.id]||[]).map(([f,x,y],i)=>({f,x,y,item:null,re:0.15*i,pop:0,ph:rand(TAU)}))};
+      this.bake(T);this.tanks.push(T);this.wire(T);}
+    const tb=document.createElement('button');tb.className='ti trash';tb.id='trashBtn';tb.title='Trash: click to clear all food, or drag food here to throw it away';
+    tb.innerHTML=`<img class="px" src="${iconURL('trash')}" alt=""><span class="tl">trash</span>`;tb.addEventListener('click',()=>trashAll());el.push(tb);
+    const info=document.createElement('div');info.className='sp-info';el.push(info);this.info=info;this.el=el;
+  },
+  bake(T){const SW=this.SW,SH=this.SH,bg=T.bg,sd=T.id.length*57;
+    if(T.id==='bugs'){bakeSoil(bg,SW,SH,0,0,SW,SH,sd);const BR=ramp('#6a4a26','#8a6434','#a8804a','#c49a5c');
+      for(let i=0;i<SW*SH;i++){const g=hash(i%SW+3,(i/SW|0)+sd);if(g>0.92)bg[i]=mixc(bg[i],BR[(g*97|0)%4],0.6);else bg[i]=mixc(bg[i],BR[1],0.3);}}
+    else if(T.id==='garden'){bakeSoil(bg,SW,SH,0,0,SW,SH,sd);const GR=ramp('#1e3a16','#2c5220','#3e6e2a','#5a8e38');
+      for(let y=0;y<SH;y++)for(let x=0;x<SW;x++){const i=y*SW+x,n=fbm(x*.09+7,y*.12,3);if(y<9+n*5-(x%4===0?2:0))bg[i]=GR[clamp(Math.floor(n*4+(y<11?1:0)),0,3)];
+        else if(hash(x,y+sd)>0.93)bg[i]=GR[1];}
+      for(let a=0;a<TAU;a+=0.05){const x=Math.round(43+Math.cos(a)*4.5),y=Math.round(24+Math.sin(a)*2.6);for(const k of[0,1])pset({w:SW,h:SH,px:bg},x,y+k,hex(hash(x,y)>0.5?'#8a6a3a':'#5e4424'));}}
+    else if(T.id==='water'){this.sea=[];}
+    else{for(let y=0;y<SH;y++)for(let x=0;x<SW;x++){const n=fbm(x*.07+3,y*.09,4),m=fbm(x*.05+40,y*.06,3);
+      let c=mixc(hex('#140c2a'),hex('#2a1a52'),clamp(n*1.4-0.2,0,1));c=mixc(c,hex('#123a4a'),clamp(m-0.45,0,1)*1.2);bg[y*SW+x]=c;}
+      for(let x=0;x<SW;x++)for(let k=0;k<2+hash(x,5)*2;k++){const y=SH-1-k;bg[y*SW+x]=mixc(bg[y*SW+x],hex(hash(x,k)>0.6?'#7a5ab8':'#3a2a6a'),0.7);}}
+  },
+  wire(T){const cv=T.cv,SW=this.SW,SH=this.SH;
+    const at=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)/r.width*SW,(e.clientY-r.top)/r.height*SH];};
+    const near=(x,y)=>{let best=null,bd=9;for(const sl of T.slots){const q=sl.item;if(!q)continue;const p=SUP.pos(q),d=Math.hypot(p.x-x,p.y-y);if(d<bd){bd=d;best=sl;}}return best;};
+    cv.addEventListener('pointermove',e=>{T.hover=at(e);const sl=near(...T.hover);if(sl!==T.hot){T.hot=sl;this.say(sl?sl.f:null);if(sl)SFX.play('tick');}});
+    cv.addEventListener('pointerleave',()=>{T.hover=null;T.hot=null;this.say(null);});
+    cv.addEventListener('pointerdown',e=>{if(e.button>0)return;T.hover=at(e);const sl=near(...T.hover);T.hot=sl;this.say(sl?sl.f:null);
+      if(!sl){SFX.play('tap');return;}try{cv.releasePointerCapture(e.pointerId);}catch(_){}ui.fdrag={f:sl.f,x:e.clientX,y:e.clientY,active:false,src:{T,sl}};});
+    cv.addEventListener('click',e=>{if(ui.fdragDone){ui.fdragDone=false;return;}const sl=near(...at(e));if(!sl)return;game.food=sl.f;SFX.play('tick');this.say(sl.f,true);});
+  },
+  say(f,picked){if(!this.info)return;
+    if(!f){const D=DIET[game.kind]||{};this.info.innerHTML=`Drag food into the tank &middot; or tap one, then tap the tank <u>(${FOODS[game.food]?.label||''} picked)</u>`;return;}
+    const lv=(DIET[game.kind]||{})[f]||0,pr=FOOD_PRICE[f]||0,nm=FOODS[f].label||FOODS[f].name;
+    this.info.innerHTML=`${picked?'Picked: ':''}<b>${nm[0].toUpperCase()+nm.slice(1)}</b> &middot; ${pr} coin${pr===1?'':'s'}${lv>=8?' &middot; <em>&#9829; a favourite!</em>':lv<=0?` &middot; <u>${game.name} won't eat this</u>`:''}${save.coins<pr?' &middot; <u>not enough coins</u>':''}`;},
+  label(){const D=DIET[game.kind]||{};for(const T of this.tanks){const fav=FOOD_CATS.find(c=>c.id===T.id).foods.some(f=>(D[f]||0)>=8);T.lab.innerHTML=T.name+(fav?'<i>&#9829;</i>':'');}},
+  mount(tr){if(!this.el)this.build();const fresh=!this.on||this.el[0].parentNode!==tr;
+    if(fresh){tr.innerHTML='';tr.append(...this.el);this.on=true;this.label();this.say(null);for(const T of this.tanks)this.draw(T);}},
+  unmount(){if(!this.on)return;this.on=false;for(const T of this.tanks||[])for(const sl of T.slots)if(!sl.item)sl.re=Math.min(sl.re,0.3);},
+  take(src){const{T,sl}=src;if(sl.item){const p=this.pos(sl.item);sl.puff={x:p.x,y:p.y,t:0.4};sl.item=null;sl.re=rand(3.5,5);}},
+  putBack(src){const{sl}=src;if(!sl.item)sl.re=0.05;},
+  tick(dt){if(!this.tanks)return;const tr=$('tray');if(!tr||tr.hidden){return;}
+    for(const T of this.tanks){const mw=T.mw;mw.t+=dt;
+      mw.pet=T.hover?{preview:true,headPos:()=>({x:T.hover[0],y:T.hover[1]}),noise:()=>0.8}:null;
+      for(const sl of T.slots){
+        if(sl.puff){sl.puff.t-=dt;if(sl.puff.t<=0)sl.puff=null;}
+        if(!sl.item){sl.re-=dt;if(sl.re<=0){const q=makeFood(sl.f,sl.x+rand(-2,2),sl.y+rand(-1,1),T.id==='magic'?4:7);q.vh=18;if(q.pts&&q.toScreen){}sl.item=q;sl.pop=0.45;if(this.on&&T.visibleOnce)SFX.play(T.id==='magic'?'tink2':'tick');}continue;}
+        const q=sl.item;sl.pop=Math.max(0,sl.pop-dt);
+        if(T.id==='magic'){q.t=(q.t||0)+dt;const tgt=3.2+Math.sin(mw.t*1.8+sl.ph)*1.4;q.h+=(tgt-q.h)*Math.min(1,dt*4);q.vh=0;if(q.type==='stars'||q.type==='moonberry')q.ang+=dt*0.3;}
+        else if(T.id==='garden'&&q.type!=='grape'){q.update(dt,mw);}
+        else q.update(dt,mw);
+        if(q.type==='minnow'){q.inWater=true;}
+        // keep live food home: gently herd anything that wandered to the glass back toward its spot
+        if(LIVE_FOOD.includes(q.type)&&q.h<=0.5){const dx=sl.x-q.x,dy=sl.y-q.y;if(Math.hypot(dx,dy)>26){q.x+=dx*dt*0.6;q.y+=dy*dt*0.6;}}}
+      T.visibleOnce=true;this.draw(T);}
+  },
+  draw(T){const fb=T.fb,SW=this.SW,SH=this.SH,px=fb.px,t=T.mw.t,mw=T.mw;
+    if(T.id==='water'){for(let y=0;y<SH;y++)for(let x=0;x<SW;x++){const a=Math.sin(x*0.3+Math.sin(y*0.22+t*0.8)*1.7+t*0.6)+Math.sin(y*0.36+Math.sin(x*0.19-t*0.7)*1.7),c=1-Math.min(1,Math.abs(a)*1.5);
+      px[y*SW+x]=mixc(mixc(SAND[clamp(Math.floor(fbm(x*0.08,y*0.08,3)*4),0,4)],hex('#124a6c'),0.6),hex('#8fdcc8'),c*c*0.3);}}
+    else px.set(T.bg);
+    const base=this.base||(this.base=new Uint32Array(SW*SH));base.set(px);
+    fb.clearLayer();const keep=FOOD_PAINTER.shells;FOOD_PAINTER.shells=[];
+    const items=T.slots.map(s=>s.item).filter(Boolean).sort((a,b)=>a.y-b.y);
+    for(const q of items)q.drawShadow(fb);
+    for(const q of items)if(!q.layered)q.draw(fb,t);
+    for(const q of items)if(q.layered)q.drawL(fb);composite(fb,FOOD_PAINTER,{sAmt:.6,sdx:1,sdy:1});FOOD_PAINTER.shells=keep;
+    const D=DIET[game.kind]||{},HEART=hex('#ff7aa0'),GOLD=hex('#ffd86a'),WHITE=hex('#ffffff');
+    for(const sl of T.slots){const P=sl.puff;if(P){const k=P.t/0.4,r=(1-k)*6+1,col=T.id==='water'?hex('#cfefff'):T.id==='magic'?hex('#d8c8ff'):hex('#c8a878');for(let a=0;a<6;a++){const an=a*TAU/6+k;pset(fb,P.x+Math.cos(an)*r,P.y+Math.sin(an)*r*0.7-(1-k)*2,col);}}}
+    for(const sl of T.slots){const q=sl.item;if(!q)continue;const p=this.pos(q),lv=D[sl.f]||0;
+      if(lv<=0){for(let yy=-4;yy<=3;yy++)for(let xx=-4;xx<=4;xx++){const X=Math.floor(p.x+xx),Y=Math.floor(p.y+yy);if(X>=0&&Y>=0&&X<SW&&Y<SH){const i=Y*SW+X,c=px[i];if(c===base[i])continue;const g=((c&255)+(c>>8&255)+(c>>>16&255))/3;px[i]=mixc(c,rgb(g*0.75,g*0.75,g*0.75),0.55);}}}
+      else if(lv>=8){const hx=Math.floor(p.x+3),hy=Math.floor(p.y-7+Math.sin(t*3+sl.ph)*0.8);for(const[u,v]of[[0,0],[2,0],[-1,1],[0,1],[1,1],[2,1],[3,1],[0,2],[1,2],[2,2],[1,3]])pset(fb,hx+u-1,hy+v,HEART);}
+      if(sl.pop>0){const k=sl.pop/0.45,r=(1-k)*7;for(let a=0;a<4;a++){const an=a*TAU/4+t*3;pset(fb,p.x+Math.cos(an)*r,p.y+Math.sin(an)*r,k>0.5?WHITE:GOLD);}}
+      if(game.food===sl.f&&Math.floor(t*2.5)%2===0){const r=4;for(const[u,v]of[[-r,-r],[r,-r],[-r,r],[r,r]]){pset(fb,p.x+u,p.y+v,GOLD);pset(fb,p.x+u-Math.sign(u),p.y+v,GOLD);pset(fb,p.x+u,p.y+v-Math.sign(v),GOLD);}}
+      if(T.hot===sl){for(let a=0;a<TAU;a+=0.35){const X=Math.floor(p.x+Math.cos(a)*5),Y=Math.floor(p.y+Math.sin(a)*3.8);if(X>=0&&Y>=0&&X<SW&&Y<SH)px[Y*SW+X]=mixc(px[Y*SW+X],WHITE,0.55);}}}
+    // tank dressing: back-wall shade, glass sheen, rim; mesh lid on the bug bin, surface ripple on the tub, twinkles in the jar
+    for(let y=0;y<6;y++)for(let x=0;x<SW;x++){const i=y*SW+x;px[i]=shade(px[i],0.6+y*0.07);}
+    if(T.id==='water')for(let x=0;x<SW;x++){const y=2+Math.round(Math.sin(x*0.35+t*2.2)*0.8);if(y>=0)px[y*SW+x]=mixc(px[y*SW+x],hex('#bff0ff'),0.55);}
+    if(T.id==='bugs')for(let x=0;x<SW;x++)for(let y=0;y<3;y++){if((x+y)%2===0)px[y*SW+x]=mixc(px[y*SW+x],hex('#9aa4a8'),y===0?0.9:0.5);}
+    if(T.id==='magic')for(let k=0;k<7;k++){const x=Math.floor(hash(k,3)*SW),y=Math.floor(6+hash(k,9)*(SH-10)),tw=Math.sin(t*(2+k*0.4)+k*2);if(tw>0.3){pset(fb,x,y,mixc(hex('#b8a8ff'),WHITE,tw));if(tw>0.8){pset(fb,x-1,y,hex('#8a78d8'));pset(fb,x+1,y,hex('#8a78d8'));pset(fb,x,y-1,hex('#8a78d8'));pset(fb,x,y+1,hex('#8a78d8'));}}}
+    for(let y=0;y<SH;y++)for(let x=0;x<SW;x++){const d=(x+y*1.3)-((t*14)%260-60);if(d>0&&d<5||d>8&&d<10){const i=y*SW+x;px[i]=mixc(px[i],WHITE,0.1);}}
+    for(let x=0;x<SW;x++){px[x]=mixc(px[x],WHITE,0.25);px[(SH-1)*SW+x]=shade(px[(SH-1)*SW+x],0.5);}
+    for(let y=0;y<SH;y++){px[y*SW]=mixc(px[y*SW],WHITE,0.18);px[y*SW+SW-1]=shade(px[y*SW+SW-1],0.55);}
+    T.ctx.putImageData(fb.img,0,0);
+  },
+};
+
+// =====================================================================
 //  Gachapon machine (its own little pixel canvas)
 // =====================================================================
 const gfb=new FB(128,176);
@@ -5614,6 +5733,8 @@ const ui={
     $('setUi').addEventListener('input',e=>{save.set.ui=+e.target.value;this.applyUI();fit();markDirty();});
     $('setUiAuto').addEventListener('click',()=>{delete save.set.ui;this.applyUI();fit();markDirty();SFX.play('ui');});
     window.addEventListener('resize',()=>{if(!save.set.ui){this.applyUI();fit();}});this.applyUI();
+    this.applyIface=()=>{const fun=save.set.iface==='fun';document.body.classList.toggle('fun',fun);for(const b of $('setIface').children)b.classList.toggle('on',b.dataset.v===(fun?'fun':'basic'));this.renderTray();fit();};
+    for(const b of $('setIface').children)b.addEventListener('click',()=>{if(b.dataset.v==='fun')save.set.iface='fun';else delete save.set.iface;markDirty();SFX.play('ui');this.applyIface();});this.applyIface();
     sw('setSfx','sfx',v=>SFX.setMuted(!v));sw('setMusic','music',v=>SFX.setMusic(v));sw('setShake','shake');sw('setBubbles','bubbles');sw('setSlimeFace','slimeFace');sw('setThoughts','thoughts');sw('setPixel','pixel',()=>fit());
     $('resetBtn').addEventListener('click',()=>{const b=$('resetBtn');if(performance.now()-this.resetArm<3000){try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem('mossjar.pet');}catch(e){}location.reload();}
       else{this.resetArm=performance.now();b.textContent='Tap again to reset';setTimeout(()=>{b.textContent='Reset';},3000);}});
@@ -5642,8 +5763,9 @@ const ui={
   renderTray(){
     const tr=$('tray'),t=game.tool,isPlay=TOY_TOOLS.includes(t)||t==='play';
     this.syncDock();
-    if(!(t==='feed'||isPlay)||!game.trayOpen){tr.hidden=true;return;}
-    tr.hidden=false;tr.innerHTML='';
+    if(!(t==='feed'||isPlay)||!game.trayOpen){tr.hidden=true;SUP.unmount();return;}
+    if(t==='feed'&&save.set.iface==='fun'&&innerWidth>=300){tr.hidden=false;tr.classList.add('supply');SUP.mount(tr);return;}
+    tr.classList.remove('supply');SUP.unmount();tr.hidden=false;tr.innerHTML='';
     if(t==='feed'){const D=DIET[game.kind]||{},catOf=f=>FOOD_CATS.find(c=>c.foods.includes(f));
       if(!this.foodCat||!FOOD_CATS.some(c=>c.id===this.foodCat))this.foodCat=(catOf(game.food)||FOOD_CATS[0]).id;
       // category tabs; each shows a heart if the current critter loves something in it
@@ -5695,6 +5817,7 @@ const ui={
       if(Math.sign(save.coins-this.coinShown)!==Math.sign(d))this.coinShown=save.coins;$('coinNum').textContent=this.coinShown;}
     if(this.open==='mGacha'){gStep(dt);gDraw();}
     if(this.open==='mPets')this.tickPreviews(dt);
+    if(SUP.on)SUP.tick(dt);
     this.liveT=(this.liveT||0)-dt;if(this.liveT<=0){this.liveT=0.5;const c=$('psCud');if(c&&!$('petStats').hidden)c.innerHTML=this.cuddleHTML();if(this.open==='mGoals'){const r=$('gReset');if(r)r.textContent=dailyResetText();}}
   },
   renderStats(){const pet=game.world.pet;if(!pet)return;const M=pet.mind,B=MIND[game.kind]||MIND.default;
@@ -5882,12 +6005,12 @@ function movePinch(){const P=pinchPts(),nz=clamp(pinch.z0*P.d/pinch.d0,cam.zmin,
 // dragging a food straight out of the tray: after a short drag you're holding one, drop it in the tank
 window.addEventListener('pointermove',e=>{const D=ui.fdrag;if(!D)return;
   if(!D.active){if(Math.hypot(e.clientX-D.x,e.clientY-D.y)<6)return;const w=game.world;if(w.prey.length>=12){flash('That is plenty of food for now.');ui.fdrag=null;return;}
-    if(!buyFood(D.f)){ui.fdrag=null;return;}D.active=true;game.food=D.f;const[x,y]=toPix(e),q=makeFood(D.f,x,y+8,8);q.paid=FOOD_PRICE[D.f]||0;if(q.pts&&q.toScreen)q.toScreen();q.inHand=true;q.sx=x;q.sy=y;w.prey.push(q);game.held=q;game.heldT=performance.now();game.heldNew=null;SFX.play('tick');ui.renderTray();}
+    if(!buyFood(D.f)){ui.fdrag=null;return;}D.active=true;if(D.src)SUP.take(D.src);game.food=D.f;const[x,y]=toPix(e),q=makeFood(D.f,x,y+8,8);q.paid=FOOD_PRICE[D.f]||0;if(q.pts&&q.toScreen)q.toScreen();q.inHand=true;q.sx=x;q.sy=y;w.prey.push(q);game.held=q;game.heldT=performance.now();game.heldNew=null;SFX.play('tick');ui.renderTray();}
   const r=canvas.getBoundingClientRect(),[x,y]=toPix(e),P=game.pointer;P.x=x;P.y=y;P.cx=e.clientX;P.cy=e.clientY;P.inside=e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;
   const tb=$('trashBtn');if(tb)tb.classList.toggle('hot',overTrash(e.clientX,e.clientY));});
 window.addEventListener('pointerup',e=>{const D=ui.fdrag;ui.fdrag=null;if(!D||!D.active)return;ui.fdragDone=true;setTimeout(()=>{ui.fdragDone=false;},0);const q=game.held;if(!q)return;
-  const tb=$('trashBtn');if(tb)tb.classList.remove('hot');const r=canvas.getBoundingClientRect(),inside=e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom&&!overTrash(e.clientX,e.clientY)&&!e.target.closest('#dock');
-  if(inside){dropHeld();SFX.play('tick');}else trashFood(q);});
+  const tb=$('trashBtn');if(tb)tb.classList.remove('hot');const r=canvas.getBoundingClientRect(),inside=e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom&&!overTrash(e.clientX,e.clientY)&&!(document.elementFromPoint(e.clientX,e.clientY)||e.target).closest('#dock');
+  if(inside){dropHeld();SFX.play('tick');}else{trashFood(q);if(D.src)SUP.putBack(D.src);}});
 function toPix(e){const r=canvas.getBoundingClientRect();return[(e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H];}
 function objectAt(x,y){const w=game.world;let best=null,bd=1e9;for(const o of[...w.toys,...w.decor]){const d=Math.hypot(o.x-x,(o.y-(o.h||0)-3)-y);if(d<o.r+4&&d<bd){bd=d;best=o;}}return best;}
 canvas.addEventListener('contextmenu',e=>{e.preventDefault();if(game.placing){game.placing=null;ui.toast('Placement cancelled.',true);}});
