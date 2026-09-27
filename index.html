@@ -108,6 +108,12 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .db.on span{color:var(--ink)}
 .db.menu{background:#2a2433}
 /* Fun UI: a real pegboard canvas replaces the tool buttons */
+#gauges,#jar,#grime{display:none}
+body.fun #meters{display:none}body.fun #gauges{display:flex;align-items:center;gap:8px;margin-left:8px}
+#gauges canvas{height:44px;width:auto;image-rendering:pixelated;filter:drop-shadow(0 2px 0 rgba(0,0,0,.45))}
+body.fun #coins img{display:none}body.fun #jar{display:block;height:40px;width:auto;image-rendering:pixelated;margin:-6px 0 -6px -2px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.4))}
+body.fun #coinNum{background:#f0e2c0;color:#3a2410;padding:2px 6px 1px;border-radius:2px;box-shadow:0 0 0 2px #1a0f06;font-size:15px}
+body.fun #grime{display:block;position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:2;image-rendering:pixelated}
 #peg{display:none;height:88px;width:auto;image-rendering:pixelated;touch-action:none;cursor:pointer;border-radius:6px}
 body.fun #tools{display:none}body.fun #peg{display:block}
 body.fun #dock{padding:4px;background:#1a0f06;border-color:#060a07;box-shadow:inset 0 0 0 2px #3a2410,0 5px 0 #040604,0 10px 18px rgba(0,0,0,.45)}
@@ -284,8 +290,8 @@ input[type=range]{accent-color:var(--moss);width:180px}
   #tray.supply .ti.trash{grid-area:1/3/3/4;width:44px;height:auto;align-self:stretch}#tray.supply .sp-info{grid-column:1/4;font-size:14px;line-height:17px}#tray.supply .sp-l{font-size:8px;padding:2px 6px 1px}
 }
 @media (max-width:340px){#tray.supply canvas{width:112px;height:64px}}
-@media (max-width:760px){#peg{height:84px}body.fun #dock{padding:3px}}
-@media (max-height:500px) and (min-width:600px){#peg{height:54px}body.fun #dock{padding:3px}}
+@media (max-width:760px){#peg{height:84px}body.fun #dock{padding:3px}#gauges canvas{height:36px}body.fun #gauges{gap:5px;margin-left:auto}body.fun #jar{height:34px}}
+@media (max-height:500px) and (min-width:600px){#peg{height:54px}body.fun #dock{padding:3px}#gauges canvas{height:32px}body.fun #jar{height:30px}}
 @media (orientation:portrait) and (min-width:761px) and (max-width:1100px){
   #top{flex-wrap:wrap;height:auto;padding-top:10px;row-gap:10px}
   #petCard{width:100%}#meters{margin-left:auto}
@@ -320,9 +326,10 @@ input[type=range]{accent-color:var(--moss);width:180px}
       <div class="meter" id="mClean" title="Clean tank"><img class="px" id="icClean" alt=""><div class="bar"><i style="--c:#9ad8f0"></i></div></div>
       <div class="meter" id="mHappy" title="Happy"><img class="px" id="icHappy" alt=""><div class="bar"><i style="--c:var(--pink)"></i></div></div>
     </div>
+    <div id="gauges"><canvas id="gFed" class="px" width="26" height="22"></canvas><canvas id="gWater" class="px" width="22" height="22"></canvas><canvas id="gHappy" class="px" width="22" height="22"></canvas></div>
   </div>
   <div id="topR">
-    <div id="coins" class="chunk" title="Coins"><img class="px" id="icCoin" alt=""><span id="coinNum">0</span></div>
+    <div id="coins" class="chunk" title="Coins"><canvas id="jar" class="px" width="18" height="24"></canvas><img class="px" id="icCoin" alt=""><span id="coinNum">0</span></div>
     <div id="menusTop"></div>
     <button class="ibtn" id="btnLight" title="Lights (L)"><img class="px" alt="Toggle lights"></button>
     <button class="ibtn" id="btnSettings" title="Settings"><img class="px" alt="Settings"></button>
@@ -338,6 +345,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
   <button class="ibtn" id="zReset" title="Reset zoom (0)"><img class="px" alt="Reset zoom"></button>
 </div>
 
+<canvas id="grime"></canvas>
 <div id="dock" class="chunk">
   <div id="tray" class="chunk" hidden></div>
   <div class="dgroup" id="tools"></div>
@@ -5536,6 +5544,78 @@ const PEG={SL:22,PH:40,slots:[],fb:null,bg:null,key:'',hover:-1,pv:null,
 };
 
 // =====================================================================
+//  Gauges stuck on the glass (Fun UI): the screen is the tank's front glass, so these stay put as you look around
+// =====================================================================
+const GAUGES={val:{fed:-1,water:-1,happy:-1},nv:0,nvv:0,jarKick:0,jarFill:-1,gr:{g:-1},bub:[],tipT:0,
+  fb(id,w,h){const k='_'+id;if(!this[k])this[k]={fb:new FB(w,h),ctx:$(id).getContext('2d')};return this[k];},
+  tick(dt){const w=game.world;if(!w||!w.pet)return;const S=w.stats,t=w.t;
+    for(const k of['fed','water','happy'])this.val[k]=this.val[k]<0?S[k]:this.val[k]+(S[k]-this.val[k])*Math.min(1,dt*3);
+    this.dial(dt,S,t);this.heart(dt,S,t,w.mood);this.card(S,t);this.jar(dt,t);this.grime(S);
+    this.tipT-=dt;if(this.tipT<=0){this.tipT=0.5;$('gWater').title=`Water ${S.water|0}% (mist to raise it)`;$('gHappy').title=`Happy ${S.happy|0}% · ${w.mood}`;$('gFed').title=`Fed ${S.fed|0}%`;$('coins').title=`${save.coins} coins`;}},
+  // brass hygrometer: needle springs toward the water level, jitters while misting
+  dial(dt,S,t){const{fb,ctx}=this.fb('gWater',22,22),px=fb.px,cx=11,cy=11,P=game.pointer;px.fill(0);
+    const tgt=S.water/100+(game.tool==='mist'&&P.down?Math.sin(t*40)*0.015:0);this.nvv+=((tgt-this.nv)*60-this.nvv*7)*dt;this.nv+=this.nvv*dt;
+    const GOLD=OR[61],FACE=hex('#f2ead2'),INKc=hex('#2a2016');
+    for(let y=0;y<22;y++)for(let x=0;x<22;x++){const d=Math.hypot(x+.5-cx,y+.5-cy);if(d>10.6)continue;const i=y*22+x;
+      if(d>9.4){const l=(x-y)/22;px[i]=d>10.2?hex('#1a0f06'):GOLD[clamp(Math.round(2+l*2.2),0,3)];}
+      else{px[i]=FACE;const a=Math.atan2(y+.5-cy,x+.5-cx);let f=((a*180/Math.PI-135)%360+360)%360/270;
+        if(f<=1&&d>6.6&&d<8.4)px[i]=f<0.25?hex('#e05848'):mixc(hex('#9ad0f0'),hex('#2a6ab0'),(f-0.25)/0.75);}}
+    for(let k=0;k<=10;k++){const a=(135+k*27)*Math.PI/180,r0=k%5===0?5.6:6.2;for(let r=r0;r<=6.6;r+=0.5)pset(fb,cx+Math.cos(a)*r,cy+Math.sin(a)*r,INKc);}
+    for(const[u,v]of[[0,0],[0,1],[-1,1],[1,1],[0,2]])pset(fb,cx-0.5+u,cy+4.5+v,hex('#3a8ad0'));
+    const f=clamp(this.nv,0,1),a=(135+f*270)*Math.PI/180;line(fb,cx-Math.cos(a)*1.5,cy-Math.sin(a)*1.5,cx+Math.cos(a)*7,cy+Math.sin(a)*7,S.water<25&&Math.floor(t*3)%2?hex('#ff3030'):hex('#c02820'));
+    pset(fb,cx,cy,GOLD[3]);pset(fb,cx-1,cy,GOLD[1]);pset(fb,cx,cy-1,GOLD[2]);
+    for(const[u,v]of[[-5,-6],[-6,-5],[-4,-7],[-6,-4]])pmix(fb,cx+u,cy+v,hex('#ffffff'),0.55);
+    ctx.putImageData(fb.img,0,0);},
+  // heart vial: pink liquid = happiness; gold and sparkly when thriving, grey-blue when grumpy
+  heart(dt,S,t,mood){const{fb,ctx}=this.fb('gHappy',22,22),px=fb.px;px.fill(0);
+    const inH=(x,y)=>{const X=(x-11)/8.2,Y=-(y-11.5)/8.2;return Math.pow(X*X+Y*Y-1,3)-X*X*Y*Y*Y<0;};
+    const lvl=21-this.val.happy/100*15.5,liq=mood==='thriving'?[hex('#ffb040'),hex('#ffe08a')]:mood==='grumpy'?[hex('#7a8aa4'),hex('#a8b4c8')]:[hex('#ff5a92'),hex('#ffa8c8')];
+    if(Math.random()<dt*3&&this.val.happy>5)this.bub.push({x:rand(7,15),y:20,v:rand(3,6)});
+    for(let y=1;y<22;y++)for(let x=0;x<22;x++){if(!inH(x+.5,y+.5))continue;const i=y*22+x,edge=!inH(x-.5,y+.5)||!inH(x+1.5,y+.5)||!inH(x+.5,y-.5)||!inH(x+.5,y+1.5);
+      if(edge){px[i]=hex('#3a1a2a');continue;}const surf=lvl+Math.sin(x*0.9+t*3)*0.6;
+      px[i]=y>=surf?(y<surf+1.2?liq[1]:liq[0]):mixc(hex('#f4e8f0'),hex('#c8b8d0'),0.3);}
+    for(const b of this.bub){b.y-=b.v*dt;if(b.y>lvl+1)pmix(fb,b.x,b.y,liq[1],0.9);}this.bub=this.bub.filter(b=>b.y>lvl+1);
+    for(const[u,v]of[[5,6],[5,7],[6,5],[4,8]])pmix(fb,u,v,hex('#ffffff'),0.7);
+    for(let y=0;y<4;y++)for(let x=9;x<=12;x++)px[y*22+x]=y===0||x===9||x===12?hex('#3a2010'):hex(y===1?'#c89058':'#a0703a');
+    if(mood==='thriving'){for(let k=0;k<3;k++){const ph=(t*1.3+k/3)%1,x=4+k*6+Math.sin(t+k)*2,y=16-ph*14;if(ph<0.8)pset(fb,x,y,hex('#fff4b0'));}}
+    if(mood==='grumpy'){const x=16,y=2+Math.sin(t*2)*0.5;for(const[u,v]of[[0,0],[1,0],[2,0],[-1,1],[0,1],[1,1],[2,1],[3,1]])pset(fb,x+u,y+v,hex('#8a94a8'));}
+    ctx.putImageData(fb.img,0,0);},
+  // feeding card taped to the glass: five ink stamps, one per fifth of fullness
+  card(S,t){const{fb,ctx}=this.fb('gFed',26,22),px=fb.px;px.fill(0);
+    for(let y=3;y<22;y++)for(let x=1;x<25;x++){const e=x===1||x===24||y===3||y===21;px[y*26+x]=e?hex('#6a5030'):hex((x*7+y*3)%11===0?'#e8dcbc':'#f4ead0');}
+    for(let y=0;y<6;y++)for(let x=8;x<18;x++){const i=y*26+x;px[i]=px[i]?mixc(px[i],hex('#e8e4b0'),0.6):hex('#d8d4a4');}
+    // little cricket heading + ruled line
+    for(const[u,v]of[[3,8],[4,8],[5,8],[6,8],[5,7],[7,7],[4,9],[6,9]])pset(fb,u,v,hex('#5a3a1a'));for(let x=10;x<23;x++)pset(fb,x,9,hex('#c8b8a0'));
+    const n=this.val.fed/20;
+    for(let k=0;k<5;k++){const x=3+k*4.3,y=14,f=clamp(n-k,0,1);
+      if(f>0.05){const c=mixc(hex('#f4ead0'),hex('#8a2a1a'),0.35+f*0.65);for(const[u,v]of[[1,0],[2,0],[0,1],[1,1],[2,1],[3,1],[0,2],[1,2],[2,2],[3,2],[1,3],[2,3]])pset(fb,x+u,y+v,c);pset(fb,x+1,y+1,mixc(c,hex('#f4ead0'),0.4));}
+      else for(const[u,v]of[[1,0],[3,1],[0,2],[2,3]])pset(fb,x+u,y+v,hex('#c8b8a0'));}
+    if(S.fed<25&&Math.floor(t*2.5)%2){for(let y=4;y<9;y++)pset(fb,21,y,hex('#d02020'));pset(fb,21,10,hex('#d02020'));}
+    ctx.putImageData(fb.img,0,0);},
+  // coin jar: fills (log scale) as coins pile up; jiggles when coins land
+  jar(dt,t){const{fb,ctx}=this.fb('jar',18,24),px=fb.px;px.fill(0);this.jarKick=Math.max(0,this.jarKick-dt*3);
+    const tgt=clamp(Math.log10(save.coins+1)/3.4,0.04,1);this.jarFill=this.jarFill<0?tgt:this.jarFill+(tgt-this.jarFill)*Math.min(1,dt*4);
+    const jx=Math.round(Math.sin(t*40)*this.jarKick*1.2),GOLD=OR[61];
+    for(let y=4;y<24;y++)for(let x=1;x<17;x++){const neck=y<7,xl=neck?4:1,xr=neck?13:16;if(x<xl||x>xr)continue;const e=x===xl||x===xr||y===23||(y===7&&(x<5||x>12));const i=y*18+x+jx;if(x+jx<0||x+jx>=18)continue;
+      px[i]=e?hex('#1a2a30'):mixc(hex('#cfe8ec'),hex('#8ab0b8'),0.3);}
+    const top=22-Math.round(this.jarFill*14);for(let y=top;y<23;y++)for(let x=2;x<16;x++){const i=y*18+x+jx;const rowc=((y+(x>>1))&1)?GOLD[2]:GOLD[1];px[i]=(y===top&&((x+Math.floor(t))%3===0))?GOLD[3]:rowc;}
+    for(let y=0;y<4;y++)for(let x=3;x<15;x++)px[y*18+x+jx]=y===0||x===3||x===14?hex('#3a2010'):hex(y===1?'#c89058':'#a0703a');
+    for(let y=9;y<19;y+=1)if(y%3)pmix(fb,3+jx,y,hex('#ffffff'),0.7);
+    ctx.putImageData(fb.img,0,0);},
+  // grime on the glass: algae creeps in from the edges, smudges appear, as the tank gets dirty
+  grime(S){const g=clamp((88-S.clean)/88,0,1),cv=$('grime'),gw=Math.ceil(innerWidth/5),gh=Math.ceil(innerHeight/5);
+    if(Math.abs(g-this.gr.g)<0.015&&cv.width===gw&&cv.height===gh)return;
+    if(cv.width!==gw||cv.height!==gh||!this.gr.n){cv.width=gw;cv.height=gh;this.gr.n=new Float32Array(gw*gh);this.gr.m=new Float32Array(gw*gh);this.gr.c=new Float32Array(gw*gh);
+      for(let y=0;y<gh;y++)for(let x=0;x<gw;x++){const i=y*gw+x;this.gr.n[i]=fbm(x*0.07,y*0.07,4);this.gr.m[i]=fbm(x*0.045+50,y*0.045+20,3);this.gr.c[i]=vnoise(x*0.3,y*0.3);}this.gr.img=cv.getContext('2d').createImageData(gw,gh);}
+    this.gr.g=g;const d=this.gr.img.data,N=this.gr.n,Mm=this.gr.m,Cc=this.gr.c;d.fill(0);
+    if(g>0)for(let y=0;y<gh;y++)for(let x=0;x<gw;x++){const i=y*gw+x,e=Math.min(x/gw,(gw-1-x)/gw,y/gh*gh/gw,(gh-1-y)/gw),lim=g*g*0.16*(0.45+N[i]);let a=0,r=0,gg=0,b=0;
+      if(e<lim){const k=1-e/lim;a=0.25+0.5*Math.pow(k,0.7);const c=Cc[i];r=60+c*30;gg=82+c*34;b=40+c*16;if(k>0.85&&c>0.6){r=38;gg=58;b=30;a=Math.min(0.85,a+0.1);}}
+      else if(Mm[i]>1.08-0.3*g){a=0.08+0.12*g;r=150;gg=136;b=100;}
+      if(a>0){d[i*4]=r;d[i*4+1]=gg;d[i*4+2]=b;d[i*4+3]=a*255;}}
+    cv.getContext('2d').putImageData(this.gr.img,0,0);},
+};
+
+// =====================================================================
 //  Supply tanks (Fun UI): four tiny live worlds you pluck food from
 // =====================================================================
 const SUP={on:false,el:null,tanks:null,SW:56,SH:32,
@@ -5937,7 +6017,7 @@ const ui={
     if(this.open==='mGacha'){gStep(dt);gDraw();}
     if(this.open==='mPets')this.tickPreviews(dt);
     if(SUP.on)SUP.tick(dt);
-    if(save.set.iface==='fun')PEG.tick(dt);
+    if(save.set.iface==='fun'){PEG.tick(dt);GAUGES.tick(dt);}
     this.liveT=(this.liveT||0)-dt;if(this.liveT<=0){this.liveT=0.5;const c=$('psCud');if(c&&!$('petStats').hidden)c.innerHTML=this.cuddleHTML();if(this.open==='mGoals'){const r=$('gReset');if(r)r.textContent=dailyResetText();}}
   },
   renderStats(){const pet=game.world.pet;if(!pet)return;const M=pet.mind,B=MIND[game.kind]||MIND.default;
@@ -5951,7 +6031,7 @@ const ui={
   refreshLevel(){if(!game.kind)return;const ps=petSave();$('lvlNum').textContent=ps.lvl;$('lvl').style.setProperty('--p',(ps.xp/xpNeed(ps.lvl)).toFixed(3));},
   refreshLight(){const d=game.world?game.world.dayTarget>0.5:true;$('btnLight').querySelector('img').src=iconURL(d?'sun':'moon');},
   trayAfford(){for(const b of document.querySelectorAll('#tray .ti[data-f]'))b.classList.toggle('poor',save.coins<(FOOD_PRICE[b.dataset.f]||0));},
-  bumpCoins(){const c=$('coins');c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump');},
+  bumpCoins(){GAUGES.jarKick=1;const c=$('coins');c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump');},
   coinFly(n,sx,sy){
     const fx=$('fx'),t=$('coins').getBoundingClientRect(),tx=t.left+18,ty=t.top+t.height/2;
     const fl=document.createElement('div');fl.className='floaty';fl.textContent='+'+n;fl.style.left=sx+'px';fl.style.top=(sy-10)+'px';fx.appendChild(fl);setTimeout(()=>fl.remove(),1300);
@@ -6092,7 +6172,7 @@ const ui={
 // =====================================================================
 function setTool(t){
   if(game.held)dropHeld();game.placing=null;if(save.set.iface==='fun'&&PEG.fb)PEG.swap(game.tool,t);game.tool=t;game.hand=null;canvas.style.cursor=t||save.set.iface==='fun'?'none':'grab';
-  if(!t&&!game.panHinted){game.panHinted=true;ui.toast('No tool selected: drag to look around. Tap a tool to pick it up again.',true);}if(TOY_TOOLS.includes(t))game.toyTool=t;if(t==='remote'&&placedCount('rc')===0&&(save.inv.rc||0)>0){placeObject('rc',160,100);markDirty();}game.trayOpen=true;ui.renderTray();
+  if(!t&&!game.panHinted&&save.set.iface!=='fun'){game.panHinted=true;ui.toast('No tool selected: drag to look around. Tap a tool to pick it up again.',true);}if(TOY_TOOLS.includes(t))game.toyTool=t;if(t==='remote'&&placedCount('rc')===0&&(save.inv.rc||0)>0){placeObject('rc',160,100);markDirty();}game.trayOpen=true;ui.renderTray();
 }
 function toggleLight(){const w=game.world;if(!w)return;w.dayTarget=w.dayTarget>0.5?0:1;SFX.play(w.dayTarget?'lightsOn':'lightsOff');
   flash(w.dayTarget?'Lights on. Good morning, jar.':'Lights off. The night shift wakes up.');ui.refreshLight();}
@@ -6141,7 +6221,7 @@ canvas.addEventListener('pointerdown',e=>{
   if(e.pointerType==='mouse'&&e.button!==0){if(!game.placing&&(e.button===1||e.button===2)){e.preventDefault();game.panning={x:e.clientX,y:e.clientY};}return;}
   if(!game.tool&&!game.placing){// no tool: drag to pan; a still click still picks up coins or uses a toy
     const [px0,py0]=toPix(e),w0=game.world;
-    for(let i=0;i<w0.coins.length;i++){const c=w0.coins[i];if(Math.hypot(c.x-px0,c.y-c.h-2.5-py0)<6){w0.coins.splice(i,1);addCoins(c.v,c.x,c.y-c.h);spawn(w0,'star',c.x,c.y-c.h-2,{life:0.18});return;}}
+    for(let i=0;i<w0.coins.length;i++){const c=w0.coins[i];if(Math.hypot(c.x-px0,c.y-c.h-2.5-py0)<6){w0.coins.splice(i,1);addCoins(c.v,c.x,c.y-c.h);spawn(w0,'star',c.x,c.y-c.h-2,{life:0.18});if(save.set.iface!=='fun'||!w0.pet||w0.pet.hitTest(px0,py0)<0)return;break;}}
     if(save.set.iface==='fun'&&handDown(e))return;
     game.panning={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,obj:objectAt(px0,py0),free:true};canvas.style.cursor=save.set.iface==='fun'?'none':'grabbing';return;}
   const P=game.pointer,[x,y]=toPix(e);P.x=x;P.y=y;P.down=true;P.inside=true;P.touch=e.pointerType==='touch';P.sprayT=0;P.vx=P.vy=0;P.lt=performance.now();
