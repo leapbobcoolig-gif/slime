@@ -111,7 +111,7 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 #gauges,#jar,#grime{display:none}
 #c{position:relative;z-index:1}
 #room{position:absolute;left:0;top:0;z-index:0;display:none;image-rendering:pixelated;transform-origin:50% 50%}
-body.inroom #dock,body.inroom #zoomChip,body.inroom #grime,body.inroom #tray{display:none!important}body.inroom #c{cursor:zoom-in!important}
+body.inroom #dock,body.inroom #zoomChip,body.inroom #grime,body.inroom #tray,body.inroom #top{display:none!important}body.inroom #c{cursor:zoom-in!important}
 #roomTip{position:fixed;z-index:30;pointer-events:none;font-family:var(--display);font-size:11px;letter-spacing:.05em;color:#2a1a0a;background:#f4e8c8;padding:4px 8px 3px;border-radius:3px;box-shadow:0 0 0 2px #1a0f06,0 3px 0 2px rgba(0,0,0,.35);transform:translate(-50%,-150%);white-space:nowrap}
 body.fun-needs #meters{display:none}body.fun-needs #gauges{display:flex;align-items:center;gap:8px;margin-left:8px}
 #gauges canvas{height:44px;width:auto;image-rendering:pixelated;filter:drop-shadow(0 2px 0 rgba(0,0,0,.45))}
@@ -5630,62 +5630,65 @@ const GAUGES={val:{fed:-1,water:-1,happy:-1},nv:0,nvv:0,jarKick:0,jarFill:-1,gr:
 //  The room (Fun UI): zoom out past the tank and it's sitting on a desk in a cozy room.
 //  Everything in the room is a doorway to a menu; the tank stays live the whole time.
 // =====================================================================
-const ROOM={on:false,p:0,pull:0,L:null,fb:null,bg:null,hover:null,chain:null,portraits:{},curtain:1,curtainT:1,pullT:0,tipT:0,touchPts:new Map(),
-  layout(){const vw=innerWidth,vh=innerHeight,port=vh>vw*1.1,cw=port?216:384,ch=port?384:216,topH=$('top').getBoundingClientRect().bottom+4;
-    const S=Math.min(vw/cw,(vh-topH)/ch),RW=Math.ceil(vw/S),RH=Math.ceil(vh/S),ox=Math.floor((RW-cw)/2),oy=Math.floor(topH/S+Math.max(0,((vh-topH)/S-ch)/2));
-    const o=r=>{const q={...r};for(const k of['x','baseX','wallX'])if(q[k]!==undefined)q[k]+=ox;for(const k of['y','baseY'])if(q[k]!==undefined)q[k]+=oy;return q;};
+const ROOM={on:false,p:0,pull:0,L:null,fb:null,bg:null,hover:null,portraits:{},tipT:0,touchPts:new Map(),jarKick:0,lampKick:0,
+  // everything is seen from straight above, like the tank: a big wooden desk with things lying on it
+  layout(){const vw=innerWidth,vh=innerHeight,port=vh>vw*1.1,cw=port?216:384,ch=port?384:216;
+    const S=Math.min(vw/cw,vh/ch),RW=Math.ceil(vw/S),RH=Math.ceil(vh/S),ox=Math.floor((RW-cw)/2),oy=Math.floor((RH-ch)/2);
+    const o=r=>{const q={...r};for(const k of['x','bx'])if(q[k]!==undefined)q[k]+=ox;for(const k of['y','by'])if(q[k]!==undefined)q[k]+=oy;return q;};
     const kinds=Object.keys(save.pets||{});const L={port,S,RW,RH,ox,oy,kinds,key:[RW,RH,port,kinds.join(),S.toFixed(3)].join('|')};
-    if(!port){L.deskY=oy+160;L.tank=o({x:104,y:62,w:176,h:99});L.window=o({x:16,y:14,w:72,h:56});L.shelf=o({x:10,y:114,w:88});L.gacha=o({x:20,y:82,w:24,h:32});L.bag=o({x:60,y:94,w:28,h:20});
-      L.cork=o({x:294,y:10,w:82,h:56});L.frames=o({x:294,y:74,w:82,h:26,max:3});L.lamp=o({x:304,y:112,style:'desk',baseX:344,baseY:158});L.notebook=o({x:30,y:150,w:36,h:10});}
-    else{L.deskY=oy+254;L.tank=o({x:20,y:155,w:176,h:99});L.cork=o({x:10,y:10,w:112,h:72});L.window=o({x:134,y:12,w:72,h:66});L.frames=o({x:10,y:92,w:196,h:26,max:6});
-      L.lamp=o({x:178,y:134,style:'sconce',wallX:210});L.cubby=o({x:14,y:282,w:188,h:62});L.gacha=o({x:28,y:310,w:24,h:32});L.bag=o({x:74,y:322,w:28,h:20});L.notebook=o({x:130,y:332,w:36,h:10});}
-    const fr=[],n=Math.min(L.frames.max,Math.max(1,kinds.length)),fw=20,gap=Math.min(8,(L.frames.w-n*fw)/Math.max(1,n-1));
-    const cur=game.kind,order=[cur,...kinds.filter(k=>k!==cur)].filter(Boolean).slice(0,n);
-    order.forEach((k,i)=>fr.push({kind:k,x:Math.round(L.frames.x+i*(fw+gap)),y:L.frames.y,w:fw,h:24}));L.fr=fr;
-    L.objs=[{id:'cork',r:L.cork,label:'Goals',act:()=>ui.openModal('mGoals')},{id:'frames',r:{x:L.frames.x-2,y:L.frames.y-2,w:L.frames.w+4,h:28},label:'Your critters',act:()=>ui.openModal('mPets')},
-      {id:'gacha',r:L.gacha,label:'Toy machine',act:()=>ui.openModal('mGacha')},{id:'bag',r:L.bag,label:'Bag',act:()=>ui.openModal('mBag')},{id:'notebook',r:{x:L.notebook.x-2,y:L.notebook.y-3,w:L.notebook.w+4,h:L.notebook.h+6},label:'Settings',act:()=>ui.openModal('mSettings')},
-      {id:'lamp',r:{x:L.lamp.x-9,y:L.lamp.y-8,w:18,h:30},label:'Pull the lamp chain',act:()=>this.pullChain()},{id:'window',r:L.window,label:'Curtains',act:()=>{this.curtain=this.curtain>0.5?0:1;SFX.play('whoosh');}},
+    if(!port){L.tank=o({x:104,y:56,w:176,h:99});L.cork=o({x:8,y:8,w:90,h:62});L.photos=o({x:10,y:80,w:88,h:62});L.note=o({x:132,y:164,w:112,h:46});
+      L.gacha=o({x:16,y:152,w:34,h:40});L.bag=o({x:60,y:148,w:36,h:48});L.lamp=o({x:326,y:36,bx:366,by:14});L.jar=o({x:352,y:104});L.mug=o({x:300,y:112});L.toys2=null;}
+    else{L.tank=o({x:8,y:132,w:200,h:112});L.cork=o({x:8,y:8,w:124,h:76});L.lamp=o({x:176,y:40,bx:206,by:14});L.photos=o({x:10,y:90,w:196,h:36});
+      L.note=o({x:8,y:256,w:104,h:48});L.jar=o({x:158,y:282});L.mug=o({x:196,y:262});L.gacha=o({x:18,y:318,w:34,h:40});L.bag=o({x:66,y:314,w:36,h:48});}
+    const n=Math.min(L.port?5:3,Math.max(1,kinds.length)),cur=game.kind,order=[cur,...kinds.filter(k=>k!==cur)].filter(Boolean).slice(0,n);
+    const ph=L.photos,ANG=[-0.16,0.12,-0.05,0.18,-0.12];L.ph=order.map((k,i)=>L.port?{kind:k,cx:ph.x+16+i*((ph.w-32)/Math.max(1,n-1)),cy:ph.y+18+(i%2)*3,a:ANG[i]}:
+      {kind:k,cx:ph.x+18+(i%2)*40+(i===2?20:0),cy:ph.y+16+Math.floor(i/2)*30+(i===1?4:0),a:ANG[i]});
+    const J=L.jar,M=L.mug,Lp=L.lamp;
+    L.objs=[{id:'cork',r:L.cork,label:'Goals',act:()=>ui.openModal('mGoals')},{id:'photos',r:L.port?{x:ph.x,y:ph.y-2,w:ph.w,h:ph.h+4}:{x:ph.x,y:ph.y-2,w:ph.w,h:ph.h+6},label:'Your critters',act:()=>ui.openModal('mPets')},
+      {id:'gacha',r:L.gacha,label:'Toy machine',act:()=>ui.openModal('mGacha')},{id:'bag',r:L.bag,label:'Bag',act:()=>ui.openModal('mBag')},{id:'note',r:L.note,label:'Settings',act:()=>ui.openModal('mSettings')},
+      {id:'lamp',r:{x:Lp.x-12,y:Lp.y-12,w:24,h:24},label:'Lamp: lights on/off',act:()=>{this.lampKick=1;SFX.play('clack');toggleLight();}},
+      {id:'jar',r:{x:J.x-13,y:J.y-13,w:26,h:26},label:()=>`Coin jar: ${save.coins} coins`,act:()=>{this.jarKick=1;SFX.play('coin');}},
+      {id:'mug',r:{x:M.x-9,y:M.y-9,w:20,h:18},label:'Tea',act:()=>{SFX.play('squish');}},
       {id:'tank',r:L.tank,label:'Back to the tank',act:()=>this.exit()}];
     return L;},
   build(){const L=this.L=this.layout(),{RW,RH}=L,cv=$('room');cv.width=RW;cv.height=RH;cv.style.width=RW*L.S+'px';cv.style.height=RH*L.S+'px';this.ctx=cv.getContext('2d');
-    const fb=this.fb=new FB(RW,RH),px=fb.px,bg=this.bg=new Uint32Array(RW*RH),dY=L.deskY;
+    const fb=this.fb=new FB(RW,RH),px=fb.px,bg=this.bg=new Uint32Array(RW*RH);
+    const put=(x,y,c)=>{x=Math.round(x);y=Math.round(y);if(x>=0&&y>=0&&x<RW&&y<RH)px[y*RW+x]=c;},dark=(x,y,f)=>{x=Math.round(x);y=Math.round(y);if(x>=0&&y>=0&&x<RW&&y<RH)px[y*RW+x]=shade(px[y*RW+x],f);};
     const rect=(x,y,w,h,c)=>{for(let j=Math.max(0,y);j<Math.min(RH,y+h);j++)for(let i=Math.max(0,x);i<Math.min(RW,x+w);i++)px[j*RW+i]=typeof c==='function'?c(i,j):c;};
-    const WP=ramp('#3e4e3c','#465844','#506250','#5c705a'),WOOD=ramp('#3a2210','#5a3a1e','#7a4e28','#a06a36'),TOP=ramp('#6a4222','#8a5a30','#a8743e','#c89058');
-    // wallpaper: sage stripes with a little diamond motif, darker toward the ceiling
-    rect(0,0,RW,dY,(x,y)=>{const st=(Math.floor((x-L.ox)/7)&1),m=((x-L.ox+(Math.floor(y/9)&1)*7)%14===7&&y%9===4);let c=m?hex('#7a8a64'):WP[st?1:2];if(hash(x,y)>0.97)c=WP[0];return shade(c,0.78+0.22*Math.min(1,y/(dY*0.8)));});
-    rect(0,dY-7,RW,2,WOOD[0]);
-    // desk: top plane with grain, bright lip, darker front with panels
-    rect(0,dY-5,RW,10,(x,y)=>{const g=Math.sin(x*0.09+Math.sin(y*1.7)*2+fbm(x*0.03,y*0.3,2)*6);return TOP[clamp(Math.floor(1.6+g*1.1),0,3)];});
-    rect(0,dY+5,RW,1,TOP[3]);
-    rect(0,dY+6,RW,RH-dY-6,(x,y)=>{const g=Math.sin(y*0.5+fbm(x*0.02,y*0.08,2)*5);let c=WOOD[clamp(Math.floor(1.5+g*0.8),0,2)];const px0=(x-L.ox)%96;if(px0===0)c=WOOD[0];else if(px0===1)c=WOOD[3];return shade(c,0.95-Math.min(0.4,(y-dY)/300));});
-    if(!L.port){for(const dx of[40,232]){const x0=L.ox+dx,y0=dY+14;rect(x0,y0,112,26,(x,y)=>x===x0||y===y0?WOOD[0]:x===x0+111||y===y0+25?WOOD[3]:WOOD[2]);rect(x0+52,y0+11,8,4,OR[61][2]);rect(x0+53,y0+11,6,1,OR[61][3]);}}
-    else{const c=L.cubby;rect(c.x-2,c.y-2,c.w+4,c.h+4,WOOD[0]);rect(c.x,c.y,c.w,c.h,(x,y)=>shade(hex('#2a1a0c'),0.7+0.3*(y-c.y)/c.h));rect(c.x,c.y+c.h-6,c.w,6,(x,y)=>y===c.y+c.h-6?TOP[3]:TOP[1]);}
-    // shadow of the tank on the desk
-    const T=L.tank;for(let y=T.y+T.h-3;y<T.y+T.h+4;y++)for(let x=T.x-4;x<T.x+T.w+6;x++)if(x>=0&&y>=0&&x<RW&&y<RH)px[y*RW+x]=shade(px[y*RW+x],0.55+0.08*Math.abs(y-(T.y+T.h)));
-    // window frame + sill (panes are painted live), curtain rod
-    const Wn=L.window;rect(Wn.x-3,Wn.y-3,Wn.w+6,Wn.h+6,(x,y)=>(x<Wn.x-1||y<Wn.y-1)?WOOD[3]:WOOD[1]);rect(Wn.x-6,Wn.y+Wn.h+2,Wn.w+12,4,(x,y)=>y===Wn.y+Wn.h+2?TOP[3]:TOP[1]);
-    rect(Wn.x-10,Wn.y-8,Wn.w+20,2,hex('#2a1a10'));for(const fx of[Wn.x-11,Wn.x+Wn.w+9])rect(fx,Wn.y-9,3,4,OR[61][2]);
-    // corkboard
-    const C=L.cork;rect(C.x-3,C.y-3,C.w+6,C.h+6,(x,y)=>(x<C.x-1||y<C.y-1)?WOOD[3]:WOOD[1]);rect(C.x,C.y,C.w,C.h,(x,y)=>{const h=hash(x*3,y*5);return h>0.86?hex('#8a6434'):h<0.12?hex('#d0a870'):hex('#b88c52');});
-    // picture frames
-    for(const f of L.fr){rect(f.x,f.y,f.w,f.h,(x,y)=>{const e=x===f.x||y===f.y||x===f.x+f.w-1||y===f.y+f.h-1;return e?hex('#5a3a08'):(x<f.x+2||y<f.y+2)?OR[61][3]:OR[61][2];});rect(f.x+2,f.y+2,f.w-4,f.h-4,hex('#efe4c8'));}
-    // shelf (landscape)
-    if(L.shelf){const sh=L.shelf;rect(sh.x,sh.y,sh.w,4,(x,y)=>y===sh.y?TOP[3]:TOP[1]);rect(sh.x,sh.y+4,sh.w,1,WOOD[0]);for(const bx of[sh.x+8,sh.x+sh.w-12]){rect(bx,sh.y+4,4,3,WOOD[1]);rect(bx+1,sh.y+7,2,3,WOOD[1]);}}
-    // notebook: green cover, page edges, elastic band, ribbon
-    const N=L.notebook;rect(N.x,N.y,N.w,N.h,(x,y)=>x>=N.x+N.w-2||y>=N.y+N.h-2?hex('#f0e6cc'):(x===N.x||y===N.y)?hex('#1a3a24'):hex('#2e6a40'));rect(N.x+N.w-9,N.y,2,N.h-2,hex('#141414'));rect(N.x+8,N.y+N.h-2,2,5,hex('#c02830'));
-    // rounded things with the object painter: toy machine, bag, lamp
-    fb.clearLayer();const cap=(a,b,r1,c,d,r2,m,bias=0)=>fb.cap(a,b,r1,c,d,r2,m,1,0,0,bias);
-    const G=L.gacha,gx=G.x+G.w/2;fb.box(gx,G.y+G.h-6,G.w/2-1,6,0,OM.RED,1,0,0,0,1.5);cap(gx,G.y+11,10,gx,G.y+11,10,OM.CRYS,0.2);cap(gx,G.y+1.5,5,gx+0.01,G.y+1.5,4,OM.RED,0.5);
-    const B=L.bag,bx=B.x+B.w/2;cap(bx-7,B.y+10,6,bx+7,B.y+10,6,OM.ORANGE);cap(bx-9,B.y+4,3,bx+9,B.y+4,3,OM.ORANGE,0.3);cap(bx-5,B.y+13,3,bx+5,B.y+13,3,OM.ORANGE,0.6);
-    const Lp=L.lamp;if(Lp.style==='desk'){cap(Lp.baseX-6,Lp.baseY,2.2,Lp.baseX+6,Lp.baseY,2.2,OM.BLACK);cap(Lp.baseX,Lp.baseY-1,1,Lp.baseX-6,Lp.baseY-30,1,OM.METAL);cap(Lp.baseX-6,Lp.baseY-30,1,Lp.x+4,Lp.y-4,1,OM.METAL);cap(Lp.baseX-6,Lp.baseY-30,1.6,Lp.baseX-6,Lp.baseY-30,1.6,OM.GOLD,1);}
-    else{fb.box(Lp.wallX-1,Lp.y-8,2,5,0,OM.GOLD,1,0,0,0,1);cap(Lp.wallX-2,Lp.y-8,1,Lp.x+2,Lp.y-7,1,OM.GOLD);}
-    cap(Lp.x-7,Lp.y+2,2.2,Lp.x+6,Lp.y+2,2.2,OM.STEM,0.4);cap(Lp.x-3,Lp.y-3,2.4,Lp.x+3,Lp.y-3,2.4,OM.STEM,0.2);
-    composite(fb,OBJ_PAINTER,{sAmt:.6,sdx:1,sdy:1});
-    // capsules in the dome, coin slot and knob, bag buckle and stitches
-    const CC=['#ff5a6a','#5ad0ff','#ffd84a','#8ae06a','#c88aff'];for(let i=0;i<9;i++){const a=i*2.4,r=2+(i%3)*2.4,x=Math.round(gx+Math.cos(a)*r),y=Math.round(G.y+13+Math.sin(a)*r*0.7);rect(x,y,2,2,hex(CC[i%5]));px[y*RW+x]=hex('#ffffff');}
-    rect(gx-1,G.y+G.h-8,3,3,OR[61][2]);px[(G.y+G.h-8)*RW+gx]=OR[61][3];rect(gx+5,G.y+G.h-8,2,1,hex('#1a0a0a'));
-    rect(bx-1,B.y+6,3,3,OR[61][2]);for(let x=bx-6;x<=bx+6;x+=2)px[(B.y+15)*RW+x]=hex('#ffe0a0');
-    bg.set(px);this.chain=null;},
+    const shadowRect=(x,y,w,h,d=3)=>{for(let j=y+d;j<y+h+d;j++)for(let i=x+d;i<x+w+d;i++)if(i>=x+w||j>=y+h)dark(i,j,0.6);};
+    // desk top: long planks with grain, seams and the odd knot; darker toward the edges
+    const DW=ramp('#4a2c14','#6a4222','#8a5a30','#a8743e','#c08a4e');
+    for(let y=0;y<RH;y++)for(let x=0;x<RW;x++){const pl=Math.floor((y-L.oy+400)/23),off=pl*57,g=Math.sin((x+off)*0.045+fbm((x+off)*0.02,y*0.21,3)*7),k=fbm((x+off)*0.07+pl*9,y*0.12,2);
+      let c=DW[clamp(Math.floor(2+g*1.05+(k-0.5)*1.2),0,4)];const yy=(y-L.oy+400)%23;if(yy===0)c=DW[0];else if(yy===1)c=mixc(c,DW[4],0.3);if(((x+off*3)%131)===0&&yy>1)c=DW[1];
+      const ex=Math.min(x,RW-1-x)/RW,ey=Math.min(y,RH-1-y)/RH;px[y*RW+x]=shade(c,0.7+0.3*Math.min(1,Math.min(ex,ey)*7));}
+    // tank sits in a shallow shadow
+    const T=L.tank;shadowRect(T.x,T.y,T.w,T.h,4);
+    // corkboard lying flat: wood frame, cork (sticky notes and pins are painted live)
+    const C=L.cork;shadowRect(C.x-3,C.y-3,C.w+6,C.h+6,3);rect(C.x-3,C.y-3,C.w+6,C.h+6,(x,y)=>(x<C.x-1||y<C.y-1)?DW[4]:(x>C.x+C.w||y>C.y+C.h)?DW[1]:DW[3]);
+    rect(C.x,C.y,C.w,C.h,(x,y)=>{const h=hash(x*3,y*5);return h>0.86?hex('#8a6434'):h<0.12?hex('#d0a870'):hex('#b88c52');});
+    // open spiral notebook with ruled pages and a pencil
+    const N=L.note,hw=Math.floor(N.w/2);shadowRect(N.x,N.y,N.w,N.h,3);
+    rect(N.x,N.y,N.w,N.h,(x,y)=>{const lx=x-N.x,ly=y-N.y;if(lx===0||ly===0||lx===N.w-1||ly===N.h-1)return hex('#a89a80');let c=hex(lx<hw?'#f6f0e0':'#f2ecdc');if(ly>6&&ly%5===0)c=hex('#b8d0e8');if(lx===8||lx===hw+8)c=hex('#f0a0a0');if(Math.abs(lx-hw)<=1)c=shade(c,0.85);return c;});
+    for(let y=N.y+3;y<N.y+N.h-2;y+=4){put(N.x+hw-1,y,hex('#8a9098'));put(N.x+hw,y,hex('#e0e6ee'));put(N.x+hw+1,y,hex('#8a9098'));}
+    for(let l=0;l<5;l++){const y=N.y+10+l*5;for(let x=N.x+11;x<N.x+hw-4-((l*7)%12);x++)if(hash(x,l+3)>0.25)put(x,y-1,hex('#4a5a7a'));}
+    // rounded things drawn with the object painter so they are shaded like the tank's decor
+    fb.clearLayer();const cap=(a,b2,r1,c2,d2,r2,m,bias=0)=>fb.cap(a,b2,r1,c2,d2,r2,m,1,0,0,bias);
+    {const px0=N.x+N.w+6,py0=N.y+6;cap(px0,py0,1.6,px0+18,py0+30,1.6,OM.YELLOW);cap(px0+18,py0+30,1.4,px0+21,py0+35,0.5,OM.WOOD,0.4);cap(px0-1,py0-2,1.7,px0,py0,1.7,OM.PINK,0.5);}
+    const G=L.gacha,gx=G.x+G.w/2,gy=G.y+G.h/2;fb.box(gx,gy,G.w/2,G.h/2,0,OM.PINK,1,0,0,0,2.2);cap(gx,gy-3,11,gx,gy-3,11,OM.CRYS,1.2);cap(gx+10,gy+13,2.6,gx+10,gy+13,2.6,OM.GOLD,1.5);
+    const B=L.bag,bx=B.x+B.w/2,by=B.y+B.h/2;cap(bx-12,by-16,1.4,bx-20,by+6,1.4,OM.WOOD);cap(bx+12,by-16,1.4,bx+20,by+6,1.4,OM.WOOD);fb.box(bx,by,B.w/2-2,B.h/2-2,0,OM.ORANGE,1,0,0,0,4);
+    fb.box(bx,by+10,10,7,0,OM.ORANGE,1,0,0,1.2,2.5);fb.box(bx,by-10,B.w/2-4,6,0,OM.ORANGE,1,0,0,0.8,2.5);for(let i=0;i<8;i++){const a=Math.PI+i/7*Math.PI;cap(bx+Math.cos(a)*5,by-B.h/2+2+Math.sin(a)*4,0.8,bx+Math.cos(a+0.45)*5,by-B.h/2+2+Math.sin(a+0.45)*4,0.8,OM.BLACK,1);}
+    const J=L.jar;cap(J.x+17,J.y+6,6.5,J.x+17,J.y+6,6.5,OM.WOOD,0.2);for(let i=0;i<16;i++){const a1=i/16*TAU,a2=(i+1)/16*TAU;cap(J.x+Math.cos(a1)*11,J.y+Math.sin(a1)*11,1.5,J.x+Math.cos(a2)*11,J.y+Math.sin(a2)*11,1.5,OM.CRYS,1);}
+    const M=L.mug;for(let i=0;i<14;i++){const a1=i/14*TAU,a2=(i+1)/14*TAU;cap(M.x+Math.cos(a1)*7,M.y+Math.sin(a1)*7,1.4,M.x+Math.cos(a2)*7,M.y+Math.sin(a2)*7,1.4,OM.WHITE,1);}
+    for(let i=0;i<6;i++){const a1=-0.9+i/5*1.8,a2=-0.9+(i+1)/5*1.8;if(i<5)cap(M.x+7+Math.cos(a1)*3.5,M.y+Math.sin(a1)*3.5,1.1,M.x+7+Math.cos(a2)*3.5,M.y+Math.sin(a2)*3.5,1.1,OM.WHITE,0.8);}
+    const Lp=L.lamp;cap(Lp.bx,Lp.by,6,Lp.bx,Lp.by,6,OM.BLACK);cap(Lp.bx,Lp.by,1.3,Lp.bx-18,Lp.by+10,1.3,OM.METAL,0.5);cap(Lp.bx-18,Lp.by+10,1.3,Lp.x,Lp.y,1.3,OM.METAL,0.5);cap(Lp.bx-18,Lp.by+10,2,Lp.bx-18,Lp.by+10,2,OM.GOLD,0.9);
+    cap(Lp.x,Lp.y,10,Lp.x,Lp.y,10,OM.STEM,1.5);cap(Lp.x,Lp.y,2.4,Lp.x,Lp.y,2.4,OM.GOLD,2.5);
+    composite(fb,OBJ_PAINTER,{sAmt:.55,sdx:3,sdy:3});
+    // details: dome capsules, coin slot and chute, bag buckle/zip, tea, jar coins are live
+    const CC=['#ff5a6a','#5ad0ff','#ffd84a','#8ae06a','#c88aff'];for(let i=0;i<11;i++){const a=i*2.3,r=2+(i%4)*2.2,x=gx+Math.cos(a)*r,y=gy-3+Math.sin(a)*r;put(x,y,hex(CC[i%5]));put(x+1,y,hex(CC[i%5]));put(x,y+1,shade(hex(CC[i%5]),0.7));put(x+1,y+1,shade(hex(CC[i%5]),0.8));}
+    rect(Math.round(gx-6),Math.round(gy+13),8,4,hex('#1a0808'));rect(Math.round(gx-5),Math.round(gy+14),6,1,hex('#3a1010'));rect(Math.round(gx+4),Math.round(gy+9),5,1,hex('#1a0808'));
+    rect(Math.round(bx-2),Math.round(by-6),5,4,OR[61][2]);put(bx-1,by-6,OR[61][3]);for(let x=bx-8;x<=bx+8;x+=2)put(x,by+4,hex('#c8ced6'));put(bx+9,by+5,hex('#e0e6ee'));
+    for(let y=-5;y<=5;y++)for(let x=-5;x<=5;x++){const d=Math.hypot(x,y);if(d<5.4)put(M.x+x,M.y+y,d<1.6&&x<0&&y<0?hex('#c89060'):mixc(hex('#6a3a18'),hex('#8a5024'),(x+y+10)/20));}
+    bg.set(px);},
   portrait(kind){if(this.portraits[kind])return this.portraits[kind];const f=new FB(64,48);
     for(let y=0;y<48;y++)for(let x=0;x<64;x++)f.px[y*64+x]=mixc(hex('#e8d8b0'),hex('#b8c8a0'),y/48);
     try{const pw={stats:{fed:60,happy:80,water:80},prey:[],parts:[],ripples:[],bounds:{x0:4,y0:4,x1:60,y1:44},dayness:1,t:0,dish:null,hide:null,lampRock:null,toys:[],bubbles:[],allWater:kind==='kraken'||SEA_PETS.includes(kind)};
@@ -5693,10 +5696,9 @@ const ROOM={on:false,p:0,pull:0,L:null,fb:null,bg:null,hover:null,chain:null,por
       const h=pet.headPos(),out=new Uint32Array(16*20),x0=clamp(Math.round(h.x-8),0,48),y0=clamp(Math.round(h.y-(pet.h||0)-11),0,28);
       for(let y=0;y<20;y++)for(let x=0;x<16;x++)out[y*16+x]=f.px[(y0+y)*64+x0+x];return this.portraits[kind]=out;}catch(e){return this.portraits[kind]=new Uint32Array(16*20).fill(hex('#c8b890'));}},
   enter(){if(this.on||!FUN('room')||game.mode!=='play')return;this.on=true;if(game.tool)setTool(null);document.body.classList.add('inroom');this.build();$('room').style.display='block';SFX.play('whoosh');
-    if(!save.set.roomSeen){save.set.roomSeen=1;ui.toast('Welcome to the room! Tap anything to use it. Tap the tank to go back.');}},
+    if(!save.set.roomSeen){save.set.roomSeen=1;ui.toast('Welcome to your desk! Tap anything to use it. Tap the tank to go back.');}},
   exit(instant){if(!this.on)return;this.on=false;$('roomTip').hidden=true;this.hover=null;SFX.play('whoosh');if(instant){this.p=0;this.finish();}},
   finish(){document.body.classList.remove('inroom');$('room').style.display='none';$('room').style.transform='';camApply();fit();},
-  pullChain(){this.pullT=0.22;SFX.play('chain');setTimeout(()=>{toggleLight();SFX.play('clack');},110);},
   tankXform(){const L=this.L,T=L.tank,S=L.S;return{z:T.w*S/cam.cw,tx:T.x*S,ty:T.y*S};},
   tick(dt){const target=this.on?1:0;if(this.p===target&&!this.on)return;
     if(this.on&&(!this.L||this.L.key!==this.layout().key))this.build();
@@ -5705,51 +5707,50 @@ const ROOM={on:false,p:0,pull:0,L:null,fb:null,bg:null,hover:null,chain:null,por
     const R=this.tankXform(),z=lerp(cam.z,R.z,e),tx=lerp(cam.tx,R.tx,e),ty=lerp(cam.ty,R.ty,e);canvas.style.transform=`translate(${tx}px,${ty}px) scale(${z})`;
     const cv=$('room');cv.style.opacity=Math.min(1,e*1.4);const T=this.L.tank,S=this.L.S;cv.style.transformOrigin=`${(T.x+T.w/2)*S}px ${(T.y+T.h/2)*S}px`;cv.style.transform=`scale(${1+(1-e)*1.8})`;
     this.draw(dt);},
+  // rotated blit of a small card (polaroids), with a soft drop shadow
+  blitRot(src,sw,sh,cx,cy,a,shadow){const L=this.L,RW=L.RW,RH=L.RH,px=this.fb.px,c=Math.cos(a),s=Math.sin(a),R=Math.ceil(Math.hypot(sw,sh)/2)+1;
+    for(let pass=shadow?0:1;pass<2;pass++){const ox=pass?0:3,oy=pass?0:3;for(let y=-R;y<=R;y++)for(let x=-R;x<=R;x++){const u=x*c+y*s+sw/2,v=-x*s+y*c+sh/2;if(u<0||v<0||u>=sw||v>=sh)continue;
+      const X=Math.round(cx+x+ox),Y=Math.round(cy+y+oy);if(X<0||Y<0||X>=RW||Y>=RH)continue;const i=Y*RW+X;if(pass)px[i]=src[(v|0)*sw+(u|0)];else px[i]=shade(px[i],0.62);}}},
   draw(dt){const L=this.L,{RW,RH}=L,fb=this.fb,px=fb.px,w=game.world,t=w.t,day=clamp(w.dayness,0,1),lit=w.dayTarget>0.5;px.set(this.bg);
-    const put=(x,y,c)=>{if(x>=0&&y>=0&&x<RW&&y<RH)px[y*RW+x]=c;},mix=(x,y,c,a)=>{if(x>=0&&y>=0&&x<RW&&y<RH){const i=y*RW+x;px[i]=mixc(px[i],c,a);}};
-    // sky through the window: clouds by day, stars and a moon by night
-    const Wn=L.window,mx=Wn.x+Math.floor(Wn.w/2),my=Wn.y+Math.floor(Wn.h/2);
-    for(let y=Wn.y;y<Wn.y+Wn.h;y++)for(let x=Wn.x;x<Wn.x+Wn.w;x++){if(Math.abs(x-mx)<=1||Math.abs(y-my)<=1){put(x,y,hex('#5a3a1e'));continue;}const f=(y-Wn.y)/Wn.h;
-      let c=mixc(mixc(hex('#0e1430'),hex('#24305a'),f),mixc(hex('#5aa8e8'),hex('#bfe4ff'),f),day);
-      const cl=fbm((x+t*1.5)*0.07,y*0.16,3);if(cl>0.58)c=mixc(c,mixc(hex('#4a5070'),hex('#ffffff'),day),Math.min(1,(cl-0.58)*4)*0.85);
-      if(day<0.5&&hash(x,y)>0.985)c=mixc(c,hex('#fff8d8'),(0.5-day)*2*(0.6+0.4*Math.sin(t*3+x)));put(x,y,c);}
-    if(day<0.6){const a=(0.6-day)/0.6,cx=Wn.x+Wn.w-14,cy=Wn.y+10;for(let y=-4;y<=4;y++)for(let x=-4;x<=4;x++){const d=Math.hypot(x,y);if(d<4.2&&Math.hypot(x+1.6,y-1)>3.4)mix(cx+x,cy+y,hex('#fff4c8'),a);}}
-    // curtains: velvet panels with folds; tap the window to open/close them
-    this.curtainT+=(this.curtain-this.curtainT)*Math.min(1,dt*5);const cwid=Math.round(5+(1-this.curtainT)*(Wn.w/2-3));
-    for(const side of[0,1])for(let y=Wn.y-7;y<Wn.y+Wn.h+10;y++)for(let i=0;i<cwid+2;i++){const x=side?Wn.x+Wn.w+3-i:Wn.x-3+i,f=Math.sin(i*1.4+(side?2:0))*0.5+0.5;put(x,y,mixc(hex('#6a1420'),hex('#b83040'),f*0.8+(i===cwid+1?-0.4:0)));}
-    // corkboard: today's tasks as sticky notes, achievements as enamel pins
-    const C=L.cork,tasks=(save.daily&&save.daily.tasks)||[],NC=['#f8e878','#ffb0c8','#a8e0f8'],nw=L.port?30:22,nh=L.port?26:20;
-    for(let i=0;i<3;i++){const x0=C.x+4+i*(nw+(L.port?6:4)),y0=C.y+5+(i===1?2:0),task=tasks[i],done=task&&task.done;
-      for(let y=0;y<nh;y++)for(let x=0;x<nw;x++){let c=hex(NC[i]);if(y===nh-1||x===nw-1)c=shade(c,0.8);if(done)c=mixc(c,hex('#ffffff'),0.3);put(x0+x,y0+y,c);}
-      for(let l=0;l<(L.port?4:3);l++){const ly=y0+6+l*4;for(let x=3;x<nw-3;x++)if(hash(x+i*31,l)>0.18&&!(hash(x*7+l,i)>0.9))put(x0+x,ly,mixc(hex(NC[i]),hex('#3a3050'),task?0.6:0.2));}
-      put(x0+Math.floor(nw/2),y0,hex('#e02030'));put(x0+Math.floor(nw/2)+1,y0,hex('#a01020'));put(x0+Math.floor(nw/2),y0+1,hex('#a01020'));
-      if(done){const cx=x0+nw/2-3,cy=y0+nh/2;for(const[u,v]of[[0,0],[1,1],[2,2],[3,1],[4,0],[5,-1],[6,-2],[7,-3]]){put(Math.round(cx+u),Math.round(cy+v),hex('#2a9a3a'));put(Math.round(cx+u),Math.round(cy+v+1),hex('#2a9a3a'));}}}
-    const got=Object.keys(save.ach||{}),PC=['#e5484d','#f2c14e','#5bb8e8','#8fcf5a','#c88aff','#ff8fb1'],pr=L.port?2:1,py0=C.y+C.h-(L.port?16:9);
-    got.slice(0,L.port?24:14).forEach((id,i)=>{const cols=L.port?12:14,x=C.x+5+(i%cols)*(L.port?8:5.4),y=py0+Math.floor(i/cols)*7,c=hex(PC[Math.floor(hash(id.length*7,id.charCodeAt(0))*6)]);
-      for(let v=-pr;v<=pr;v++)for(let u=-pr;u<=pr;u++)if(u*u+v*v<=pr*pr+0.5)put(Math.round(x+u),y+v,c);put(Math.round(x-pr/2),y-pr,hex('#ffffff'));});
-    // portraits in the frames (the current critter gets a little gold star)
-    for(const f of L.fr){const P=this.portrait(f.kind);for(let y=0;y<20;y++)for(let x=0;x<16;x++)put(f.x+2+x,f.y+2+y,P[y*16+x]);if(f.kind===game.kind){const sx=f.x+f.w-3,sy=f.y-2;for(const[u,v]of[[0,-1],[-1,0],[0,0],[1,0],[0,1]])put(sx+u,sy+v,hex('#ffe066'));}}
-    // lamp glow + chain (verlet) you can pull
-    const Lp=L.lamp,ax=Lp.x+1,ay=Lp.y+5;
-    if(lit){for(let x=-6;x<=6;x++)put(Lp.x+x,Lp.y+4,hex('#fff4b0'));const tx=L.tank.x+L.tank.w*(L.port?0.75:0.8),ty=L.deskY;
-      for(let y=ay;y<ty+4;y++){const f=(y-ay)/(ty-ay),half=4+f*28,cx=lerp(Lp.x,tx,f);for(let x=Math.floor(cx-half);x<=cx+half;x++)mix(x,y,hex('#ffe8a0'),0.13*(1-Math.abs(x-cx)/half)*(1-f*0.4));}}
-    if(!this.chain){this.chain=[];for(let i=0;i<6;i++)this.chain.push({x:ax,y:ay+i*2,px:ax,py:ay+i*2});}
-    const ch=this.chain;this.pullT=Math.max(0,this.pullT-dt);
-    for(let i=1;i<ch.length;i++){const n=ch[i],vx=(n.x-n.px)*0.96,vy=(n.y-n.py)*0.96;n.px=n.x;n.py=n.y;n.x+=vx+Math.sin(t*1.3+i)*0.004;n.y+=vy+0.06;}
-    if(this.pullT>0){const n=ch[ch.length-1];n.y=ay+ch.length*2+5*Math.sin(this.pullT/0.22*Math.PI);}
-    ch[0].x=ax;ch[0].y=ay;for(let k=0;k<4;k++)for(let i=1;i<ch.length;i++){const a=ch[i-1],b=ch[i],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,f=(d-2)/d;if(i>1){a.x+=dx*f*0.5;a.y+=dy*f*0.5;}b.x-=dx*f*(i>1?0.5:1);b.y-=dy*f*(i>1?0.5:1);}
-    ch.forEach((n,i)=>put(Math.round(n.x),Math.round(n.y),i%2?OR[61][1]:OR[61][3]));const e=ch[ch.length-1];for(const[u,v]of[[0,1],[-1,2],[0,2],[1,2],[0,3]])put(Math.round(e.x)+u,Math.round(e.y)+v,OR[61][2]);
-    // ambient light: warm by day, moonlit blue at night (the window keeps its sky)
-    if(day<0.98){const a=0.42+0.58*day,nt=hex('#1a2448');for(let y=0;y<RH;y++)for(let x=0;x<RW;x++){if(x>=Wn.x&&x<Wn.x+Wn.w&&y>=Wn.y&&y<Wn.y+Wn.h)continue;const i=y*RW+x;px[i]=mixc(shade(px[i],a),nt,(1-day)*0.18);}}
+    const put=(x,y,c)=>{x=Math.round(x);y=Math.round(y);if(x>=0&&y>=0&&x<RW&&y<RH)px[y*RW+x]=c;},mix=(x,y,c,a)=>{x=Math.round(x);y=Math.round(y);if(x>=0&&y>=0&&x<RW&&y<RH){const i=y*RW+x;px[i]=mixc(px[i],c,a);}};
+    // corkboard: today's tasks as sticky notes (seen from above, so pins are little domes), achievements as enamel pins
+    const C=L.cork,tasks=(save.daily&&save.daily.tasks)||[],NC=['#f8e878','#ffb0c8','#a8e0f8'],nw=L.port?34:24,nh=L.port?30:22;
+    for(let i=0;i<3;i++){const x0=C.x+5+i*(nw+(L.port?6:5)),y0=C.y+5+(i===1?2:0),task=tasks[i],done=task&&task.done;
+      for(let y=0;y<nh+2;y++)for(let x=0;x<nw+2;x++){if(x>=nw||y>=nh){if(x>=2&&y>=2)mix(x0+x,y0+y,hex('#000000'),0.35);continue;}let c=hex(NC[i]);if(y===nh-1||x===nw-1)c=shade(c,0.85);if(done)c=mixc(c,hex('#ffffff'),0.3);put(x0+x,y0+y,c);}
+      for(let l=0;l<(L.port?5:3);l++){const ly=y0+6+l*4;for(let x=3;x<nw-3;x++)if(hash(x+i*31,l)>0.18&&!(hash(x*7+l,i)>0.9))put(x0+x,ly,mixc(hex(NC[i]),hex('#3a3050'),task?0.6:0.2));}
+      const pxx=x0+Math.floor(nw/2);for(const[u,v,c]of[[0,0,'#e02030'],[1,0,'#a01020'],[0,1,'#a01020'],[1,1,'#800a18'],[0,-1,'#ff8090']])put(pxx+u,y0+1+v,hex(c));mix(pxx+2,y0+3,hex('#000000'),0.35);
+      if(done){const cx=x0+nw/2-3,cy=y0+nh/2;for(const[u,v]of[[0,0],[1,1],[2,2],[3,1],[4,0],[5,-1],[6,-2],[7,-3]]){put(cx+u,cy+v,hex('#2a9a3a'));put(cx+u,cy+v+1,hex('#2a9a3a'));}}}
+    const got=Object.keys(save.ach||{}),PC=['#e5484d','#f2c14e','#5bb8e8','#8fcf5a','#c88aff','#ff8fb1'],py0=C.y+C.h-(L.port?14:10);
+    got.slice(0,L.port?28:16).forEach((id,i)=>{const cols=L.port?14:16,x=C.x+5+(i%cols)*(L.port?8.4:5.3),y=py0+Math.floor(i/cols)*6,c=hex(PC[Math.floor(hash(id.length*7,id.charCodeAt(0))*6)]);
+      for(const[u,v]of[[0,0],[1,0],[0,1],[1,1],[-1,0],[2,0],[0,-1],[1,-1],[0,2],[1,2]])put(x+u,y+v,c);put(x,y-1,hex('#ffffff'));mix(x+2,y+2,hex('#000000'),0.4);});
+    // polaroids of your critters, scattered at angles
+    for(const ph of L.ph){const P=this.portrait(ph.kind),cw=20,chh=24,card=new Uint32Array(cw*chh);for(let y=0;y<chh;y++)for(let x=0;x<cw;x++){const e=x===0||y===0||x===cw-1||y===chh-1;card[y*cw+x]=e?hex('#c8c0b0'):hex('#fbf8f0');}
+      for(let y=0;y<18;y++)for(let x=0;x<16;x++)card[(2+y)*cw+2+x]=P[(y+1)*16+x];if(ph.kind===game.kind)for(const[u,v]of[[9,21],[10,21],[10,20],[10,22],[11,21]])card[v*cw+u]=hex('#e0a020');
+      this.blitRot(card,cw,chh,ph.cx,ph.cy,ph.a,true);}
+    // coin jar (seen from above: the rim and the coins inside) — fills as you save
+    this.jarKick=Math.max(0,this.jarKick-dt*3);const J=L.jar,jk=Math.sin(t*40)*this.jarKick,fill=clamp(Math.log10(save.coins+1)/3.4,0.05,1),GOLD=OR[61];
+    for(let y=-10;y<=10;y++)for(let x=-10;x<=10;x++){const d=Math.hypot(x,y);if(d>9.6)continue;let c=mixc(hex('#3a4a4a'),hex('#6a8080'),(x+y+20)/40);
+      const cr=hash(x+11,y+17+Math.floor(fill*8));if(d<9.6*Math.sqrt(fill)+1&&cr>0.3){const sh=((x*3+y*5)&3);c=GOLD[sh===0?3:sh===1?1:2];}put(J.x+x+jk,J.y+y,c);}
+    for(const[u,v]of[[-6,-6],[-7,-5],[-5,-7]])mix(J.x+u+jk,J.y+v,hex('#ffffff'),0.7);
+    // steam from the tea
+    const M=L.mug;for(let k=0;k<5;k++){const ph=(t*0.5+k/5)%1,x=M.x+Math.sin(t*1.7+k*2)*2.5+ph*3,y=M.y-4-ph*16;mix(x,y,hex('#ffffff'),0.5*(1-ph));mix(x+1,y,hex('#ffffff'),0.3*(1-ph));}
+    // window light falling across the desk (warm by day, cool moonlight by night); the lamp's pool of light when on
+    const WL=day>0.5?hex('#fff0c0'):hex('#9ab4e8'),wa=day>0.5?0.14*day:0.1*(1-day);
+    for(const[bx,bw]of[[0.18,0.1],[0.31,0.1]])for(let y=0;y<RH;y++){const x0=Math.round(RW*bx+y*0.55-RH*0.2),x1=x0+Math.round(RW*bw);for(let x=Math.max(0,x0);x<Math.min(RW,x1);x++)mix(x,y,WL,wa*(0.7+0.3*Math.sin(y*0.05)));}
+    this.lampKick=Math.max(0,this.lampKick-dt*4);const Lp=L.lamp;
+    if(lit){const lx=Lp.x-6,ly=Lp.y+10,R=L.port?60:74;for(let y=Math.max(0,ly-R);y<Math.min(RH,ly+R);y++)for(let x=Math.max(0,lx-R);x<Math.min(RW,lx+R);x++){const d=Math.hypot(x-lx,(y-ly)*1.1)/R;if(d<1)mix(x,y,hex('#ffe8a0'),0.16*(1-d)*(1-d));}}
+    else for(let y=-2;y<=2;y++)for(let x=-2;x<=2;x++)mix(Lp.x+x,Lp.y+y,hex('#000000'),0.25);
+    // ambient: darker and bluer at night
+    if(day<0.98){const a=0.45+0.55*day,nt=hex('#1a2448');for(let i=0;i<px.length;i++)px[i]=mixc(shade(px[i],a),nt,(1-day)*0.2);}
     // hover: brighten and bracket the thing under the pointer
     const H=this.hover;if(H&&H.id!=='tank'){const r=H.r;for(let y=r.y;y<r.y+r.h;y++)for(let x=r.x;x<r.x+r.w;x++)mix(x,y,hex('#ffffff'),0.1);
-      const B=hex('#fff4b0'),x0=r.x-2,y0=r.y-2,x1=r.x+r.w+1,y1=r.y+r.h+1;for(let k=0;k<4;k++){put(x0+k,y0,B);put(x0,y0+k,B);put(x1-k,y0,B);put(x1,y0+k,B);put(x0+k,y1,B);put(x0,y1-k,B);put(x1-k,y1,B);put(x1,y1-k,B);}}
+      const Bc=hex('#fff4b0'),x0=r.x-2,y0=r.y-2,x1=r.x+r.w+1,y1=r.y+r.h+1;for(let k=0;k<4;k++){put(x0+k,y0,Bc);put(x0,y0+k,Bc);put(x1-k,y0,Bc);put(x1,y0+k,Bc);put(x0+k,y1,Bc);put(x0,y1-k,Bc);put(x1-k,y1,Bc);put(x1,y1-k,Bc);}}
     this.ctx.putImageData(fb.img,0,0);},
   at(e){const L=this.L;return[e.clientX/L.S,e.clientY/L.S];},
   objAt(x,y){for(const o of this.L.objs){const r=o.r;if(x>=r.x-1&&x<=r.x+r.w+1&&y>=r.y-1&&y<=r.y+r.h+1)return o;}return null;},
   wire(){const cv=$('room'),tip=$('roomTip');
     cv.addEventListener('pointermove',e=>{if(!this.on)return;const o=this.objAt(...this.at(e));if(o!==this.hover){this.hover=o;if(o)SFX.play('tick');}cv.style.cursor=o?'pointer':'default';
-      if(o&&e.pointerType!=='touch'){tip.hidden=false;tip.textContent=o.label;tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';}else tip.hidden=true;});
+      if(o&&e.pointerType!=='touch'){tip.hidden=false;tip.textContent=typeof o.label==='function'?o.label():o.label;tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';}else tip.hidden=true;});
     cv.addEventListener('pointerleave',()=>{this.hover=null;tip.hidden=true;});
     cv.addEventListener('pointerdown',e=>{if(!this.on)return;this.touchPts.set(e.pointerId,[e.clientX,e.clientY]);if(this.touchPts.size>=2){const[a,b]=[...this.touchPts.values()];this.pinchD=Math.hypot(a[0]-b[0],a[1]-b[1]);return;}
       const o=this.objAt(...this.at(e));if(o){SFX.play('ui');this.hover=o;o.act();}});
@@ -6078,7 +6079,7 @@ const ui={
     const sp=$('setPieces');for(const P of FUN_PIECES){const r=document.createElement('div');r.className='srow';r.innerHTML=`<label>${P.name}<small>${P.fun}</small></label><div class="seg" data-k="${P.id}"><button class="btn alt" data-v="0">Basic</button><button class="btn alt" data-v="1">Fun</button></div>`;
       for(const b of r.querySelectorAll('button'))b.addEventListener('click',()=>{save.set.fun=save.set.fun||{};if(b.dataset.v==='1')save.set.fun[P.id]=1;else delete save.set.fun[P.id];markDirty();SFX.play('ui');this.applyIface();this.funHints();});sp.appendChild(r);}
     this.funHints=()=>{if(FUN('tools')&&!save.set.funHint){save.set.funHint=1;this.toast('Your hand does the petting now: rub to pet, hold to pick up, double-tap to knock on the glass. Tools hang on the pegboard.');}
-      else if(FUN('room')&&!save.set.roomHint){save.set.roomHint=1;this.toast('Zoom all the way out (or tap the little house) to step back into the room.');}};
+      else if(FUN('room')&&!save.set.roomHint){save.set.roomHint=1;this.toast('Zoom all the way out (or tap the little house) to step back to your desk.');}};
     this.applyIface=()=>{if(save.set.iface==='fun'){save.set.fun=Object.fromEntries(FUN_PIECES.map(p=>[p.id,1]));}delete save.set.iface;
       for(const P of FUN_PIECES)document.body.classList.toggle('fun-'+P.id,FUN(P.id));document.body.classList.toggle('fun',FUN_PIECES.some(p=>FUN(p.id)));
       if(FUN('tools')&&['pet','grab','tap'].includes(game.tool))setTool(null);canvas.style.cursor=game.tool||FUN('tools')?'none':'grab';
@@ -6419,7 +6420,7 @@ const HAND={
  carry:[".............","..kkkkkkk....",".khkhkhkhk...",".kpkpkpkpk...",".kskskskskk..",".kpppppppkhk.",".khppppppkpk.",".kppppppppk..","..kpppppppk..","...kppppsk...","....kkkkk...."],
  knock:[".............",".............","...kkkkk.....","..khpspsk....",".khpspsppk...",".kpppppppkk..",".kppppppkhk..",".khpppppkpk..","..kpppppppk..","...kppppsk...","....kkkkk...."],
 };
-const FUN_PIECES=[{id:'food',name:'Food',fun:'Supply tanks you pluck food from'},{id:'tools',name:'Tools',fun:'Your hand + a pegboard of real tools'},{id:'needs',name:'Needs',fun:'Gauges on the glass; grime shows a dirty tank'},{id:'coins',name:'Coins',fun:'A coin jar that fills up'},{id:'room',name:'Room',fun:'Zoom out into the room around the tank'}];
+const FUN_PIECES=[{id:'food',name:'Food',fun:'Supply tanks you pluck food from'},{id:'tools',name:'Tools',fun:'Your hand + a pegboard of real tools'},{id:'needs',name:'Needs',fun:'Gauges on the glass; grime shows a dirty tank'},{id:'coins',name:'Coins',fun:'A coin jar that fills up'},{id:'room',name:'Desk',fun:'Zoom out to your desk: everything lives on it'}];
 const FUN=k=>!!(save.set&&save.set.fun&&save.set.fun[k]);
 const HAND_PAL={k:hex('#1a0f0a'),p:hex('#f3c2a6'),s:hex('#cf8f78'),h:hex('#fff0e0')},HOLD_T=0.42;
 function funHand(){return FUN('tools')&&!game.tool&&!game.placing&&game.mode==='play';}
