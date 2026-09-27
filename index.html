@@ -107,22 +107,10 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .db.on{background:#2c4a24;box-shadow:inset 0 0 0 2px var(--moss),0 4px 0 #040604,0 0 18px rgba(156,211,94,.35);transform:translateY(-6px)}
 .db.on span{color:var(--ink)}
 .db.menu{background:#2a2433}
-/* Fun UI: the dock is a wooden pegboard; tools hang from brass pegs and leave a painted outline when lifted */
-body.fun #dock{border-color:#1a0f06;border-radius:10px;padding:8px 10px 6px;
-  background:radial-gradient(circle,#2a180a 1.5px,rgba(42,24,10,.35) 2.1px,transparent 2.6px) 6px 5px/13px 13px,repeating-linear-gradient(90deg,rgba(0,0,0,.05) 0 2px,transparent 2px 7px,rgba(255,220,160,.04) 7px 8px,transparent 8px 19px),linear-gradient(#9a6c3c,#7a522a 60%,#6a4522);
-  box-shadow:inset 0 0 0 3px #4a2c12,inset 0 3px 0 5px rgba(255,210,150,.12),0 5px 0 #1a0f06,0 10px 18px rgba(0,0,0,.45)}
-body.fun .db{background:none;border:0;box-shadow:none;transform:none!important;padding-top:12px;overflow:visible}
-body.fun .db::before{content:"";position:absolute;top:2px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;z-index:2;
-  background:radial-gradient(circle at 35% 30%,#fff0b0 0 1px,#e0b050 1.5px,#8a5a1a 4px);box-shadow:0 0 0 2px #2a1606,1px 2px 0 1px rgba(0,0,0,.35)}
-body.fun .db img{transform-origin:50% -4px;transform:rotate(var(--sw,0deg));transition:filter .22s,opacity .22s;
-  filter:brightness(1) opacity(1) drop-shadow(2px 3px 0 rgba(20,10,2,.5))}
-body.fun .db:hover img{transform:rotate(var(--sw,0deg))}
-body.fun .db.on img{filter:brightness(0) opacity(.3) drop-shadow(0 0 0 rgba(20,10,2,0));animation:lift .3s ease-out}
-@keyframes lift{0%{filter:brightness(1) opacity(1) drop-shadow(2px 3px 0 rgba(20,10,2,.5));translate:0 0}45%{filter:brightness(1.2) opacity(.9) drop-shadow(3px 8px 0 rgba(20,10,2,.3));translate:0 -10px}100%{translate:0 0}}
-body.fun .db.on::after{content:"";position:absolute;top:6px;left:50%;width:2px;height:8px;margin-left:-1px;background:#c8a050;border-radius:1px;box-shadow:0 0 0 1px #2a1606;transform:rotate(8deg);transform-origin:top}
-body.fun .db span{color:#2a1606;text-shadow:0 1px 0 rgba(255,220,160,.35);font-weight:bold}body.fun .db.on span{color:#2a1606}
-body.fun .db kbd{color:#3a220c;opacity:.7;top:1px;right:6px}
-body.fun .db.on{background:radial-gradient(ellipse at 50% 55%,rgba(255,220,120,.18),transparent 70%)}
+/* Fun UI: a real pegboard canvas replaces the tool buttons */
+#peg{display:none;height:88px;width:auto;image-rendering:pixelated;touch-action:none;cursor:pointer;border-radius:6px}
+body.fun #tools{display:none}body.fun #peg{display:block}
+body.fun #dock{padding:4px;background:#1a0f06;border-color:#060a07;box-shadow:inset 0 0 0 2px #3a2410,0 5px 0 #040604,0 10px 18px rgba(0,0,0,.45)}
 .db.menu.gacha,#d-gacha{background:#3a1f30}
 .mbtn .dot,.db .dot{position:absolute;top:-5px;left:-5px;width:14px;height:14px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 2px #060a07;animation:bump 1.2s infinite}
 #tray{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%);display:flex;gap:6px;padding:7px;max-width:calc(100vw - 24px);overflow-x:auto;animation:trayin .2s}
@@ -296,8 +284,8 @@ input[type=range]{accent-color:var(--moss);width:180px}
   #tray.supply .ti.trash{grid-area:1/3/3/4;width:44px;height:auto;align-self:stretch}#tray.supply .sp-info{grid-column:1/4;font-size:14px;line-height:17px}#tray.supply .sp-l{font-size:8px;padding:2px 6px 1px}
 }
 @media (max-width:340px){#tray.supply canvas{width:112px;height:64px}}
-@media (max-width:760px){body.fun #dock{padding:6px 5px 4px}body.fun .db{padding-top:10px}}
-@media (max-height:500px) and (min-width:600px){body.fun #dock{padding:5px 4px 3px}body.fun .db{padding-top:9px}body.fun .db img{width:28px;height:28px}}
+@media (max-width:760px){#peg{height:84px}body.fun #dock{padding:3px}}
+@media (max-height:500px) and (min-width:600px){#peg{height:54px}body.fun #dock{padding:3px}}
 @media (orientation:portrait) and (min-width:761px) and (max-width:1100px){
   #top{flex-wrap:wrap;height:auto;padding-top:10px;row-gap:10px}
   #petCard{width:100%}#meters{margin-left:auto}
@@ -353,6 +341,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
 <div id="dock" class="chunk">
   <div id="tray" class="chunk" hidden></div>
   <div class="dgroup" id="tools"></div>
+  <canvas id="peg" class="px" title="Tools: tap one to take it, tap its outline to hang it back"></canvas>
 </div>
 
 <div class="modal" id="mGoals" hidden><div class="sheet chunk" style="width:min(620px,100%)">
@@ -518,6 +507,8 @@ const SFX=(()=>{
     whirr:()=>{noise(0.45,{freq:900,to:1500,q:3,gain:0.03});tone(300,0.45,{type:'triangle',to:540,gain:0.02});},
     boop:()=>tone(520,0.13,{type:'sine',to:290,gain:0.09}),
     clack:()=>{noise(0.05,{freq:2200,gain:0.07});tone(640,0.05,{type:'square',gain:0.02});},
+    unhook:()=>{noise(0.04,{freq:3200,gain:0.05});tone(760,0.06,{type:'triangle',to:1250,gain:0.05});},
+    hang:()=>{noise(0.05,{freq:1700,gain:0.09});tone(480,0.05,{type:'square',gain:0.03});tone(1580,0.16,{delay:0.03,type:'triangle',gain:0.035});},
     musicbox:()=>arp([784,988,1175,988,784,659,784,1047],0.17,{type:'triangle',gain:0.04,dur:0.32,nojit:true}),
     flutter:()=>noise(0.12,{freq:3200,to:1800,q:1.5,gain:0.025}),
     tune:()=>{const N=[659,784,988,784,880,1047,988,784,659,587,659,784,880,784,659,523,587,659,784,659,587,523],D=[0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1];
@@ -1083,7 +1074,7 @@ class Pet{
       this.glance=opts.length?pick(opts):null;this.glanceUntil=w.t+rand(0.8,2);}
     if(this.glance&&w.t<this.glanceUntil){const g=this.glance.ptr?game.pointer:this.glance;if(this.faceToward&&this.kind!=='frog')this.faceToward(g.x,g.y,dt*0.6);}
     // shy critters edge away from a cursor hovering right over them
-    const P=game.pointer;if(!this.preview&&P.inside&&M.bold<0.35&&(game.tool==='pet'||game.tool==='grab')){const hd=this.headPos(),d=Math.hypot(P.x-hd.x,P.y-hd.y);
+    const P=game.pointer;if(!this.preview&&P.inside&&M.bold<0.35&&(game.tool==='pet'||game.tool==='grab'||(funHand()&&!P.touch))){const hd=this.headPos(),d=Math.hypot(P.x-hd.x,P.y-hd.y);
       if(d<16&&Math.random()<dt*0.6){const a=Math.atan2(hd.y-P.y,hd.x-P.x),B=w.bounds;this.tx=clamp(hd.x+Math.cos(a)*30,B.x0,B.x1);this.ty=clamp(hd.y+Math.sin(a)*30,B.y0,B.y1);this.state='wander';this.pace='walk';this.timer=3;think(this,'!');}}}
   isActive(){if(this.preview||this.kind==='slime')return true;const d=this.world.dayness;return(this.kind==='lizard'||this.kind==='snake'||this.kind==='turtle'||this.kind==='chameleon'||this.kind==='dragon')?d>0.5:d<0.5;}
   flick(){}
@@ -5054,7 +5045,7 @@ function updatePlay(dt){
   S.happy=Math.max(0,S.happy-(0.09+(S.fed<25?0.3:0)+(S.water<25?0.3:0)+(S.clean<60?(60-S.clean)/60*0.14:0))*dt);
   if(pet&&!pet.preview){if(w.mood==='thriving'){game.sparkT=(game.sparkT||0)-dt;if(game.sparkT<=0){game.sparkT=rand(2.5,4.5);const h=pet.headPos();spawn(w,'spark2',h.x+rand(-6,6),h.y-4-(pet.h||0)+rand(-4,2),{vy:-rand(4,9),life:0.8});}}
     else if(w.mood==='grumpy'){game.grrT=(game.grrT||rand(4,8))-dt;if(game.grrT<=0){game.grrT=rand(10,16);think(pet,'grr');}}}
-  const tool=game.tool;
+  const tool=game.tool;handStep(dt);
   if(P.down&&P.inside&&!game.placing){
     if(tool==='mist'){
       P.sprayT-=dt;
@@ -5065,7 +5056,7 @@ function updatePlay(dt){
       S.water=Math.min(100,S.water+3.5*dt);game.mistAcc=(game.mistAcc||0)+dt;{const hd0=pet.headPos();if(Math.hypot(hd0.x-P.x,hd0.y-P.y)<34)reqEvent('mist',null,dt);}
       const hd=pet.headPos();if(Math.hypot(hd.x-P.x,hd.y-P.y)<26)S.happy=Math.min(100,S.happy+({lizard:0.6,snake:0.6,chameleon:1,tarantula:0.3,scorpion:0.4,kraken:2,cuttle:1.5,golem:2.5,turtle:1.5,bee:0.2,mush:4}[pet.kind]??3)*dt);
       for(const pl of w.plants)if(Math.hypot(pl.x-P.x,pl.y-P.y)<pl.reach+10)pl.dist=Math.max(pl.dist,0.8);
-    }else if(tool==='pet'){
+    }else if(tool==='pet'||(!tool&&game.hand&&game.hand.mode==='rub')){
       if(pet.hitTest(P.x,P.y)>=0&&P.moved>0.5&&pet.petMe()){P.rub=(P.rub||0)+P.moved;
         if(P.rub>7){P.rub=0;spawn(w,'heart',P.x+rand(-2,2),P.y-3,{vy:-rand(12,18),life:1.2,ph:rand(TAU)});SFX.play('heart');
           game.hearts++;if(game.hearts%3===0)addXP(1);track('hearts');reqEvent('pets');cuddleHeart(pet);}}
@@ -5272,9 +5263,10 @@ function drawFoodAt(tfb,type,x,y,t){
   if(q.layered){tfb.clearLayer();q.drawL(tfb);composite(tfb,FOOD_PAINTER);}else q.draw(tfb,t);
 }
 function drawCursor(w){drawRequest(fb,w);
-  const P=game.pointer;if(!P.inside||P.touch)return;const x=Math.round(P.x),y=Math.round(P.y),t=game.tool;
+  const P=game.pointer;if(!P.inside)return;if(funHand()){if(!P.touch||game.hand||game.knockT>0)drawHand(w);return;}if(P.touch)return;const x=Math.round(P.x),y=Math.round(P.y),t=game.tool;
   if(game.placing)return;
   if(t==='feed'){drawTweezers(x,y,!!game.held||P.down);if(!game.held)drawFoodAt(fb,game.food,x+7,y+7,w.t);}
+  else if(save.set.iface==='fun'&&(t==='mist'||t==='scoop')){heldTool(w,t,x,y,P);if(t==='scoop'){const m=messAt(w,P.x,P.y);if(m){const a=w.t*5;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,m.x+Math.cos(aa)*5,m.y-(m.h||0)+Math.sin(aa)*4,hex('#9ad8f0'));}}}}
   else if(t==='mist'){const r=12;for(let i=0;i<24;i++){const a=i/24*TAU+w.t*0.8;if(i%2)pset(fb,x+Math.cos(a)*r,y+Math.sin(a)*r*0.8,CUR_PAL.w);}pset(fb,x,y,CUR_PAL.w);pset(fb,x+1,y+1,CUR_PAL.k);}
   else if(t==='pet')sprite(fb,CUR.pet,x-3,y-3,CUR_PAL);
   else if(t==='grab')sprite(fb,game.grabbing||game.dragObj?CUR.grabbing:CUR.grab,x-3,game.grabbing?y-7:y-3,CUR_PAL);
@@ -5284,6 +5276,16 @@ function drawCursor(w){drawRequest(fb,w);
   else if(t==='remote'){const c=CUR_PAL.w;for(const[dx,dy]of[[-3,0],[-2,0],[2,0],[3,0],[0,-3],[0,-2],[0,2],[0,3]])pset(fb,x+dx,y+dy,c);pset(fb,x,y,hex('#ff3030'));}
   if((t==='pet'||t==='tap')&&!(t==='pet'&&w.pet.hitTest(P.x,P.y)>=0)){const o=objectAt(P.x,P.y);if(o&&o.onClick){const a=w.t*4;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,x+Math.cos(aa)*6,y+Math.sin(aa)*6,hex('#ffe066'));}}}
 }
+// Fun mode: the tool you took off the pegboard is what you hold in the tank
+function heldTool(w,t,x,y,P){const k=t==="mist"?0.85:0.75;let ang,wu,wv,o={t:w.t};
+  let tx=x,ty=y;
+  if(t==='mist'){o.flip=true;ang=-0.6+(P.down?Math.sin(w.t*28)*0.03:0);wu=5.8;wv=3.2;tx=x+6;ty=y-8;o.squeeze=P.down?0.6+0.4*Math.sin(w.t*30):0;o.slosh=Math.sin(w.t*3);
+    const r=12;for(let i=0;i<24;i++){const a=i/24*TAU+w.t*0.8;if(i%2)pmix(fb,x+Math.cos(a)*r,y+Math.sin(a)*r*0.8,CUR_PAL.w,0.55);}pset(fb,x,y,CUR_PAL.w);
+    if(P.down)for(let i=0;i<5;i++){const f=rand(0.2,1);pmix(fb,tx+(x-tx)*f+rand(-1.5,1.5),ty+(y-ty)*f+rand(-1.5,1.5),hex('#e8f8ff'),0.7);}}
+  else{ang=0.55+(P.down?Math.sin(w.t*14)*0.12:0);wu=0;wv=21.4;}
+  const F=o.flip?-1:1,c=Math.cos(ang),s=Math.sin(ang),hx=tx-(F*wu*c-wv*s)*k,hy=ty-(F*wu*s+wv*c)*k-(t==='scoop'&&P.down?-2:0);
+  ddisc(fb,t==='mist'?tx+4:x+3,t==='mist'?ty+16:y+5,t==='mist'?3:4,0.7);
+  fb.clearLayer();drawTool(fb,t,hx,hy,ang,k,o);composite(fb,OBJ_PAINTER,{sAmt:.6,sdx:2,sdy:3});toolDetails(fb,t,hx,hy,ang,k,o);}
 const SEATINT=hex('#144a66'),GRUMPBUF=new Uint32Array(N),PLOPBUF=new Uint32Array(N);let grumpRect=null,plopRect=null;
 function renderObjects(list){
   if(!list.length)return;const w=game.world;
@@ -5322,7 +5324,7 @@ function renderPlay(){
   for(const t of w.toys)if((t.sunk||0)>0.05&&!t.dragged)drawSubToy(w,t);
   const py=pet.headPos().y,objs=[...w.decor,...w.toys.filter(t=>!((t.sunk||0)>0.05)||t.dragged)],back=objs.filter(o=>o.y<=py&&!o.dragged),front=objs.filter(o=>o.y>py&&!o.dragged);
   renderObjects(back);
-  const hover=(game.tool==='pet'||game.tool==='grab')&&P.inside&&pet.hitTest(P.x,P.y)>=0;
+  const hover=(game.tool==='pet'||game.tool==='grab'||funHand())&&P.inside&&!P.touch&&pet.hitTest(P.x,P.y)>=0;
   const hat=petSave().hat;
   const drawPet=()=>{subBegin(w,pet);grumpRect=null;plopRect=null;if(pet.plop>0){const h=pet.headPos(),cx=pet.x??h.x,cy=pet.y??h.y,x0=Math.max(1,Math.floor(cx-32)),x1=Math.min(W-2,Math.ceil(cx+32)),y0=Math.max(0,Math.floor(cy-40-(pet.h||0))),y1=Math.min(H-1,Math.ceil(cy+26));
       for(let y=y0;y<=y1;y++){const o=y*W;PLOPBUF.set(px.subarray(o+x0,o+x1+1),o+x0);}plopRect=[x0,y0,x1,y1];}
@@ -5435,6 +5437,103 @@ function foodCanvas(type){
   const c=document.createElement('canvas');c.width=22;c.height=16;c.className='px';c.getContext('2d').putImageData(f.img,0,0);return c;
 }
 function toolCanvas(id){const f=new FB(22,16);f.px.fill(0);drawToolIcon(f,id,11,8);const c=document.createElement('canvas');c.width=22;c.height=16;c.className='px';c.getContext('2d').putImageData(f.img,0,0);return c;}
+
+// =====================================================================
+//  Real tools (Fun UI): drawn from capsules, hanging from a hook at (hx,hy), rotated by ang, scaled by k
+// =====================================================================
+const TOOL_LEN={feed:27,mist:23,scoop:26,feather:27,laser:22,bubbles:23,remote:23};
+const TOOL_NAME={feed:'Tweezers',mist:'Spray bottle',scoop:'Scoop net',feather:'Feather wand',laser:'Laser pointer',bubbles:'Bubble wand',remote:'RC remote'};
+function drawTool(fb,id,hx,hy,ang,k,o={}){
+  const c=Math.cos(ang),s=Math.sin(ang),F=o.flip?-1:1,P=(u,v)=>[hx+(F*u*c-v*s)*k,hy+(F*u*s+v*c)*k];
+  const C=(u1,v1,r1,u2,v2,r2,m,b=0)=>{const a=P(u1,v1),e=P(u2,v2);fb.cap(a[0],a[1],Math.max(0.42,r1*k),e[0],e[1],Math.max(0.42,r2*k),m,1,0,0,b);};
+  const D=(u,v,r,m,b=0)=>C(u,v,r,u,v,r,m,b);
+  const ring=(u,v,r,th,m,n=10,b=0)=>{for(let i=0;i<n;i++){const a1=i/n*TAU,a2=(i+1)/n*TAU;C(u+Math.cos(a1)*r,v+Math.sin(a1)*r,th,u+Math.cos(a2)*r,v+Math.sin(a2)*r,th,m,b);}};
+  const sq=o.squeeze||0;
+  switch(id){
+    case 'feed':ring(0,1.5,1.2,0.4,OM.SILVER,8);C(0,3,1.3,0,4.8,1.4,OM.SILVER,0.5);const op=o.open??0.9;
+      C(-0.8,4.8,0.8,-0.5-op,26,0.4,OM.SILVER);C(0.8,4.8,0.8,0.5+op,26,0.4,OM.SILVER);
+      C(-1.05,8.5,0.62,-0.95,14,0.6,OM.BLACK,0.4);C(1.05,8.5,0.62,0.95,14,0.6,OM.BLACK,0.4);break;
+    case 'mist':ring(0,1.2,1.1,0.4,OM.WHITE,8);
+      C(-2.6,3.2,1.7,2.6,3.2,1.5,OM.BLUE,0.5);C(2.8,3.2,0.9,4.8,3.2,0.75,OM.WHITE,0.6);D(5.2,3.2,0.55,OM.BLACK,0.7);
+      C(1.1,4.6,0.55,2.3-sq*1.3,8.6,0.5,OM.BLUE,0.4);C(-0.6,4.4,1.25,-0.6,7.4,1.3,OM.WHITE);
+      C(-0.6,9.5,3.7,-0.6,20.5,4.1,OM.CRYS);C(-0.6,14.2+(o.slosh||0)*0.6,3.05,-0.6,20.6,3.45,OM.WATER,1.2);break;
+    case 'scoop':ring(0,1.4,1.1,0.4,OM.METAL,8);C(0,2.8,0.85,0,14.2,0.95,OM.WOOD);C(0,14,1.15,0,15.8,1.15,OM.METAL,0.3);
+      C(0,15.8,0.5,0,16.8,0.5,OM.METAL);ring(0,21.4,4.7,0.6,OM.SILVER,14,0.4);break;
+    case 'feather':ring(0,1.3,1,0.35,OM.GOLD,8);C(0,2.6,0.6,0,17,0.55,OM.WOOD);
+      C(0,17,0.5,-2.7,24.5,1.35,OM.PINK,0.2);C(0,17.4,0.5,0.2,26.2,1.45,OM.BLUE,0.4);C(0,17,0.5,2.8,24.4,1.3,OM.YELLOW,0.3);D(0,17.2,0.9,OM.GOLD,0.6);break;
+    case 'laser':ring(0,1.2,1,0.35,OM.RED,8);C(0,2.4,0.32,0,5.2,0.32,OM.RED);C(0,6,1.4,0,18.6,1.3,OM.SILVER);C(0,18.6,1.45,0,20.4,1.25,OM.BLACK,0.3);D(0.95,10.5,0.62,OM.RED,1);break;
+    case 'bubbles':ring(0,1.3,1,0.35,OM.PINK,8);C(0,2.6,0.62,0,15,0.62,OM.PINK);ring(0,19,3.6,0.62,OM.PINK,14,0.3);break;
+    case 'remote':C(0,0.6,0.34,0,5.4,0.34,OM.BLACK);ring(0,1.4,1,0.3,OM.BLACK,8);{const a=P(0,11.5);fb.box(a[0],a[1],3.1*k,5.6*k,ang,OM.STONE,1,0,0,0,1.2*k);}
+      C(2.1,16.5,0.36,3.4,22,0.3,OM.METAL,0.4);D(3.4,22,0.72,OM.RED,0.6);break;
+  }
+}
+// small painted-on details that capsules can't do (net mesh, buttons, soap film, grip glints, water glint)
+function toolDetails(fb,id,hx,hy,ang,k,o={}){
+  const c=Math.cos(ang),s=Math.sin(ang),F=o.flip?-1:1,P=(u,v)=>[hx+(F*u*c-v*s)*k,hy+(F*u*s+v*c)*k],t=o.t||0;
+  const lit=(u,v,col,a=1)=>{const[x,y]=P(u,v);const X=Math.floor(x),Y=Math.floor(y);if(X<0||Y<0||X>=fb.w||Y>=fb.h)return;const i=Y*fb.w+X;fb.px[i]=a>=1?col:mixc(fb.px[i],col,a);};
+  const inside=(cu,cv,r,fn)=>{const R=r*k+1,[cx,cy]=P(cu,cv);for(let y=Math.floor(cy-R);y<=cy+R;y++)for(let x=Math.floor(cx-R);x<=cx+R;x++){const dx=x+.5-hx,dy=y+.5-hy,u=F*(dx*c+dy*s)/k,v=(-dx*s+dy*c)/k,du=u-cu,dv=v-cv;if(du*du+dv*dv<r*r&&x>=0&&y>=0&&x<fb.w&&y<fb.h)fn(x,y,u,v);}};
+  if(id==='scoop')inside(0,21.4,4.1,(x,y,u,v)=>{const i=y*fb.w+x;if(((Math.round(u*1.4)+Math.round(v*1.4))&1)===0)fb.px[i]=mixc(fb.px[i],hex('#e8f0e0'),0.55);else fb.px[i]=shade(fb.px[i],0.8);});
+  else if(id==='bubbles')inside(0,19,3.0,(x,y,u,v)=>{const i=y*fb.w+x,h=Math.sin(u*1.3+v*0.9+t*3);fb.px[i]=mixc(fb.px[i],h>0.3?hex('#bff4ff'):h<-0.5?hex('#ffc8f0'):hex('#e8fff8'),0.22+Math.max(0,h)*0.2);});
+  else if(id==='remote'){lit(-1.2,9.5,hex('#e5484d'));lit(1.2,9.5,hex('#3f9be0'));lit(0,12.5,hex('#f2c14e'));lit(-1,14,hex('#8a9098'));lit(1,14,hex('#8a9098'));}
+  else if(id==='laser'){if(o.board){const g=0.5+0.5*Math.sin(t*4);lit(0,21.2,hex('#ff5050'),0.4+g*0.5);}}
+  else if(id==='mist'){lit(-3.2,12,hex('#ffffff'),0.8);lit(-3.2,13,hex('#ffffff'),0.5);for(let v=8;v<20;v+=2)lit(0.4,v,hex('#d8f4ff'),0.35);}
+  else if(id==='feed'){lit(-0.6,17,hex('#ffffff'),0.7);lit(-0.5,20,hex('#ffffff'),0.5);}
+}
+// The pegboard: one pixel canvas. Tools hang on brass hooks over painted outlines and swing like pendulums.
+const PEG={SL:22,PH:40,slots:[],fb:null,bg:null,key:'',hover:-1,pv:null,
+  ids(){return['feed','mist','scoop',...TOY_TOOLS.filter(t=>toolOwned(t))];},
+  build(){const ids=this.ids();const key=ids.join(',');if(key===this.key&&this.fb)return;this.key=key;
+    const n=ids.length+(ids.length===3?1:0),PW=n*this.SL+8,PH=this.PH;const cv=$('peg');cv.width=PW;cv.height=PH;this.ctx=cv.getContext('2d');
+    const old=Object.fromEntries(this.slots.map(sl=>[sl.id,sl]));
+    this.slots=ids.map((id,i)=>old[id]?Object.assign(old[id],{x:4+this.SL*i+this.SL/2}):{id,x:4+this.SL*i+this.SL/2,a:0,v:rand(-0.4,0.4),fly:0,flyDir:0});
+    this.empty=ids.length===3?4+this.SL*3+this.SL/2:null;
+    this.fb=new FB(PW,PH);this.bg=new Uint32Array(PW*PH);const bg=this.bg,W1=ramp('#4a2c14','#6a4222','#8a5a30','#a8743e');
+    for(let y=0;y<PH;y++)for(let x=0;x<PW;x++){const plank=Math.floor((y+2)/12),n0=fbm(x*0.05+plank*13,y*0.35+plank*7,3),g=Math.sin(x*0.22+n0*9+plank*3);
+      let col=W1[clamp(Math.floor(n0*3.2+(g>0.75?1:0)),0,3)];if((y+2)%12===0)col=hex('#2a1608');else if((y+2)%12===1)col=mixc(col,hex('#c89058'),0.35);
+      if(x%6===3&&y%6===3)col=hex('#1a0c04');else if(x%6===4&&y%6===3||x%6===3&&y%6===4)col=mixc(col,hex('#1a0c04'),0.4);
+      if(x<2||y<2||x>=PW-2||y>=PH-2)col=shade(col,0.55);bg[y*PW+x]=col;}
+    // painted outlines (shadow board): each tool's silhouette in dark paint with a pale rim
+    const tmp=new FB(PW,PH);for(const sl of this.slots){tmp.px.fill(0);tmp.clearLayer();drawTool(tmp,sl.id,sl.x,4.5,0,this.k(sl.id));composite(tmp,OBJ_PAINTER,{});
+      const m=i=>tmp.px[i]!==0;for(let i=0;i<PW*PH;i++){if(!m(i))continue;const x=i%PW,y=(i/PW)|0;const edge=!m(i-1)||!m(i+1)||!m(i-PW)||!m(i+PW);bg[i]=edge?mixc(bg[i],hex('#f0e0c0'),0.55):mixc(bg[i],hex('#20120a'),0.72);}}
+    if(this.empty){const x=Math.round(this.empty);for(let y=6;y<12;y++)bg[y*PW+x]=hex('#d8c8a0');
+      for(let y=12;y<24;y++)for(let xx=x-4;xx<=x+4;xx++){const e=y===12||y===23||xx===x-4||xx===x+4;bg[y*PW+xx]=e?hex('#6a4a2a'):hex(((xx+y)&3)===0?'#e8dcc0':'#f4ead0');}
+      for(const[u,v]of[[-1,15],[0,15],[1,15],[1,16],[0,17],[0,18],[0,20]])bg[(v)*PW+x+u]=hex('#8a3a2a');}
+  },
+  k(id){return Math.min(1,(this.PH-6)/TOOL_LEN[id]);},
+  held(id){const t=game.tool;return t===id;},
+  wire(){const cv=$('peg');
+    const at=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)/r.width*cv.width,(e.clientY-r.top)/r.height*cv.height];};
+    const slotAt=x=>{let b=-1,bd=this.SL/2+1;this.slots.forEach((sl,i)=>{const d=Math.abs(sl.x-x);if(d<bd){bd=d;b=i;}});if(b<0&&this.empty&&Math.abs(this.empty-x)<this.SL/2)return 'toys';return b;};
+    cv.addEventListener('pointermove',e=>{const[x,y]=at(e);if(this.pv){const dx=x-this.pv[0];for(const sl of this.slots){if(this.held(sl.id))continue;const tipY=4.5+TOOL_LEN[sl.id]*this.k(sl.id),tipX=sl.x+Math.sin(sl.a)*(tipY-4.5);
+        if(Math.abs(x-tipX)<5&&y>6&&y<tipY+2)sl.v+=clamp(dx,-3,3)*0.55;}}this.pv=[x,y];
+      const h=slotAt(x);if(h!==this.hover){this.hover=h;cv.title=h==='toys'?'No toys yet: get some from the toy machine!':h>=0?`${TOOL_NAME[this.slots[h].id]} (${this.keyOf(this.slots[h].id)}) — ${this.held(this.slots[h].id)?'tap to hang it back':'tap to take it'}`:'';}});
+    cv.addEventListener('pointerleave',()=>{this.pv=null;this.hover=-1;});
+    cv.addEventListener('pointerdown',e=>{if(e.button>0)return;const[x]=at(e),h=slotAt(x);
+      if(h==='toys'){SFX.play('ui');G.m='toys';ui.openModal('mGacha');return;}if(h<0)return;const id=this.slots[h].id;
+      if(this.held(id))setTool(null);else setTool(id);});
+  },
+  keyOf(id){return id==='feed'?'1':id==='mist'?'4':id==='scoop'?'5':'7';},
+  // setTool calls this whenever the tool in hand changes, so hooks animate no matter how the change happened
+  swap(from,to){for(const sl of this.slots){if(sl.id===from&&from!==to){sl.fly=1;sl.flyDir=-1;}if(sl.id===to){sl.fly=1;sl.flyDir=1;SFX.play('unhook');}}},
+  tick(dt){if(!this.fb||this.key!==this.ids().join(','))this.build();if(!$('peg').offsetParent)return;
+    const fb=this.fb,px=fb.px,t=performance.now()/1000;px.set(this.bg);fb.clearLayer();
+    for(const sl of this.slots){
+      if(sl.fly>0){sl.fly=Math.max(0,sl.fly-dt*5.5);if(sl.fly===0&&sl.flyDir<0){SFX.play('hang');sl.v+=rand(-1,1)>0?2.6:-2.6;for(const o of this.slots)if(o!==sl)o.v+=rand(-0.5,0.5)*Math.max(0,1-Math.abs(o.x-sl.x)/60)*1.6;}}
+      const n=Math.max(1,Math.ceil(dt/0.008)),h=dt/n;for(let i=0;i<n;i++){sl.v+=(-38*Math.sin(sl.a)-1.5*sl.v)*h;sl.a+=sl.v*h;}sl.a=clamp(sl.a,-0.9,0.9);
+      // brass hook
+      fb.cap(sl.x,3.2,1.25,sl.x,3.2,1.25,OM.GOLD,1,0,0,2);fb.cap(sl.x,3.2,0.6,sl.x+0.2,5.6,0.55,OM.GOLD,1,0,0,2);
+      const held=this.held(sl.id);let dy=0;
+      if(sl.fly>0)dy=sl.flyDir>0?-(1-sl.fly)*(this.PH+10):-sl.fly*sl.fly*(this.PH+6);else if(held)continue;
+      if(sl.flyDir>0&&sl.fly===0&&held)continue;
+      drawTool(fb,sl.id,sl.x,4.5+dy,sl.a,this.k(sl.id),{slosh:Math.sin(sl.a*3)});}
+    composite(fb,OBJ_PAINTER,{sAmt:.6,sdx:1,sdy:1});
+    for(const sl of this.slots){const held=this.held(sl.id);if(held&&sl.fly===0)continue;if(sl.fly>0&&sl.flyDir>0&&sl.fly<0.05)continue;
+      const dy=sl.fly>0?(sl.flyDir>0?-(1-sl.fly)*(this.PH+10):-sl.fly*sl.fly*(this.PH+6)):0;toolDetails(fb,sl.id,sl.x,4.5+dy,sl.a,this.k(sl.id),{t,board:true});}
+    // hover glow on the outline of the slot under the pointer; the held tool's outline pulses softly
+    this.slots.forEach((sl,i)=>{const held=this.held(sl.id);if(i!==this.hover&&!held)return;const a=held?0.12+0.1*Math.sin(t*4):0.08;
+      for(let y=2;y<this.PH-2;y++)for(let x=Math.floor(sl.x-this.SL/2+1);x<sl.x+this.SL/2-1;x++){const j=y*fb.w+x;px[j]=mixc(px[j],hex(held?'#ffe9a0':'#ffffff'),a);}});
+    this.ctx.putImageData(fb.img,0,0);},
+};
 
 // =====================================================================
 //  Supply tanks (Fun UI): four tiny live worlds you pluck food from
@@ -5711,7 +5810,7 @@ function iconURL(name){
 const TOOLS=[{id:'feed',label:'Feed',key:'1'},{id:'pet',label:'Pet',key:'2'},{id:'grab',label:'Grab',key:'3'},{id:'mist',label:'Mist',key:'4'},{id:'scoop',label:'Scoop',key:'5'},{id:'tap',label:'Tap',key:'6'},{id:'play',label:'Play',key:'7'}];
 const MENUS=[{id:'goals',label:'Goals',key:'O'},{id:'bag',label:'Bag',key:'B'},{id:'gacha',label:'Gacha',key:'G'},{id:'pets',label:'Pets',key:'P'}];
 const ui={
-  open:null,swing:{},bagTab:'hat',revealShown:false,coinShown:0,evT:0,previews:[],resetArm:0,
+  open:null,bagTab:'hat',revealShown:false,coinShown:0,evT:0,previews:[],resetArm:0,
   modalOpen(){return!!this.open;},
   init(){
     $('icFed').src=iconURL('fed');$('icWater').src=iconURL('water');$('icHappy').src=iconURL('heart');$('icClean').src=iconURL('clean');$('icCoin').src=iconURL('coin');
@@ -5732,10 +5831,8 @@ const ui={
     zc.addEventListener('dblclick',e=>{if(e.target.closest('button'))return;delete save.set.zoomPos;markDirty();fit();});
     const mk=(d,menu)=>{const b=document.createElement('button');b.className='db'+(menu?' menu '+d.id:'');b.id='d-'+d.id;b.title=`${d.label} (${d.key})`;
       b.innerHTML=`<img class="px" src="${iconURL(d.id)}" alt=""><span>${d.label}</span><kbd>${d.key}</kbd>`;return b;};
-    for(const d of TOOLS){const b=mk(d,false);b.addEventListener('click',()=>this.toolClick(d.id));$('tools').appendChild(b);
-      const sp=this.swing[d.id]={a:0,v:0,b,img:b.querySelector('img'),on:false};
-      b.addEventListener('pointerenter',e=>{if(!document.body.classList.contains('fun'))return;sp.v+=(e.movementX>=0?1:-1)*rand(60,110);});
-      b.addEventListener('pointermove',e=>{if(!document.body.classList.contains('fun'))return;sp.v+=clamp(e.movementX,-12,12)*7;});}
+    for(const d of TOOLS){const b=mk(d,false);b.addEventListener('click',()=>this.toolClick(d.id));$('tools').appendChild(b);}
+    PEG.wire();
     for(const d of MENUS){const b=document.createElement('button');b.className='ibtn mbtn '+d.id;b.id='d-'+d.id;b.title=`${d.label} (${d.key})`;b.setAttribute('aria-label',d.label);b.innerHTML=`<img class="px" src="${iconURL(d.id)}" alt="">`;
       b.addEventListener('click',()=>{SFX.play('ui');this.openModal('m'+d.id[0].toUpperCase()+d.id.slice(1));});$('menusTop').appendChild(b);}
     $('petName').addEventListener('click',e=>{e.stopPropagation();if(!game.kind)return;const st=$('petStats');if(st.hidden){this.renderStats();st.hidden=false;}else st.hidden=true;SFX.play('ui');});
@@ -5754,8 +5851,9 @@ const ui={
     $('setUi').addEventListener('input',e=>{save.set.ui=+e.target.value;this.applyUI();fit();markDirty();});
     $('setUiAuto').addEventListener('click',()=>{delete save.set.ui;this.applyUI();fit();markDirty();SFX.play('ui');});
     window.addEventListener('resize',()=>{if(!save.set.ui){this.applyUI();fit();}});this.applyUI();
-    this.applyIface=()=>{const fun=save.set.iface==='fun';document.body.classList.toggle('fun',fun);for(const b of $('setIface').children)b.classList.toggle('on',b.dataset.v===(fun?'fun':'basic'));this.renderTray();fit();};
-    for(const b of $('setIface').children)b.addEventListener('click',()=>{if(b.dataset.v==='fun')save.set.iface='fun';else delete save.set.iface;markDirty();SFX.play('ui');this.applyIface();});this.applyIface();
+    this.applyIface=()=>{const fun=save.set.iface==='fun';document.body.classList.toggle('fun',fun);if(fun&&['pet','grab','tap'].includes(game.tool))setTool(null);canvas.style.cursor=game.tool||fun?'none':'grab';for(const b of $('setIface').children)b.classList.toggle('on',b.dataset.v===(fun?'fun':'basic'));this.renderTray();fit();};
+    for(const b of $('setIface').children)b.addEventListener('click',()=>{if(b.dataset.v==='fun')save.set.iface='fun';else delete save.set.iface;markDirty();SFX.play('ui');this.applyIface();
+      if(save.set.iface==='fun'&&!save.set.funHint){save.set.funHint=1;this.toast('Fun mode! Your hand does the petting: rub to pet, hold to pick up, double-tap to knock on the glass. Tools hang on the pegboard.');}});this.applyIface();
     sw('setSfx','sfx',v=>SFX.setMuted(!v));sw('setMusic','music',v=>SFX.setMusic(v));sw('setShake','shake');sw('setBubbles','bubbles');sw('setSlimeFace','slimeFace');sw('setThoughts','thoughts');sw('setPixel','pixel',()=>fit());
     $('resetBtn').addEventListener('click',()=>{const b=$('resetBtn');if(performance.now()-this.resetArm<3000){try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem('mossjar.pet');}catch(e){}location.reload();}
       else{this.resetArm=performance.now();b.textContent='Tap again to reset';setTimeout(()=>{b.textContent='Reset';},3000);}});
@@ -5778,8 +5876,7 @@ const ui={
     setTool(id);
   },
   syncDock(){const t=game.tool,key=(TOY_TOOLS.includes(t)||t==='play')?'play':t;
-    for(const d of TOOLS){const on=d.id===key,sp=this.swing[d.id];$('d-'+d.id).classList.toggle('on',on);
-      if(sp&&sp.on!==on){sp.on=on;if(document.body.classList.contains('fun')){sp.v+=on?0:rand(-1,1)>0?160:-160;if(!on)SFX.play('clack');}}}
+    for(const d of TOOLS)$('d-'+d.id).classList.toggle('on',d.id===key);
     const gl=$('d-goals');if(gl){let d2=gl.querySelector('.dot');const on=(save.achNew||0)>0||(save.daily&&save.daily.tasks.some(t=>t.done)&&!save.daily.seen);if(on&&!d2){d2=document.createElement('i');d2.className='dot';gl.appendChild(d2);}else if(!on&&d2)d2.remove();}
     const g=$('d-gacha');let dot=g.querySelector('.dot');const can=save.coins>=50;if(can&&!dot){dot=document.createElement('i');dot.className='dot';g.appendChild(dot);}else if(!can&&dot)dot.remove();},
   renderTray(){
@@ -5840,8 +5937,7 @@ const ui={
     if(this.open==='mGacha'){gStep(dt);gDraw();}
     if(this.open==='mPets')this.tickPreviews(dt);
     if(SUP.on)SUP.tick(dt);
-    if(document.body.classList.contains('fun'))for(const id in this.swing){const sp=this.swing[id];if(Math.abs(sp.a)<0.05&&Math.abs(sp.v)<0.5){if(sp.a!==0){sp.a=0;sp.img.style.removeProperty('--sw');}continue;}
-      const n=Math.max(1,Math.ceil(dt/0.008)),h=dt/n;for(let k=0;k<n;k++){sp.v+=(-90*sp.a-4.6*sp.v)*h;sp.a+=sp.v*h;}sp.a=clamp(sp.a,-35,35);sp.img.style.setProperty('--sw',sp.a.toFixed(2)+'deg');}
+    if(save.set.iface==='fun')PEG.tick(dt);
     this.liveT=(this.liveT||0)-dt;if(this.liveT<=0){this.liveT=0.5;const c=$('psCud');if(c&&!$('petStats').hidden)c.innerHTML=this.cuddleHTML();if(this.open==='mGoals'){const r=$('gReset');if(r)r.textContent=dailyResetText();}}
   },
   renderStats(){const pet=game.world.pet;if(!pet)return;const M=pet.mind,B=MIND[game.kind]||MIND.default;
@@ -5995,7 +6091,7 @@ const ui={
 //  Input
 // =====================================================================
 function setTool(t){
-  if(game.held)dropHeld();game.placing=null;game.tool=t;canvas.style.cursor=t?'none':'grab';
+  if(game.held)dropHeld();game.placing=null;if(save.set.iface==='fun'&&PEG.fb)PEG.swap(game.tool,t);game.tool=t;game.hand=null;canvas.style.cursor=t||save.set.iface==='fun'?'none':'grab';
   if(!t&&!game.panHinted){game.panHinted=true;ui.toast('No tool selected: drag to look around. Tap a tool to pick it up again.',true);}if(TOY_TOOLS.includes(t))game.toyTool=t;if(t==='remote'&&placedCount('rc')===0&&(save.inv.rc||0)>0){placeObject('rc',160,100);markDirty();}game.trayOpen=true;ui.renderTray();
 }
 function toggleLight(){const w=game.world;if(!w)return;w.dayTarget=w.dayTarget>0.5?0:1;SFX.play(w.dayTarget?'lightsOn':'lightsOff');
@@ -6037,7 +6133,7 @@ window.addEventListener('pointerup',e=>{const D=ui.fdrag;ui.fdrag=null;if(!D||!D
   if(inside){dropHeld();SFX.play('tick');}else{trashFood(q);if(D.src)SUP.putBack(D.src);}});
 function toPix(e){const r=canvas.getBoundingClientRect();return[(e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H];}
 function objectAt(x,y){const w=game.world;let best=null,bd=1e9;for(const o of[...w.toys,...w.decor]){const d=Math.hypot(o.x-x,(o.y-(o.h||0)-3)-y);if(d<o.r+4&&d<bd){bd=d;best=o;}}return best;}
-canvas.addEventListener('contextmenu',e=>{e.preventDefault();if(game.placing){game.placing=null;ui.toast('Placement cancelled.',true);}});
+canvas.addEventListener('contextmenu',e=>{e.preventDefault();if(game.placing){game.placing=null;ui.toast('Placement cancelled.',true);}else if(save.set.iface==='fun'&&game.tool)setTool(null);});
 canvas.addEventListener('pointerdown',e=>{
   if(game.mode!=='play')return;canvas.setPointerCapture(e.pointerId);
   if(e.pointerType==='touch'){touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
@@ -6046,7 +6142,8 @@ canvas.addEventListener('pointerdown',e=>{
   if(!game.tool&&!game.placing){// no tool: drag to pan; a still click still picks up coins or uses a toy
     const [px0,py0]=toPix(e),w0=game.world;
     for(let i=0;i<w0.coins.length;i++){const c=w0.coins[i];if(Math.hypot(c.x-px0,c.y-c.h-2.5-py0)<6){w0.coins.splice(i,1);addCoins(c.v,c.x,c.y-c.h);spawn(w0,'star',c.x,c.y-c.h-2,{life:0.18});return;}}
-    game.panning={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,obj:objectAt(px0,py0),free:true};canvas.style.cursor='grabbing';return;}
+    if(save.set.iface==='fun'&&handDown(e))return;
+    game.panning={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,obj:objectAt(px0,py0),free:true};canvas.style.cursor=save.set.iface==='fun'?'none':'grabbing';return;}
   const P=game.pointer,[x,y]=toPix(e);P.x=x;P.y=y;P.down=true;P.inside=true;P.touch=e.pointerType==='touch';P.sprayT=0;P.vx=P.vy=0;P.lt=performance.now();
   const w=game.world,pet=w.pet,B=w.bounds;
   if(game.placing){if(e.button!==0)return;const id=game.placing;game.placing=null;
@@ -6068,14 +6165,54 @@ canvas.addEventListener('pointerdown',e=>{
     else{const o=objectAt(x,y);if(o){game.dragObj=o;o.dragged=true;o.vx=o.vy=0;o.h=0;SFX.play('tick');}}
   }
   else if(tool==='mist')SFX.mistOn(true);
-  else if(tool==='tap'){
+  else if(tool==='tap')knockAt(x,y);
+});
+// a knuckle on the glass: rings on the glass, a little shake, the critter reacts, bugs scatter, toys hop
+function knockAt(x,y){const w=game.world,pet=w.pet;game.knockT=0.22;
     w.glassRings.push({x,y,age:0});game.shake=0.22;SFX.play('tink');
     const hd=pet.headPos(),tapD=Math.hypot(hd.x-x,hd.y-y);pet.reactTap(x,y,tapD);if(tapD<120)w.stats.happy=Math.max(0,w.stats.happy-3*(1.4-pet.mind.bold));
     for(const q of w.prey){if(q.type==='cricket'&&q.h===0&&!q.caught){q.timer=0;}if(q.type==='fly'){q.landT=0;q.ang=Math.atan2(q.y-y,q.x-x);}}
     for(const t of w.toys)if(Math.hypot(t.x-x,t.y-y)<40&&!t.dragged){t.vh=rand(10,25);t.h=0.1;}
     for(const pl of w.plants)pl.dist=1;
-  }
-});
+}
+// ---- Fun mode: with no tool in hand, your bare hand does the petting, picking up and knocking
+const HAND={
+ open:["..k.k.k.k....",".khkpkpkpk...",".kpkpkpkpk...",".kpkpkpkpk.k.",".kpkpkpkpkkhk",".kpspspspkpk.",".khppppppppk.",".kppppppppk..","..kpppppppk..","...kppppsk...","....kkkkk...."],
+ rub:[".............",".............","..k.k.k.k....",".khkpkpkpk.k.",".kpkpkpkpkkhk",".kpspspspkpk.",".khppppppppk.",".kppppppppk..","..kpppppppk..","...kppppsk...","....kkkkk...."],
+ close:[".............",".............","..kkkkkkk....",".khkhkhkhk...",".kpspspspkk..",".kpppppppkhk.",".khppppppkpk.",".kppppppppk..","..kpppppppk..","...kppppsk...","....kkkkk...."],
+ carry:[".............","..kkkkkkk....",".khkhkhkhk...",".kpkpkpkpk...",".kskskskskk..",".kpppppppkhk.",".khppppppkpk.",".kppppppppk..","..kpppppppk..","...kppppsk...","....kkkkk...."],
+ knock:[".............",".............","...kkkkk.....","..khpspsk....",".khpspsppk...",".kpppppppkk..",".kppppppkhk..",".khpppppkpk..","..kpppppppk..","...kppppsk...","....kkkkk...."],
+};
+const HAND_PAL={k:hex('#1a0f0a'),p:hex('#f3c2a6'),s:hex('#cf8f78'),h:hex('#fff0e0')},HOLD_T=0.42;
+function funHand(){return save.set.iface==='fun'&&!game.tool&&!game.placing&&game.mode==='play';}
+function onRim(x,y){const B=game.world.bounds;return x<B.x0-1||x>B.x1+1||y<B.y0-1||y>B.y1+1;}
+function rimPoint(x,y){const T=TANK,dl=x-T.x0,dr=T.x1-x,dt=y-T.y0,db=T.y1-y,m=Math.min(dl,dr,dt,db);
+  return m===dl?[T.x0+2,clamp(y,T.y0,T.y1)]:m===dr?[T.x1-2,clamp(y,T.y0,T.y1)]:m===dt?[clamp(x,T.x0,T.x1),T.y0+2]:[clamp(x,T.x0,T.x1),T.y1-2];}
+function handDown(e){const[x,y]=toPix(e),w=game.world,pet=w.pet,P=game.pointer,now=performance.now();
+  P.x=x;P.y=y;P.inside=true;P.touch=e.pointerType==='touch';P.vx=P.vy=0;P.lt=now;P.rub=P.rub||0;P.moved=0;
+  if(onRim(x,y)){const[kx,ky]=rimPoint(x,y);knockAt(kx,ky);game.lastTap=null;return true;}
+  if(pet&&pet.hitTest(x,y)>=0){P.down=true;game.hand={mode:'touch',t:0,dist:0};return true;}
+  const o=objectAt(x,y);if(o){P.down=true;game.hand={mode:'obj',o,t:0,dist:0};return true;}
+  const L=game.lastTap;if(L&&now-L.t<380&&Math.hypot(L.x-x,L.y-y)<16){game.lastTap=null;knockAt(x,y);return true;}
+  game.lastTap={t:now,x,y};return false;}
+function handStep(dt){const H=game.hand,P=game.pointer,w=game.world,pet=w.pet;if(game.knockT>0)game.knockT-=dt;if(!H||!P.down)return;
+  H.t+=dt;H.dist+=P.moved;
+  if(H.mode==='touch'){if(H.dist>2.5)H.mode='rub';
+    else if(H.t>HOLD_T){if(pet.tryGrab(P.x,P.y)){game.grabbing=true;w.stats.happy=Math.max(0,w.stats.happy-1.4*(1.2-pet.mind.bold));SFX.play('squeak');H.mode='carry';game.shake=Math.max(game.shake||0,0.06);}else H.mode='rub';}}
+  else if(H.mode==='obj'&&H.dist>3){const o=H.o;game.dragObj=o;o.dragged=true;o.vx=o.vy=0;o.h=0;SFX.play('tick');H.mode='drag';}}
+function handUp(){const H=game.hand;game.hand=null;if(!H)return;if(H.mode==='obj'&&H.o.onClick)H.o.onClick(game.world);
+  else if(H.mode==='touch'&&H.t<HOLD_T){const pet=game.world.pet;if(pet.petMe&&pet.petMe()){const P=game.pointer;P.rub=(P.rub||0)+3;}}}
+function drawHand(w){const P=game.pointer,H=game.hand,x=Math.round(P.x),y=Math.round(P.y);let spr=HAND.open,lift=3;
+  if(game.grabbing||(H&&H.mode==='drag')){spr=HAND.carry;lift=5;}
+  else if(H&&H.mode==='touch'&&H.t>0.12){spr=HAND.close;lift=1;}
+  else if(H&&H.mode==='rub'){spr=Math.floor(w.t*9)%2?HAND.rub:HAND.open;lift=1;}
+  else if(game.knockT>0||onRim(P.x,P.y)){spr=HAND.knock;lift=game.knockT>0.11?0:game.knockT>0?1:3;}
+  const ox=x-6,oy=y-4-(spr===HAND.open||spr===HAND.rub?0:2);
+  for(let j=0;j<spr.length;j++)for(let i=0;i<spr[j].length;i++)if(spr[j][i]!=='.')pdark(fb,ox+i+lift,oy+j+lift+1,0.72);
+  sprite(fb,spr,ox,oy,HAND_PAL);
+  if(H&&H.mode==='touch'&&H.t>0.12){const f=clamp((H.t-0.12)/(HOLD_T-0.12),0,1),n=Math.ceil(f*16);for(let i=0;i<n;i++){const a=-Math.PI/2+i/16*TAU;pset(fb,x+Math.cos(a)*9,y+2+Math.sin(a)*8,hex(f>=1?'#9ccf6a':'#ffe066'));}}
+  if(game.knockT>0.1){const k=(game.knockT-0.1)/0.12;for(const[a,b]of[[-1,-1],[1,-1],[-1,1]])line(fb,x-7+a*(3+k*3),y-3+b*(3+k*3),x-7+a*(5+k*4),y-3+b*(5+k*4),CUR_PAL.w);}
+}
 canvas.addEventListener('pointermove',e=>{
   if(e.pointerType==='touch'&&touches.has(e.pointerId)){touches.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pinch&&touches.size>=2){movePinch();return;}if(pinch||touchBlock)return;}
   if(game.panning){panBy(e.clientX-game.panning.x,e.clientY-game.panning.y);game.panning.x=e.clientX;game.panning.y=e.clientY;return;}
@@ -6096,7 +6233,7 @@ function overTrash(cx,cy){const t=$('trashBtn');if(!t||t.offsetParent===null||cx
 function dropHeld(){const q=game.held;if(!q)return;game.held=null;q.inHand=false;q.paid=0;q.h=8;q.vh=0;
   if(q.pts){q.toWorld(8);q.x=q.pts[0].x;q.y=q.pts[0].y;}if(q.type==='fly')q.targetH=rand(10,20);
   const w=game.world;if(w){w.foodMem=w.foodMem||[];w.foodMem.push({x:q.x,y:q.y});if(w.foodMem.length>4)w.foodMem.shift();}}
-function up(){const P=game.pointer;P.down=false;SFX.mistOn(false);
+function up(){const P=game.pointer;P.down=false;SFX.mistOn(false);handUp();
   const tb=$('trashBtn');if(tb)tb.classList.remove('hot');
   if(game.held&&overTrash(P.cx,P.cy)){const q=game.held,pd=q.paid;trashFood(q);SFX.play('thunk');ui.toast(`Threw away the ${FOODS[q.type].name.replace(/^an? /,'')}${pd?` (refunded ${pd})`:''}.`,true);}
   dropHeld();
@@ -6105,7 +6242,7 @@ function up(){const P=game.pointer;P.down=false;SFX.mistOn(false);
     SFX.play('place');game.dragObj=null;markDirty();}}
 function pointerEnd(e){
   if(game.panning&&(e.pointerType==='mouse'||game.panning.free)){const pn=game.panning;game.panning=null;if(e.pointerType==='touch')touches.delete(e.pointerId);
-    if(pn.free){canvas.style.cursor=game.tool?'none':'grab';if(pn.obj&&pn.obj.onClick&&Math.hypot(e.clientX-pn.sx,e.clientY-pn.sy)<6)pn.obj.onClick(game.world);}return;}
+    if(pn.free){canvas.style.cursor=game.tool||save.set.iface==='fun'?'none':'grab';if(pn.obj&&pn.obj.onClick&&Math.hypot(e.clientX-pn.sx,e.clientY-pn.sy)<6)pn.obj.onClick(game.world);}return;}
   if(e.pointerType==='touch'){touches.delete(e.pointerId);
     if(pinch){if(touches.size<2){pinch=null;touchBlock=touches.size>0;}return;}
     if(touchBlock){if(touches.size===0)touchBlock=false;return;}}
@@ -6113,10 +6250,11 @@ function pointerEnd(e){
 canvas.addEventListener('pointerup',pointerEnd);canvas.addEventListener('pointercancel',pointerEnd);
 canvas.addEventListener('pointerleave',()=>{if(!game.pointer.down)game.pointer.inside=false;});
 window.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){if(game.placing){game.placing=null;ui.toast('Placement cancelled.',true);}else if(ui.revealShown)ui.hideReveal();else if(ui.open&&!game.firstRun)ui.close();return;}
+  if(e.key==='Escape'){if(game.placing){game.placing=null;ui.toast('Placement cancelled.',true);}else if(save.set.iface==='fun'&&game.tool&&!ui.open){setTool(null);}else if(ui.revealShown)ui.hideReveal();else if(ui.open&&!game.firstRun)ui.close();return;}
   if(ui.open||game.mode!=='play'||e.target.tagName==='INPUT')return;
   if(e.key==='+'||e.key==='='){setZoom(cam.z*1.35);return;}if(e.key==='-'||e.key==='_'){setZoom(cam.z/1.35);return;}if(e.key==='0'){camReset();return;}
   const k=e.key.toLowerCase(),map={'1':'feed','2':'pet','3':'grab','4':'mist','5':'scoop','6':'tap','7':'play'};
+  if(save.set.iface==='fun'&&(k==='2'||k==='3'||k==='6')){if(game.tool)setTool(null);return;}
   if(map[k])ui.toolClick(map[k]);else if(k==='l')toggleLight();
   else if(k==='m'){save.set.sfx=!save.set.sfx;SFX.setMuted(!save.set.sfx);$('setSfx').classList.toggle('on',save.set.sfx);markDirty();ui.toast(save.set.sfx?'Sound effects on':'Sound effects off',true);}
   else if(k==='o')ui.openModal('mGoals');else if(k==='b')ui.openModal('mBag');else if(k==='g')ui.openModal('mGacha');else if(k==='p')ui.openModal('mPets');
