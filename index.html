@@ -109,14 +109,18 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .db.menu{background:#2a2433}
 /* Fun UI: a real pegboard canvas replaces the tool buttons */
 #gauges,#jar,#grime{display:none}
-body.fun #meters{display:none}body.fun #gauges{display:flex;align-items:center;gap:8px;margin-left:8px}
+#c{position:relative;z-index:1}
+#room{position:absolute;left:0;top:0;z-index:0;display:none;image-rendering:pixelated;transform-origin:50% 50%}
+body.inroom #dock,body.inroom #zoomChip,body.inroom #grime,body.inroom #tray{display:none!important}body.inroom #c{cursor:zoom-in!important}
+#roomTip{position:fixed;z-index:30;pointer-events:none;font-family:var(--display);font-size:11px;letter-spacing:.05em;color:#2a1a0a;background:#f4e8c8;padding:4px 8px 3px;border-radius:3px;box-shadow:0 0 0 2px #1a0f06,0 3px 0 2px rgba(0,0,0,.35);transform:translate(-50%,-150%);white-space:nowrap}
+body.fun-needs #meters{display:none}body.fun-needs #gauges{display:flex;align-items:center;gap:8px;margin-left:8px}
 #gauges canvas{height:44px;width:auto;image-rendering:pixelated;filter:drop-shadow(0 2px 0 rgba(0,0,0,.45))}
-body.fun #coins img{display:none}body.fun #jar{display:block;height:40px;width:auto;image-rendering:pixelated;margin:-6px 0 -6px -2px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.4))}
-body.fun #coinNum{background:#f0e2c0;color:#3a2410;padding:2px 6px 1px;border-radius:2px;box-shadow:0 0 0 2px #1a0f06;font-size:15px}
-body.fun #grime{display:block;position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:2;image-rendering:pixelated}
+body.fun-coins #coins img{display:none}body.fun-coins #jar{display:block;height:40px;width:auto;image-rendering:pixelated;margin:-6px 0 -6px -2px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.4))}
+body.fun-coins #coinNum{background:#f0e2c0;color:#3a2410;padding:2px 6px 1px;border-radius:2px;box-shadow:0 0 0 2px #1a0f06;font-size:15px}
+body.fun-needs #grime{display:block;position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:2;image-rendering:pixelated}
 #peg{display:none;height:88px;width:auto;image-rendering:pixelated;touch-action:none;cursor:pointer;border-radius:6px}
-body.fun #tools{display:none}body.fun #peg{display:block}
-body.fun #dock{padding:4px;background:#1a0f06;border-color:#060a07;box-shadow:inset 0 0 0 2px #3a2410,0 5px 0 #040604,0 10px 18px rgba(0,0,0,.45)}
+body.fun-tools #tools{display:none}body.fun-tools #peg{display:block}
+body.fun-tools #dock{padding:4px;background:#1a0f06;border-color:#060a07;box-shadow:inset 0 0 0 2px #3a2410,0 5px 0 #040604,0 10px 18px rgba(0,0,0,.45)}
 .db.menu.gacha,#d-gacha{background:#3a1f30}
 .mbtn .dot,.db .dot{position:absolute;top:-5px;left:-5px;width:14px;height:14px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 2px #060a07;animation:bump 1.2s infinite}
 #tray{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%);display:flex;gap:6px;padding:7px;max-width:calc(100vw - 24px);overflow-x:auto;animation:trayin .2s}
@@ -134,7 +138,9 @@ body.fun #dock{padding:4px;background:#1a0f06;border-color:#060a07;box-shadow:in
 .tcat.on{background:#3a3418;color:#ffe9a8;box-shadow:inset 0 0 0 1px var(--amber)}
 .tcat i{font-style:normal;color:#ff7a9a;margin-left:4px}
 .ti.meh{opacity:.45}
-.seg{display:flex;gap:6px}.seg .btn{flex:none;padding-inline:14px}.seg .btn.on{background:#3a3418;color:#ffe9a8;box-shadow:inset 0 0 0 2px var(--amber)}
+.seg{display:flex;gap:6px}
+#setPieces{margin:-4px 0 6px 12px;border-left:2px solid var(--line);padding-left:10px}
+#setPieces .srow{padding:6px 0;border:0}#setPieces label{font-size:15px}#setPieces small{font-size:12px}#setPieces .seg .btn{padding:4px 10px;font-size:13px}.seg .btn{flex:none;padding-inline:14px}.seg .btn.on{background:#3a3418;color:#ffe9a8;box-shadow:inset 0 0 0 2px var(--amber)}
 /* Fun UI: supply tanks you pluck food from */
 #tray.supply{display:grid;grid-template-columns:repeat(4,auto) auto;align-items:start;overflow:visible;width:max-content;gap:6px 10px;padding:8px 10px 6px;background:linear-gradient(#3a2a1a,#2a1d12);box-shadow:inset 0 0 0 2px #5a4028,inset 0 3px 0 #6a4c30,0 0 0 3px #060a07,0 8px 0 #040604}
 #tray.supply .sp-t{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px}
@@ -290,8 +296,8 @@ input[type=range]{accent-color:var(--moss);width:180px}
   #tray.supply .ti.trash{grid-area:1/3/3/4;width:44px;height:auto;align-self:stretch}#tray.supply .sp-info{grid-column:1/4;font-size:14px;line-height:17px}#tray.supply .sp-l{font-size:8px;padding:2px 6px 1px}
 }
 @media (max-width:340px){#tray.supply canvas{width:112px;height:64px}}
-@media (max-width:760px){#peg{height:84px}body.fun #dock{padding:3px}#gauges canvas{height:36px}body.fun #gauges{gap:5px;margin-left:auto}body.fun #jar{height:34px}}
-@media (max-height:500px) and (min-width:600px){#peg{height:54px}body.fun #dock{padding:3px}#gauges canvas{height:32px}body.fun #jar{height:30px}}
+@media (max-width:760px){#peg{height:84px}body.fun-tools #dock{padding:3px}#gauges canvas{height:36px}body.fun-needs #gauges{gap:5px;margin-left:auto}body.fun-coins #jar{height:34px}}
+@media (max-height:500px) and (min-width:600px){#peg{height:54px}body.fun-tools #dock{padding:3px}#gauges canvas{height:32px}body.fun-coins #jar{height:30px}}
 @media (orientation:portrait) and (min-width:761px) and (max-width:1100px){
   #top{flex-wrap:wrap;height:auto;padding-top:10px;row-gap:10px}
   #petCard{width:100%}#meters{margin-left:auto}
@@ -312,7 +318,8 @@ input[type=range]{accent-color:var(--moss);width:180px}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 
-<div id="stage"><canvas id="c" width="320" height="180" aria-label="Terrarium"></canvas></div>
+<div id="stage"><canvas id="room" class="px" aria-label="Room"></canvas><canvas id="c" width="320" height="180" aria-label="Terrarium"></canvas></div>
+<div id="roomTip" hidden></div>
 <div id="fx"></div>
 
 <div id="top">
@@ -343,6 +350,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
   <button class="ibtn" id="zIn" title="Zoom in (+)"><img class="px" alt="Zoom in"></button>
   <button class="ibtn" id="zFollow" title="Follow your critter"><img class="px" alt="Follow"></button>
   <button class="ibtn" id="zReset" title="Reset zoom (0)"><img class="px" alt="Reset zoom"></button>
+  <button class="ibtn" id="zRoom" title="Step back into the room" hidden><img class="px" alt="Room"></button>
 </div>
 
 <canvas id="grime"></canvas>
@@ -397,7 +405,8 @@ input[type=range]{accent-color:var(--moss);width:180px}
   <div class="srow"><label>Thought marks<small>Little ? ! and ... above critters while they think.</small></label><button class="sw" id="setThoughts" aria-label="Thought marks"></button></div>
   <div class="srow"><label>Pixel-perfect scaling<small>Crisper pixels, smaller tank.</small></label><button class="sw" id="setPixel" aria-label="Pixel-perfect scaling"></button></div>
   <div class="srow"><label for="setUi">Interface size<small id="setUiV">Auto</small></label><div style="display:flex;gap:8px;align-items:center"><input type="range" id="setUi" min="0.6" max="1.4" step="0.05"><button class="btn alt" id="setUiAuto" style="flex:none">Auto</button></div></div>
-  <div class="srow"><label>Interface style<small>Fun (beta): pluck food from little supply tanks.</small></label><div class="seg" id="setIface"><button class="btn alt" data-v="basic">Basic</button><button class="btn alt" data-v="fun">Fun</button></div></div>
+  <div class="srow"><label>Interface style<small>Mix and match: Fun (beta) turns each piece into a hands-on toy.</small></label><div class="seg" id="setIface"><button class="btn alt" data-v="basic">All basic</button><button class="btn alt" data-v="fun">All fun</button></div></div>
+  <div id="setPieces"></div>
   <div class="srow" id="resetRow"><label>Reset save<small>Coins, items and bonds start over.</small></label><button class="btn alt danger" id="resetBtn" style="flex:none">Reset</button></div>
   <div class="srow" id="unlockRow" hidden><label>Unlock everything<small>Secret menu! Every critter, hat, toy, tool and decoration.</small></label><button class="btn" id="unlockBtn" style="flex:none">Unlock all</button></div>
 </div></div>
@@ -515,6 +524,8 @@ const SFX=(()=>{
     whirr:()=>{noise(0.45,{freq:900,to:1500,q:3,gain:0.03});tone(300,0.45,{type:'triangle',to:540,gain:0.02});},
     boop:()=>tone(520,0.13,{type:'sine',to:290,gain:0.09}),
     clack:()=>{noise(0.05,{freq:2200,gain:0.07});tone(640,0.05,{type:'square',gain:0.02});},
+    whoosh:()=>{noise(0.45,{filter:'bandpass',freq:420,gain:0.07});tone(220,0.4,{type:'sine',to:110,gain:0.03});},
+    chain:()=>{noise(0.03,{freq:4200,gain:0.05});tone(1900,0.04,{type:'square',gain:0.015});tone(2400,0.05,{delay:0.05,type:'triangle',gain:0.02});},
     unhook:()=>{noise(0.04,{freq:3200,gain:0.05});tone(760,0.06,{type:'triangle',to:1250,gain:0.05});},
     hang:()=>{noise(0.05,{freq:1700,gain:0.09});tone(480,0.05,{type:'square',gain:0.03});tone(1580,0.16,{delay:0.03,type:'triangle',gain:0.035});},
     musicbox:()=>arp([784,988,1175,988,784,659,784,1047],0.17,{type:'triangle',gain:0.04,dur:0.32,nojit:true}),
@@ -5270,11 +5281,11 @@ function drawFoodAt(tfb,type,x,y,t){
   if(q.type==='roach'){q.legPh=t*6;q.drawShadow(tfb);}
   if(q.layered){tfb.clearLayer();q.drawL(tfb);composite(tfb,FOOD_PAINTER);}else q.draw(tfb,t);
 }
-function drawCursor(w){drawRequest(fb,w);
+function drawCursor(w){drawRequest(fb,w);if(ROOM.on)return;
   const P=game.pointer;if(!P.inside)return;if(funHand()){if(!P.touch||game.hand||game.knockT>0)drawHand(w);return;}if(P.touch)return;const x=Math.round(P.x),y=Math.round(P.y),t=game.tool;
   if(game.placing)return;
   if(t==='feed'){drawTweezers(x,y,!!game.held||P.down);if(!game.held)drawFoodAt(fb,game.food,x+7,y+7,w.t);}
-  else if(save.set.iface==='fun'&&(t==='mist'||t==='scoop')){heldTool(w,t,x,y,P);if(t==='scoop'){const m=messAt(w,P.x,P.y);if(m){const a=w.t*5;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,m.x+Math.cos(aa)*5,m.y-(m.h||0)+Math.sin(aa)*4,hex('#9ad8f0'));}}}}
+  else if(FUN('tools')&&(t==='mist'||t==='scoop')){heldTool(w,t,x,y,P);if(t==='scoop'){const m=messAt(w,P.x,P.y);if(m){const a=w.t*5;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,m.x+Math.cos(aa)*5,m.y-(m.h||0)+Math.sin(aa)*4,hex('#9ad8f0'));}}}}
   else if(t==='mist'){const r=12;for(let i=0;i<24;i++){const a=i/24*TAU+w.t*0.8;if(i%2)pset(fb,x+Math.cos(a)*r,y+Math.sin(a)*r*0.8,CUR_PAL.w);}pset(fb,x,y,CUR_PAL.w);pset(fb,x+1,y+1,CUR_PAL.k);}
   else if(t==='pet')sprite(fb,CUR.pet,x-3,y-3,CUR_PAL);
   else if(t==='grab')sprite(fb,game.grabbing||game.dragObj?CUR.grabbing:CUR.grab,x-3,game.grabbing?y-7:y-3,CUR_PAL);
@@ -5550,7 +5561,7 @@ const GAUGES={val:{fed:-1,water:-1,happy:-1},nv:0,nvv:0,jarKick:0,jarFill:-1,gr:
   fb(id,w,h){const k='_'+id;if(!this[k])this[k]={fb:new FB(w,h),ctx:$(id).getContext('2d')};return this[k];},
   tick(dt){const w=game.world;if(!w||!w.pet)return;const S=w.stats,t=w.t;
     for(const k of['fed','water','happy'])this.val[k]=this.val[k]<0?S[k]:this.val[k]+(S[k]-this.val[k])*Math.min(1,dt*3);
-    this.dial(dt,S,t);this.heart(dt,S,t,w.mood);this.card(S,t);this.jar(dt,t);this.grime(S);
+    if(FUN('needs')){this.dial(dt,S,t);this.heart(dt,S,t,w.mood);this.card(S,t);this.grime(S);}if(FUN('coins'))this.jar(dt,t);
     this.tipT-=dt;if(this.tipT<=0){this.tipT=0.5;$('gWater').title=`Water ${S.water|0}% (mist to raise it)`;$('gHappy').title=`Happy ${S.happy|0}% · ${w.mood}`;$('gFed').title=`Fed ${S.fed|0}%`;$('coins').title=`${save.coins} coins`;}},
   // brass hygrometer: needle springs toward the water level, jitters while misting
   dial(dt,S,t){const{fb,ctx}=this.fb('gWater',22,22),px=fb.px,cx=11,cy=11,P=game.pointer;px.fill(0);
@@ -5613,6 +5624,138 @@ const GAUGES={val:{fed:-1,water:-1,happy:-1},nv:0,nvv:0,jarKick:0,jarFill:-1,gr:
       else if(Mm[i]>1.08-0.3*g){a=0.08+0.12*g;r=150;gg=136;b=100;}
       if(a>0){d[i*4]=r;d[i*4+1]=gg;d[i*4+2]=b;d[i*4+3]=a*255;}}
     cv.getContext('2d').putImageData(this.gr.img,0,0);},
+};
+
+// =====================================================================
+//  The room (Fun UI): zoom out past the tank and it's sitting on a desk in a cozy room.
+//  Everything in the room is a doorway to a menu; the tank stays live the whole time.
+// =====================================================================
+const ROOM={on:false,p:0,pull:0,L:null,fb:null,bg:null,hover:null,chain:null,portraits:{},curtain:1,curtainT:1,pullT:0,tipT:0,touchPts:new Map(),
+  layout(){const vw=innerWidth,vh=innerHeight,port=vh>vw*1.1,cw=port?216:384,ch=port?384:216,topH=$('top').getBoundingClientRect().bottom+4;
+    const S=Math.min(vw/cw,(vh-topH)/ch),RW=Math.ceil(vw/S),RH=Math.ceil(vh/S),ox=Math.floor((RW-cw)/2),oy=Math.floor(topH/S+Math.max(0,((vh-topH)/S-ch)/2));
+    const o=r=>{const q={...r};for(const k of['x','baseX','wallX'])if(q[k]!==undefined)q[k]+=ox;for(const k of['y','baseY'])if(q[k]!==undefined)q[k]+=oy;return q;};
+    const kinds=Object.keys(save.pets||{});const L={port,S,RW,RH,ox,oy,kinds,key:[RW,RH,port,kinds.join(),S.toFixed(3)].join('|')};
+    if(!port){L.deskY=oy+160;L.tank=o({x:104,y:62,w:176,h:99});L.window=o({x:16,y:14,w:72,h:56});L.shelf=o({x:10,y:114,w:88});L.gacha=o({x:20,y:82,w:24,h:32});L.bag=o({x:60,y:94,w:28,h:20});
+      L.cork=o({x:294,y:10,w:82,h:56});L.frames=o({x:294,y:74,w:82,h:26,max:3});L.lamp=o({x:304,y:112,style:'desk',baseX:344,baseY:158});L.notebook=o({x:30,y:150,w:36,h:10});}
+    else{L.deskY=oy+254;L.tank=o({x:20,y:155,w:176,h:99});L.cork=o({x:10,y:10,w:112,h:72});L.window=o({x:134,y:12,w:72,h:66});L.frames=o({x:10,y:92,w:196,h:26,max:6});
+      L.lamp=o({x:178,y:134,style:'sconce',wallX:210});L.cubby=o({x:14,y:282,w:188,h:62});L.gacha=o({x:28,y:310,w:24,h:32});L.bag=o({x:74,y:322,w:28,h:20});L.notebook=o({x:130,y:332,w:36,h:10});}
+    const fr=[],n=Math.min(L.frames.max,Math.max(1,kinds.length)),fw=20,gap=Math.min(8,(L.frames.w-n*fw)/Math.max(1,n-1));
+    const cur=game.kind,order=[cur,...kinds.filter(k=>k!==cur)].filter(Boolean).slice(0,n);
+    order.forEach((k,i)=>fr.push({kind:k,x:Math.round(L.frames.x+i*(fw+gap)),y:L.frames.y,w:fw,h:24}));L.fr=fr;
+    L.objs=[{id:'cork',r:L.cork,label:'Goals',act:()=>ui.openModal('mGoals')},{id:'frames',r:{x:L.frames.x-2,y:L.frames.y-2,w:L.frames.w+4,h:28},label:'Your critters',act:()=>ui.openModal('mPets')},
+      {id:'gacha',r:L.gacha,label:'Toy machine',act:()=>ui.openModal('mGacha')},{id:'bag',r:L.bag,label:'Bag',act:()=>ui.openModal('mBag')},{id:'notebook',r:{x:L.notebook.x-2,y:L.notebook.y-3,w:L.notebook.w+4,h:L.notebook.h+6},label:'Settings',act:()=>ui.openModal('mSettings')},
+      {id:'lamp',r:{x:L.lamp.x-9,y:L.lamp.y-8,w:18,h:30},label:'Pull the lamp chain',act:()=>this.pullChain()},{id:'window',r:L.window,label:'Curtains',act:()=>{this.curtain=this.curtain>0.5?0:1;SFX.play('whoosh');}},
+      {id:'tank',r:L.tank,label:'Back to the tank',act:()=>this.exit()}];
+    return L;},
+  build(){const L=this.L=this.layout(),{RW,RH}=L,cv=$('room');cv.width=RW;cv.height=RH;cv.style.width=RW*L.S+'px';cv.style.height=RH*L.S+'px';this.ctx=cv.getContext('2d');
+    const fb=this.fb=new FB(RW,RH),px=fb.px,bg=this.bg=new Uint32Array(RW*RH),dY=L.deskY;
+    const rect=(x,y,w,h,c)=>{for(let j=Math.max(0,y);j<Math.min(RH,y+h);j++)for(let i=Math.max(0,x);i<Math.min(RW,x+w);i++)px[j*RW+i]=typeof c==='function'?c(i,j):c;};
+    const WP=ramp('#3e4e3c','#465844','#506250','#5c705a'),WOOD=ramp('#3a2210','#5a3a1e','#7a4e28','#a06a36'),TOP=ramp('#6a4222','#8a5a30','#a8743e','#c89058');
+    // wallpaper: sage stripes with a little diamond motif, darker toward the ceiling
+    rect(0,0,RW,dY,(x,y)=>{const st=(Math.floor((x-L.ox)/7)&1),m=((x-L.ox+(Math.floor(y/9)&1)*7)%14===7&&y%9===4);let c=m?hex('#7a8a64'):WP[st?1:2];if(hash(x,y)>0.97)c=WP[0];return shade(c,0.78+0.22*Math.min(1,y/(dY*0.8)));});
+    rect(0,dY-7,RW,2,WOOD[0]);
+    // desk: top plane with grain, bright lip, darker front with panels
+    rect(0,dY-5,RW,10,(x,y)=>{const g=Math.sin(x*0.09+Math.sin(y*1.7)*2+fbm(x*0.03,y*0.3,2)*6);return TOP[clamp(Math.floor(1.6+g*1.1),0,3)];});
+    rect(0,dY+5,RW,1,TOP[3]);
+    rect(0,dY+6,RW,RH-dY-6,(x,y)=>{const g=Math.sin(y*0.5+fbm(x*0.02,y*0.08,2)*5);let c=WOOD[clamp(Math.floor(1.5+g*0.8),0,2)];const px0=(x-L.ox)%96;if(px0===0)c=WOOD[0];else if(px0===1)c=WOOD[3];return shade(c,0.95-Math.min(0.4,(y-dY)/300));});
+    if(!L.port){for(const dx of[40,232]){const x0=L.ox+dx,y0=dY+14;rect(x0,y0,112,26,(x,y)=>x===x0||y===y0?WOOD[0]:x===x0+111||y===y0+25?WOOD[3]:WOOD[2]);rect(x0+52,y0+11,8,4,OR[61][2]);rect(x0+53,y0+11,6,1,OR[61][3]);}}
+    else{const c=L.cubby;rect(c.x-2,c.y-2,c.w+4,c.h+4,WOOD[0]);rect(c.x,c.y,c.w,c.h,(x,y)=>shade(hex('#2a1a0c'),0.7+0.3*(y-c.y)/c.h));rect(c.x,c.y+c.h-6,c.w,6,(x,y)=>y===c.y+c.h-6?TOP[3]:TOP[1]);}
+    // shadow of the tank on the desk
+    const T=L.tank;for(let y=T.y+T.h-3;y<T.y+T.h+4;y++)for(let x=T.x-4;x<T.x+T.w+6;x++)if(x>=0&&y>=0&&x<RW&&y<RH)px[y*RW+x]=shade(px[y*RW+x],0.55+0.08*Math.abs(y-(T.y+T.h)));
+    // window frame + sill (panes are painted live), curtain rod
+    const Wn=L.window;rect(Wn.x-3,Wn.y-3,Wn.w+6,Wn.h+6,(x,y)=>(x<Wn.x-1||y<Wn.y-1)?WOOD[3]:WOOD[1]);rect(Wn.x-6,Wn.y+Wn.h+2,Wn.w+12,4,(x,y)=>y===Wn.y+Wn.h+2?TOP[3]:TOP[1]);
+    rect(Wn.x-10,Wn.y-8,Wn.w+20,2,hex('#2a1a10'));for(const fx of[Wn.x-11,Wn.x+Wn.w+9])rect(fx,Wn.y-9,3,4,OR[61][2]);
+    // corkboard
+    const C=L.cork;rect(C.x-3,C.y-3,C.w+6,C.h+6,(x,y)=>(x<C.x-1||y<C.y-1)?WOOD[3]:WOOD[1]);rect(C.x,C.y,C.w,C.h,(x,y)=>{const h=hash(x*3,y*5);return h>0.86?hex('#8a6434'):h<0.12?hex('#d0a870'):hex('#b88c52');});
+    // picture frames
+    for(const f of L.fr){rect(f.x,f.y,f.w,f.h,(x,y)=>{const e=x===f.x||y===f.y||x===f.x+f.w-1||y===f.y+f.h-1;return e?hex('#5a3a08'):(x<f.x+2||y<f.y+2)?OR[61][3]:OR[61][2];});rect(f.x+2,f.y+2,f.w-4,f.h-4,hex('#efe4c8'));}
+    // shelf (landscape)
+    if(L.shelf){const sh=L.shelf;rect(sh.x,sh.y,sh.w,4,(x,y)=>y===sh.y?TOP[3]:TOP[1]);rect(sh.x,sh.y+4,sh.w,1,WOOD[0]);for(const bx of[sh.x+8,sh.x+sh.w-12]){rect(bx,sh.y+4,4,3,WOOD[1]);rect(bx+1,sh.y+7,2,3,WOOD[1]);}}
+    // notebook: green cover, page edges, elastic band, ribbon
+    const N=L.notebook;rect(N.x,N.y,N.w,N.h,(x,y)=>x>=N.x+N.w-2||y>=N.y+N.h-2?hex('#f0e6cc'):(x===N.x||y===N.y)?hex('#1a3a24'):hex('#2e6a40'));rect(N.x+N.w-9,N.y,2,N.h-2,hex('#141414'));rect(N.x+8,N.y+N.h-2,2,5,hex('#c02830'));
+    // rounded things with the object painter: toy machine, bag, lamp
+    fb.clearLayer();const cap=(a,b,r1,c,d,r2,m,bias=0)=>fb.cap(a,b,r1,c,d,r2,m,1,0,0,bias);
+    const G=L.gacha,gx=G.x+G.w/2;fb.box(gx,G.y+G.h-6,G.w/2-1,6,0,OM.RED,1,0,0,0,1.5);cap(gx,G.y+11,10,gx,G.y+11,10,OM.CRYS,0.2);cap(gx,G.y+1.5,5,gx+0.01,G.y+1.5,4,OM.RED,0.5);
+    const B=L.bag,bx=B.x+B.w/2;cap(bx-7,B.y+10,6,bx+7,B.y+10,6,OM.ORANGE);cap(bx-9,B.y+4,3,bx+9,B.y+4,3,OM.ORANGE,0.3);cap(bx-5,B.y+13,3,bx+5,B.y+13,3,OM.ORANGE,0.6);
+    const Lp=L.lamp;if(Lp.style==='desk'){cap(Lp.baseX-6,Lp.baseY,2.2,Lp.baseX+6,Lp.baseY,2.2,OM.BLACK);cap(Lp.baseX,Lp.baseY-1,1,Lp.baseX-6,Lp.baseY-30,1,OM.METAL);cap(Lp.baseX-6,Lp.baseY-30,1,Lp.x+4,Lp.y-4,1,OM.METAL);cap(Lp.baseX-6,Lp.baseY-30,1.6,Lp.baseX-6,Lp.baseY-30,1.6,OM.GOLD,1);}
+    else{fb.box(Lp.wallX-1,Lp.y-8,2,5,0,OM.GOLD,1,0,0,0,1);cap(Lp.wallX-2,Lp.y-8,1,Lp.x+2,Lp.y-7,1,OM.GOLD);}
+    cap(Lp.x-7,Lp.y+2,2.2,Lp.x+6,Lp.y+2,2.2,OM.STEM,0.4);cap(Lp.x-3,Lp.y-3,2.4,Lp.x+3,Lp.y-3,2.4,OM.STEM,0.2);
+    composite(fb,OBJ_PAINTER,{sAmt:.6,sdx:1,sdy:1});
+    // capsules in the dome, coin slot and knob, bag buckle and stitches
+    const CC=['#ff5a6a','#5ad0ff','#ffd84a','#8ae06a','#c88aff'];for(let i=0;i<9;i++){const a=i*2.4,r=2+(i%3)*2.4,x=Math.round(gx+Math.cos(a)*r),y=Math.round(G.y+13+Math.sin(a)*r*0.7);rect(x,y,2,2,hex(CC[i%5]));px[y*RW+x]=hex('#ffffff');}
+    rect(gx-1,G.y+G.h-8,3,3,OR[61][2]);px[(G.y+G.h-8)*RW+gx]=OR[61][3];rect(gx+5,G.y+G.h-8,2,1,hex('#1a0a0a'));
+    rect(bx-1,B.y+6,3,3,OR[61][2]);for(let x=bx-6;x<=bx+6;x+=2)px[(B.y+15)*RW+x]=hex('#ffe0a0');
+    bg.set(px);this.chain=null;},
+  portrait(kind){if(this.portraits[kind])return this.portraits[kind];const f=new FB(64,48);
+    for(let y=0;y<48;y++)for(let x=0;x<64;x++)f.px[y*64+x]=mixc(hex('#e8d8b0'),hex('#b8c8a0'),y/48);
+    try{const pw={stats:{fed:60,happy:80,water:80},prey:[],parts:[],ripples:[],bounds:{x0:4,y0:4,x1:60,y1:44},dayness:1,t:0,dish:null,hide:null,lampRock:null,toys:[],bubbles:[],allWater:kind==='kraken'||SEA_PETS.includes(kind)};
+      const pet=makePet(pw,kind,32,28);pet.preview=true;pw.pet=pet;for(let i=0;i<3;i++)pet.update(0.016);f.clearLayer();pet.draw(f);composite(f,pet,{sAmt:.6,sdx:1,sdy:1});if(pet.drawExtras)pet.drawExtras(f);
+      const h=pet.headPos(),out=new Uint32Array(16*20),x0=clamp(Math.round(h.x-8),0,48),y0=clamp(Math.round(h.y-(pet.h||0)-11),0,28);
+      for(let y=0;y<20;y++)for(let x=0;x<16;x++)out[y*16+x]=f.px[(y0+y)*64+x0+x];return this.portraits[kind]=out;}catch(e){return this.portraits[kind]=new Uint32Array(16*20).fill(hex('#c8b890'));}},
+  enter(){if(this.on||!FUN('room')||game.mode!=='play')return;this.on=true;if(game.tool)setTool(null);document.body.classList.add('inroom');this.build();$('room').style.display='block';SFX.play('whoosh');
+    if(!save.set.roomSeen){save.set.roomSeen=1;ui.toast('Welcome to the room! Tap anything to use it. Tap the tank to go back.');}},
+  exit(instant){if(!this.on)return;this.on=false;$('roomTip').hidden=true;this.hover=null;SFX.play('whoosh');if(instant){this.p=0;this.finish();}},
+  finish(){document.body.classList.remove('inroom');$('room').style.display='none';$('room').style.transform='';camApply();fit();},
+  pullChain(){this.pullT=0.22;SFX.play('chain');setTimeout(()=>{toggleLight();SFX.play('clack');},110);},
+  tankXform(){const L=this.L,T=L.tank,S=L.S;return{z:T.w*S/cam.cw,tx:T.x*S,ty:T.y*S};},
+  tick(dt){const target=this.on?1:0;if(this.p===target&&!this.on)return;
+    if(this.on&&(!this.L||this.L.key!==this.layout().key))this.build();
+    this.p=clamp(this.p+(target>this.p?1:-1)*dt/0.6,0,1);const e=this.p*this.p*(3-2*this.p);
+    if(!this.on&&this.p===0){this.finish();return;}
+    const R=this.tankXform(),z=lerp(cam.z,R.z,e),tx=lerp(cam.tx,R.tx,e),ty=lerp(cam.ty,R.ty,e);canvas.style.transform=`translate(${tx}px,${ty}px) scale(${z})`;
+    const cv=$('room');cv.style.opacity=Math.min(1,e*1.4);const T=this.L.tank,S=this.L.S;cv.style.transformOrigin=`${(T.x+T.w/2)*S}px ${(T.y+T.h/2)*S}px`;cv.style.transform=`scale(${1+(1-e)*1.8})`;
+    this.draw(dt);},
+  draw(dt){const L=this.L,{RW,RH}=L,fb=this.fb,px=fb.px,w=game.world,t=w.t,day=clamp(w.dayness,0,1),lit=w.dayTarget>0.5;px.set(this.bg);
+    const put=(x,y,c)=>{if(x>=0&&y>=0&&x<RW&&y<RH)px[y*RW+x]=c;},mix=(x,y,c,a)=>{if(x>=0&&y>=0&&x<RW&&y<RH){const i=y*RW+x;px[i]=mixc(px[i],c,a);}};
+    // sky through the window: clouds by day, stars and a moon by night
+    const Wn=L.window,mx=Wn.x+Math.floor(Wn.w/2),my=Wn.y+Math.floor(Wn.h/2);
+    for(let y=Wn.y;y<Wn.y+Wn.h;y++)for(let x=Wn.x;x<Wn.x+Wn.w;x++){if(Math.abs(x-mx)<=1||Math.abs(y-my)<=1){put(x,y,hex('#5a3a1e'));continue;}const f=(y-Wn.y)/Wn.h;
+      let c=mixc(mixc(hex('#0e1430'),hex('#24305a'),f),mixc(hex('#5aa8e8'),hex('#bfe4ff'),f),day);
+      const cl=fbm((x+t*1.5)*0.07,y*0.16,3);if(cl>0.58)c=mixc(c,mixc(hex('#4a5070'),hex('#ffffff'),day),Math.min(1,(cl-0.58)*4)*0.85);
+      if(day<0.5&&hash(x,y)>0.985)c=mixc(c,hex('#fff8d8'),(0.5-day)*2*(0.6+0.4*Math.sin(t*3+x)));put(x,y,c);}
+    if(day<0.6){const a=(0.6-day)/0.6,cx=Wn.x+Wn.w-14,cy=Wn.y+10;for(let y=-4;y<=4;y++)for(let x=-4;x<=4;x++){const d=Math.hypot(x,y);if(d<4.2&&Math.hypot(x+1.6,y-1)>3.4)mix(cx+x,cy+y,hex('#fff4c8'),a);}}
+    // curtains: velvet panels with folds; tap the window to open/close them
+    this.curtainT+=(this.curtain-this.curtainT)*Math.min(1,dt*5);const cwid=Math.round(5+(1-this.curtainT)*(Wn.w/2-3));
+    for(const side of[0,1])for(let y=Wn.y-7;y<Wn.y+Wn.h+10;y++)for(let i=0;i<cwid+2;i++){const x=side?Wn.x+Wn.w+3-i:Wn.x-3+i,f=Math.sin(i*1.4+(side?2:0))*0.5+0.5;put(x,y,mixc(hex('#6a1420'),hex('#b83040'),f*0.8+(i===cwid+1?-0.4:0)));}
+    // corkboard: today's tasks as sticky notes, achievements as enamel pins
+    const C=L.cork,tasks=(save.daily&&save.daily.tasks)||[],NC=['#f8e878','#ffb0c8','#a8e0f8'],nw=L.port?30:22,nh=L.port?26:20;
+    for(let i=0;i<3;i++){const x0=C.x+4+i*(nw+(L.port?6:4)),y0=C.y+5+(i===1?2:0),task=tasks[i],done=task&&task.done;
+      for(let y=0;y<nh;y++)for(let x=0;x<nw;x++){let c=hex(NC[i]);if(y===nh-1||x===nw-1)c=shade(c,0.8);if(done)c=mixc(c,hex('#ffffff'),0.3);put(x0+x,y0+y,c);}
+      for(let l=0;l<(L.port?4:3);l++){const ly=y0+6+l*4;for(let x=3;x<nw-3;x++)if(hash(x+i*31,l)>0.18&&!(hash(x*7+l,i)>0.9))put(x0+x,ly,mixc(hex(NC[i]),hex('#3a3050'),task?0.6:0.2));}
+      put(x0+Math.floor(nw/2),y0,hex('#e02030'));put(x0+Math.floor(nw/2)+1,y0,hex('#a01020'));put(x0+Math.floor(nw/2),y0+1,hex('#a01020'));
+      if(done){const cx=x0+nw/2-3,cy=y0+nh/2;for(const[u,v]of[[0,0],[1,1],[2,2],[3,1],[4,0],[5,-1],[6,-2],[7,-3]]){put(Math.round(cx+u),Math.round(cy+v),hex('#2a9a3a'));put(Math.round(cx+u),Math.round(cy+v+1),hex('#2a9a3a'));}}}
+    const got=Object.keys(save.ach||{}),PC=['#e5484d','#f2c14e','#5bb8e8','#8fcf5a','#c88aff','#ff8fb1'],pr=L.port?2:1,py0=C.y+C.h-(L.port?16:9);
+    got.slice(0,L.port?24:14).forEach((id,i)=>{const cols=L.port?12:14,x=C.x+5+(i%cols)*(L.port?8:5.4),y=py0+Math.floor(i/cols)*7,c=hex(PC[Math.floor(hash(id.length*7,id.charCodeAt(0))*6)]);
+      for(let v=-pr;v<=pr;v++)for(let u=-pr;u<=pr;u++)if(u*u+v*v<=pr*pr+0.5)put(Math.round(x+u),y+v,c);put(Math.round(x-pr/2),y-pr,hex('#ffffff'));});
+    // portraits in the frames (the current critter gets a little gold star)
+    for(const f of L.fr){const P=this.portrait(f.kind);for(let y=0;y<20;y++)for(let x=0;x<16;x++)put(f.x+2+x,f.y+2+y,P[y*16+x]);if(f.kind===game.kind){const sx=f.x+f.w-3,sy=f.y-2;for(const[u,v]of[[0,-1],[-1,0],[0,0],[1,0],[0,1]])put(sx+u,sy+v,hex('#ffe066'));}}
+    // lamp glow + chain (verlet) you can pull
+    const Lp=L.lamp,ax=Lp.x+1,ay=Lp.y+5;
+    if(lit){for(let x=-6;x<=6;x++)put(Lp.x+x,Lp.y+4,hex('#fff4b0'));const tx=L.tank.x+L.tank.w*(L.port?0.75:0.8),ty=L.deskY;
+      for(let y=ay;y<ty+4;y++){const f=(y-ay)/(ty-ay),half=4+f*28,cx=lerp(Lp.x,tx,f);for(let x=Math.floor(cx-half);x<=cx+half;x++)mix(x,y,hex('#ffe8a0'),0.13*(1-Math.abs(x-cx)/half)*(1-f*0.4));}}
+    if(!this.chain){this.chain=[];for(let i=0;i<6;i++)this.chain.push({x:ax,y:ay+i*2,px:ax,py:ay+i*2});}
+    const ch=this.chain;this.pullT=Math.max(0,this.pullT-dt);
+    for(let i=1;i<ch.length;i++){const n=ch[i],vx=(n.x-n.px)*0.96,vy=(n.y-n.py)*0.96;n.px=n.x;n.py=n.y;n.x+=vx+Math.sin(t*1.3+i)*0.004;n.y+=vy+0.06;}
+    if(this.pullT>0){const n=ch[ch.length-1];n.y=ay+ch.length*2+5*Math.sin(this.pullT/0.22*Math.PI);}
+    ch[0].x=ax;ch[0].y=ay;for(let k=0;k<4;k++)for(let i=1;i<ch.length;i++){const a=ch[i-1],b=ch[i],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,f=(d-2)/d;if(i>1){a.x+=dx*f*0.5;a.y+=dy*f*0.5;}b.x-=dx*f*(i>1?0.5:1);b.y-=dy*f*(i>1?0.5:1);}
+    ch.forEach((n,i)=>put(Math.round(n.x),Math.round(n.y),i%2?OR[61][1]:OR[61][3]));const e=ch[ch.length-1];for(const[u,v]of[[0,1],[-1,2],[0,2],[1,2],[0,3]])put(Math.round(e.x)+u,Math.round(e.y)+v,OR[61][2]);
+    // ambient light: warm by day, moonlit blue at night (the window keeps its sky)
+    if(day<0.98){const a=0.42+0.58*day,nt=hex('#1a2448');for(let y=0;y<RH;y++)for(let x=0;x<RW;x++){if(x>=Wn.x&&x<Wn.x+Wn.w&&y>=Wn.y&&y<Wn.y+Wn.h)continue;const i=y*RW+x;px[i]=mixc(shade(px[i],a),nt,(1-day)*0.18);}}
+    // hover: brighten and bracket the thing under the pointer
+    const H=this.hover;if(H&&H.id!=='tank'){const r=H.r;for(let y=r.y;y<r.y+r.h;y++)for(let x=r.x;x<r.x+r.w;x++)mix(x,y,hex('#ffffff'),0.1);
+      const B=hex('#fff4b0'),x0=r.x-2,y0=r.y-2,x1=r.x+r.w+1,y1=r.y+r.h+1;for(let k=0;k<4;k++){put(x0+k,y0,B);put(x0,y0+k,B);put(x1-k,y0,B);put(x1,y0+k,B);put(x0+k,y1,B);put(x0,y1-k,B);put(x1-k,y1,B);put(x1,y1-k,B);}}
+    this.ctx.putImageData(fb.img,0,0);},
+  at(e){const L=this.L;return[e.clientX/L.S,e.clientY/L.S];},
+  objAt(x,y){for(const o of this.L.objs){const r=o.r;if(x>=r.x-1&&x<=r.x+r.w+1&&y>=r.y-1&&y<=r.y+r.h+1)return o;}return null;},
+  wire(){const cv=$('room'),tip=$('roomTip');
+    cv.addEventListener('pointermove',e=>{if(!this.on)return;const o=this.objAt(...this.at(e));if(o!==this.hover){this.hover=o;if(o)SFX.play('tick');}cv.style.cursor=o?'pointer':'default';
+      if(o&&e.pointerType!=='touch'){tip.hidden=false;tip.textContent=o.label;tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';}else tip.hidden=true;});
+    cv.addEventListener('pointerleave',()=>{this.hover=null;tip.hidden=true;});
+    cv.addEventListener('pointerdown',e=>{if(!this.on)return;this.touchPts.set(e.pointerId,[e.clientX,e.clientY]);if(this.touchPts.size>=2){const[a,b]=[...this.touchPts.values()];this.pinchD=Math.hypot(a[0]-b[0],a[1]-b[1]);return;}
+      const o=this.objAt(...this.at(e));if(o){SFX.play('ui');this.hover=o;o.act();}});
+    cv.addEventListener('pointermove',e=>{if(!this.touchPts.has(e.pointerId))return;this.touchPts.set(e.pointerId,[e.clientX,e.clientY]);if(this.touchPts.size>=2&&this.pinchD){const[a,b]=[...this.touchPts.values()];if(Math.hypot(a[0]-b[0],a[1]-b[1])>this.pinchD*1.3){this.pinchD=0;this.exit();}}});
+    const end=e=>{this.touchPts.delete(e.pointerId);if(this.touchPts.size<2)this.pinchD=0;};cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+    $('zRoom').querySelector('img').src=iconURL('house');$('zRoom').addEventListener('click',()=>{SFX.play('ui');this.enter();});},
 };
 
 // =====================================================================
@@ -5802,6 +5945,7 @@ function gDraw(){
 const IP={k:'#141a14',w:'#f4f1e2',W:'#c8c4b4',g:'#8fcf5a',G:'#4a7a2a',y:'#f2c14e',Y:'#b8862a',r:'#e5484d',R:'#9a2a30',b:'#5bb8e8',B:'#2a6a9a',
   p:'#ff8fb1',P:'#c0507a',s:'#c8ced6',S:'#6a727c',n:'#9a6034',N:'#5a3a1e',m:'#e8d9a8'};
 const SPR={
+  house:['.....kk.....','....kRRk.kk.','...kRRRRkNk.','..kRRRRRRkk.','.kRRRRRRRRk.','kkkkkkkkkkkk','.kmmmmmmmmk.','.kmbbkmmNNk.','.kmbbkmmNNk.','.kmkkkmmNNk.','.kmmmmmmNNk.','.kkkkkkkkkk.'],
   goals:['..kkkkkkkk..','kkkyyyyyykkk','kyk.yyyyk.ky','kyk.yYyyk.ky','.kykyyyYkyk.','..kyyyyyyk..','...kyyyyk...','....kyyk....','.....kk.....','....kYYk....','...kyyyyk...','...kkkkkk...'],
   scoop:['.......kk...','......kSSk..','.....kSSk...','....kSSk....','...kSSk.....','..kkkk......','.kwbwbk.....','kwbwbwbk....','kbwbwbwk....','kwbwbwbk....','.kbwbwk.....','..kkkk......'],
   clean:['.......k....','......kwk...','.kkk...k....','kbbwk.......','kbwbk..kkk..','kbbbk.kbbwk.','.kkk.kbbbwk.','.....kbbbbk.','..kk..kbbk..','.kbwk..kk...','.kbbk.......','..kk........'],
@@ -5912,7 +6056,7 @@ const ui={
     const mk=(d,menu)=>{const b=document.createElement('button');b.className='db'+(menu?' menu '+d.id:'');b.id='d-'+d.id;b.title=`${d.label} (${d.key})`;
       b.innerHTML=`<img class="px" src="${iconURL(d.id)}" alt=""><span>${d.label}</span><kbd>${d.key}</kbd>`;return b;};
     for(const d of TOOLS){const b=mk(d,false);b.addEventListener('click',()=>this.toolClick(d.id));$('tools').appendChild(b);}
-    PEG.wire();
+    PEG.wire();ROOM.wire();
     for(const d of MENUS){const b=document.createElement('button');b.className='ibtn mbtn '+d.id;b.id='d-'+d.id;b.title=`${d.label} (${d.key})`;b.setAttribute('aria-label',d.label);b.innerHTML=`<img class="px" src="${iconURL(d.id)}" alt="">`;
       b.addEventListener('click',()=>{SFX.play('ui');this.openModal('m'+d.id[0].toUpperCase()+d.id.slice(1));});$('menusTop').appendChild(b);}
     $('petName').addEventListener('click',e=>{e.stopPropagation();if(!game.kind)return;const st=$('petStats');if(st.hidden){this.renderStats();st.hidden=false;}else st.hidden=true;SFX.play('ui');});
@@ -5931,9 +6075,17 @@ const ui={
     $('setUi').addEventListener('input',e=>{save.set.ui=+e.target.value;this.applyUI();fit();markDirty();});
     $('setUiAuto').addEventListener('click',()=>{delete save.set.ui;this.applyUI();fit();markDirty();SFX.play('ui');});
     window.addEventListener('resize',()=>{if(!save.set.ui){this.applyUI();fit();}});this.applyUI();
-    this.applyIface=()=>{const fun=save.set.iface==='fun';document.body.classList.toggle('fun',fun);if(fun&&['pet','grab','tap'].includes(game.tool))setTool(null);canvas.style.cursor=game.tool||fun?'none':'grab';for(const b of $('setIface').children)b.classList.toggle('on',b.dataset.v===(fun?'fun':'basic'));this.renderTray();fit();};
-    for(const b of $('setIface').children)b.addEventListener('click',()=>{if(b.dataset.v==='fun')save.set.iface='fun';else delete save.set.iface;markDirty();SFX.play('ui');this.applyIface();
-      if(save.set.iface==='fun'&&!save.set.funHint){save.set.funHint=1;this.toast('Fun mode! Your hand does the petting: rub to pet, hold to pick up, double-tap to knock on the glass. Tools hang on the pegboard.');}});this.applyIface();
+    const sp=$('setPieces');for(const P of FUN_PIECES){const r=document.createElement('div');r.className='srow';r.innerHTML=`<label>${P.name}<small>${P.fun}</small></label><div class="seg" data-k="${P.id}"><button class="btn alt" data-v="0">Basic</button><button class="btn alt" data-v="1">Fun</button></div>`;
+      for(const b of r.querySelectorAll('button'))b.addEventListener('click',()=>{save.set.fun=save.set.fun||{};if(b.dataset.v==='1')save.set.fun[P.id]=1;else delete save.set.fun[P.id];markDirty();SFX.play('ui');this.applyIface();this.funHints();});sp.appendChild(r);}
+    this.funHints=()=>{if(FUN('tools')&&!save.set.funHint){save.set.funHint=1;this.toast('Your hand does the petting now: rub to pet, hold to pick up, double-tap to knock on the glass. Tools hang on the pegboard.');}
+      else if(FUN('room')&&!save.set.roomHint){save.set.roomHint=1;this.toast('Zoom all the way out (or tap the little house) to step back into the room.');}};
+    this.applyIface=()=>{if(save.set.iface==='fun'){save.set.fun=Object.fromEntries(FUN_PIECES.map(p=>[p.id,1]));}delete save.set.iface;
+      for(const P of FUN_PIECES)document.body.classList.toggle('fun-'+P.id,FUN(P.id));document.body.classList.toggle('fun',FUN_PIECES.some(p=>FUN(p.id)));
+      if(FUN('tools')&&['pet','grab','tap'].includes(game.tool))setTool(null);canvas.style.cursor=game.tool||FUN('tools')?'none':'grab';
+      const all=FUN_PIECES.every(p=>FUN(p.id)),none=!FUN_PIECES.some(p=>FUN(p.id));for(const b of $('setIface').children)b.classList.toggle('on',b.dataset.v==='fun'?all:none);
+      for(const seg of sp.querySelectorAll('.seg'))for(const b of seg.children)b.classList.toggle('on',(b.dataset.v==='1')===FUN(seg.dataset.k));
+      if(!FUN('room')&&ROOM.on)ROOM.exit(true);$('zRoom').hidden=!FUN('room');this.renderTray();fit();};
+    for(const b of $('setIface').children)b.addEventListener('click',()=>{save.set.fun=b.dataset.v==='fun'?Object.fromEntries(FUN_PIECES.map(p=>[p.id,1])):{};markDirty();SFX.play('ui');this.applyIface();this.funHints();});this.applyIface();
     sw('setSfx','sfx',v=>SFX.setMuted(!v));sw('setMusic','music',v=>SFX.setMusic(v));sw('setShake','shake');sw('setBubbles','bubbles');sw('setSlimeFace','slimeFace');sw('setThoughts','thoughts');sw('setPixel','pixel',()=>fit());
     $('resetBtn').addEventListener('click',()=>{const b=$('resetBtn');if(performance.now()-this.resetArm<3000){try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem('mossjar.pet');}catch(e){}location.reload();}
       else{this.resetArm=performance.now();b.textContent='Tap again to reset';setTimeout(()=>{b.textContent='Reset';},3000);}});
@@ -5963,7 +6115,7 @@ const ui={
     const tr=$('tray'),t=game.tool,isPlay=TOY_TOOLS.includes(t)||t==='play';
     this.syncDock();
     if(!(t==='feed'||isPlay)||!game.trayOpen){tr.hidden=true;SUP.unmount();return;}
-    if(t==='feed'&&save.set.iface==='fun'&&innerWidth>=300){tr.hidden=false;tr.classList.add('supply');SUP.mount(tr);return;}
+    if(t==='feed'&&FUN('food')&&innerWidth>=300){tr.hidden=false;tr.classList.add('supply');SUP.mount(tr);return;}
     tr.classList.remove('supply');SUP.unmount();tr.hidden=false;tr.innerHTML='';
     if(t==='feed'){const D=DIET[game.kind]||{},catOf=f=>FOOD_CATS.find(c=>c.foods.includes(f));
       if(!this.foodCat||!FOOD_CATS.some(c=>c.id===this.foodCat))this.foodCat=(catOf(game.food)||FOOD_CATS[0]).id;
@@ -6017,7 +6169,7 @@ const ui={
     if(this.open==='mGacha'){gStep(dt);gDraw();}
     if(this.open==='mPets')this.tickPreviews(dt);
     if(SUP.on)SUP.tick(dt);
-    if(save.set.iface==='fun'){PEG.tick(dt);GAUGES.tick(dt);}
+    if(FUN('tools'))PEG.tick(dt);if(FUN('needs')||FUN('coins'))GAUGES.tick(dt);if(ROOM.on||ROOM.p>0)ROOM.tick(dt);
     this.liveT=(this.liveT||0)-dt;if(this.liveT<=0){this.liveT=0.5;const c=$('psCud');if(c&&!$('petStats').hidden)c.innerHTML=this.cuddleHTML();if(this.open==='mGoals'){const r=$('gReset');if(r)r.textContent=dailyResetText();}}
   },
   renderStats(){const pet=game.world.pet;if(!pet)return;const M=pet.mind,B=MIND[game.kind]||MIND.default;
@@ -6171,8 +6323,8 @@ const ui={
 //  Input
 // =====================================================================
 function setTool(t){
-  if(game.held)dropHeld();game.placing=null;if(save.set.iface==='fun'&&PEG.fb)PEG.swap(game.tool,t);game.tool=t;game.hand=null;canvas.style.cursor=t||save.set.iface==='fun'?'none':'grab';
-  if(!t&&!game.panHinted&&save.set.iface!=='fun'){game.panHinted=true;ui.toast('No tool selected: drag to look around. Tap a tool to pick it up again.',true);}if(TOY_TOOLS.includes(t))game.toyTool=t;if(t==='remote'&&placedCount('rc')===0&&(save.inv.rc||0)>0){placeObject('rc',160,100);markDirty();}game.trayOpen=true;ui.renderTray();
+  if(game.held)dropHeld();game.placing=null;if(FUN('tools')&&PEG.fb)PEG.swap(game.tool,t);game.tool=t;game.hand=null;canvas.style.cursor=t||FUN('tools')?'none':'grab';
+  if(!t&&!game.panHinted&&!FUN('tools')){game.panHinted=true;ui.toast('No tool selected: drag to look around. Tap a tool to pick it up again.',true);}if(TOY_TOOLS.includes(t))game.toyTool=t;if(t==='remote'&&placedCount('rc')===0&&(save.inv.rc||0)>0){placeObject('rc',160,100);markDirty();}game.trayOpen=true;ui.renderTray();
 }
 function toggleLight(){const w=game.world;if(!w)return;w.dayTarget=w.dayTarget>0.5?0:1;SFX.play(w.dayTarget?'lightsOn':'lightsOff');
   flash(w.dayTarget?'Lights on. Good morning, jar.':'Lights off. The night shift wakes up.');ui.refreshLight();}
@@ -6192,7 +6344,9 @@ function stageXY(x,y){return[x,y];}
 function camCenterOn(x,y,k){const s=cam.cw/W;cam.tx=lerp(cam.tx,innerWidth/2-x*s*cam.z,k);cam.ty=lerp(cam.ty,(cam.mT+innerHeight-cam.mB)/2-y*s*cam.z,k);camApply();}
 function camFollow(dt){const pet=game.world&&game.world.pet;if(!cam.follow||!pet||game.mode!=='play')return;const hp=pet.headPos();camCenterOn(hp.x,hp.y-(pet.h||0)-2,Math.min(1,dt*3.5));}
 $('stage').addEventListener('wheel',e=>{if(game.mode!=='play'||ui.open)return;e.preventDefault();
-  const[px,py]=stageXY(e.clientX,e.clientY),dy=e.deltaMode===1?e.deltaY*16:e.deltaY;setZoom(cam.z*Math.exp(-clamp(dy,-120,120)*0.0018),px,py);},{passive:false});
+  const[px,py]=stageXY(e.clientX,e.clientY),dy=e.deltaMode===1?e.deltaY*16:e.deltaY;
+  if(ROOM.on){if(dy<-8)ROOM.exit();return;}
+  if(FUN('room')&&dy>0&&cam.z<=cam.zmin*1.03){ROOM.pull+=dy;if(ROOM.pull>220){ROOM.pull=0;ROOM.enter();}return;}ROOM.pull=0;setZoom(cam.z*Math.exp(-clamp(dy,-120,120)*0.0018),px,py);},{passive:false});
 const touches=new Map();let pinch=null,touchBlock=false;
 function pinchPts(){const[a,b]=[...touches.values()];return{d:Math.max(1,Math.hypot(a.x-b.x,a.y-b.y)),mx:(a.x+b.x)/2,my:(a.y+b.y)/2};}
 function startPinch(){
@@ -6200,6 +6354,7 @@ function startPinch(){
   const q=game.held;if(q&&q===game.heldNew&&performance.now()-game.heldT<400){refundFood(q);game.held=null;const L=game.world.prey,i=L.indexOf(q);if(i>=0)L.splice(i,1);}
   up();game.panning=null;const P=pinchPts(),[mx,my]=stageXY(P.mx,P.my);pinch={d0:P.d,z0:cam.z,mx,my,u:(mx-cam.tx)/cam.z,v:(my-cam.ty)/cam.z};}
 function movePinch(){const P=pinchPts(),nz=clamp(pinch.z0*P.d/pinch.d0,cam.zmin,4);
+  if(FUN('room')&&pinch.z0*P.d/pinch.d0<cam.zmin*0.72){pinch=null;touchBlock=true;ROOM.enter();return;}
   cam.tx=pinch.mx-pinch.u*nz;cam.ty=pinch.my-pinch.v*nz;cam.z=nz;camApply();
   if(Math.abs(nz-1)>0.05&&!cam.hinted){cam.hinted=true;ui.toast('Pinch to zoom. Put your tool down (tap it again) to drag around.',true);}}
 // dragging a food straight out of the tray: after a short drag you're holding one, drop it in the tank
@@ -6213,17 +6368,18 @@ window.addEventListener('pointerup',e=>{const D=ui.fdrag;ui.fdrag=null;if(!D||!D
   if(inside){dropHeld();SFX.play('tick');}else{trashFood(q);if(D.src)SUP.putBack(D.src);}});
 function toPix(e){const r=canvas.getBoundingClientRect();return[(e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H];}
 function objectAt(x,y){const w=game.world;let best=null,bd=1e9;for(const o of[...w.toys,...w.decor]){const d=Math.hypot(o.x-x,(o.y-(o.h||0)-3)-y);if(d<o.r+4&&d<bd){bd=d;best=o;}}return best;}
-canvas.addEventListener('contextmenu',e=>{e.preventDefault();if(game.placing){game.placing=null;ui.toast('Placement cancelled.',true);}else if(save.set.iface==='fun'&&game.tool)setTool(null);});
+canvas.addEventListener('contextmenu',e=>{e.preventDefault();if(game.placing){game.placing=null;ui.toast('Placement cancelled.',true);}else if(FUN('tools')&&game.tool)setTool(null);});
 canvas.addEventListener('pointerdown',e=>{
+  if(ROOM.on){e.preventDefault();ROOM.exit();return;}
   if(game.mode!=='play')return;canvas.setPointerCapture(e.pointerId);
   if(e.pointerType==='touch'){touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(touches.size>=2){if(!pinch)startPinch();return;}if(pinch||touchBlock)return;}
   if(e.pointerType==='mouse'&&e.button!==0){if(!game.placing&&(e.button===1||e.button===2)){e.preventDefault();game.panning={x:e.clientX,y:e.clientY};}return;}
   if(!game.tool&&!game.placing){// no tool: drag to pan; a still click still picks up coins or uses a toy
     const [px0,py0]=toPix(e),w0=game.world;
-    for(let i=0;i<w0.coins.length;i++){const c=w0.coins[i];if(Math.hypot(c.x-px0,c.y-c.h-2.5-py0)<6){w0.coins.splice(i,1);addCoins(c.v,c.x,c.y-c.h);spawn(w0,'star',c.x,c.y-c.h-2,{life:0.18});if(save.set.iface!=='fun'||!w0.pet||w0.pet.hitTest(px0,py0)<0)return;break;}}
-    if(save.set.iface==='fun'&&handDown(e))return;
-    game.panning={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,obj:objectAt(px0,py0),free:true};canvas.style.cursor=save.set.iface==='fun'?'none':'grabbing';return;}
+    for(let i=0;i<w0.coins.length;i++){const c=w0.coins[i];if(Math.hypot(c.x-px0,c.y-c.h-2.5-py0)<6){w0.coins.splice(i,1);addCoins(c.v,c.x,c.y-c.h);spawn(w0,'star',c.x,c.y-c.h-2,{life:0.18});if(!FUN('tools')||!w0.pet||w0.pet.hitTest(px0,py0)<0)return;break;}}
+    if(FUN('tools')&&handDown(e))return;
+    game.panning={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,obj:objectAt(px0,py0),free:true};canvas.style.cursor=FUN('tools')?'none':'grabbing';return;}
   const P=game.pointer,[x,y]=toPix(e);P.x=x;P.y=y;P.down=true;P.inside=true;P.touch=e.pointerType==='touch';P.sprayT=0;P.vx=P.vy=0;P.lt=performance.now();
   const w=game.world,pet=w.pet,B=w.bounds;
   if(game.placing){if(e.button!==0)return;const id=game.placing;game.placing=null;
@@ -6263,8 +6419,10 @@ const HAND={
  carry:[".............","..kkkkkkk....",".khkhkhkhk...",".kpkpkpkpk...",".kskskskskk..",".kpppppppkhk.",".khppppppkpk.",".kppppppppk..","..kpppppppk..","...kppppsk...","....kkkkk...."],
  knock:[".............",".............","...kkkkk.....","..khpspsk....",".khpspsppk...",".kpppppppkk..",".kppppppkhk..",".khpppppkpk..","..kpppppppk..","...kppppsk...","....kkkkk...."],
 };
+const FUN_PIECES=[{id:'food',name:'Food',fun:'Supply tanks you pluck food from'},{id:'tools',name:'Tools',fun:'Your hand + a pegboard of real tools'},{id:'needs',name:'Needs',fun:'Gauges on the glass; grime shows a dirty tank'},{id:'coins',name:'Coins',fun:'A coin jar that fills up'},{id:'room',name:'Room',fun:'Zoom out into the room around the tank'}];
+const FUN=k=>!!(save.set&&save.set.fun&&save.set.fun[k]);
 const HAND_PAL={k:hex('#1a0f0a'),p:hex('#f3c2a6'),s:hex('#cf8f78'),h:hex('#fff0e0')},HOLD_T=0.42;
-function funHand(){return save.set.iface==='fun'&&!game.tool&&!game.placing&&game.mode==='play';}
+function funHand(){return FUN('tools')&&!game.tool&&!game.placing&&game.mode==='play';}
 function onRim(x,y){const B=game.world.bounds;return x<B.x0-1||x>B.x1+1||y<B.y0-1||y>B.y1+1;}
 function rimPoint(x,y){const T=TANK,dl=x-T.x0,dr=T.x1-x,dt=y-T.y0,db=T.y1-y,m=Math.min(dl,dr,dt,db);
   return m===dl?[T.x0+2,clamp(y,T.y0,T.y1)]:m===dr?[T.x1-2,clamp(y,T.y0,T.y1)]:m===dt?[clamp(x,T.x0,T.x1),T.y0+2]:[clamp(x,T.x0,T.x1),T.y1-2];}
@@ -6322,7 +6480,7 @@ function up(){const P=game.pointer;P.down=false;SFX.mistOn(false);handUp();
     SFX.play('place');game.dragObj=null;markDirty();}}
 function pointerEnd(e){
   if(game.panning&&(e.pointerType==='mouse'||game.panning.free)){const pn=game.panning;game.panning=null;if(e.pointerType==='touch')touches.delete(e.pointerId);
-    if(pn.free){canvas.style.cursor=game.tool||save.set.iface==='fun'?'none':'grab';if(pn.obj&&pn.obj.onClick&&Math.hypot(e.clientX-pn.sx,e.clientY-pn.sy)<6)pn.obj.onClick(game.world);}return;}
+    if(pn.free){canvas.style.cursor=game.tool||FUN('tools')?'none':'grab';if(pn.obj&&pn.obj.onClick&&Math.hypot(e.clientX-pn.sx,e.clientY-pn.sy)<6)pn.obj.onClick(game.world);}return;}
   if(e.pointerType==='touch'){touches.delete(e.pointerId);
     if(pinch){if(touches.size<2){pinch=null;touchBlock=touches.size>0;}return;}
     if(touchBlock){if(touches.size===0)touchBlock=false;return;}}
@@ -6330,11 +6488,11 @@ function pointerEnd(e){
 canvas.addEventListener('pointerup',pointerEnd);canvas.addEventListener('pointercancel',pointerEnd);
 canvas.addEventListener('pointerleave',()=>{if(!game.pointer.down)game.pointer.inside=false;});
 window.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){if(game.placing){game.placing=null;ui.toast('Placement cancelled.',true);}else if(save.set.iface==='fun'&&game.tool&&!ui.open){setTool(null);}else if(ui.revealShown)ui.hideReveal();else if(ui.open&&!game.firstRun)ui.close();return;}
+  if(e.key==='Escape'){if(game.placing){game.placing=null;ui.toast('Placement cancelled.',true);}else if(ROOM.on&&!ui.open){ROOM.exit();}else if(FUN('tools')&&game.tool&&!ui.open){setTool(null);}else if(ui.revealShown)ui.hideReveal();else if(ui.open&&!game.firstRun)ui.close();return;}
   if(ui.open||game.mode!=='play'||e.target.tagName==='INPUT')return;
   if(e.key==='+'||e.key==='='){setZoom(cam.z*1.35);return;}if(e.key==='-'||e.key==='_'){setZoom(cam.z/1.35);return;}if(e.key==='0'){camReset();return;}
   const k=e.key.toLowerCase(),map={'1':'feed','2':'pet','3':'grab','4':'mist','5':'scoop','6':'tap','7':'play'};
-  if(save.set.iface==='fun'&&(k==='2'||k==='3'||k==='6')){if(game.tool)setTool(null);return;}
+  if(FUN('tools')&&(k==='2'||k==='3'||k==='6')){if(game.tool)setTool(null);return;}
   if(map[k])ui.toolClick(map[k]);else if(k==='l')toggleLight();
   else if(k==='m'){save.set.sfx=!save.set.sfx;SFX.setMuted(!save.set.sfx);$('setSfx').classList.toggle('on',save.set.sfx);markDirty();ui.toast(save.set.sfx?'Sound effects on':'Sound effects off',true);}
   else if(k==='o')ui.openModal('mGoals');else if(k==='b')ui.openModal('mBag');else if(k==='g')ui.openModal('mGacha');else if(k==='p')ui.openModal('mPets');
