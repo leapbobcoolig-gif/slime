@@ -140,6 +140,15 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .sheet-h p{margin:0;color:var(--mute);font-size:19px}
 .sheet-h .x{margin-left:auto}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.gsub{color:var(--mute);font-size:15px;margin:0 0 10px}.gcat{font-size:13px;color:var(--amber);text-transform:uppercase;margin:14px 0 6px;letter-spacing:1px}
+.gcard{display:flex;align-items:center;gap:10px;background:var(--panel-2);border:3px solid #060a07;border-radius:8px;padding:8px 10px;margin-bottom:6px;box-shadow:inset 0 0 0 2px var(--line)}
+.gcard.done{box-shadow:inset 0 0 0 2px #6a8a3a;background:#223018}.gcard.locked{opacity:.85}.gcard.locked .gico{filter:grayscale(1);opacity:.6}.gcard.bonus{border-style:dashed}
+.gtxt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.gtxt b{font-size:16px}.gtxt small{font-size:13px;color:var(--mute)}
+.gico{font-size:20px;width:26px;text-align:center}.grw{font-size:16px;color:#ffe9a8;display:flex;align-items:center;gap:3px;white-space:nowrap}.grw img{width:14px;height:14px}.gcard.done .grw{color:#9cf07a}
+.gbar{display:block;height:6px;background:#10140e;border-radius:3px;overflow:hidden}.gbar em{display:block;height:100%;background:linear-gradient(90deg,#8fcf5a,#f2c14e)}
+.gtoast{position:fixed;left:50%;top:26%;transform:translateX(-50%);background:#2a2410;border:3px solid #060a07;box-shadow:inset 0 0 0 2px #c89a30,0 4px 0 #040604;border-radius:10px;padding:8px 16px;display:flex;flex-direction:column;align-items:center;gap:2px;z-index:60;animation:gtin .45s cubic-bezier(.2,1.4,.4,1);pointer-events:none;transition:opacity .6s,transform .6s}
+.gtoast b{color:#ffe07a;font-size:18px}.gtoast span{color:#f0e6c8;font-size:14px}.gtoast.out{opacity:0;transform:translateX(-50%) translateY(-10px)}
+@keyframes gtin{from{transform:translateX(-50%) scale(.6);opacity:0}}
 .tab{font-size:12px;padding:8px 12px 7px;background:var(--panel-2);border:3px solid #060a07;border-radius:8px;box-shadow:inset 0 0 0 2px var(--line)}
 .tab.on{background:#2c4a24;box-shadow:inset 0 0 0 2px var(--moss)}
 .tab .n{color:var(--mute);margin-left:4px}
@@ -292,6 +301,10 @@ input[type=range]{accent-color:var(--moss);width:180px}
   <div class="dgroup" id="menus"></div>
 </div>
 
+<div class="modal" id="mGoals" hidden><div class="sheet chunk" style="width:min(620px,100%)">
+  <div class="sheet-h"><h2>Goals</h2><p>Daily tasks and achievements. Everything pays coins!</p><button class="ibtn x" data-close aria-label="Close"><img class="px icX" alt=""></button></div>
+  <div class="tabs" id="goalTabs"></div><div id="goalBody"></div>
+</div></div>
 <div class="modal" id="mBag" hidden><div class="sheet chunk">
   <div class="sheet-h"><h2>Bag</h2><p id="bagSub"></p><button class="ibtn x" data-close aria-label="Close"><img class="px icX" alt=""></button></div>
   <div class="tabs" id="bagTabs"></div><div id="bagBody"></div>
@@ -471,6 +484,10 @@ const SFX=(()=>{
     juicy:()=>{noise(0.12,{filter:'lowpass',freq:1400,to:400,gain:0.2});tone(700,0.07,{to:1200,gain:0.08});tone(300,0.1,{delay:0.05,to:160,gain:0.1});},
     tink2:()=>{tone(2600,0.1,{type:'triangle',gain:0.05});tone(3400,0.12,{delay:0.06,type:'triangle',gain:0.04});},
     scoop:()=>{noise(0.1,{freq:2200,to:900,q:1.2,gain:0.09});tone(1500,0.08,{delay:0.06,type:'triangle',to:2300,gain:0.06});tone(2400,0.1,{delay:0.12,type:'triangle',gain:0.04});},
+    plop:()=>{tone(420,0.07,{type:'triangle',to:150,gain:0.14});noise(0.05,{filter:'lowpass',freq:700,gain:0.1});tone(240,0.05,{delay:0.09,type:'triangle',to:190,gain:0.06});},
+    ask:()=>{tone(880,0.07,{type:'triangle',to:1180,gain:0.06});tone(1180,0.09,{delay:0.08,type:'triangle',to:1500,gain:0.05});},
+    yay:()=>{arp([784,988,1175,1568],0.07,{type:'triangle',gain:0.07,dur:0.16});},
+    achieve:()=>{arp([659,784,988,1319],0.09,{type:'square',gain:0.035,dur:0.2});tone(1976,0.4,{delay:0.36,type:'triangle',gain:0.05});},
     burble:()=>{for(let k=0;k<4;k++)tone(rand(500,900),0.05,{delay:k*rand(0.05,0.11),to:rand(1100,1600),gain:0.018});},
     clatter:()=>{for(let i=0;i<4;i++)noise(0.04,{delay:i*0.07+Math.random()*0.03,freq:2600-i*300,q:3,gain:0.08-i*0.015});},
     grumble:()=>tone(180,0.3,{type:'sawtooth',to:110,gain:0.04}),
@@ -3774,6 +3791,7 @@ function updateParts(w,dt){
     switch(p.type){
       case 'heart':p.y+=p.vy*dt;p.x+=Math.sin(p.life*6+p.ph)*0.25;break;
       case 'zzz':p.x+=4*dt;p.y-=6*dt;break;
+      case 'stink':p.y+=p.vy*dt;p.x+=Math.sin(p.life*5)*0.15;break;
       case 'spore':p.ph+=dt*3;p.x+=(p.vx+Math.sin(p.ph)*3)*dt;p.y+=p.vy*dt;p.vx*=1-dt*0.8;p.vy*=1-dt*0.4;break;
       case 'think':p.y-=(p.life>0.9?12:1.5)*dt;if(p.owner&&p.owner.world&&p.owner.headPos){const h=p.owner.headPos();p.x+=(h.x-p.x)*Math.min(1,dt*8);}break;
       case 'crumb':p.vh-=200*dt;p.h+=p.vh*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.h<0){p.h=0;p.vh=0;p.vx*=.3;p.vy*=.3;}break;
@@ -4623,9 +4641,9 @@ function createWorld(){
     feather:{kind:'feather',label:'the feather',play:true,on:false,x:160,y:90,h:5,vx:0,vy:0,dead:true,caught:false,cool:0,
       onCatch(){this.cool=0.9;this.vy-=90;this.vx+=rand(-60,60);this.h=12;SFX.play('flutter');}},
     onEvent:msg=>flash(`${game.name} ${msg}`)};
-  w.onEat=(pet,p)=>{if(pet.preview)return;if(!NO_POOP.includes(pet.kind)&&Math.random()<0.6&&!(game.poopT>0))game.poopT=rand(30,90);const m=pet.mouthScreen(),lv=(DIET[pet.kind]||{})[p.type]||0;addCoins(lv>=8?3:lv>=5?2:1,m.x,m.y);addXP(4);
+  w.onEat=(pet,p)=>{if(pet.preview)return;track('meals');if(((DIET[pet.kind]||{})[p.type]||0)>=8)track('favmeals');reqEvent('food',p.type);if(!NO_POOP.includes(pet.kind)&&Math.random()<0.6&&!(game.poopT>0))game.poopT=rand(30,90);const m=pet.mouthScreen(),lv=(DIET[pet.kind]||{})[p.type]||0;addCoins(lv>=8?3:lv>=5?2:1,m.x,m.y);addXP(4);
     if(p.type==='grape'){SFX.play('juicy');for(let i=0;i<9;i++){const a=rand(TAU);spawn(w,'crumb',m.x,m.y+(pet.h||0),{h:(pet.h||0)+2,vh:rand(20,45),vx:Math.cos(a)*rand(8,20),vy:Math.sin(a)*rand(5,14),life:1.2,c:hex(pick(['#b862e0','#f2c8ff','#7a2aa0']))});}}};
-  w.onPlay=(pet,t)=>{if(pet.preview)return;const S=w.stats,k=t.kind;if(t instanceof Toy)t.bore=Math.min(1,(t.bore||0)+0.22);S.happy=Math.min(100,S.happy+(k==='bubble'?1.5:3));addXP(k==='bubble'?1:2);
+  w.onPlay=(pet,t)=>{if(pet.preview)return;const S=w.stats,k=t.kind;track('toyplays');if(k==='laser')track('laser');if(k==='bubble')track('bubbles');reqEvent('play',t instanceof Toy?t.id:k==='bubble'?'bubbles':k);if(t instanceof Toy)t.bore=Math.min(1,(t.bore||0)+0.22);S.happy=Math.min(100,S.happy+(k==='bubble'?1.5:3));addXP(k==='bubble'?1:2);
     if(k==='laser'){SFX.play('zap');spawn(w,'star',t.x,t.y,{life:0.18});}
     if(Math.random()<(k==='laser'||k==='feather'?0.2:k==='bubble'?0.06:0.3))addCoins(k==='laser'||k==='bubble'||k==='feather'?1:2,t.x,t.y-t.h);
     if(Math.random()<0.4){const hd=pet.headPos();spawn(w,'heart',hd.x,hd.y-6-pet.h,{vy:-rand(10,16),life:1.2,ph:rand(TAU)});}};
@@ -4779,7 +4797,7 @@ function flash(msg){game.flashMsg=msg;game.flashT=2.8;ui.toast(msg,true);}
 function startGame(kind,restoring){
   const w=game.world;
   if(w.pet&&game.kind){stashLayout(game.kind);if(kind!==game.kind)petSave(game.kind).toys=[];writeSave();}
-  const same=kind===game.kind;
+  const same=kind===game.kind;if(game.kind&&!same&&!restoring)setTimeout(()=>track('visits'),0);game.req=null;game.reqT=rand(60,120);
   setTank(habitatOf(kind));
   if(!same||restoring||!w.pet)loadLayout(kind,restoring||same);
   game.kind=kind;if(!((DIET[kind]||{})[game.food]>=5))game.food=Object.entries(DIET[kind]).sort((a,b)=>b[1]-a[1])[0][0];if(typeof ui!=='undefined')ui.foodCat=null;const ps=petSave(kind);game.name=ps.name;
@@ -4788,7 +4806,7 @@ function startGame(kind,restoring){
   const st=ps.stats||{fed:72,water:68,happy:70};w.stats.fed=st.fed;w.stats.water=st.water;w.stats.happy=st.happy;
   game.mode='play';save.cur=kind;writeSave();
   ui.refreshPet();ui.renderTray();
-  flash(ps.visited?`${game.name} is happy to see you!`:`${game.name} moved in. Say hi!`);ps.visited=true;
+  flash(ps.visited?`${game.name} is happy to see you!`:`${game.name} moved in. Say hi!`);ps.visited=true;setTimeout(checkAch,400);
 }
 function toCanvasScreen(x,y){const r=canvas.getBoundingClientRect();return[r.left+x/W*r.width,r.top+y/H*r.height];}
 // ---- cuddle bursts: every few hearts fills the love meter; a full meter pops out a little shower of coins ----
@@ -4802,12 +4820,12 @@ function cuddleHeart(pet){const ps=petSave(),c=cuddleState(ps),w=game.world;
   if(c.n<=0){c.love=1;if(!game.cudNote||performance.now()-game.cudNote>15000){game.cudNote=performance.now();flash(`${game.name} is all cuddled out for now. More cuddle coins in ${mmss(cuddleNext(ps))}.`);}return;}
   c.love=Math.min(1,c.love+1/6+1e-6);markDirty();
   if(c.love>=0.999){c.love=0;if(c.n>=CUD_MAX)c.t=Date.now();c.n--;const S=w.stats,thr=w.mood==='thriving',n=4+Math.floor(rand(0,3))+Math.floor((ps.lvl-1)/3)+(thr?1:0),hd=pet.headPos();
-    SFX.play('coinburst');for(let i=0;i<n;i++){const a=i/n*TAU+rand(-0.3,0.3),v=rand(14,26);spawnCoin(w,hd.x,hd.y,1,{vx:Math.cos(a)*v,vy:Math.sin(a)*v*0.7,vh:rand(40,60),auto:rand(1.1,1.6)});}
+    SFX.play('coinburst');track('bursts');for(let i=0;i<n;i++){const a=i/n*TAU+rand(-0.3,0.3),v=rand(14,26);spawnCoin(w,hd.x,hd.y,1,{vx:Math.cos(a)*v,vy:Math.sin(a)*v*0.7,vh:rand(40,60),auto:rand(1.1,1.6)});}
     for(let i=0;i<6;i++)spawn(w,'star',hd.x+rand(-5,5),hd.y-4+rand(-4,4),{life:rand(0.15,0.3)});}
-  if(ui.open==='petStats'||$('petStats').offsetParent)ui.renderStats();}
+  const pc=$('psCud');if(pc&&!$('petStats').hidden)pc.innerHTML=ui.cuddleHTML();}
 // ---- Mess: droppings a while after meals, and food left lying about going stale. Scoop them up for a coin each ----
 const NO_POOP=['slime','mush','bee'],LIVE_FOOD=['cricket','roach','fly','minnow','snail','worm','waxworm'];
-function addMess(w,x,y,k){if(!w.mess)w.mess=[];if(w.mess.length>=12)return;const B=w.bounds;w.mess.push({x:clamp(x,B.x0+2,B.x1-2),y:clamp(y,B.y0+2,B.y1-2),k:k||'drop',t:0,s:rand(0.85,1.2),a:rand(TAU)});}
+function addMess(w,x,y,k){if(!w.mess)w.mess=[];if(w.mess.length>=12)return null;const B=w.bounds,m={x:clamp(x,B.x0+2,B.x1-2),y:clamp(y,B.y0+2,B.y1-2),k:k||'drop',t:0,s:rand(0.85,1.2),a:rand(TAU),born:1};w.mess.push(m);return m;}
 function messCount(w){let n=w.mess?w.mess.length:0;for(const q of w.prey)if(q.stale&&!q.dead)n++;return n;}
 function messAt(w,x,y){let best=null,bd=8;for(const m of w.mess||[]){const d=Math.hypot(m.x-x,m.y-y);if(d<bd){bd=d;best=m;}}
   for(const q of w.prey)if(q.stale&&!q.dead&&!q.caught){const d=Math.hypot(q.x-x,q.y-(q.h||0)-y);if(d<bd){bd=d;best=q;}}return best;}
@@ -4818,7 +4836,8 @@ function scoopAt(x,y,click){const w=game.world,m=messAt(w,x,y);if(!m){if(click)S
   addCoins(1,m.x,m.y-(m.h||0));if(typeof track==='function')track('cleans',1);if(messCount(w)===0)flash(`Spotless! ${game.name}'s tank is sparkling clean.`);return true;}
 const POOP=['...k...','..kmk..','.kmmhk.','.kdmmk.','kmmmmhk','kddmmmk','.kkkkk.'];
 function drawMess(fb,w){if(!w.mess||!w.mess.length)return;const OUT=hex('#140c06'),C=[hex('#3e2814'),hex('#5e3e1e'),hex('#8a6440')],G=[hex('#3a3a38'),hex('#6e6c68'),hex('#b0aca2')];
-  for(const m of w.mess){const wet=w.tank==='aqua'&&waterAt(w,m.x,m.y)>0.05,P=m.k==='pebble'?G:C,x=Math.round(m.x),y=Math.round(m.y),tint=c=>wet?mixc(c,SEATINT,0.35):c;
+  for(const m of w.mess){if(m.born<1)m.born=Math.min(1,m.born+1/60/0.35);const bk=m.born,hop=bk<1?Math.abs(Math.sin(bk*Math.PI*1.5))*(1-bk)*5:0;
+    const wet=w.tank==='aqua'&&waterAt(w,m.x,m.y)>0.05,P=m.k==='pebble'?G:C,x=Math.round(m.x),y=Math.round(m.y-hop),tint=c=>wet?mixc(c,SEATINT,0.35):c;
     if(m.k==='pebble'){const pts=[[-1,0],[2,1]];// the golem sheds little pebbles
       if(!wet)for(const[dx,dy]of pts){pdark(fb,x+dx+1,y+dy+2,0.5);pdark(fb,x+dx+2,y+dy+2,0.5);}
       for(const[dx,dy]of pts){for(const[ox,oy]of[[-1,0],[2,0],[0,-1],[1,-1],[0,2],[1,2],[-1,1],[2,1]])pset(fb,x+dx+ox,y+dy+oy,tint(OUT));}
@@ -4836,6 +4855,116 @@ function drawStale(fb,w){for(const q of w.prey){if(!q.stale||q.dead||q.caught||q
   for(let k=0;k<9;k++){const dx=Math.round(Math.sin(k*2.3+q.x)*2.4),dy=Math.round(Math.cos(k*1.7+q.y)*1.8);pmix(fb,x+dx,y+dy,k%3?hex('#aebe8a'):hex('#e0e8c8'),wet?0.35:0.75);}
   if(!wet){const ph=(w.t*0.8+q.x*0.1)%1;for(let j=0;j<4;j++){const yy=y-5-ph*8-j;pmix(fb,x+Math.round(Math.sin((yy+w.t*3)*0.8)),yy,hex('#cfe08a'),0.65*(1-ph));}messFly(fb,x,y-7,w.t+q.x);}}}
 const MURK=hex('#4a6a2a');
+// =====================================================================
+//  Goals: what you've done (tracking), achievements, daily tasks and critter requests
+// =====================================================================
+const ACH=[
+  {id:'firstbite',cat:'Care',t:'First Bite',d:'Feed a critter its first meal',k:'meals',n:1,rw:10},
+  {id:'hand10',cat:'Care',t:'Hand-feeder',d:'Feed from the tweezers 10 times',k:'handfeeds',n:10,rw:20},
+  {id:'hand50',cat:'Care',t:'Tweezer Master',d:'Feed from the tweezers 50 times',k:'handfeeds',n:50,rw:50},
+  {id:'clean10',cat:'Care',t:'Tidy Keeper',d:'Scoop up 10 messes',k:'cleans',n:10,rw:15},
+  {id:'clean50',cat:'Care',t:'Spotless Legend',d:'Scoop up 50 messes',k:'cleans',n:50,rw:40},
+  {id:'treats10',cat:'Care',t:'Spoilt Rotten',d:'Buy 10 fancy treats (5+ coins)',k:'treats',n:10,rw:25},
+  {id:'thrive10',cat:'Care',t:'Living Well',d:'Keep a critter thriving for 10 minutes in a row',k:'thriveBest',n:600,rw:40,sec:true},
+  {id:'lvl3',cat:'Bond',t:'Friends',d:'Reach bond level 3 with a critter',k:'@lvl',n:3,rw:20},
+  {id:'lvl5',cat:'Bond',t:'Best Friends',d:'Reach bond level 5',k:'@lvl',n:5,rw:40},
+  {id:'lvl10',cat:'Bond',t:'Soulmates',d:'Reach bond level 10',k:'@lvl',n:10,rw:100},
+  {id:'bursts25',cat:'Bond',t:'Cuddle Monster',d:'Get 25 cuddle coin bursts',k:'bursts',n:25,rw:30},
+  {id:'own3',cat:'Collection',t:'Growing Family',d:'Care for 3 different critters',k:'@pets',n:3,rw:20},
+  {id:'own6',cat:'Collection',t:'Menagerie',d:'Care for 6 different critters',k:'@pets',n:6,rw:40},
+  {id:'own10',cat:'Collection',t:'Critter Keeper',d:'Care for 10 different critters',k:'@pets',n:10,rw:80},
+  {id:'tanks',cat:'Collection',t:'Three Worlds',d:'Have a critter in the terrarium, paludarium and aquarium',k:'@tanks',n:3,rw:50},
+  {id:'hats5',cat:'Collection',t:'Hat Rack',d:'Collect 5 different hats',k:'@hats',n:5,rw:20},
+  {id:'hats10',cat:'Collection',t:'Fashionista',d:'Collect 10 different hats',k:'@hats',n:10,rw:50},
+  {id:'decor10',cat:'Collection',t:'Interior Designer',d:'Collect 10 different decor pieces',k:'@decor',n:10,rw:40},
+  {id:'caps10',cat:'Collection',t:'Capsule Fan',d:'Open 10 gacha capsules',k:'capsules',n:10,rw:30},
+  {id:'dance',cat:'Play',t:'Dance Party',d:'See a critter dance',k:'dances',n:1,rw:15},
+  {id:'bub50',cat:'Play',t:'Bubble Popper',d:'Have your critters pop 50 bubbles',k:'bubbles',n:50,rw:25},
+  {id:'laser10',cat:'Play',t:'Red Dot Hunter',d:'Let a critter catch the laser dot 10 times',k:'laser',n:10,rw:20},
+  {id:'toys50',cat:'Play',t:'Playtime',d:'50 toy and tool plays',k:'toyplays',n:50,rw:30},
+  {id:'puff',cat:'Discovery',t:'Pufferball',d:'See a pufferfish puff up',k:'seen_puff',n:1,rw:15},
+  {id:'ink',cat:'Discovery',t:'Ink Cloud',d:'See a squirt of ink',k:'seen_ink',n:1,rw:15},
+  {id:'shrooms',cat:'Discovery',t:'Fairy Ring',d:'See baby mushrooms sprout',k:'seen_shrooms',n:1,rw:15},
+  {id:'land',cat:'Discovery',t:'Land Ho!',d:'See a kraken crawl about on land',k:'seen_krakenLand',n:1,rw:15},
+  {id:'night',cat:'Discovery',t:'Night Owl',d:'Spend 2 minutes with the lights off',k:'nightT',n:120,rw:15,sec:true},
+  {id:'req10',cat:'Discovery',t:'Good Listener',d:'Grant 10 critter requests',k:'requests',n:10,rw:30},
+  {id:'daily',cat:'Discovery',t:'Daily Hero',d:'Finish all three daily tasks in one day',k:'dailyAll',n:1,rw:30}];
+function achVal(a){const T=save.track||{};switch(a.k){
+  case '@lvl':return Math.max(0,...Object.values(save.pets).map(p=>p.lvl||1));case '@pets':return Object.keys(save.pets).length;
+  case '@tanks':return new Set(Object.keys(save.pets).map(habitatOf)).size;case '@hats':return Object.keys(ITEMS).filter(i=>ITEMS[i].cat==='hat'&&save.inv[i]>0).length;
+  case '@decor':return Object.keys(ITEMS).filter(i=>ITEMS[i].cat==='decor'&&save.inv[i]>0).length;default:return T[a.k]||0;}}
+function checkAch(){if(!save.ach)save.ach={};for(const a of ACH){if(save.ach[a.id]||achVal(a)<a.n)continue;save.ach[a.id]=Date.now();save.achNew=(save.achNew||0)+1;
+  addCoins(a.rw);SFX.play('achieve');ui.goalToast(`🏆 ${a.t}`,`${a.d} · +${a.rw} coins`);ui.syncDock();markDirty();}}
+function track(k,n=1){const T=save.track||(save.track={});T[k]=(T[k]||0)+n;dailyProgress(k,n);checkAch();markDirty();}
+function seen(k){const T=save.track||(save.track={});if(T['seen_'+k])return;T['seen_'+k]=1;checkAch();markDirty();}
+// ---- daily tasks: three small jobs a day, always ones you can actually do ----
+const hasPlay=()=>TOY_TOOLS.some(toolOwned)||Object.keys(ITEMS).some(i=>ITEMS[i].cat==='toy'&&save.inv[i]>0);
+const DAILY_POOL=[
+  {id:'hand',t:'Hand-feed {name} 3 times',k:'handfeeds',n:3,d:1},{id:'meals',t:'Feed {name} 5 meals',k:'meals',n:5,d:1},
+  {id:'hearts',t:'Give {name} 30 hearts',k:'hearts',n:30,d:1},{id:'mist',t:'Mist the tank for 10 seconds',k:'mistS',n:10,d:1},
+  {id:'clean',t:'Scoop up 3 messes',k:'cleans',n:3,d:1,ok:()=>!NO_POOP.includes(game.kind)},{id:'visit',t:'Visit another critter',k:'visits',n:1,d:1,ok:()=>Object.keys(save.pets).length>=2},
+  {id:'fav',t:"Feed {name} its favourite food twice",k:'favmeals',n:2,d:2},{id:'bursts',t:'Get 2 cuddle coin bursts',k:'bursts',n:2,d:2},
+  {id:'req',t:"Grant one of {name}'s requests",k:'requests',n:1,d:2},{id:'treat',t:'Buy a fancy treat (5+ coins)',k:'treats',n:1,d:2},
+  {id:'toys',t:'Play with toys or tools 3 times',k:'toyplays',n:3,d:2,ok:hasPlay},{id:'thrive',t:'Keep {name} thriving for 5 minutes',k:'thriveS',n:300,d:3,sec:true},
+  {id:'req2',t:"Grant 2 of {name}'s requests",k:'requests',n:2,d:3},{id:'hand8',t:'Hand-feed {name} 8 times',k:'handfeeds',n:8,d:3}];
+const todayKey=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
+function dailyResetText(){const d=new Date(),m=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1)-d,s=Math.floor(m/1000);return `New tasks in ${Math.floor(s/3600)}:${String(Math.floor(s/60)%60).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;}
+function rollDaily(force){const key=todayKey();if(!force&&save.daily&&save.daily.date===key)return;const ok=t=>!t.ok||t.ok(),pk=d=>{const L=DAILY_POOL.filter(t=>t.d===d&&ok(t)&&!out.some(o=>o.id===t.id||o.k===t.k));return L.length?pick(L):null;},out=[];
+  for(const[d,rw]of[[1,15],[2,25],[3,40]]){const t=pk(d)||pk(2)||pk(1);if(t)out.push({id:t.id,t:t.t,k:t.k,n:t.n,sec:!!t.sec,prog:0,rw,done:false});}
+  save.daily={date:key,tasks:out,bonus:false};markDirty();}
+function dailyProgress(k,n){const D=save.daily;if(!D||D.date!==todayKey())return;for(const t of D.tasks){if(t.done||t.k!==k)continue;t.prog=Math.min(t.n,t.prog+n);
+  if(t.prog>=t.n){t.done=true;addCoins(t.rw);SFX.play('achieve');ui.goalToast('✔ Daily task done!',`${t.t.replace('{name}',game.name)} · +${t.rw} coins`);}}
+  if(!D.bonus&&D.tasks.length&&D.tasks.every(t=>t.done)){D.bonus=true;addCoins(20);track('dailyAll');ui.goalToast('★ All daily tasks done!','Bonus +20 coins. See you tomorrow!');}
+  if(ui.open==='mGoals')ui.renderGoals();}
+// ---- critter requests: now and then your critter asks for something; do it for a little reward ----
+const MIST_LOVERS=['frog','salamander','axolotl','mush','gsnail','chameleon'];
+function wpick(L){let s=0;for(const o of L)s+=o.w;let r=Math.random()*s;for(const o of L){r-=o.w;if(r<=0)return o;}return L[L.length-1];}
+function newRequest(){const w=game.world,pet=w.pet,M=pet.mind,S=w.stats,D=DIET[game.kind]||{},L=[];
+  if(w.mood==='grumpy'){// only the most urgent need
+    if(S.fed<25)L.push({w:1,type:'food',arg:null});else if(S.clean<30)L.push({w:1,type:'clean'});else if(S.water<25)L.push({w:1,type:'mist'});else L.push({w:1,type:'pets'});}
+  else{const liked=Object.keys(D).filter(f=>D[f]>=6&&FOOD_PRICE[f]!==undefined);if(liked.length&&S.fed<85)L.push({w:1.2,type:'food',arg:pick(liked)});
+    if(S.fed<90)L.push({w:0.5+M.bold*0.8,type:'hand'});L.push({w:0.4+M.patience*0.8+(1-M.energy)*0.4,type:'pets'});
+    if(MIST_LOVERS.includes(game.kind))L.push({w:1.1,type:'mist'});
+    const tools=TOY_TOOLS.filter(t=>t!=='remote'&&toolOwned(t)),toys=w.toys.filter(t=>t.playable).map(t=>t.id);
+    if(tools.length||toys.length){const opt=[...tools,...toys];L.push({w:0.4+M.energy+M.cur*0.5,type:'play',arg:pick(opt)});}
+    if(messCount(w)>=2)L.push({w:1.5,type:'clean'});}
+  const r=wpick(L);game.req={type:r.type,arg:r.arg,t:120,T:120,prog:0,need:r.type==='pets'?12:r.type==='mist'?4:1};
+  think(pet,'!');SFX.play('ask');if(!save.set.reqTip){save.set.reqTip=true;flash(`${game.name} wants something! Look at the bubble above its head.`);}}
+function reqDone(){const w=game.world,pet=w.pet,hd=pet.headPos();game.req=null;game.reqT=rand(180,360);
+  const n=Math.floor(rand(8,13));for(let i=0;i<n;i++){const a=i/n*TAU+rand(-0.3,0.3),v=rand(12,22);spawnCoin(w,hd.x,hd.y,1,{vx:Math.cos(a)*v,vy:Math.sin(a)*v*0.7,vh:rand(38,56),auto:rand(1,1.5)});}
+  for(let i=0;i<4;i++)spawn(w,'heart',hd.x+rand(-4,4),hd.y-6-(pet.h||0),{vy:-rand(12,18),life:1.3,ph:rand(TAU)});
+  addXP(5);SFX.play('yay');flash(`${game.name} is delighted!`);track('requests');}
+function reqEvent(type,arg,n=1){const R=game.req;if(!R||R.type!==type)return;if(type==='food'&&R.arg&&R.arg!==arg)return;if(type==='play'&&R.arg!==arg)return;
+  R.prog+=n;if(R.prog>=R.need)reqDone();}
+function updateGoals(w,dt){const pet=w.pet,T=save.track||(save.track={});
+  rollDaily();
+  // seconds-based counters, ticked once a second
+  game.secT=(game.secT||0)+dt;if(game.secT>=1){game.secT-=1;
+    if(w.mood==='thriving'){T.thriveRun=(T.thriveRun||0)+1;if(T.thriveRun>(T.thriveBest||0))T.thriveBest=T.thriveRun;track('thriveS');}else T.thriveRun=0;
+    if(w.dayTarget<0.5)track('nightT');}
+  if(game.mistAcc>=1){track('mistS',Math.floor(game.mistAcc));game.mistAcc-=Math.floor(game.mistAcc);}
+  // things worth discovering
+  if(pet.state==='dance'&&game.lastSt!=='dance')track('dances');game.lastSt=pet.state;
+  if(pet.kind==='puffer'&&pet.state==='puffed')seen('puff');if(w.parts.some(p=>p.type==='ink'))seen('ink');if(w.shrooms&&w.shrooms.length)seen('shrooms');
+  if(pet.kind==='kraken'&&pet.onLand&&pet.onLand()&&pet.speed>2)seen('krakenLand');
+  // requests
+  const R=game.req;if(R){R.t-=dt;if(R.type==='clean'&&messCount(w)===0)reqDone();else if(R.t<=0){game.req=null;game.reqT=rand(120,240);think(pet,'...');}}
+  else if(!ui.modalOpen()){game.reqT=(game.reqT??rand(60,120))-dt;if(w.mood==='grumpy')game.reqT=Math.min(game.reqT,20);if(game.reqT<=0)newRequest();}}
+// the request bubble, drawn above the critter's head
+const BUBBLE=['.kkkkkkkkkkkkk.','kwwwwwwwwwwwwwk','kwwwwwwwwwwwwwk','kwwwwwwwwwwwwwk','kwwwwwwwwwwwwwk','kwwwwwwwwwwwwwk','kwwwwwwwwwwwwwk','kwwwwwwwwwwwwwk','kwwwwwwwwwwwwwk','.kkkkkwwkkkkkk.','......kwk......','.......k.......'];
+const DROPLET=['..k..','.kbk.','kbbwk','kbbbk','.kkk.'];
+function drawRequest(fb,w){const R=game.req,pet=w.pet;if(!R||!pet)return;const a=pet.hatAnchor(),bx=Math.round(a.x-7),by=Math.round(a.y-17+Math.sin(w.t*3)*1),fade=Math.min(1,R.t/8);
+  if(fade<1&&Math.floor(w.t*8)%2&&R.t<4)return;// blinks as it runs out
+  sprite(fb,BUBBLE,bx,by,{k:hex('#10140e'),w:hex('#f6f3e6')});const cx=bx+7,cy=by+5;
+  if(R.type==='food')drawFoodAt(fb,R.arg||'cricket',cx,cy,w.t);
+  else if(R.type==='hand'){drawFoodAt(fb,Object.entries(DIET[game.kind]).sort((x,y)=>y[1]-x[1])[0][0],cx+2,cy+2,w.t);const S1=hex('#9aa2ac'),S2=hex('#5a626c');for(let i=0;i<5;i++){pset(fb,cx-5+i,cy-4+i,S1);pset(fb,cx-4+i,cy-5+i,S2);}}// mini tweezers holding its favourite
+  else if(R.type==='pets')sprite(fb,HEART,cx-2,cy-2,{r:hex('#ff6a8a')});
+  else if(R.type==='mist')sprite(fb,DROPLET,cx-2,cy-2,{k:hex('#10140e'),b:hex('#5bb8e8'),w:hex('#ffffff')});
+  else if(R.type==='clean')sprite(fb,CUR.scoop,cx-4,cy-4,CUR_PAL);
+  else if(R.type==='play'){if(TOY_TOOLS.includes(R.arg))drawToolIcon(fb,R.arg,cx,cy);else{const t=w.toys.find(o=>o.id===R.arg);if(t){const ox=t.x,oy=t.y,oh=t.h;t.x=cx;t.y=cy+2;t.h=0;fb.clearLayer();drawToy(fb,t);composite(fb,OBJ_PAINTER);t.x=ox;t.y=oy;t.h=oh;}}}
+  // time left: a thin bar under the bubble
+  const L=Math.round(13*R.t/R.T);for(let i=0;i<13;i++)pset(fb,bx+1+i,by+12,i<L?hex('#9cf07a'):hex('#2a3424'));
+  if(R.need>1){const L2=Math.round(13*R.prog/R.need);for(let i=0;i<L2;i++)pset(fb,bx+1+i,by+13,hex('#ff8fb1'));}}
 function addCoins(n,cx,cy){
   save.coins+=n;markDirty();if(typeof ui!=='undefined'&&ui.trayAfford)ui.trayAfford();
   if(cx!==undefined){const[sx,sy]=toCanvasScreen(cx,cy);ui.coinFly(n,sx,sy);}else ui.bumpCoins();
@@ -4843,7 +4972,7 @@ function addCoins(n,cx,cy){
 function addXP(n){
   const ps=petSave();if(n>=3&&game.world&&game.world.mood==='thriving')n+=1;ps.xp+=n;markDirty();
   while(ps.xp>=xpNeed(ps.lvl)){ps.xp-=xpNeed(ps.lvl);ps.lvl++;
-    SFX.play('levelup');ui.levelUp(ps.lvl);addCoins(25);flash(`${game.name} reached bond level ${ps.lvl}! +25 coins`);}
+    SFX.play('levelup');ui.levelUp(ps.lvl);addCoins(25);setTimeout(checkAch,50);flash(`${game.name} reached bond level ${ps.lvl}! +25 coins`);}
   ui.refreshLevel();
 }
 function placeObject(id,x,y){
@@ -4862,7 +4991,8 @@ function updatePlay(dt){
   w.dayness+=(w.dayTarget-w.dayness)*Math.min(1,dt*0.9);
   S.fed=Math.max(0,S.fed-0.24*dt);S.water=Math.max(0,S.water-0.18*dt);
   if(!w.mess)w.mess=[];for(const m of w.mess)m.t+=dt;
-  if(game.poopT>0){game.poopT-=dt;if(game.poopT<=0&&pet&&!pet.preview){const c=Math.cos(pet.ang||0),sn=Math.sin(pet.ang||0),bx=(pet.x??pet.headPos().x)-c*6,by=(pet.y??pet.headPos().y)-sn*6;addMess(w,bx,by,pet.kind==='golem'?'pebble':'drop');}}
+  if(game.poopT>0){game.poopT-=dt;if(game.poopT<=0&&pet&&!pet.preview){const c=Math.cos(pet.ang||0),sn=Math.sin(pet.ang||0),bx=(pet.x??pet.headPos().x)-c*6,by=(pet.y??pet.headPos().y)-sn*6;const m=addMess(w,bx,by,pet.kind==='golem'?'pebble':'drop');if(m){m.born=0;pet.plop=0.45;SFX.play('plop');dust(w,m.x,m.y,5);spawn(w,'stink',m.x,m.y-3,{vy:-6,life:1.6,max:1.6});
+      save.set.poopN=(save.set.poopN||0)+1;if(save.set.poopN<=3)flash(`${game.name} left a little present. Grab the Scoop!`);}}}
   S.clean=clamp(100-messCount(w)*14,0,100);
   // mood: thriving when every need is met and the tank is clean; grumpy when something is badly wrong
   w.mood=(S.fed<25||S.water<25||S.happy<25||S.clean<30)?'grumpy':(S.fed>=70&&S.water>=70&&S.happy>=70&&S.clean>=70)?'thriving':'content';
@@ -4877,13 +5007,13 @@ function updatePlay(dt){
         spawn(w,'drop',P.x+Math.cos(a)*r*0.4,P.y+22+Math.sin(a)*r*0.4,{h:22,vh:-rand(0,20),vx:Math.cos(a)*r*1.6,vy:Math.sin(a)*r*1.2,life:3});
         if(Math.random()<0.5)spawn(w,'mist',P.x+rand(-3,3),P.y+rand(-3,3),{vx:rand(-20,20),vy:rand(-16,16),life:rand(.4,.8)});}
       if(Math.random()<dt*14)w.glassDrops.push({x:P.x+rand(-26,26),y:P.y+rand(-18,18),life:rand(7,14),r:Math.random()<0.25?2:1});
-      S.water=Math.min(100,S.water+3.5*dt);
+      S.water=Math.min(100,S.water+3.5*dt);game.mistAcc=(game.mistAcc||0)+dt;{const hd0=pet.headPos();if(Math.hypot(hd0.x-P.x,hd0.y-P.y)<34)reqEvent('mist',null,dt);}
       const hd=pet.headPos();if(Math.hypot(hd.x-P.x,hd.y-P.y)<26)S.happy=Math.min(100,S.happy+({lizard:0.6,snake:0.6,chameleon:1,tarantula:0.3,scorpion:0.4,kraken:2,cuttle:1.5,golem:2.5,turtle:1.5,bee:0.2,mush:4}[pet.kind]??3)*dt);
       for(const pl of w.plants)if(Math.hypot(pl.x-P.x,pl.y-P.y)<pl.reach+10)pl.dist=Math.max(pl.dist,0.8);
     }else if(tool==='pet'){
       if(pet.hitTest(P.x,P.y)>=0&&P.moved>0.5&&pet.petMe()){P.rub=(P.rub||0)+P.moved;
         if(P.rub>7){P.rub=0;spawn(w,'heart',P.x+rand(-2,2),P.y-3,{vy:-rand(12,18),life:1.2,ph:rand(TAU)});SFX.play('heart');
-          game.hearts++;if(game.hearts%3===0)addXP(1);cuddleHeart(pet);}}
+          game.hearts++;if(game.hearts%3===0)addXP(1);track('hearts');reqEvent('pets');cuddleHeart(pet);}}
     }else if(tool==='scoop'){scoopAt(P.x,P.y,false);
     }else if(tool==='bubbles'){
       game.bubbleT-=dt;if(game.bubbleT<=0&&w.bubbles.length<14){game.bubbleT=0.16;SFX.play('blow');
@@ -4908,9 +5038,9 @@ function updatePlay(dt){
   P.stillT=(P.stillT||0)+dt;
   const hq=game.held;
   if(hq){hq.sx=P.x;hq.sy=P.y;hq.x=P.x;hq.y=P.y+8;hq.h=8;}
-  pet.update(w.mood==='grumpy'?dt*0.8:dt);
+  pet.update(w.mood==='grumpy'?dt*0.8:dt);if(pet.plop>0)pet.plop-=dt;
   if(hq&&(hq.caught||hq.dead)){game.held=null;hq.inHand=false;
-    if(hq.caught){S.happy=Math.min(100,S.happy+6);SFX.play('sparkle');addCoins(3,P.x,P.y);addXP(6);
+    if(hq.caught){S.happy=Math.min(100,S.happy+6);SFX.play('sparkle');addCoins(3,P.x,P.y);addXP(6);track('handfeeds');reqEvent('hand');
       for(let i=0;i<8;i++){const a=rand(TAU),v=rand(14,30);spawn(w,'spark2',P.x,P.y,{vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.35,.6)});}
       flash(`${game.name} took ${PREY_NAME[hq.type]} right from the tweezers!`);}}
   for(const p of w.prey){p.update(dt,w);floatPrey(p,w,dt);if(!p.caught&&!p.inHand&&!p.stale&&!LIVE_FOOD.includes(p.type)&&p.h<=0.5){p.age=(p.age||0)+dt;if(p.age>180)p.stale=true;}}
@@ -4968,6 +5098,7 @@ function updatePlay(dt){
   for(let i=w.glassDrops.length-1;i>=0;i--){const g=w.glassDrops[i];g.life-=dt;if(g.life<=0)w.glassDrops.splice(i,1);}
   if(w.glassDrops.length>160)w.glassDrops.splice(0,w.glassDrops.length-160);
   for(const pl of w.plants){if(mv>0.3&&Math.hypot(hd.x-pl.x,hd.y-pl.y)<pl.reach)pl.dist=Math.max(pl.dist,0.5);pl.dist*=Math.pow(0.25,dt);}
+  if(pet&&!pet.preview)updateGoals(w,dt);
   const wet=w.wet,f=Math.pow(0.95,dt);for(let i=0;i<N;i++){const v=wet[i];if(v>0.004)wet[i]=v*f;else if(v)wet[i]=0;}
   const night=1-w.dayness;
   if(night>0.5&&w.fireflies.length<(w.sea?16:7)&&Math.random()<dt*2)w.fireflies.push({x:rand(30,290),y:rand(30,150),a:rand(TAU),ph:rand(TAU),s:rand(100),life:rand(10,20)});
@@ -5085,7 +5216,7 @@ function drawFoodAt(tfb,type,x,y,t){
   if(q.type==='roach'){q.legPh=t*6;q.drawShadow(tfb);}
   if(q.layered){tfb.clearLayer();q.drawL(tfb);composite(tfb,FOOD_PAINTER);}else q.draw(tfb,t);
 }
-function drawCursor(w){
+function drawCursor(w){drawRequest(fb,w);
   const P=game.pointer;if(!P.inside||P.touch)return;const x=Math.round(P.x),y=Math.round(P.y),t=game.tool;
   if(game.placing)return;
   if(t==='feed'){drawTweezers(x,y,!!game.held||P.down);if(!game.held)drawFoodAt(fb,game.food,x+7,y+7,w.t);}
@@ -5098,7 +5229,7 @@ function drawCursor(w){
   else if(t==='remote'){const c=CUR_PAL.w;for(const[dx,dy]of[[-3,0],[-2,0],[2,0],[3,0],[0,-3],[0,-2],[0,2],[0,3]])pset(fb,x+dx,y+dy,c);pset(fb,x,y,hex('#ff3030'));}
   if((t==='pet'||t==='tap')&&!(t==='pet'&&w.pet.hitTest(P.x,P.y)>=0)){const o=objectAt(P.x,P.y);if(o&&o.onClick){const a=w.t*4;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,x+Math.cos(aa)*6,y+Math.sin(aa)*6,hex('#ffe066'));}}}
 }
-const SEATINT=hex('#144a66'),GRUMPBUF=new Uint32Array(N);let grumpRect=null;
+const SEATINT=hex('#144a66'),GRUMPBUF=new Uint32Array(N),PLOPBUF=new Uint32Array(N);let grumpRect=null,plopRect=null;
 function renderObjects(list){
   if(!list.length)return;const w=game.world;
   if(w.sea){const dec=list.filter(o=>o instanceof Decor),toys=list.filter(o=>!(o instanceof Decor));
@@ -5118,6 +5249,7 @@ function renderPlay(){
   const drop=hex('#bfe4f2'),mistc=hex('#e8f4f6');
   for(const p of w.parts){
     if(p.type==='crumb')pset(fb,p.x,p.y-p.h,p.c||hex('#7a5a30'));
+    else if(p.type==='stink'){const f=clamp(p.life/p.max,0,1),r=1.5+(1-f)*2.5;for(let yy=-3;yy<=3;yy++)for(let xx=-4;xx<=4;xx++){const d=Math.hypot(xx,yy*1.2)/r;if(d<1)pmix(fb,p.x+xx,p.y+yy,hex('#a8c070'),0.45*f*(1-d));}}
     else if(p.type==='dust')pmix(fb,p.x,p.y,hex('#8a7058'),clamp(p.life/.4,0,1)*0.8);
     else if(p.type==='splash'){pmix(fb,p.x-1,p.y,drop,.6);pmix(fb,p.x+1,p.y,drop,.6);pmix(fb,p.x,p.y-1,drop,.6);}
     else if(p.type==='drop')pdark(fb,p.x+1,p.y+1,.8);
@@ -5137,7 +5269,9 @@ function renderPlay(){
   renderObjects(back);
   const hover=(game.tool==='pet'||game.tool==='grab')&&P.inside&&pet.hitTest(P.x,P.y)>=0;
   const hat=petSave().hat;
-  const drawPet=()=>{subBegin(w,pet);grumpRect=null;if(w.mood==='grumpy'){const h=pet.headPos(),cx=pet.x??h.x,cy=pet.y??h.y,x0=Math.max(0,Math.floor(cx-32)),x1=Math.min(W-1,Math.ceil(cx+32)),y0=Math.max(0,Math.floor(cy-40-(pet.h||0))),y1=Math.min(H-1,Math.ceil(cy+26));
+  const drawPet=()=>{subBegin(w,pet);grumpRect=null;plopRect=null;if(pet.plop>0){const h=pet.headPos(),cx=pet.x??h.x,cy=pet.y??h.y,x0=Math.max(1,Math.floor(cx-32)),x1=Math.min(W-2,Math.ceil(cx+32)),y0=Math.max(0,Math.floor(cy-40-(pet.h||0))),y1=Math.min(H-1,Math.ceil(cy+26));
+      for(let y=y0;y<=y1;y++){const o=y*W;PLOPBUF.set(px.subarray(o+x0,o+x1+1),o+x0);}plopRect=[x0,y0,x1,y1];}
+    if(w.mood==='grumpy'){const h=pet.headPos(),cx=pet.x??h.x,cy=pet.y??h.y,x0=Math.max(0,Math.floor(cx-32)),x1=Math.min(W-1,Math.ceil(cx+32)),y0=Math.max(0,Math.floor(cy-40-(pet.h||0))),y1=Math.min(H-1,Math.ceil(cy+26));
       for(let y=y0;y<=y1;y++){const o=y*W;GRUMPBUF.set(px.subarray(o+x0,o+x1+1),o+x0);}grumpRect=[x0,y0,x1,y1];}
     fb.clearLayer();pet.draw(fb);
     // swimming at the surface throws a shadow down onto the pool floor, further away the deeper the water
@@ -5150,6 +5284,8 @@ function renderPlay(){
     fb.clearLayer();for(const q of w.prey)if(q.caught&&q.layered)q.drawL(fb);composite(fb,FOOD_PAINTER);
     subEnd(w,pet);
     if(pet.dive>0.5&&w.pads.length)drawPads(fb,w);
+    if(plopRect){const[x0,y0,x1,y1]=plopRect,dx=Math.round(Math.sin(pet.plop*60))*(pet.plop>0.1?1:0),sq=pet.plop>0.2?1:0;for(let y=y0;y<=y1;y++){const o=y*W;SUBTMP.set(px.subarray(o+x0,o+x1+1),o+x0);}
+      for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x,sx=x-dx,sy=Math.min(y1,y-sq+((y-y0)&1?sq:0)),j=sy*W+sx;const moved=SUBTMP[j]!==PLOPBUF[j];px[i]=moved?SUBTMP[j]:(SUBTMP[i]!==PLOPBUF[i]?PLOPBUF[i]:px[i]);}}
     if(grumpRect){const[x0,y0,x1,y1]=grumpRect;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x,c=px[i];if(c===GRUMPBUF[i])continue;const r=c&255,g=c>>8&255,b=c>>>16&255,l=(r*0.3+g*0.5+b*0.2)*0.86,bl=l*1.04;
       px[i]=(255<<24)|(Math.round(lerp(b,bl,0.6))<<16)|(Math.round(lerp(g,l,0.6))<<8)|Math.round(lerp(r,l*0.95,0.6));}}};
   if(pet.h<=3)drawPet();
@@ -5333,6 +5469,7 @@ function gDraw(){
 const IP={k:'#141a14',w:'#f4f1e2',W:'#c8c4b4',g:'#8fcf5a',G:'#4a7a2a',y:'#f2c14e',Y:'#b8862a',r:'#e5484d',R:'#9a2a30',b:'#5bb8e8',B:'#2a6a9a',
   p:'#ff8fb1',P:'#c0507a',s:'#c8ced6',S:'#6a727c',n:'#9a6034',N:'#5a3a1e',m:'#e8d9a8'};
 const SPR={
+  goals:['..kkkkkkkk..','kkkyyyyyykkk','kyk.yyyyk.ky','kyk.yYyyk.ky','.kykyyyYkyk.','..kyyyyyyk..','...kyyyyk...','....kyyk....','.....kk.....','....kYYk....','...kyyyyk...','...kkkkkk...'],
   scoop:['.......kk...','......kSSk..','.....kSSk...','....kSSk....','...kSSk.....','..kkkk......','.kwbwbk.....','kwbwbwbk....','kbwbwbwk....','kwbwbwbk....','.kbwbwk.....','..kkkk......'],
   clean:['.......k....','......kwk...','.kkk...k....','kbbwk.......','kbwbk..kkk..','kbbbk.kbbwk.','.kkk.kbbbwk.','.....kbbbbk.','..kk..kbbk..','.kbwk..kk...','.kbbk.......','..kk........'],
   feed:['.........kk.','........kssk','.......ksSk.','......ksSk..','.....ksSk...','....ksSk....','...ksSk.....','.kkkSk......','kggGkk......','kgGgk.......','kGggk.......','.kkk........'],
@@ -5418,7 +5555,7 @@ function iconURL(name){
   return ICON_URL[name]=c.toDataURL();
 }
 const TOOLS=[{id:'feed',label:'Feed',key:'1'},{id:'pet',label:'Pet',key:'2'},{id:'grab',label:'Grab',key:'3'},{id:'mist',label:'Mist',key:'4'},{id:'scoop',label:'Scoop',key:'5'},{id:'tap',label:'Tap',key:'6'},{id:'play',label:'Play',key:'7'}];
-const MENUS=[{id:'bag',label:'Bag',key:'B'},{id:'gacha',label:'Gacha',key:'G'},{id:'pets',label:'Pets',key:'P'}];
+const MENUS=[{id:'goals',label:'Goals',key:'O'},{id:'bag',label:'Bag',key:'B'},{id:'gacha',label:'Gacha',key:'G'},{id:'pets',label:'Pets',key:'P'}];
 const ui={
   open:null,bagTab:'hat',revealShown:false,coinShown:0,evT:0,previews:[],resetArm:0,
   modalOpen(){return!!this.open;},
@@ -5482,6 +5619,7 @@ const ui={
   },
   syncDock(){const t=game.tool,key=(TOY_TOOLS.includes(t)||t==='play')?'play':t;
     for(const d of TOOLS)$('d-'+d.id).classList.toggle('on',d.id===key);
+    const gl=$('d-goals');if(gl){let d2=gl.querySelector('.dot');const on=(save.achNew||0)>0||(save.daily&&save.daily.tasks.some(t=>t.done)&&!save.daily.seen);if(on&&!d2){d2=document.createElement('i');d2.className='dot';gl.appendChild(d2);}else if(!on&&d2)d2.remove();}
     const g=$('d-gacha');let dot=g.querySelector('.dot');const can=save.coins>=50;if(can&&!dot){dot=document.createElement('i');dot.className='dot';g.appendChild(dot);}else if(!can&&dot)dot.remove();},
   renderTray(){
     const tr=$('tray'),t=game.tool,isPlay=TOY_TOOLS.includes(t)||t==='play';
@@ -5539,13 +5677,15 @@ const ui={
       if(Math.sign(save.coins-this.coinShown)!==Math.sign(d))this.coinShown=save.coins;$('coinNum').textContent=this.coinShown;}
     if(this.open==='mGacha'){gStep(dt);gDraw();}
     if(this.open==='mPets')this.tickPreviews(dt);
+    this.liveT=(this.liveT||0)-dt;if(this.liveT<=0){this.liveT=0.5;const c=$('psCud');if(c&&!$('petStats').hidden)c.innerHTML=this.cuddleHTML();if(this.open==='mGoals'){const r=$('gReset');if(r)r.textContent=dailyResetText();}}
   },
   renderStats(){const pet=game.world.pet;if(!pet)return;const M=pet.mind,B=MIND[game.kind]||MIND.default;
     const HINT={cur:['Curiosity','notices and explores new things'],bold:['Boldness','stays calm around taps and your hand'],smart:['Smarts','remembers where food turned up'],focus:['Focus','sticks with what it started'],energy:['Energy','plays and moves around a lot'],patience:['Patience','waits for the perfect moment to pounce']};
     const think=M.think<0.55?'Quick':M.think<1.1?'Steady':'Slow',sn=[];if(M.sight[0]>=110)sn.push('sharp eyes');else if(M.sight[0]>0&&M.sight[0]<45)sn.push('poor eyesight');if(M.motionOnly)sn.push('only sees movement');if(M.smell>=35)sn.push('keen nose');if(M.vib>=50)sn.push('feels vibrations');if(!M.sight[0])sn.push('no eyes to speak of');
-    const cs=cuddleState(petSave()),hearts='&#9829;'.repeat(cs.n)+'<span style="opacity:.3">'+'&#9829;'.repeat(CUD_MAX-cs.n)+'</span>',nx=cuddleNext(petSave());
-    $('petStats').innerHTML=`<div class="ps-t"><b>${M.temper}</b> ${SPECIES[game.kind].label.toLowerCase()}</div><div class="ps-c" title="Petting fills the love meter; when it's full a little shower of coins pops out. One cuddle refills every 3 minutes.">Cuddle coins <b style="color:#ff7a9a">${hearts}</b>${nx?` · next in ${mmss(nx)}`:''}<i><em style="width:${Math.round(cs.love*100)}%"></em></i></div>`+TRAITS.map(t=>`<div class="ps-r" title="${HINT[t][1]}"><span>${HINT[t][0]}</span><i><em style="width:${Math.round(M[t]*100)}%"></em><u style="left:${Math.round(B[t]*100)}%"></u></i></div>`).join('')+
+    $('petStats').innerHTML=`<div class="ps-t"><b>${M.temper}</b> ${SPECIES[game.kind].label.toLowerCase()}</div><div class="ps-c" id="psCud" title="Petting fills the love meter; when it's full a little shower of coins pops out. One cuddle refills every 3 minutes.">${this.cuddleHTML()}</div>`+TRAITS.map(t=>`<div class="ps-r" title="${HINT[t][1]}"><span>${HINT[t][0]}</span><i><em style="width:${Math.round(M[t]*100)}%"></em><u style="left:${Math.round(B[t]*100)}%"></u></i></div>`).join('')+
       `<div class="ps-m">Thinks: <b>${think}</b>${sn.length?' · '+sn.join(', '):''}</div><div class="ps-n">Personality comes from the name. Same name, same personality! The little line marks a typical ${SPECIES[game.kind].label.toLowerCase()}.</div>`;},
+  cuddleHTML(){const ps=petSave(),cs=cuddleState(ps),nx=cuddleNext(ps),grumpy=game.world&&game.world.mood==='grumpy';
+    return `Cuddle coins <b style="color:#ff7a9a">${'&#9829;'.repeat(cs.n)}<span style="opacity:.3">${'&#9829;'.repeat(CUD_MAX-cs.n)}</span></b>${nx?` · next in ${mmss(nx)}`:''}${grumpy?' · <span style="color:#9ab4d0">too grumpy</span>':''}<i><em style="width:${Math.round(cs.love*100)}%"></em></i>`;},
   refreshPet(){if(!game.kind)return;$('petName').textContent=game.name+' ▾';$('petKind').textContent=SPECIES[game.kind].label+(game.world&&game.world.pet&&game.world.pet.mind?' · '+game.world.pet.mind.temper:'');this.refreshLevel();},
   refreshLevel(){if(!game.kind)return;const ps=petSave();$('lvlNum').textContent=ps.lvl;$('lvl').style.setProperty('--p',(ps.xp/xpNeed(ps.lvl)).toFixed(3));},
   refreshLight(){const d=game.world?game.world.dayTarget>0.5:true;$('btnLight').querySelector('img').src=iconURL(d?'sun':'moon');},
@@ -5564,13 +5704,23 @@ const ui={
     if(this.open===id)return;if(this.open)this.close(true);
     const m=$(id);if(!m)return;m.hidden=false;this.open=id;SFX.play('whoosh');
     if(game.held)dropHeld();
-    if(id==='mBag')this.renderBag();else if(id==='mGacha')this.renderGacha();else if(id==='mPets')this.renderPets();
+    if(id==='mGoals'){this.renderGoals();save.achNew=0;this.syncDock();}else if(id==='mBag')this.renderBag();else if(id==='mGacha')this.renderGacha();else if(id==='mPets')this.renderPets();
   },
   close(silent){
     if(!this.open)return;if(this.open==='mGacha'&&this.revealShown)this.hideReveal();
     $(this.open).hidden=true;this.open=null;this.previews=[];if(!silent)SFX.play('close');
   },
   // ---------- bag ----------
+  goalTab:'today',
+  goalToast(title,sub){const box=$('fx'),d=document.createElement('div');d.className='gtoast chunk';d.innerHTML=`<b>${title}</b><span>${sub}</span>`;box.appendChild(d);setTimeout(()=>d.classList.add('out'),3200);setTimeout(()=>d.remove(),3900);},
+  renderGoals(){rollDaily();const tabs=$('goalTabs'),body=$('goalBody'),got=Object.keys(save.ach||{}).length;
+    tabs.innerHTML='';for(const[k,l]of[['today','Today'],['ach',`Achievements <span class="n">${got}/${ACH.length}</span>`]]){const b=document.createElement('button');b.className='tab'+(this.goalTab===k?' on':'');b.innerHTML=l;b.addEventListener('click',()=>{this.goalTab=k;SFX.play('tick');this.renderGoals();});tabs.appendChild(b);}
+    const bar=(v,n)=>`<i class="gbar"><em style="width:${Math.round(Math.min(1,v/n)*100)}%"></em></i>`,fmt=(v,t)=>t.sec?`${Math.floor(Math.min(v,t.n)/60)}:${String(Math.floor(Math.min(v,t.n))%60).padStart(2,'0')} / ${Math.floor(t.n/60)}:${String(t.n%60).padStart(2,'0')}`:`${Math.min(v,t.n)} / ${t.n}`;
+    if(this.goalTab==='today'){const D=save.daily;D.seen=true;this.syncDock();
+      body.innerHTML=`<p class="gsub" id="gReset">${dailyResetText()}</p>`+D.tasks.map(t=>`<div class="gcard${t.done?' done':''}"><div class="gtxt"><b>${t.t.replace('{name}',game.name||'your critter')}</b>${bar(t.prog,t.n)}<small>${t.done?'Done!':fmt(t.prog,t)}</small></div><div class="grw">${t.done?'✔':`<img class="px" src="${iconURL('coin')}">${t.rw}`}</div></div>`).join('')+
+        `<div class="gcard bonus${D.bonus?' done':''}"><div class="gtxt"><b>Finish all three</b><small>${D.bonus?'Bonus collected. See you tomorrow!':'A bonus for a full day of care'}</small></div><div class="grw">${D.bonus?'✔':`<img class="px" src="${iconURL('coin')}">20`}</div></div>`;}
+    else{const cats=[...new Set(ACH.map(a=>a.cat))];body.innerHTML=cats.map(c=>`<h3 class="gcat">${c}</h3>`+ACH.filter(a=>a.cat===c).map(a=>{const v=achVal(a),ok=!!(save.ach||{})[a.id];
+      return `<div class="gcard${ok?' done':' locked'}"><div class="gico">${ok?'🏆':'🔒'}</div><div class="gtxt"><b>${a.t}</b><small>${a.d}</small>${ok?'':bar(v,a.n)}</div><div class="grw">${ok?'✔':`<img class="px" src="${iconURL('coin')}">${a.rw}`}</div></div>`;}).join('')).join('');}},
   renderBag(){
     const tabs=$('bagTabs'),body=$('bagBody'),inv=save.inv;
     const cats={hat:['hat'],decor:['decor'],toy:['toy','tool']},lbl={hat:'Hats',decor:'Decor',toy:'Toys'};
@@ -5614,7 +5764,7 @@ const ui={
     if(G.state!=='idle')return;const M2=MACHINES[G.m];
     if(save.coins<M2.price){SFX.play('nope');const c=$('coins');c.classList.remove('poor');void c.offsetWidth;c.classList.add('poor');
       this.toast(`You need ${M2.price-save.coins} more coins. Care for your pet to earn them!`,true);return;}
-    save.coins-=M2.price;markDirty();SFX.play('insert');G.result=rollItem(G.m);G.state='crank';G.t=0;G.rt=0;$('gPull').disabled=true;
+    save.coins-=M2.price;markDirty();SFX.play('insert');track('capsules');G.result=rollItem(G.m);G.state='crank';G.t=0;G.rt=0;$('gPull').disabled=true;
   },
   showReveal(r){
     this.revealShown=true;const it=ITEMS[r.id],rc=RAR[it.r].c,box=$('gReveal'),card=$('gCard');box.style.setProperty('--rc',rc);card.style.setProperty('--rc',rc);
@@ -5770,7 +5920,7 @@ canvas.addEventListener('pointermove',e=>{
   P.vx=lerp(P.vx,(x-P.x)/dt,0.5);P.vy=lerp(P.vy,(y-P.y)/dt,0.5);P.lt=now;const mv=Math.hypot(x-P.x,y-P.y);P.moved+=mv;if(mv>0.6)P.stillT=0;P.x=x;P.y=y;P.inside=true;P.touch=e.pointerType==='touch';});
 // buying food: returns false (with a friendly note) if you can't afford it
 function buyFood(f){const c=FOOD_PRICE[f]||0;if(save.coins<c){flash(`${FOODS[f].name[0].toUpperCase()+FOODS[f].name.slice(1)} costs ${c} coins. Pet ${game.name} or finish goals to earn more!`);SFX.play('tick');return false;}
-  if(c){save.coins-=c;markDirty();ui.bumpCoins();ui.trayAfford();}return true;}
+  if(c){save.coins-=c;markDirty();ui.bumpCoins();ui.trayAfford();if(c>=5)track('treats');}return true;}
 function refundFood(q){if(q&&q.paid){save.coins+=q.paid;q.paid=0;markDirty();ui.bumpCoins();ui.trayAfford();}}
 function trashFood(q){const w=game.world,i=w.prey.indexOf(q);if(i<0)return;if(q.inHand)refundFood(q);w.prey.splice(i,1);q.dead=true;if(game.held===q)game.held=null;
   dust(w,q.x,q.y-(q.h||0),7);}
@@ -5804,7 +5954,7 @@ window.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase(),map={'1':'feed','2':'pet','3':'grab','4':'mist','5':'scoop','6':'tap','7':'play'};
   if(map[k])ui.toolClick(map[k]);else if(k==='l')toggleLight();
   else if(k==='m'){save.set.sfx=!save.set.sfx;SFX.setMuted(!save.set.sfx);$('setSfx').classList.toggle('on',save.set.sfx);markDirty();ui.toast(save.set.sfx?'Sound effects on':'Sound effects off',true);}
-  else if(k==='b')ui.openModal('mBag');else if(k==='g')ui.openModal('mGacha');else if(k==='p')ui.openModal('mPets');
+  else if(k==='o')ui.openModal('mGoals');else if(k==='b')ui.openModal('mBag');else if(k==='g')ui.openModal('mGacha');else if(k==='p')ui.openModal('mPets');
   else if(k==='f'){const fs=FOOD_ORDER;game.food=fs[(fs.indexOf(game.food)+1)%fs.length];ui.foodCat=null;if(game.tool!=='feed')setTool('feed');else ui.renderTray();}
 });
 // CSS zoom (UI scale) also scales these fixed offsets, so positions are divided by it
