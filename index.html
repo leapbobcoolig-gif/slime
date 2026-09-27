@@ -121,6 +121,10 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .ti.meh{opacity:.45}
 .ti.filler{visibility:hidden;pointer-events:none}
 .ti{touch-action:none}
+.ps-c{font-size:15px;margin:2px 0 6px;color:var(--mute)}.ps-c i{display:block;height:5px;background:#10140e;border-radius:3px;margin-top:3px;overflow:hidden}.ps-c em{display:block;height:100%;background:#ff7a9a}
+.ti .tpr{position:absolute;top:1px;left:3px;font-style:normal;font-size:9px;color:#ffe9a8;text-shadow:0 1px 0 #000;display:flex;align-items:center;gap:1px;line-height:1}
+.ti .tpr img{width:9px;height:9px}
+.ti.poor canvas{filter:grayscale(.8) brightness(.6)}.ti.poor .tpr{color:#ff8a7a}
 .ti .tfav{position:absolute;top:1px;right:3px;font-style:normal;font-size:11px;color:#ff7a9a;text-shadow:0 1px 0 #000}
 .ti .tl{position:absolute;bottom:-2px;left:0;right:0;font-size:8px;text-transform:uppercase;color:var(--mute);text-align:center}
 .tray-note{font-size:19px;color:var(--mute);padding:6px 10px;white-space:nowrap;display:flex;align-items:center;gap:10px}
@@ -457,6 +461,9 @@ const SFX=(()=>{
     pat:()=>{tone(rand(520,640),0.04,{type:'triangle',to:380,gain:0.05});noise(0.03,{filter:'lowpass',freq:700,gain:0.05});},
     spore:()=>{noise(0.35,{freq:1400,to:3600,q:0.8,gain:0.05,attack:0.04});tone(2600,0.12,{delay:0.08,type:'triangle',gain:0.025});tone(3300,0.14,{delay:0.16,type:'triangle',gain:0.02});},
     pomf:()=>{tone(420,0.12,{type:'triangle',to:190,gain:0.14});noise(0.1,{filter:'lowpass',freq:600,gain:0.12});},
+    coinburst:()=>{tone(880,0.1,{type:'triangle',to:1320,gain:0.08});for(let k=0;k<5;k++)tone(rand(1500,2400),0.06,{delay:0.05+k*0.05,type:'triangle',gain:0.05});},
+    juicy:()=>{noise(0.12,{filter:'lowpass',freq:1400,to:400,gain:0.2});tone(700,0.07,{to:1200,gain:0.08});tone(300,0.1,{delay:0.05,to:160,gain:0.1});},
+    tink2:()=>{tone(2600,0.1,{type:'triangle',gain:0.05});tone(3400,0.12,{delay:0.06,type:'triangle',gain:0.04});},
     burble:()=>{for(let k=0;k<4;k++)tone(rand(500,900),0.05,{delay:k*rand(0.05,0.11),to:rand(1100,1600),gain:0.018});},
     clatter:()=>{for(let i=0;i<4;i++)noise(0.04,{delay:i*0.07+Math.random()*0.03,freq:2600-i*300,q:3,gain:0.08-i*0.015});},
     grumble:()=>tone(180,0.3,{type:'sawtooth',to:110,gain:0.04}),
@@ -638,7 +645,7 @@ function ik2(ax,ay,fx,fy,l1,l2,bend){
 // =====================================================================
 //  Palettes & materials
 // =====================================================================
-const M={BODY:1,LIMB:2,EYE:3,PUPIL:4,TONGUE:5,TOE:6,LID:7,CLAW:8,CLAW2:9,F_MEAL:20,F_WAX:21,F_HEAD:22,F_SNAIL:23,F_BERRY:24,F_LEAF:25,F_EGG:26,F_GREEN:27,F_ROACH:28,SHELLA:30,SHELLB:31,LEAF1:10,LEAF2:11,LEAF3:12,STEM:13,ROCK:14,SLATE:15,LOG:16,LITTER:17,RIM:18,CATTAIL:32,F_FISH:33,F_BLOOD:34,F_SHRIMP:35,F_MOON:36,F_GEM:37,F_PETAL:38,F_POLLEN:39,CORAL:40,CORAL2:41,CORAL3:42,STAR:43};
+const M={BODY:1,LIMB:2,EYE:3,PUPIL:4,TONGUE:5,TOE:6,LID:7,CLAW:8,CLAW2:9,F_MEAL:20,F_WAX:21,F_HEAD:22,F_SNAIL:23,F_BERRY:24,F_LEAF:25,F_EGG:26,F_GREEN:27,F_ROACH:28,SHELLA:30,SHELLB:31,LEAF1:10,LEAF2:11,LEAF3:12,STEM:13,ROCK:14,SLATE:15,LOG:16,LITTER:17,RIM:18,CATTAIL:32,F_FISH:33,F_BLOOD:34,F_SHRIMP:35,F_MOON:36,F_GEM:37,F_PETAL:38,F_POLLEN:39,CORAL:40,CORAL2:41,CORAL3:42,STAR:43,F_GRAPE:44,F_STARC:45};
 const INK=hex('#07080a');
 const PAL={
   tongue:ramp('#5a1224','#a3243c','#d8505e','#f7939a'),
@@ -691,7 +698,7 @@ const PAL={
         dark:ramp('#140e08','#2a1c10','#443018','#645028'),pale:ramp('#3a4a3a','#6a806a','#a0b8a0','#d4e8d4'),
         stripe:ramp('#6a6a3a','#a8a860','#dcdc98','#fafad0'),outline:'#08140a'},
   food2:{fish:ramp('#3a4a5a','#6a8298','#a8c0d0','#eef6fa'),fishB:ramp('#2a3a48','#4a6078','#6a84a0','#9ab0c8'),blood:ramp('#4a0808','#8a1414','#c42a22','#ec5a44'),
-    shrimp:ramp('#6a3a36','#b0645a','#e89a86','#ffd2c0'),moon:ramp('#14265a','#2a4ca8','#4a8ae8','#b8e8ff'),petal:ramp('#8a8478','#cac4b6','#eeeae0','#ffffff'),pollen:ramp('#7a4a08','#c08010','#f0b828','#ffe070'),gem:ramp('#3a1460','#6a2aa8','#a45ae0','#e8c8ff')},
+    shrimp:ramp('#6a3a36','#b0645a','#e89a86','#ffd2c0'),moon:ramp('#14265a','#2a4ca8','#4a8ae8','#b8e8ff'),petal:ramp('#8a8478','#cac4b6','#eeeae0','#ffffff'),grape:ramp('#3a0e4e','#7a2aa0','#b862e0','#f2c8ff'),starc:ramp('#6a4a0a','#c89a18','#ffd84a','#fff6c0'),pollen:ramp('#7a4a08','#c08010','#f0b828','#ffe070'),gem:ramp('#3a1460','#6a2aa8','#a45ae0','#e8c8ff')},
   food:{meal:ramp('#5a3a10','#9a6a24','#cf9a3c','#f4cc72'),mealDark:ramp('#3a2408','#6a4414','#94642a','#b88a44'),
         head:ramp('#2a1406','#4a2a10','#6e421c','#9a6230'),wax:ramp('#8a7a5a','#c8b890','#ece0bc','#fffbea'),
         waxDark:ramp('#6a5c40','#a09070','#c8b894','#e4d8b8'),snail:ramp('#4a4038','#7a6c5c','#a8988a','#d4c6b8'),
@@ -744,6 +751,8 @@ const FOOD_PAINTER={outline:hex('#140c06'),seam:1.0,shells:[],color(m,q,s,l,x,y)
     case M.F_SHRIMP:{const G=PAL.food2.shrimp;if(s>=4.5)return G[Math.max(0,q-1)];if((s%1)<0.2)return G[Math.max(0,q-1)];return G[q];}
     case M.F_MOON:{const G=PAL.food2.moon;if(hash(x*7+1,y*5)>0.86)return G[3];return G[q];}
     case M.F_PETAL:return PAL.food2.petal[q];
+    case M.F_GRAPE:{if(s>0.6&&q>=2)return PAL.food2.grape[3];return PAL.food2.grape[q];}// the bright rim reads as a see-through jelly skin
+    case M.F_STARC:return PAL.food2.starc[Math.min(3,q+(hash(x*5,y*7)>0.6?1:0))];
     case M.F_POLLEN:return PAL.food2.pollen[Math.min(3,q+(hash(x*5,y*3)>0.7?1:0))];
     case M.F_GEM:return PAL.food2.gem[Math.min(3,q+(hash(x*3,y*7)>0.7?1:0))];
     case M.ROCK:return PAL.rock[q];
@@ -909,25 +918,25 @@ const SPECIES={
 };
 // how much each species likes each food (0 = won't eat it)
 const DIET={
-  dragon:{flower:4,cricket:9,roach:9,waxworm:8,worm:6,greens:7,fruit:5,snail:2,fly:3,egg:0,bloodworm:2,shrimp:0,minnow:0,moonberry:7,geode:0},
-  bee:{fruit:8,moonberry:9,flower:10},
-  mush:{moonberry:10,greens:9,fruit:8,flower:8,egg:3,worm:3},
+  dragon:{flower:4,grape:6,stars:5,cricket:9,roach:9,waxworm:8,worm:6,greens:7,fruit:5,snail:2,fly:3,egg:0,bloodworm:2,shrimp:0,minnow:0,moonberry:7,geode:0},
+  bee:{fruit:8,moonberry:9,flower:10,grape:7,stars:6},
+  mush:{moonberry:10,greens:9,fruit:8,flower:8,grape:8,stars:8,egg:3,worm:3},
   puffer:{snail:10,shrimp:10,bloodworm:9,worm:7,waxworm:5,cricket:4,roach:3,minnow:2,egg:2},
-  golem:{flower:7,cricket:1,roach:0,waxworm:1,worm:2,fly:0,snail:6,fruit:9,egg:4,greens:10,bloodworm:0,shrimp:0,minnow:0,moonberry:9,geode:10},
+  golem:{flower:7,grape:6,stars:8,cricket:1,roach:0,waxworm:1,worm:2,fly:0,snail:6,fruit:9,egg:4,greens:10,bloodworm:0,shrimp:0,minnow:0,moonberry:9,geode:10},
   cuttle:{cricket:6,roach:5,waxworm:5,worm:6,fly:2,snail:4,fruit:0,egg:3,greens:0,bloodworm:7,shrimp:10,minnow:9,moonberry:0,geode:0},
-  kraken:{cricket:7,roach:7,waxworm:7,worm:8,fly:3,snail:9,fruit:0,egg:6,greens:0,bloodworm:8,shrimp:9,minnow:10,moonberry:0,geode:2},
+  kraken:{stars:5,cricket:7,roach:7,waxworm:7,worm:8,fly:3,snail:9,fruit:0,egg:6,greens:0,bloodworm:8,shrimp:9,minnow:10,moonberry:0,geode:2},
   scorpion:{cricket:10,roach:9,waxworm:8,worm:6,fly:3,snail:1,fruit:0,egg:0,greens:0,bloodworm:2,shrimp:3,minnow:0,moonberry:0,geode:0},
   gecko:{cricket:9,roach:8,waxworm:9,worm:7,fly:4,snail:0,fruit:0,egg:0,greens:0,bloodworm:3,shrimp:0,minnow:0,moonberry:0,geode:0},
   axolotl:{worm:9,waxworm:7,cricket:5,roach:5,snail:4,fly:2,fruit:0,egg:0,greens:0,bloodworm:10,shrimp:8,minnow:7,moonberry:0,geode:0},
-  millipede:{flower:6,greens:9,fruit:8,egg:3,worm:2,cricket:0,roach:0,waxworm:0,fly:0,snail:0,bloodworm:0,shrimp:0,minnow:0,moonberry:8,geode:0},
-  slime:{flower:8,cricket:7,roach:7,worm:7,waxworm:8,fly:6,snail:6,fruit:8,egg:7,greens:7,bloodworm:7,shrimp:6,minnow:6,moonberry:10,geode:7},
+  millipede:{flower:6,grape:8,stars:5,greens:9,fruit:8,egg:3,worm:2,cricket:0,roach:0,waxworm:0,fly:0,snail:0,bloodworm:0,shrimp:0,minnow:0,moonberry:8,geode:0},
+  slime:{flower:8,grape:9,stars:9,cricket:7,roach:7,worm:7,waxworm:8,fly:6,snail:6,fruit:8,egg:7,greens:7,bloodworm:7,shrimp:6,minnow:6,moonberry:10,geode:7},
   frog:{fly:9,cricket:6,waxworm:7,worm:4,roach:5,snail:0,fruit:0,egg:0,greens:0,bloodworm:6,shrimp:3,minnow:5,moonberry:0,geode:0},
   lizard:{cricket:9,roach:8,waxworm:8,worm:6,fly:4,snail:3,fruit:3,egg:0,greens:2,bloodworm:3,shrimp:0,minnow:0,moonberry:3,geode:0},
   salamander:{worm:9,waxworm:8,snail:6,roach:6,cricket:5,fly:3,fruit:0,egg:0,bloodworm:9,shrimp:5,minnow:5,moonberry:0,geode:0},
   snake:{egg:10,waxworm:8,worm:6,snail:6,cricket:3,roach:2,fly:0,fruit:0,bloodworm:4,shrimp:5,minnow:10,moonberry:0,geode:0},
-  crab:{flower:3,fruit:10,greens:7,waxworm:7,egg:6,worm:6,snail:4,cricket:3,roach:3,fly:0,bloodworm:5,shrimp:10,minnow:3,moonberry:8,geode:0},
-  turtle:{flower:6,greens:9,fruit:8,snail:8,worm:7,waxworm:7,cricket:5,roach:5,egg:2,fly:0,bloodworm:6,shrimp:9,minnow:9,moonberry:7,geode:0},
-  gsnail:{flower:9,greens:10,fruit:9,egg:3,worm:0,waxworm:0,snail:0,cricket:0,fly:0,roach:0,bloodworm:0,shrimp:0,minnow:0,moonberry:9,geode:0},
+  crab:{flower:3,grape:8,stars:4,fruit:10,greens:7,waxworm:7,egg:6,worm:6,snail:4,cricket:3,roach:3,fly:0,bloodworm:5,shrimp:10,minnow:3,moonberry:8,geode:0},
+  turtle:{flower:6,grape:8,stars:4,greens:9,fruit:8,snail:8,worm:7,waxworm:7,cricket:5,roach:5,egg:2,fly:0,bloodworm:6,shrimp:9,minnow:9,moonberry:7,geode:0},
+  gsnail:{flower:9,grape:8,stars:5,greens:10,fruit:9,egg:3,worm:0,waxworm:0,snail:0,cricket:0,fly:0,roach:0,bloodworm:0,shrimp:0,minnow:0,moonberry:9,geode:0},
   tarantula:{roach:10,cricket:9,waxworm:7,worm:7,fly:4,snail:2,fruit:0,egg:0,greens:0,bloodworm:2,shrimp:0,minnow:0,moonberry:0,geode:0},
   chameleon:{cricket:9,fly:8,roach:7,waxworm:7,worm:6,snail:0,fruit:0,egg:0,greens:0,bloodworm:2,shrimp:0,minnow:0,moonberry:0,geode:0},
 };
@@ -936,10 +945,12 @@ const FOODS={cricket:{name:'a cricket',label:'cricket',value:18},worm:{name:'a m
   snail:{name:'a snail',label:'snails',value:20},fruit:{name:'a strawberry',label:'fruit',value:16},egg:{name:'a quail egg',label:'eggs',value:30},
   greens:{name:'some greens',label:'greens',value:14},roach:{name:'a roach',label:'roaches',value:20},
   bloodworm:{name:'some bloodworms',label:'bloodworms',value:16},shrimp:{name:'a shrimp',label:'shrimp',value:20},minnow:{name:'a minnow',label:'minnows',value:28},
-  moonberry:{name:'a moonberry',label:'moonberries',value:22},geode:{name:'a geode crunch',label:'geodes',value:24},flower:{name:'a daisy',label:'flowers',value:16}};
-const FOOD_ORDER=['cricket','roach','worm','waxworm','fly','snail','bloodworm','shrimp','minnow','fruit','greens','flower','egg','moonberry','geode'];
-const FOOD_CATS=[{id:'bugs',name:'Bugs',foods:['cricket','roach','worm','waxworm','fly','snail']},{id:'water',name:'Water',foods:['bloodworm','shrimp','minnow']},{id:'garden',name:'Garden',foods:['fruit','greens','flower','egg']},{id:'magic',name:'Magic',foods:['moonberry','geode']}];
-const CRUMB={cricket:hex('#6a4a2a'),worm:hex('#c89a4a'),waxworm:hex('#f0e0c0'),snail:hex('#8a7a6a'),fruit:hex('#d83040'),egg:hex('#f0e8d0'),fly:hex('#303030'),greens:hex('#6ab038'),roach:hex('#5a3418'),bloodworm:hex('#a01a1a'),shrimp:hex('#e89a86'),minnow:hex('#a8c0d0'),moonberry:hex('#4a8ae8'),geode:hex('#a45ae0'),flower:hex('#f6f0e0')};
+  moonberry:{name:'a moonberry',label:'moonberries',value:22},geode:{name:'a geode crunch',label:'geodes',value:24},flower:{name:'a daisy',label:'flowers',value:16},grape:{name:'a jelly grape',label:'jelly grapes',value:20},stars:{name:'some star crumbs',label:'star crumbs',value:14}};
+// what each food costs: everyday staples are cheap; the showy ones (flies, minnows, jelly grapes, glowing and crystal treats) cost more
+const FOOD_PRICE={cricket:1,worm:1,greens:1,fruit:1,bloodworm:1,waxworm:2,roach:2,egg:2,stars:2,snail:3,shrimp:3,flower:3,fly:5,grape:5,minnow:6,moonberry:7,geode:8};
+const FOOD_ORDER=['cricket','roach','worm','waxworm','fly','snail','bloodworm','shrimp','minnow','fruit','greens','flower','egg','grape','stars','moonberry','geode'];
+const FOOD_CATS=[{id:'bugs',name:'Bugs',foods:['cricket','roach','worm','waxworm','fly','snail']},{id:'water',name:'Water',foods:['bloodworm','shrimp','minnow']},{id:'garden',name:'Garden',foods:['fruit','greens','egg','flower','grape']},{id:'magic',name:'Magic',foods:['stars','moonberry','geode']}];
+const CRUMB={cricket:hex('#6a4a2a'),worm:hex('#c89a4a'),waxworm:hex('#f0e0c0'),snail:hex('#8a7a6a'),fruit:hex('#d83040'),egg:hex('#f0e8d0'),fly:hex('#303030'),greens:hex('#6ab038'),roach:hex('#5a3418'),bloodworm:hex('#a01a1a'),shrimp:hex('#e89a86'),minnow:hex('#a8c0d0'),moonberry:hex('#4a8ae8'),geode:hex('#a45ae0'),flower:hex('#f6f0e0'),grape:hex('#b860dc'),stars:hex('#ffe070')};
 // Hunting styles: how long they stalk, how close before they commit, and how they rush.
 const HUNT={mush:{st:[0.4,1.2],near:20,rush:'walk'},puffer:{st:[0.3,1.0],near:26,rush:'walk'},bee:{st:[0.1,0.5],near:40,rush:'walk'},lizard:{st:[0.3,1.4],near:42,rush:'run'},salamander:{st:[0.6,2.0],near:28,rush:'run'},snake:{st:[0.8,2.2],near:32,rush:'run'},
   chameleon:{st:[1.0,2.4],near:40,rush:'run'},dragon:{st:[0.5,1.6],near:36,rush:'run'},gecko:{st:[0.8,2.0],near:30,rush:'run'},slime:{st:[0.2,0.8],near:40,rush:'run'},axolotl:{st:[0.3,1.0],near:26,rush:'run'},millipede:{st:[0,0],near:0,rush:'walk'},frog:{st:[0.2,1.0],near:40,rush:'run'},tarantula:{st:[0.6,1.8],near:40,rush:'pounce',ambush:true},scorpion:{st:[0.5,1.6],near:36,rush:'pounce',ambush:true},kraken:{st:[0.2,0.7],near:44,rush:'run'},cuttle:{st:[0.9,2.0],near:32,rush:'run'},golem:{st:[0,0.3],near:60,rush:'walk'},
@@ -2302,7 +2313,7 @@ class Millipede extends Walker{
 //  Jelly slime: a soft-body ring of springy points that squish-hops, jiggles, splats,
 //  shows its food digesting inside, changes colour with its dinner and buds off a mini-slime.
 // =====================================================================
-const SLIME_COL={base:'#5fe08a',cricket:'#f0b04a',roach:'#d0783c',worm:'#f4d45a',waxworm:'#f4ecc4',fly:'#56d4e0',snail:'#b894f0',fruit:'#ff6a9a',egg:'#fff0a0',greens:'#66d858',bloodworm:'#e04040',shrimp:'#ffa890',minnow:'#b8d0e0',moonberry:'#5aa0ff',geode:'#c080ff',flower:'#ffe27a'};
+const SLIME_COL={base:'#5fe08a',cricket:'#f0b04a',roach:'#d0783c',worm:'#f4d45a',waxworm:'#f4ecc4',fly:'#56d4e0',snail:'#b894f0',fruit:'#ff6a9a',egg:'#fff0a0',greens:'#66d858',bloodworm:'#e04040',shrimp:'#ffa890',minnow:'#b8d0e0',moonberry:'#5aa0ff',geode:'#c080ff',flower:'#ffe27a',grape:'#c070ff',stars:'#fff09a'};
 function slimeRamp(hexc){const c=hex(hexc);return[mixc(c,hex('#06140c'),0.62),mixc(c,hex('#06140c'),0.32),c,mixc(c,hex('#ffffff'),0.45)];}
 class Slime extends Pet{
   get translucent(){return 0.38;}
@@ -3483,7 +3494,7 @@ class Food{
   initFood(type,x,y,h){this.type=type;this.value=FOODS[type].value;this.x=x;this.y=y;this.h=h;this.vh=0;this.ang=rand(TAU);this.t=rand(10);
     this.dead=false;this.caught=false;this.inHand=false;this.bites=0;this.layered=true;}
   fall(dt){if(this.h>0||this.vh>0){this.vh-=170*dt;this.h+=this.vh*dt;
-    if(this.h<=0){if(this.vh<-70)SFX.play(this.type==='fruit'||this.type==='egg'?'squish':'tap');this.h=0;this.vh=0;return true;}}return false;}
+    if(this.h<=0){if(this.vh<-70)SFX.play(this.type==='fruit'||this.type==='egg'||this.type==='grape'?'squish':this.type==='stars'?'tink2':'tap');this.h=0;this.vh=0;return true;}}return false;}
   scr(){return(this.caught||this.inHand)?{x:this.sx,y:this.sy}:{x:this.x,y:this.y-this.h};}
   grounded(){return!this.caught&&!this.inHand&&this.h<=0.5;}
   drawShadow(fb){if(this.caught)return;if(this.inHand||this.h>0.5)ddisc(fb,this.x+1,this.y+1,2.2,.62);}
@@ -3697,6 +3708,21 @@ class Minnow extends Food{
     if(this.bites<3){const tx=bx+Math.cos(ta)*1.6,ty=by+Math.sin(ta)*1.6;for(const sd of[-1,1]){const fa=ta+sd*0.5;fb.cap(tx,ty,0.35,tx+Math.cos(fa)*1.5,ty+Math.sin(fa)*1.5,0.55,M.F_FISH,1,5,5);}
       fb.cap(bx,by,0.6,tx,ty,0.4,M.F_FISH,1,4,5);}}
 }
+// Jelly grape: a see-through purple grape cluster that wobbles like jelly and bursts with a juicy pop when eaten
+class Grape extends Food{
+  constructor(x,y,h=0){super();this.initFood('grape',x,y,h);this.jig=0;}
+  update(dt,w){if(this.caught||this.inHand){this.jig=Math.max(this.jig,0.4);}else if(this.fall(dt))this.jig=1;this.t+=dt;this.jig=Math.max(0,this.jig-dt*1.4);
+    const pet=w.pet;if(pet&&pet.headPos&&!this.caught){const h=pet.headPos();if(Math.hypot(h.x-this.x,h.y-this.y)<8)this.jig=Math.max(this.jig,0.5);}}
+  drawL(fb){const{x,y}=this.scr(),k=1-this.bites*0.25,j=Math.sin(this.t*18)*this.jig*0.28,sx=1+j,sy=1-j;
+    const B=[[-1.1,0.5,1.35],[1.1,0.6,1.3],[0,-0.8,1.4]];for(let i=0;i<B.length;i++){if(this.bites>=2&&i>0)continue;const[u,v,r]=B[i];fb.cap(x+u*k*sx,y+v*k*sy,r*k,x+u*k*sx,y+v*k*sy,r*k,M.F_GRAPE,1,0,0,0.4+i*0.1);}
+    if(this.bites<3)fb.cap(x+0.2,y-2.1*k,0.3,x+1,y-3*k,0.4,M.F_LEAF,2);}
+}
+// Star crumbs: a pinch of twinkly star-shaped flakes (the everyday magic snack; they float and sparkle)
+class Stars extends Food{
+  constructor(x,y,h=0){super();this.initFood('stars',x,y,h);this.pts2=[[-1.6,0.4],[1.4,-0.6],[0.2,1.3],[-0.3,-1.4],[1.8,1.2]];}
+  update(dt,w){if(this.caught||this.inHand)return;this.fall(dt);this.t+=dt;}
+  drawL(fb){const{x,y}=this.scr(),n=5-this.bites;for(let i=0;i<Math.max(1,n);i++){const[u,v]=this.pts2[i];fb.cap(x+u,y+v,0.72,x+u,y+v,0.72,M.F_STARC,1,0,0,0.3);}}
+}
 // Moonberry: a glowing blue fantasy berry (glows at night)
 class Moonberry extends Food{
   constructor(x,y,h=0){super();this.initFood('moonberry',x,y,h);}
@@ -3724,7 +3750,7 @@ class Flower extends Food{
 }
 function makeFood(type,x,y,h){
   switch(type){case 'cricket':return new Cricket(x,y,h);case 'fly':return new Fly(x,y,h);case 'snail':return new Snail(x,y,h);
-    case 'fruit':return new Fruit(x,y,h);case 'egg':return new Egg(x,y,h);case 'greens':return new Greens(x,y,h);case 'roach':return new Roach(x,y,h);case 'bloodworm':return new Bloodworm(x,y,h);case 'shrimp':return new Shrimp(x,y,h);case 'minnow':return new Minnow(x,y,h);case 'moonberry':return new Moonberry(x,y,h);case 'geode':return new Geode(x,y,h);case 'flower':return new Flower(x,y,h);default:return new Worm(x,y,h,type);}
+    case 'fruit':return new Fruit(x,y,h);case 'egg':return new Egg(x,y,h);case 'greens':return new Greens(x,y,h);case 'roach':return new Roach(x,y,h);case 'bloodworm':return new Bloodworm(x,y,h);case 'shrimp':return new Shrimp(x,y,h);case 'minnow':return new Minnow(x,y,h);case 'moonberry':return new Moonberry(x,y,h);case 'geode':return new Geode(x,y,h);case 'flower':return new Flower(x,y,h);case 'grape':return new Grape(x,y,h);case 'stars':return new Stars(x,y,h);default:return new Worm(x,y,h,type);}
 }
 function slime(w,x,y){const r=1.6;for(let yy=Math.floor(y-r);yy<=y+r;yy++)for(let xx=Math.floor(x-r);xx<=x+r;xx++){
   if(xx<0||yy<0||xx>=W||yy>=H)continue;const d=Math.hypot(xx+.5-x,yy+.5-y);if(d>r)continue;const i=yy*W+xx;w.wet[i]=Math.min(1,w.wet[i]+0.5*(1-d/r));}}
@@ -4543,7 +4569,7 @@ function drawToolIcon(fb,id,x,y){
 // =====================================================================
 //  Coins lying in the tank
 // =====================================================================
-function spawnCoin(w,x,y,v){if(w.coins.length>=8)return;const B=w.bounds;w.coins.push({x:clamp(x,B.x0,B.x1),y:clamp(y,B.y0,B.y1),h:6,vh:34,v,t:rand(10),life:40});}
+function spawnCoin(w,x,y,v,o){if(w.coins.length>=20)return;const B=w.bounds;w.coins.push(Object.assign({x:clamp(x,B.x0,B.x1),y:clamp(y,B.y0,B.y1),h:6,vh:34,v,t:rand(10),life:40,vx:0,vy:0},o||{}));}
 function drawCoin(fb,c){
   const f=Math.floor(c.t*8)%4,rx=[2.6,1.7,0.7,1.7][f],x=c.x,y=c.y-c.h-2.5,o=hex('#3a2604'),g=hex('#f0c030'),d=hex('#b8860e'),l=hex('#fff0a0');
   if(c.h<0.5)pdark(fb,x+1,c.y,0.6);
@@ -4590,7 +4616,8 @@ function createWorld(){
     feather:{kind:'feather',label:'the feather',play:true,on:false,x:160,y:90,h:5,vx:0,vy:0,dead:true,caught:false,cool:0,
       onCatch(){this.cool=0.9;this.vy-=90;this.vx+=rand(-60,60);this.h=12;SFX.play('flutter');}},
     onEvent:msg=>flash(`${game.name} ${msg}`)};
-  w.onEat=(pet,p)=>{if(pet.preview)return;const m=pet.mouthScreen();addCoins(3,m.x,m.y);addXP(4);};
+  w.onEat=(pet,p)=>{if(pet.preview)return;const m=pet.mouthScreen(),lv=(DIET[pet.kind]||{})[p.type]||0;addCoins(lv>=8?3:lv>=5?2:1,m.x,m.y);addXP(4);
+    if(p.type==='grape'){SFX.play('juicy');for(let i=0;i<9;i++){const a=rand(TAU);spawn(w,'crumb',m.x,m.y+(pet.h||0),{h:(pet.h||0)+2,vh:rand(20,45),vx:Math.cos(a)*rand(8,20),vy:Math.sin(a)*rand(5,14),life:1.2,c:hex(pick(['#b862e0','#f2c8ff','#7a2aa0']))});}}};
   w.onPlay=(pet,t)=>{if(pet.preview)return;const S=w.stats,k=t.kind;if(t instanceof Toy)t.bore=Math.min(1,(t.bore||0)+0.22);S.happy=Math.min(100,S.happy+(k==='bubble'?1.5:3));addXP(k==='bubble'?1:2);
     if(k==='laser'){SFX.play('zap');spawn(w,'star',t.x,t.y,{life:0.18});}
     if(Math.random()<(k==='laser'||k==='feather'?0.2:k==='bubble'?0.06:0.3))addCoins(k==='laser'||k==='bubble'||k==='feather'?1:2,t.x,t.y-t.h);
@@ -4633,7 +4660,7 @@ function floatToy(t,w,dt){if(t.h>0.6)return;const k=Math.min(1,dt*2.2),ph=w.t*0.
 function landSnap(w,x,y){if(waterAt(w,x,y)<=0)return[x,y];const B=w.bounds;
   for(let r=2;r<90;r+=2)for(let k=0;k<24;k++){const a=k/24*TAU,nx=clamp(x+Math.cos(a)*r,B.x0,B.x1),ny=clamp(y+Math.sin(a)*r,B.y0,B.y1);if(waterAt(w,nx,ny)<=0)return[nx,ny];}return[x,y];}
 // food that lands in the water floats; crickets and roaches paddle for the shore
-const FLOAT_FOOD=['fruit','greens','moonberry','flower'],STRUGGLE_FOOD=['cricket','roach'],WRIGGLE_FOOD=['worm','waxworm'];
+const FLOAT_FOOD=['fruit','greens','moonberry','flower','stars'],STRUGGLE_FOOD=['cricket','roach'],WRIGGLE_FOOD=['worm','waxworm'];
 function floatPrey(q,w,dt){if(q.type==='minnow')return;if(q.caught||q.inHand){q.sink=0;q.stuckW=false;return;}
   if(q.type==='fly'){// a fly that lands on the water gets stuck, buzzing and struggling on the surface
     if(w.tank==='aqua'&&(q.stuckW||(q.landT>0&&q.h<1.5&&waterAt(w,q.x,q.y)>0.05))){if(!q.stuckW){q.stuckW=true;q.ax=q.x;q.ay=q.y;w.ripples.push({x:q.x,y:q.y,age:0});}
@@ -4743,8 +4770,21 @@ function startGame(kind,restoring){
   flash(ps.visited?`${game.name} is happy to see you!`:`${game.name} moved in. Say hi!`);ps.visited=true;
 }
 function toCanvasScreen(x,y){const r=canvas.getBoundingClientRect();return[r.left+x/W*r.width,r.top+y/H*r.height];}
+// ---- cuddle bursts: every few hearts fills the love meter; a full meter pops out a little shower of coins ----
+const CUD_MAX=3,CUD_REFILL=180000;
+function cuddleState(ps){const now=Date.now();if(!ps.cud)ps.cud={n:CUD_MAX,t:now,love:0};const c=ps.cud;
+  if(c.n>=CUD_MAX)c.t=now;else{const k=Math.floor((now-c.t)/CUD_REFILL);if(k>0){c.n=Math.min(CUD_MAX,c.n+k);c.t=c.n>=CUD_MAX?now:c.t+k*CUD_REFILL;}}return c;}
+function cuddleNext(ps){const c=cuddleState(ps);return c.n>=CUD_MAX?0:Math.max(0,CUD_REFILL-(Date.now()-c.t));}
+const mmss=ms=>{const s=Math.ceil(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+function cuddleHeart(pet){const ps=petSave(),c=cuddleState(ps),w=game.world;
+  if(c.n<=0){c.love=1;if(!game.cudNote||performance.now()-game.cudNote>15000){game.cudNote=performance.now();flash(`${game.name} is all cuddled out for now. More cuddle coins in ${mmss(cuddleNext(ps))}.`);}return;}
+  c.love=Math.min(1,c.love+1/6+1e-6);markDirty();
+  if(c.love>=0.999){c.love=0;if(c.n>=CUD_MAX)c.t=Date.now();c.n--;const S=w.stats,thr=S.fed>=70&&S.water>=70&&S.happy>=70,n=4+Math.floor(rand(0,3))+Math.floor((ps.lvl-1)/3)+(thr?1:0),hd=pet.headPos();
+    SFX.play('coinburst');for(let i=0;i<n;i++){const a=i/n*TAU+rand(-0.3,0.3),v=rand(14,26);spawnCoin(w,hd.x,hd.y,1,{vx:Math.cos(a)*v,vy:Math.sin(a)*v*0.7,vh:rand(40,60),auto:rand(1.1,1.6)});}
+    for(let i=0;i<6;i++)spawn(w,'star',hd.x+rand(-5,5),hd.y-4+rand(-4,4),{life:rand(0.15,0.3)});}
+  if(ui.open==='petStats'||$('petStats').offsetParent)ui.renderStats();}
 function addCoins(n,cx,cy){
-  save.coins+=n;markDirty();
+  save.coins+=n;markDirty();if(typeof ui!=='undefined'&&ui.trayAfford)ui.trayAfford();
   if(cx!==undefined){const[sx,sy]=toCanvasScreen(cx,cy);ui.coinFly(n,sx,sy);}else ui.bumpCoins();
 }
 function addXP(n){
@@ -4783,7 +4823,7 @@ function updatePlay(dt){
     }else if(tool==='pet'){
       if(pet.hitTest(P.x,P.y)>=0&&P.moved>0.5&&pet.petMe()){P.rub=(P.rub||0)+P.moved;
         if(P.rub>7){P.rub=0;spawn(w,'heart',P.x+rand(-2,2),P.y-3,{vy:-rand(12,18),life:1.2,ph:rand(TAU)});SFX.play('heart');
-          game.hearts++;if(game.hearts%3===0){addCoins(1,P.x,P.y);addXP(1);}}}
+          game.hearts++;if(game.hearts%3===0)addXP(1);cuddleHeart(pet);}}
     }else if(tool==='bubbles'){
       game.bubbleT-=dt;if(game.bubbleT<=0&&w.bubbles.length<14){game.bubbleT=0.16;SFX.play('blow');
         w.bubbles.push({kind:'bubble',label:'a bubble',play:true,dead:false,caught:false,x:P.x+rand(-2,2),y:P.y+10,h:10,vx:rand(-10,10),vy:rand(-8,8),r:rand(1.6,3),life:rand(6,10),ph:rand(TAU),
@@ -4809,7 +4849,7 @@ function updatePlay(dt){
   if(hq){hq.sx=P.x;hq.sy=P.y;hq.x=P.x;hq.y=P.y+8;hq.h=8;}
   pet.update(dt);
   if(hq&&(hq.caught||hq.dead)){game.held=null;hq.inHand=false;
-    if(hq.caught){S.happy=Math.min(100,S.happy+6);SFX.play('sparkle');addCoins(6,P.x,P.y);addXP(6);
+    if(hq.caught){S.happy=Math.min(100,S.happy+6);SFX.play('sparkle');addCoins(3,P.x,P.y);addXP(6);
       for(let i=0;i<8;i++){const a=rand(TAU),v=rand(14,30);spawn(w,'spark2',P.x,P.y,{vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.35,.6)});}
       flash(`${game.name} took ${PREY_NAME[hq.type]} right from the tweezers!`);}}
   for(const p of w.prey){p.update(dt,w);floatPrey(p,w,dt);}
@@ -4832,10 +4872,11 @@ function updatePlay(dt){
     b.x=clamp(b.x,w.bounds.x0,w.bounds.x1);b.y=clamp(b.y,w.bounds.y0,w.bounds.y1);
     if(b.life<=0&&!b.dead){b.dead=true;popBubble(w,b);}if(b.dead&&!b.caught)w.bubbles.splice(i,1);}
   for(let i=w.coins.length-1;i>=0;i--){const c=w.coins[i];c.t+=dt;c.life-=dt;
-    if(c.h>0||c.vh>0){c.vh-=180*dt;c.h+=c.vh*dt;if(c.h<=0){c.h=0;if(c.vh<-25){c.vh=-c.vh*0.4;SFX.play('tick');}else c.vh=0;}}
+    if(c.h>0||c.vh>0){c.vh-=180*dt;c.h+=c.vh*dt;const B=w.bounds;c.x=clamp(c.x+c.vx*dt,B.x0,B.x1);c.y=clamp(c.y+c.vy*dt,B.y0,B.y1);if(c.h<=0){c.h=0;c.vx*=0.4;c.vy*=0.4;if(c.vh<-25){c.vh=-c.vh*0.4;SFX.play('tick');}else c.vh=0;}}
+    if(c.auto!==undefined){c.auto-=dt;if(c.auto<=0){w.coins.splice(i,1);addCoins(c.v,c.x,c.y-c.h);continue;}}
     if(c.life<=0)w.coins.splice(i,1);}
   game.coinT-=dt;
-  if(game.coinT<=0){game.coinT=rand(22,40);if(S.happy>55&&!ui.modalOpen()){spawnCoin(w,hd.x+rand(-8,8),hd.y+rand(-6,6),Math.floor(rand(4,9)));flash(`${game.name} found a shiny coin!`);}}
+  if(game.coinT<=0){game.coinT=rand(120,180);if(S.happy>=70&&S.fed>=70&&S.water>=70&&!ui.modalOpen()){spawnCoin(w,hd.x+rand(-8,8),hd.y+rand(-6,6),Math.floor(rand(2,5)));flash(`${game.name} is so well looked after, it found you a shiny coin!`);}}
   updateParts(w,dt);
   for(let i=w.ripples.length-1;i>=0;i--){w.ripples[i].age+=dt;if(w.ripples[i].age>1.1)w.ripples.splice(i,1);}
   if(w.pads.length)updatePads(w,dt);
@@ -5065,6 +5106,7 @@ function renderPlay(){
       for(let yy=-4;yy<=4;yy++)for(let xx=-6;xx<=6;xx++){const d=Math.sqrt(xx*xx/36+yy*yy/16);if(d>=1)continue;const f=k*(1-d)**1.4;if(((xx+yy)&1)&&f<0.12)continue;
         padd(fb,Math.round(x)+xx,Math.round(y)+yy,c[0]*f,c[1]*f,c[2]*f);}}}
   for(const d of w.decor)decorGlow(fb,d,night,w.t);glowShrooms(fb,w,night);
+  for(const q of w.prey)if(q.type==='stars'&&!q.dead&&!(q.sink>0.5)){const p=q.scr();for(let i=0;i<q.pts2.length-q.bites;i++){const tw=Math.max(0,Math.sin(w.t*3+i*2.1+q.x)),b=(0.35+night*0.9)*tw*tw;if(b>0.05){const[u,v]=q.pts2[i];padd(fb,p.x+u,p.y+v,160*b,140*b,60*b);if(b>0.5){padd(fb,p.x+u+1,p.y+v,50*b,45*b,20*b);padd(fb,p.x+u-1,p.y+v,50*b,45*b,20*b);padd(fb,p.x+u,p.y+v-1,50*b,45*b,20*b);padd(fb,p.x+u,p.y+v+1,50*b,45*b,20*b);}}}}
   if(night>0.2)for(const q of w.prey)if(q.type==='moonberry'&&!q.dead){const p=q.scr(),b=night*(0.7+0.3*Math.sin(w.t*2+q.x))*(1-(q.sink||0)*0.5);for(let yy=-4;yy<=4;yy++)for(let xx=-4;xx<=4;xx++){const k=1-Math.hypot(xx,yy)/4.5;if(k>0)padd(fb,p.x+xx,p.y+yy,30*k*b,80*k*b,160*k*b);}}
   if(pet.glow)pet.glow(fb,night);
   for(const o of w.toys)toyGlow(fb,o,night,w.t);
@@ -5383,8 +5425,9 @@ const ui={
         cb.innerHTML=`${c.name}${fav?'<i>&#9829;</i>':''}`;cb.addEventListener('click',()=>{this.foodCat=c.id;SFX.play('tick');this.renderTray();});tabs.appendChild(cb);}
       tr.appendChild(tabs);
       for(const f of FOOD_CATS.find(c=>c.id===this.foodCat).foods){const b=document.createElement('button');const lv=D[f]||0;b.className='ti'+(game.food===f?' on':'')+(lv<=0?' meh':'');b.title=FOODS[f].name+(lv>=8?' (a favourite!)':lv<=0?` (${game.name} won't eat this)`:'');
-      b.appendChild(foodCanvas(f));const l=document.createElement('span');l.className='tl';l.textContent=f==='fruit'?'berry':f==='worm'?'meal':f==='waxworm'?'wax':f==='bloodworm'?'blood':f==='moonberry'?'moon':f;b.appendChild(l);
+      b.appendChild(foodCanvas(f));const l=document.createElement('span');l.className='tl';l.textContent=f==='fruit'?'berry':f==='worm'?'meal':f==='waxworm'?'wax':f==='bloodworm'?'blood':f==='moonberry'?'moon':f==='stars'?'stars':f;b.appendChild(l);
       if(lv>=8){const h=document.createElement('i');h.className='tfav';h.innerHTML='&#9829;';b.appendChild(h);}
+      const pr=document.createElement('i');pr.className='tpr';pr.innerHTML=`<img class="px" src="${iconURL('coin')}" alt="">${FOOD_PRICE[f]||0}`;b.appendChild(pr);b.dataset.f=f;if(save.coins<(FOOD_PRICE[f]||0))b.classList.add('poor');
       b.addEventListener('click',()=>{if(this.fdragDone){this.fdragDone=false;return;}game.food=f;SFX.play('tick');this.renderTray();});
       b.addEventListener('pointerdown',e=>{if(e.button>0)return;this.fdrag={f,x:e.clientX,y:e.clientY,active:false};});tr.appendChild(b);}
       const maxN=Math.max(...FOOD_CATS.map(c=>c.foods.length));for(let k=FOOD_CATS.find(c=>c.id===this.foodCat).foods.length;k<maxN;k++){const fl=document.createElement('div');fl.className='ti filler';tr.appendChild(fl);}
@@ -5427,11 +5470,13 @@ const ui={
   renderStats(){const pet=game.world.pet;if(!pet)return;const M=pet.mind,B=MIND[game.kind]||MIND.default;
     const HINT={cur:['Curiosity','notices and explores new things'],bold:['Boldness','stays calm around taps and your hand'],smart:['Smarts','remembers where food turned up'],focus:['Focus','sticks with what it started'],energy:['Energy','plays and moves around a lot'],patience:['Patience','waits for the perfect moment to pounce']};
     const think=M.think<0.55?'Quick':M.think<1.1?'Steady':'Slow',sn=[];if(M.sight[0]>=110)sn.push('sharp eyes');else if(M.sight[0]>0&&M.sight[0]<45)sn.push('poor eyesight');if(M.motionOnly)sn.push('only sees movement');if(M.smell>=35)sn.push('keen nose');if(M.vib>=50)sn.push('feels vibrations');if(!M.sight[0])sn.push('no eyes to speak of');
-    $('petStats').innerHTML=`<div class="ps-t"><b>${M.temper}</b> ${SPECIES[game.kind].label.toLowerCase()}</div>`+TRAITS.map(t=>`<div class="ps-r" title="${HINT[t][1]}"><span>${HINT[t][0]}</span><i><em style="width:${Math.round(M[t]*100)}%"></em><u style="left:${Math.round(B[t]*100)}%"></u></i></div>`).join('')+
+    const cs=cuddleState(petSave()),hearts='&#9829;'.repeat(cs.n)+'<span style="opacity:.3">'+'&#9829;'.repeat(CUD_MAX-cs.n)+'</span>',nx=cuddleNext(petSave());
+    $('petStats').innerHTML=`<div class="ps-t"><b>${M.temper}</b> ${SPECIES[game.kind].label.toLowerCase()}</div><div class="ps-c" title="Petting fills the love meter; when it's full a little shower of coins pops out. One cuddle refills every 3 minutes.">Cuddle coins <b style="color:#ff7a9a">${hearts}</b>${nx?` · next in ${mmss(nx)}`:''}<i><em style="width:${Math.round(cs.love*100)}%"></em></i></div>`+TRAITS.map(t=>`<div class="ps-r" title="${HINT[t][1]}"><span>${HINT[t][0]}</span><i><em style="width:${Math.round(M[t]*100)}%"></em><u style="left:${Math.round(B[t]*100)}%"></u></i></div>`).join('')+
       `<div class="ps-m">Thinks: <b>${think}</b>${sn.length?' · '+sn.join(', '):''}</div><div class="ps-n">Personality comes from the name. Same name, same personality! The little line marks a typical ${SPECIES[game.kind].label.toLowerCase()}.</div>`;},
   refreshPet(){if(!game.kind)return;$('petName').textContent=game.name+' ▾';$('petKind').textContent=SPECIES[game.kind].label+(game.world&&game.world.pet&&game.world.pet.mind?' · '+game.world.pet.mind.temper:'');this.refreshLevel();},
   refreshLevel(){if(!game.kind)return;const ps=petSave();$('lvlNum').textContent=ps.lvl;$('lvl').style.setProperty('--p',(ps.xp/xpNeed(ps.lvl)).toFixed(3));},
   refreshLight(){const d=game.world?game.world.dayTarget>0.5:true;$('btnLight').querySelector('img').src=iconURL(d?'sun':'moon');},
+  trayAfford(){for(const b of document.querySelectorAll('#tray .ti[data-f]'))b.classList.toggle('poor',save.coins<(FOOD_PRICE[b.dataset.f]||0));},
   bumpCoins(){const c=$('coins');c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump');},
   coinFly(n,sx,sy){
     const fx=$('fx'),t=$('coins').getBoundingClientRect(),tx=t.left+18,ty=t.top+t.height/2;
@@ -5588,7 +5633,7 @@ const touches=new Map();let pinch=null,touchBlock=false;
 function pinchPts(){const[a,b]=[...touches.values()];return{d:Math.max(1,Math.hypot(a.x-b.x,a.y-b.y)),mx:(a.x+b.x)/2,my:(a.y+b.y)/2};}
 function startPinch(){
   // a second finger cancels whatever the first one started; food conjured a moment ago just vanishes
-  const q=game.held;if(q&&q===game.heldNew&&performance.now()-game.heldT<400){game.held=null;const L=game.world.prey,i=L.indexOf(q);if(i>=0)L.splice(i,1);}
+  const q=game.held;if(q&&q===game.heldNew&&performance.now()-game.heldT<400){refundFood(q);game.held=null;const L=game.world.prey,i=L.indexOf(q);if(i>=0)L.splice(i,1);}
   up();game.panning=null;const P=pinchPts(),[mx,my]=stageXY(P.mx,P.my);pinch={d0:P.d,z0:cam.z,mx,my,u:(mx-cam.tx)/cam.z,v:(my-cam.ty)/cam.z};}
 function movePinch(){const P=pinchPts(),nz=clamp(pinch.z0*P.d/pinch.d0,cam.zmin,4);
   cam.tx=pinch.mx-pinch.u*nz;cam.ty=pinch.my-pinch.v*nz;cam.z=nz;camApply();
@@ -5596,7 +5641,7 @@ function movePinch(){const P=pinchPts(),nz=clamp(pinch.z0*P.d/pinch.d0,cam.zmin,
 // dragging a food straight out of the tray: after a short drag you're holding one, drop it in the tank
 window.addEventListener('pointermove',e=>{const D=ui.fdrag;if(!D)return;
   if(!D.active){if(Math.hypot(e.clientX-D.x,e.clientY-D.y)<6)return;const w=game.world;if(w.prey.length>=12){flash('That is plenty of food for now.');ui.fdrag=null;return;}
-    D.active=true;game.food=D.f;const[x,y]=toPix(e),q=makeFood(D.f,x,y+8,8);if(q.pts&&q.toScreen)q.toScreen();q.inHand=true;q.sx=x;q.sy=y;w.prey.push(q);game.held=q;game.heldT=performance.now();game.heldNew=null;SFX.play('tick');ui.renderTray();}
+    if(!buyFood(D.f)){ui.fdrag=null;return;}D.active=true;game.food=D.f;const[x,y]=toPix(e),q=makeFood(D.f,x,y+8,8);q.paid=FOOD_PRICE[D.f]||0;if(q.pts&&q.toScreen)q.toScreen();q.inHand=true;q.sx=x;q.sy=y;w.prey.push(q);game.held=q;game.heldT=performance.now();game.heldNew=null;SFX.play('tick');ui.renderTray();}
   const r=canvas.getBoundingClientRect(),[x,y]=toPix(e),P=game.pointer;P.x=x;P.y=y;P.cx=e.clientX;P.cy=e.clientY;P.inside=e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;
   const tb=$('trashBtn');if(tb)tb.classList.toggle('hot',overTrash(e.clientX,e.clientY));});
 window.addEventListener('pointerup',e=>{const D=ui.fdrag;ui.fdrag=null;if(!D||!D.active)return;ui.fdragDone=true;setTimeout(()=>{ui.fdragDone=false;},0);const q=game.held;if(!q)return;
@@ -5625,8 +5670,8 @@ canvas.addEventListener('pointerdown',e=>{
   if(tool==='feed'){
     let q=null,bd=6;
     for(const p of w.prey){if(p.caught||p.dead)continue;const d=Math.hypot(p.x-x,p.y-p.h-y);if(d<bd){bd=d;q=p;}}
-    if(!q){if(w.prey.length>=12){flash('That is plenty of food for now.');return;}
-      q=makeFood(game.food,x,y+8,8);q.__new=true;if(q.pts)q.toScreen();w.prey.push(q);if(q.type==='fly')SFX.play('buzz');}
+    if(!q){if(w.prey.length>=12){flash('That is plenty of food for now.');return;}if(!buyFood(game.food))return;
+      q=makeFood(game.food,x,y+8,8);q.__new=true;q.paid=FOOD_PRICE[game.food]||0;if(q.pts)q.toScreen();w.prey.push(q);if(q.type==='fly')SFX.play('buzz');}
     else if(q.pts)q.toScreen();
     q.inHand=true;q.hidden=false;q.vh=0;q.sx=x;q.sy=y;q.x=x;q.y=y+8;q.h=8;if(q.type==='snail')q.hideT=0;game.held=q;game.heldT=performance.now();game.heldNew=q.__new?q:null;q.__new=false;SFX.play('tick');
   }else if(tool==='grab'){
@@ -5649,18 +5694,22 @@ canvas.addEventListener('pointermove',e=>{
   if(game.held){const tb=$('trashBtn');if(tb)tb.classList.toggle('hot',overTrash(e.clientX,e.clientY));}
   const P=game.pointer,[x,y]=toPix(e),now=performance.now(),dt=Math.max(8,now-P.lt)/1000;
   P.vx=lerp(P.vx,(x-P.x)/dt,0.5);P.vy=lerp(P.vy,(y-P.y)/dt,0.5);P.lt=now;const mv=Math.hypot(x-P.x,y-P.y);P.moved+=mv;if(mv>0.6)P.stillT=0;P.x=x;P.y=y;P.inside=true;P.touch=e.pointerType==='touch';});
-function trashFood(q){const w=game.world,i=w.prey.indexOf(q);if(i<0)return;w.prey.splice(i,1);q.dead=true;if(game.held===q)game.held=null;
+// buying food: returns false (with a friendly note) if you can't afford it
+function buyFood(f){const c=FOOD_PRICE[f]||0;if(save.coins<c){flash(`${FOODS[f].name[0].toUpperCase()+FOODS[f].name.slice(1)} costs ${c} coins. Pet ${game.name} or finish goals to earn more!`);SFX.play('tick');return false;}
+  if(c){save.coins-=c;markDirty();ui.bumpCoins();ui.trayAfford();}return true;}
+function refundFood(q){if(q&&q.paid){save.coins+=q.paid;q.paid=0;markDirty();ui.bumpCoins();ui.trayAfford();}}
+function trashFood(q){const w=game.world,i=w.prey.indexOf(q);if(i<0)return;if(q.inHand)refundFood(q);w.prey.splice(i,1);q.dead=true;if(game.held===q)game.held=null;
   dust(w,q.x,q.y-(q.h||0),7);}
 function trashAll(){const w=game.world,L=w.prey.filter(q=>!q.caught);
   if(!L.length){ui.toast('No food in the tank to clear.',true);SFX.play('tick');return;}
   for(const q of L)trashFood(q);SFX.play('thunk');ui.toast(`Cleared ${L.length} food${L.length>1?'s':''} from the tank.`,true);}
 function overTrash(cx,cy){const t=$('trashBtn');if(!t||t.offsetParent===null||cx===undefined)return false;const r=t.getBoundingClientRect();return cx>=r.left-6&&cx<=r.right+6&&cy>=r.top-6&&cy<=r.bottom+6;}
-function dropHeld(){const q=game.held;if(!q)return;game.held=null;q.inHand=false;q.h=8;q.vh=0;
+function dropHeld(){const q=game.held;if(!q)return;game.held=null;q.inHand=false;q.paid=0;q.h=8;q.vh=0;
   if(q.pts){q.toWorld(8);q.x=q.pts[0].x;q.y=q.pts[0].y;}if(q.type==='fly')q.targetH=rand(10,20);
   const w=game.world;if(w){w.foodMem=w.foodMem||[];w.foodMem.push({x:q.x,y:q.y});if(w.foodMem.length>4)w.foodMem.shift();}}
 function up(){const P=game.pointer;P.down=false;SFX.mistOn(false);
   const tb=$('trashBtn');if(tb)tb.classList.remove('hot');
-  if(game.held&&overTrash(P.cx,P.cy)){const q=game.held;trashFood(q);SFX.play('thunk');ui.toast(`Threw away the ${FOODS[q.type].name.replace(/^an? /,'')}.`,true);}
+  if(game.held&&overTrash(P.cx,P.cy)){const q=game.held,pd=q.paid;trashFood(q);SFX.play('thunk');ui.toast(`Threw away the ${FOODS[q.type].name.replace(/^an? /,'')}${pd?` (refunded ${pd})`:''}.`,true);}
   dropHeld();
   if(game.grabbing){game.world.pet.release();game.grabbing=false;}
   if(game.dragObj){const o=game.dragObj;o.dragged=false;if(o instanceof Decor)[o.x,o.y]=landSnap(game.world,o.x,o.y);else if(waterAt(game.world,o.x,o.y)>0)game.world.ripples.push({x:o.x,y:o.y,age:0});if(o instanceof Toy){o.vx=clamp(P.vx*0.5,-150,150);o.vy=clamp(P.vy*0.5,-150,150);const sp=Math.hypot(o.vx,o.vy);o.vh=Math.min(45,sp*0.25);o.h=0.1;}
