@@ -25,13 +25,13 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 /* ---------- stage ---------- */
 #stage{position:fixed;inset:0;overflow:hidden;background:#0a0f0c}
 #c{display:block;image-rendering:pixelated;image-rendering:crisp-edges;cursor:none;touch-action:none;transform-origin:0 0}
-#zoomChip{position:fixed;z-index:25;display:flex;align-items:center;gap:4px;padding:4px;transition:opacity .2s,box-shadow .15s;touch-action:none;cursor:grab}
+#zoomChip{position:fixed;z-index:25;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px;transition:opacity .2s,box-shadow .15s;touch-action:none;cursor:grab}
 #zoomChip.drag{cursor:grabbing;box-shadow:inset 0 0 0 2px var(--moss),0 10px 24px rgba(0,0,0,.5)}
-#zGrip{width:12px;align-self:stretch;min-height:26px;border-radius:4px;background:radial-gradient(circle,#7c8c74 1.3px,transparent 1.8px) 1px 1px/5px 5px}
+#zGrip{height:10px;align-self:stretch;min-width:26px;border-radius:4px;background:radial-gradient(circle,#7c8c74 1.3px,transparent 1.8px) 1px 1px/5px 5px}
 #zoomChip .ibtn{width:34px;height:34px}#zoomChip .ibtn img{width:22px;height:22px}
 #zoomChip .ibtn.on{background:#2c4a24;box-shadow:inset 0 0 0 2px var(--moss),0 4px 0 #040604}
-#zLvl{font-family:var(--display);font-size:11px;min-width:42px;text-align:center}
-@media (max-width:760px){#zIn,#zOut{display:none}#zoomChip{gap:3px;padding:3px}#zoomChip .ibtn{width:30px;height:30px}#zoomChip .ibtn img{width:18px;height:18px}#zLvl{min-width:34px;font-size:10px}}
+#zLvl{font-family:var(--display);font-size:9px;min-width:0;text-align:center}
+@media (max-width:760px),(pointer:coarse){#zIn,#zOut,#zLvl{display:none}#zoomChip{gap:3px;padding:3px}#zoomChip .ibtn{width:32px;height:32px}#zoomChip .ibtn img{width:20px;height:20px}}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
 
 /* ---------- shared chunky panel look ---------- */
@@ -62,8 +62,10 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 #petText{display:flex;flex-direction:column;min-width:0}
 #petName{background:none;border:0;padding:0;font-size:15px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
 #petName:hover{color:var(--amber)}
-#petKind{font-size:17px;color:var(--mute);white-space:nowrap}
-#petMood{font-size:15px;white-space:nowrap;margin-left:2px}#petMood.thriving{color:#ffd86a}#petMood.content{color:var(--mute)}#petMood.grumpy{color:#9ab4d0}
+#petKind{font-size:17px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pnrow{display:flex;align-items:center;gap:6px;min-width:0}
+#petMood{font-family:var(--display);font-size:9px;white-space:nowrap;padding:2px 6px 1px;border-radius:9px;background:#26302a;box-shadow:0 0 0 2px #060a07;letter-spacing:.04em;flex:none}
+#petMood.thriving{color:#2a1c04;background:#ffd86a}#petMood.content{color:var(--mute)}#petMood.grumpy{color:#dce8f6;background:#4a5a70}
 #meters{display:flex;gap:8px;margin-left:6px}
 .meter{display:flex;align-items:center;gap:4px}
 .meter img{width:18px;height:18px}
@@ -81,6 +83,7 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 @keyframes tmsgin{from{opacity:0;transform:translateY(-6px) scale(.98)}}
 @keyframes toastpop{0%{transform:scale(.88);opacity:0}60%{transform:scale(1.03);opacity:1}100%{transform:scale(1)}}
 #topR{margin-left:auto;display:flex;align-items:center;gap:8px}
+#menusTop{display:flex;gap:6px}.mbtn{position:relative}.mbtn.goals{background:#2e2a1a}.mbtn.bag{background:#2e2418}.mbtn.gacha{background:#3a1f30}.mbtn.pets{background:#2a2433}
 #coins{display:flex;align-items:center;gap:6px;padding:6px 12px 6px 8px;font-family:var(--display);font-size:18px;color:var(--amber);cursor:pointer}
 #coins img{width:24px;height:24px}
 #coins.bump{animation:bump .35s}
@@ -104,7 +107,7 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .db.on span{color:var(--ink)}
 .db.menu{background:#2a2433}
 .db.menu.gacha,#d-gacha{background:#3a1f30}
-.db .dot{position:absolute;top:-5px;left:-5px;width:14px;height:14px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 2px #060a07;animation:bump 1.2s infinite}
+.mbtn .dot,.db .dot{position:absolute;top:-5px;left:-5px;width:14px;height:14px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 2px #060a07;animation:bump 1.2s infinite}
 #tray{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%);display:flex;gap:6px;padding:7px;max-width:calc(100vw - 24px);overflow-x:auto;animation:trayin .2s}
 @keyframes trayin{from{opacity:0;transform:translate(-50%,10px)}}
 .ti{position:relative;flex:none;width:56px;height:56px;display:grid;place-items:center;padding:0;background:var(--panel-2);border:3px solid #060a07;border-radius:8px;
@@ -135,7 +138,7 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .modal{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:16px;background:rgba(4,7,5,.62);backdrop-filter:blur(3px)}
 .sheet{position:relative;width:min(960px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:18px 20px 20px;animation:sheetin .28s cubic-bezier(.2,1.4,.4,1)}
 @keyframes sheetin{from{opacity:0;transform:translateY(24px) scale(.94)}}
-.sheet-h{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.sheet-h{display:flex;align-items:center;gap:12px;margin:-18px -20px 14px;padding:14px 20px 8px;position:sticky;top:-18px;z-index:3;background:var(--panel);border-radius:8px 8px 0 0}
 .sheet-h h2{margin:0;font-family:var(--display);font-size:24px;letter-spacing:.02em;text-wrap:balance}
 .sheet-h p{margin:0;color:var(--mute);font-size:19px}
 .sheet-h .x{margin-left:auto}
@@ -249,16 +252,31 @@ input[type=range]{accent-color:var(--moss);width:180px}
   :root{--top:150px;--bot:140px}
   #top{flex-wrap:wrap;height:auto;padding-top:8px;row-gap:8px}
   #toast{max-width:calc(100vw - 40px)}.tmsg{font-size:18px}
-  .db{width:52px;height:52px}.db img{width:36px;height:36px}.db span{display:none}.db kbd{display:none}.db.on{transform:translateY(-3px)}
-  #dock{gap:6px;padding:5px;flex-wrap:wrap;justify-content:center;width:max-content}.dgroup{gap:4px}.dsep{display:none}
+  .db{width:54px;height:54px}.db img{width:36px;height:36px}.db span{display:none}.db kbd{display:none}.db.on{transform:translateY(-3px)}
+  #dock{gap:6px;padding:5px;justify-content:center;width:max-content}.dgroup{gap:5px}
   #petCard{flex-wrap:wrap;row-gap:6px;width:100%}#meters{width:100%;margin-left:0;gap:12px}#meters .meter{flex:1;min-width:0}#meters .bar{flex:1;width:auto;height:12px}#meters .meter img{width:20px;height:20px}
-  #topR{margin-left:auto}
+  #topR{margin-left:0;width:100%;justify-content:space-between}#menusTop{gap:5px}
   #tray{flex-wrap:wrap;justify-content:center;overflow:visible;max-width:calc(100vw - 16px);width:max-content;gap:5px;padding:6px}
   #tray .tcats{flex-direction:row;flex-basis:100%;justify-content:center;margin:0 0 2px}#tray .tcat{flex:1;min-width:0;text-align:center;padding:5px 4px;font-size:11px}
   #tray .ti{width:44px;height:44px}#tray .ti canvas{width:36px;height:26px}#tray .tsep{display:none}#tray .ti .tl{font-size:7px;bottom:2px}#tray .ti canvas{margin-top:-6px}
   .tray-note{white-space:normal;flex-basis:100%;font-size:16px}
   .gwrap{grid-template-columns:1fr}.machine{justify-self:center}
   #gcv{width:256px;height:352px}
+}
+@media (orientation:portrait) and (min-width:761px) and (max-width:1100px){
+  #top{flex-wrap:wrap;height:auto;padding-top:10px;row-gap:10px}
+  #petCard{width:100%}#meters{margin-left:auto}
+  #topR{margin-left:0;width:100%;justify-content:flex-start;gap:10px}#menusTop{margin-left:auto;gap:8px}
+}
+@media (max-height:500px) and (min-width:600px){
+  :root{--top:56px}
+  #top{padding-top:4px}#petCard{padding:3px 10px 3px 5px}#lvl{width:36px;height:36px}#lvl b{font-size:13px}
+  #petName{font-size:13px}#petKind{font-size:15px}.meter .bar{width:42px}
+  #topR .ibtn{width:38px;height:38px}#topR .ibtn img{width:24px;height:24px}#coins{padding:4px 10px 4px 6px;font-size:16px}#coins img{width:20px;height:20px}
+  #dock{bottom:6px;padding:4px;gap:4px}.dgroup{gap:4px}.db{width:44px;height:44px}.db img{width:30px;height:30px}.db span,.db kbd{display:none}.db.on{transform:translateY(-3px)}
+  #tray{bottom:calc(100% + 6px);padding:4px;gap:4px}#tray .ti{width:40px;height:40px}#tray .ti canvas{width:34px;height:24px;margin-top:-5px}#tray .ti .tl{font-size:7px;bottom:1px}#tray .ti .tpr{font-size:8px}
+  #tray .tcats{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-right:2px}#tray .tcat{min-width:0;padding:2px 5px;font-size:9px}
+  .tmsg{font-size:17px;padding:5px 12px 4px}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
@@ -269,7 +287,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
 <div id="top">
   <div id="petCard" class="chunk">
     <div id="lvl" title="Bond level"><b id="lvlNum">1</b><small>LV</small></div>
-    <div id="petText"><button id="petName" title="Personality and stats">…</button><span id="petKind">…</span><span id="petMood"></span></div>
+    <div id="petText"><div class="pnrow"><button id="petName" title="Personality and stats">…</button><span id="petMood"></span></div><span id="petKind">…</span></div>
     <div id="petStats" class="chunk" hidden></div>
     <div id="meters">
       <div class="meter" id="mFed" title="Fed"><img class="px" id="icFed" alt=""><div class="bar"><i style="--c:var(--amber)"></i></div></div>
@@ -280,6 +298,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
   </div>
   <div id="topR">
     <div id="coins" class="chunk" title="Coins"><img class="px" id="icCoin" alt=""><span id="coinNum">0</span></div>
+    <div id="menusTop"></div>
     <button class="ibtn" id="btnLight" title="Lights (L)"><img class="px" alt="Toggle lights"></button>
     <button class="ibtn" id="btnSettings" title="Settings"><img class="px" alt="Settings"></button>
   </div>
@@ -297,8 +316,6 @@ input[type=range]{accent-color:var(--moss);width:180px}
 <div id="dock" class="chunk">
   <div id="tray" class="chunk" hidden></div>
   <div class="dgroup" id="tools"></div>
-  <div class="dsep"></div>
-  <div class="dgroup" id="menus"></div>
 </div>
 
 <div class="modal" id="mGoals" hidden><div class="sheet chunk" style="width:min(620px,100%)">
@@ -5579,7 +5596,8 @@ const ui={
     const mk=(d,menu)=>{const b=document.createElement('button');b.className='db'+(menu?' menu '+d.id:'');b.id='d-'+d.id;b.title=`${d.label} (${d.key})`;
       b.innerHTML=`<img class="px" src="${iconURL(d.id)}" alt=""><span>${d.label}</span><kbd>${d.key}</kbd>`;return b;};
     for(const d of TOOLS){const b=mk(d,false);b.addEventListener('click',()=>this.toolClick(d.id));$('tools').appendChild(b);}
-    for(const d of MENUS){const b=mk(d,true);b.addEventListener('click',()=>{SFX.play('ui');this.openModal('m'+d.id[0].toUpperCase()+d.id.slice(1));});$('menus').appendChild(b);}
+    for(const d of MENUS){const b=document.createElement('button');b.className='ibtn mbtn '+d.id;b.id='d-'+d.id;b.title=`${d.label} (${d.key})`;b.setAttribute('aria-label',d.label);b.innerHTML=`<img class="px" src="${iconURL(d.id)}" alt="">`;
+      b.addEventListener('click',()=>{SFX.play('ui');this.openModal('m'+d.id[0].toUpperCase()+d.id.slice(1));});$('menusTop').appendChild(b);}
     $('petName').addEventListener('click',e=>{e.stopPropagation();if(!game.kind)return;const st=$('petStats');if(st.hidden){this.renderStats();st.hidden=false;}else st.hidden=true;SFX.play('ui');});
     document.addEventListener('pointerdown',e=>{const st=$('petStats');if(!st.hidden&&!e.target.closest('#petStats')&&!e.target.closest('#petName'))st.hidden=true;});
     $('coins').addEventListener('click',()=>this.openModal('mGacha'));
@@ -5660,7 +5678,7 @@ const ui={
   update(){
     const w=game.world;if(!w||!w.pet)return;const S=w.stats;
     for(const[k,id]of[['fed','mFed'],['water','mWater'],['clean','mClean'],['happy','mHappy']]){const el=$(id);el.querySelector('i').style.width=(S[k]??100).toFixed(0)+'%';el.classList.toggle('low',(S[k]??100)<25);}
-    if(this.moodShown!==w.mood){this.moodShown=w.mood;const m=$('petMood');m.className=w.mood||'content';m.textContent=w.mood==='thriving'?'✦ Thriving':w.mood==='grumpy'?'☁ Grumpy':'· Content';
+    if(this.moodShown!==w.mood){this.moodShown=w.mood;const m=$('petMood');m.className=w.mood||'content';m.textContent=w.mood==='thriving'?'✦ THRIVING':w.mood==='grumpy'?'☁ GRUMPY':'CONTENT';
       m.title=w.mood==='thriving'?'Fed, watered, happy and in a clean tank: plays more, leaves you tips and bonus cuddle coins':w.mood==='grumpy'?'Something is wrong (hungry, thirsty, sad or a dirty tank). Grumpy critters sulk and skip cuddle coins until it is fixed':'Doing fine. Keep everything above 70 and the tank clean to make it thrive';}
     if(this.evT<=0){let msg,now=true;
       if(game.placing)msg=`Click in the tank to place the ${ITEMS[game.placing].name.toLowerCase()} · Esc cancels`;
@@ -5974,7 +5992,7 @@ function fit(){
   cam.mT=Math.round(topH+6);cam.mB=Math.round(dockH+64);
   $('toast').style.top=Math.round((topH+8)/uiZ($('toast')))+'px';
   const zc=$('zoomChip'),zp=save.set.zoomPos,ZC=uiZ(zc);
-  if(zp)placeZoomChip(zp[0]*vw,zp[1]*vh);else{zc.style.left='auto';zc.style.right=Math.round(10/ZC)+'px';zc.style.top=Math.round((vh-cam.mB-zc.getBoundingClientRect().height-6)/ZC)+'px';}
+  if(zp)placeZoomChip(zp[0]*vw,zp[1]*vh);else{zc.style.left='auto';zc.style.right=Math.round(8/ZC)+'px';zc.style.top=Math.round(Math.max(topH+8,(vh-zc.getBoundingClientRect().height)/2)/ZC)+'px';}
   if(!cam.init){cam.init=true;camReset();}else camApply();
 }
 window.addEventListener('resize',fit);
