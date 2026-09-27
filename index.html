@@ -107,6 +107,22 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .db.on{background:#2c4a24;box-shadow:inset 0 0 0 2px var(--moss),0 4px 0 #040604,0 0 18px rgba(156,211,94,.35);transform:translateY(-6px)}
 .db.on span{color:var(--ink)}
 .db.menu{background:#2a2433}
+/* Fun UI: the dock is a wooden pegboard; tools hang from brass pegs and leave a painted outline when lifted */
+body.fun #dock{border-color:#1a0f06;border-radius:10px;padding:8px 10px 6px;
+  background:radial-gradient(circle,#2a180a 1.5px,rgba(42,24,10,.35) 2.1px,transparent 2.6px) 6px 5px/13px 13px,repeating-linear-gradient(90deg,rgba(0,0,0,.05) 0 2px,transparent 2px 7px,rgba(255,220,160,.04) 7px 8px,transparent 8px 19px),linear-gradient(#9a6c3c,#7a522a 60%,#6a4522);
+  box-shadow:inset 0 0 0 3px #4a2c12,inset 0 3px 0 5px rgba(255,210,150,.12),0 5px 0 #1a0f06,0 10px 18px rgba(0,0,0,.45)}
+body.fun .db{background:none;border:0;box-shadow:none;transform:none!important;padding-top:12px;overflow:visible}
+body.fun .db::before{content:"";position:absolute;top:2px;left:50%;width:8px;height:8px;margin-left:-4px;border-radius:50%;z-index:2;
+  background:radial-gradient(circle at 35% 30%,#fff0b0 0 1px,#e0b050 1.5px,#8a5a1a 4px);box-shadow:0 0 0 2px #2a1606,1px 2px 0 1px rgba(0,0,0,.35)}
+body.fun .db img{transform-origin:50% -4px;transform:rotate(var(--sw,0deg));transition:filter .22s,opacity .22s;
+  filter:brightness(1) opacity(1) drop-shadow(2px 3px 0 rgba(20,10,2,.5))}
+body.fun .db:hover img{transform:rotate(var(--sw,0deg))}
+body.fun .db.on img{filter:brightness(0) opacity(.3) drop-shadow(0 0 0 rgba(20,10,2,0));animation:lift .3s ease-out}
+@keyframes lift{0%{filter:brightness(1) opacity(1) drop-shadow(2px 3px 0 rgba(20,10,2,.5));translate:0 0}45%{filter:brightness(1.2) opacity(.9) drop-shadow(3px 8px 0 rgba(20,10,2,.3));translate:0 -10px}100%{translate:0 0}}
+body.fun .db.on::after{content:"";position:absolute;top:6px;left:50%;width:2px;height:8px;margin-left:-1px;background:#c8a050;border-radius:1px;box-shadow:0 0 0 1px #2a1606;transform:rotate(8deg);transform-origin:top}
+body.fun .db span{color:#2a1606;text-shadow:0 1px 0 rgba(255,220,160,.35);font-weight:bold}body.fun .db.on span{color:#2a1606}
+body.fun .db kbd{color:#3a220c;opacity:.7;top:1px;right:6px}
+body.fun .db.on{background:radial-gradient(ellipse at 50% 55%,rgba(255,220,120,.18),transparent 70%)}
 .db.menu.gacha,#d-gacha{background:#3a1f30}
 .mbtn .dot,.db .dot{position:absolute;top:-5px;left:-5px;width:14px;height:14px;border-radius:50%;background:var(--pink);box-shadow:0 0 0 2px #060a07;animation:bump 1.2s infinite}
 #tray{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%);display:flex;gap:6px;padding:7px;max-width:calc(100vw - 24px);overflow-x:auto;animation:trayin .2s}
@@ -265,7 +281,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
   #top{flex-wrap:wrap;height:auto;padding-top:8px;row-gap:8px}
   #toast{max-width:calc(100vw - 40px)}.tmsg{font-size:18px}
   .db{width:54px;height:54px}.db img{width:36px;height:36px}.db span{display:none}.db kbd{display:none}.db.on{transform:translateY(-3px)}
-  #dock{gap:6px;padding:5px;justify-content:center;width:max-content}.dgroup{gap:5px}
+  #dock{gap:6px;padding:5px;justify-content:center;width:max-content;max-width:none}.dgroup{gap:5px}
   #petCard{width:100%;gap:8px;padding:5px 8px 5px 6px}#petText{flex:1}#petName{max-width:100%}
   #meters{margin-left:auto;display:grid;grid-template-columns:auto auto;gap:5px 8px;flex:none}#meters .bar{width:44px;height:10px}#meters .meter img{width:18px;height:18px}
   #topR{margin-left:0;width:100%;justify-content:space-between}#menusTop{gap:5px}
@@ -280,6 +296,8 @@ input[type=range]{accent-color:var(--moss);width:180px}
   #tray.supply .ti.trash{grid-area:1/3/3/4;width:44px;height:auto;align-self:stretch}#tray.supply .sp-info{grid-column:1/4;font-size:14px;line-height:17px}#tray.supply .sp-l{font-size:8px;padding:2px 6px 1px}
 }
 @media (max-width:340px){#tray.supply canvas{width:112px;height:64px}}
+@media (max-width:760px){body.fun #dock{padding:6px 5px 4px}body.fun .db{padding-top:10px}}
+@media (max-height:500px) and (min-width:600px){body.fun #dock{padding:5px 4px 3px}body.fun .db{padding-top:9px}body.fun .db img{width:28px;height:28px}}
 @media (orientation:portrait) and (min-width:761px) and (max-width:1100px){
   #top{flex-wrap:wrap;height:auto;padding-top:10px;row-gap:10px}
   #petCard{width:100%}#meters{margin-left:auto}
@@ -5693,7 +5711,7 @@ function iconURL(name){
 const TOOLS=[{id:'feed',label:'Feed',key:'1'},{id:'pet',label:'Pet',key:'2'},{id:'grab',label:'Grab',key:'3'},{id:'mist',label:'Mist',key:'4'},{id:'scoop',label:'Scoop',key:'5'},{id:'tap',label:'Tap',key:'6'},{id:'play',label:'Play',key:'7'}];
 const MENUS=[{id:'goals',label:'Goals',key:'O'},{id:'bag',label:'Bag',key:'B'},{id:'gacha',label:'Gacha',key:'G'},{id:'pets',label:'Pets',key:'P'}];
 const ui={
-  open:null,bagTab:'hat',revealShown:false,coinShown:0,evT:0,previews:[],resetArm:0,
+  open:null,swing:{},bagTab:'hat',revealShown:false,coinShown:0,evT:0,previews:[],resetArm:0,
   modalOpen(){return!!this.open;},
   init(){
     $('icFed').src=iconURL('fed');$('icWater').src=iconURL('water');$('icHappy').src=iconURL('heart');$('icClean').src=iconURL('clean');$('icCoin').src=iconURL('coin');
@@ -5714,7 +5732,10 @@ const ui={
     zc.addEventListener('dblclick',e=>{if(e.target.closest('button'))return;delete save.set.zoomPos;markDirty();fit();});
     const mk=(d,menu)=>{const b=document.createElement('button');b.className='db'+(menu?' menu '+d.id:'');b.id='d-'+d.id;b.title=`${d.label} (${d.key})`;
       b.innerHTML=`<img class="px" src="${iconURL(d.id)}" alt=""><span>${d.label}</span><kbd>${d.key}</kbd>`;return b;};
-    for(const d of TOOLS){const b=mk(d,false);b.addEventListener('click',()=>this.toolClick(d.id));$('tools').appendChild(b);}
+    for(const d of TOOLS){const b=mk(d,false);b.addEventListener('click',()=>this.toolClick(d.id));$('tools').appendChild(b);
+      const sp=this.swing[d.id]={a:0,v:0,b,img:b.querySelector('img'),on:false};
+      b.addEventListener('pointerenter',e=>{if(!document.body.classList.contains('fun'))return;sp.v+=(e.movementX>=0?1:-1)*rand(60,110);});
+      b.addEventListener('pointermove',e=>{if(!document.body.classList.contains('fun'))return;sp.v+=clamp(e.movementX,-12,12)*7;});}
     for(const d of MENUS){const b=document.createElement('button');b.className='ibtn mbtn '+d.id;b.id='d-'+d.id;b.title=`${d.label} (${d.key})`;b.setAttribute('aria-label',d.label);b.innerHTML=`<img class="px" src="${iconURL(d.id)}" alt="">`;
       b.addEventListener('click',()=>{SFX.play('ui');this.openModal('m'+d.id[0].toUpperCase()+d.id.slice(1));});$('menusTop').appendChild(b);}
     $('petName').addEventListener('click',e=>{e.stopPropagation();if(!game.kind)return;const st=$('petStats');if(st.hidden){this.renderStats();st.hidden=false;}else st.hidden=true;SFX.play('ui');});
@@ -5757,7 +5778,8 @@ const ui={
     setTool(id);
   },
   syncDock(){const t=game.tool,key=(TOY_TOOLS.includes(t)||t==='play')?'play':t;
-    for(const d of TOOLS)$('d-'+d.id).classList.toggle('on',d.id===key);
+    for(const d of TOOLS){const on=d.id===key,sp=this.swing[d.id];$('d-'+d.id).classList.toggle('on',on);
+      if(sp&&sp.on!==on){sp.on=on;if(document.body.classList.contains('fun')){sp.v+=on?0:rand(-1,1)>0?160:-160;if(!on)SFX.play('clack');}}}
     const gl=$('d-goals');if(gl){let d2=gl.querySelector('.dot');const on=(save.achNew||0)>0||(save.daily&&save.daily.tasks.some(t=>t.done)&&!save.daily.seen);if(on&&!d2){d2=document.createElement('i');d2.className='dot';gl.appendChild(d2);}else if(!on&&d2)d2.remove();}
     const g=$('d-gacha');let dot=g.querySelector('.dot');const can=save.coins>=50;if(can&&!dot){dot=document.createElement('i');dot.className='dot';g.appendChild(dot);}else if(!can&&dot)dot.remove();},
   renderTray(){
@@ -5818,6 +5840,8 @@ const ui={
     if(this.open==='mGacha'){gStep(dt);gDraw();}
     if(this.open==='mPets')this.tickPreviews(dt);
     if(SUP.on)SUP.tick(dt);
+    if(document.body.classList.contains('fun'))for(const id in this.swing){const sp=this.swing[id];if(Math.abs(sp.a)<0.05&&Math.abs(sp.v)<0.5){if(sp.a!==0){sp.a=0;sp.img.style.removeProperty('--sw');}continue;}
+      const n=Math.max(1,Math.ceil(dt/0.008)),h=dt/n;for(let k=0;k<n;k++){sp.v+=(-90*sp.a-4.6*sp.v)*h;sp.a+=sp.v*h;}sp.a=clamp(sp.a,-35,35);sp.img.style.setProperty('--sw',sp.a.toFixed(2)+'deg');}
     this.liveT=(this.liveT||0)-dt;if(this.liveT<=0){this.liveT=0.5;const c=$('psCud');if(c&&!$('petStats').hidden)c.innerHTML=this.cuddleHTML();if(this.open==='mGoals'){const r=$('gReset');if(r)r.textContent=dailyResetText();}}
   },
   renderStats(){const pet=game.world.pet;if(!pet)return;const M=pet.mind,B=MIND[game.kind]||MIND.default;
