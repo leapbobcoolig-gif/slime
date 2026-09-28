@@ -5219,7 +5219,7 @@ function updatePlay(dt){
     }else if(tool==='scoop'){scoopAt(P.x,P.y,false);
     }else if(tool==='bubbles'){
       game.bubbleT-=dt;if(game.bubbleT<=0&&w.bubbles.length<14){game.bubbleT=0.16;SFX.play('blow');
-        w.bubbles.push({kind:'bubble',label:'a bubble',play:true,dead:false,caught:false,x:P.x+rand(-2,2),y:P.y+10,h:10,vx:rand(-10,10),vy:rand(-8,8),r:rand(1.6,3),life:rand(6,10),ph:rand(TAU),
+        w.bubbles.push({kind:'bubble',label:'a bubble',play:true,dead:false,caught:false,x:P.x+rand(-1,1),y:P.y+10,h:10,vx:clamp((P.vx||0)*0.3,-60,60)+rand(-8,8),vy:clamp((P.vy||0)*0.3,-45,45)+rand(-6,6),r:rand(1.6,3),life:rand(6,10),ph:rand(TAU),
           onCatch(){this.dead=true;popBubble(w,this);}});}
     }
   }
@@ -5239,7 +5239,7 @@ function updatePlay(dt){
   {const rc=w.toys.find(t=>t.id==='rc');SFX.engine(rc&&(w.rcTarget||rc.spd>2)&&!ui.modalOpen()?Math.min(1,rc.spd/64+(w.rcTarget?0.08:0)):0);}
   P.stillT=(P.stillT||0)+dt;
   const hq=game.held;
-  if(hq){hq.sx=P.x;hq.sy=P.y;hq.x=P.x;hq.y=P.y+8;hq.h=8;}
+  if(hq){const sw=game.toolMotion&&FUN('tools')?game.toolMotion.a:0;hq.sx=P.x-sw*4;hq.sy=P.y+Math.abs(sw)*1.5;hq.x=P.x;hq.y=P.y+8;hq.h=8;}
   pet.update(w.mood==='grumpy'?dt*0.8:dt);if(pet.plop>0)pet.plop-=dt;
   if(hq&&(hq.caught||hq.dead)){game.held=null;hq.inHand=false;
     if(hq.caught){S.happy=Math.min(100,S.happy+6);SFX.play('sparkle');addCoins(3,P.x,P.y);addXP(6);track('handfeeds');reqEvent('hand');
@@ -5431,7 +5431,9 @@ function drawCursor(w){drawRequest(fb,w);
   const P=game.pointer;if(!P.inside)return;if(funHand()){if(!P.touch||game.hand||game.knockT>0)drawHand(w);return;}if(P.touch)return;const x=Math.round(P.x),y=Math.round(P.y),t=game.tool;
   if(game.placing)return;
   if(t==='feed'&&game.cursorUI)return;
-  if(t==='feed'){drawTweezers(x,y,!!game.held||P.down);if(!game.held)drawFoodAt(fb,game.food,x+7,y+7,w.t);}
+  if(t==='feed'&&FUN('tools')){heldTool(w,'feed',x,y,P);if(!game.held&&!FUN('food'))drawFoodAt(fb,game.food,x+7,y+7,w.t);}
+  else if(t==='bubbles'&&FUN('tools'))heldTool(w,'bubbles',x,y,P);
+  else if(t==='feed'){drawTweezers(x,y,!!game.held||P.down);if(!game.held)drawFoodAt(fb,game.food,x+7,y+7,w.t);}
   else if(FUN('tools')&&(t==='mist'||t==='scoop')){heldTool(w,t,x,y,P);if(t==='scoop'){const m=scoopTarget(w,P.x,P.y);if(m){const a=w.t*5;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,m.x+Math.cos(aa)*5,m.y-(m.h||0)+Math.sin(aa)*4,hex('#9ad8f0'));}}}}
   else if(t==='mist'){const r=12;for(let i=0;i<24;i++){const a=i/24*TAU+w.t*0.8;if(i%2)pset(fb,x+Math.cos(a)*r,y+Math.sin(a)*r*0.8,CUR_PAL.w);}pset(fb,x,y,CUR_PAL.w);pset(fb,x+1,y+1,CUR_PAL.k);}
   else if(t==='pet')sprite(fb,CUR.pet,x-3,y-3,CUR_PAL);
@@ -5445,13 +5447,31 @@ function drawCursor(w){drawRequest(fb,w);
 // Fun mode: the tool you took off the pegboard is what you hold in the tank
 function heldTool(w,t,x,y,P){const k=t==="mist"?0.85:0.75;let ang,wu,wv,o={t:w.t};
   let tx=x,ty=y;
+  // every held tool leans into the way you move it, overshoots a touch and springs back upright
+  const M=game.toolMotion||(game.toolMotion={a:0,va:0,open:0.9,lt:w.t,glint:0,drips:[]}),dt=clamp(w.t-M.lt,0,0.05);M.lt=w.t;
+  const lean=clamp(-(P.vx||0)*0.0035,-0.45,0.45);M.va+=((lean-M.a)*90-M.va*9)*dt;M.a+=M.va*dt;
   if(t==='mist'){o.flip=true;ang=-0.6+(P.down?Math.sin(w.t*28)*0.03:0);wu=5.8;wv=3.2;tx=x+6;ty=y-8;o.squeeze=P.down?0.6+0.4*Math.sin(w.t*30):0;o.slosh=Math.sin(w.t*3);
     const r=12;for(let i=0;i<24;i++){const a=i/24*TAU+w.t*0.8;if(i%2)pmix(fb,x+Math.cos(a)*r,y+Math.sin(a)*r*0.8,CUR_PAL.w,0.55);}pset(fb,x,y,CUR_PAL.w);
     if(P.down)for(let i=0;i<5;i++){const f=rand(0.2,1);pmix(fb,tx+(x-tx)*f+rand(-1.5,1.5),ty+(y-ty)*f+rand(-1.5,1.5),hex('#e8f8ff'),0.7);}}
-  else{ang=0.55+(P.down?Math.sin(w.t*14)*0.12:0);wu=0;wv=21.4;}
+  else if(t==='feed'){// tweezers: tips at the pointer; jaws ease open near food, snap shut to pinch
+    let near=null,bd=10;if(!game.held)for(const q of w.prey){if(q.caught||q.dead||q.stale||q.inHand)continue;const d=Math.hypot(q.x-x,q.y-(q.h||0)-y);if(d<bd){bd=d;near=q;}}
+    const shut=!!game.held||P.down,tgt=shut?0:near?2.8:0.6,was=M.open;M.open+=(tgt-M.open)*Math.min(1,dt*(shut?30:9));if(was>0.5&&M.open<=0.5)M.glint=0.25;
+    ang=0.5+M.a;wu=0;wv=26;o.open=M.open;ddisc(fb,x+1,y+3,2.2,0.62);
+    if(near){const a=w.t*5;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,near.x+Math.cos(aa)*5,near.y-(near.h||0)+Math.sin(aa)*4,hex('#ffe9a0'));}}}
+  else if(t==='bubbles'){// bubble wand: ring at the pointer, a living soap film that bulges and lets bubbles go
+    ang=0.45+M.a;wu=0;wv=19;o.film=1;ddisc(fb,x+2,y+6,3,0.7);}
+  else{ang=0.55+(P.down?Math.sin(w.t*14)*0.12:0)+M.a;wu=0;wv=21.4;}
+  if(t==='mist')ang+=M.a*0.6;
   const F=o.flip?-1:1,c=Math.cos(ang),s=Math.sin(ang),hx=tx-(F*wu*c-wv*s)*k,hy=ty-(F*wu*s+wv*c)*k-(t==='scoop'&&P.down?-2:0);
   ddisc(fb,t==='mist'?tx+4:x+3,t==='mist'?ty+16:y+5,t==='mist'?3:4,0.7);
-  fb.clearLayer();drawTool(fb,t,hx,hy,ang,k,o);composite(fb,OBJ_PAINTER,{sAmt:.6,sdx:2,sdy:3});toolDetails(fb,t,hx,hy,ang,k,o);}
+  fb.clearLayer();drawTool(fb,t,hx,hy,ang,k,o);composite(fb,OBJ_PAINTER,{sAmt:.6,sdx:2,sdy:3});toolDetails(fb,t,hx,hy,ang,k,o);
+  if(t==='feed'&&M.glint>0){M.glint-=dt;const g=M.glint/0.25;for(const[dx,dy]of[[-2,-2],[2,-2],[0,-3],[-3,0],[3,0]])pmix(fb,x+dx*(1+(1-g)),y+dy*(1+(1-g))-1,hex('#ffffff'),g*0.9);}
+  if(t==='bubbles'){// film bulge grows with each breath, then snaps back when a bubble breaks free
+    const st=P.down?clamp(1-(game.bubbleT||0)/0.16,0,1):0.15+0.1*Math.sin(w.t*2.4),ax=Math.sin(ang),ay=-Math.cos(ang),r=1.4+st*2.6,cx=x-ax*st*3.2,cy=y-ay*st*3.2;
+    for(let yy=Math.floor(cy-r-1);yy<=cy+r+1;yy++)for(let xx=Math.floor(cx-r-1);xx<=cx+r+1;xx++){const d=Math.hypot(xx+.5-cx,yy+.5-cy);if(d>r)continue;const e=d/r,h=Math.sin(xx*0.9+yy*0.7+w.t*4);
+      pmix(fb,xx,yy,e>0.78?(h>0?hex('#bff4ff'):hex('#ffc8f0')):hex('#eafcff'),e>0.78?0.55:0.12+0.1*st);}
+    if(M.drips.length<4&&Math.random()<dt*0.9)M.drips.push({x:x+rand(-2,2),y:y+2,vy:0,life:0.8});
+    for(const d of M.drips){d.vy+=60*dt;d.y+=d.vy*dt;d.life-=dt;pmix(fb,d.x,d.y,hex('#d8f6ff'),0.7*Math.max(0,d.life/0.8));}M.drips=M.drips.filter(d=>d.life>0);}}
 const SEATINT=hex('#144a66'),GRUMPBUF=new Uint32Array(N),PLOPBUF=new Uint32Array(N);let grumpRect=null,plopRect=null;
 function renderObjects(list){
   if(!list.length)return;const w=game.world;
