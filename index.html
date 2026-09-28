@@ -111,7 +111,7 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 #gauges{display:none}
 /* Fun food drawer: a stack of wooden trays, each holding a row of little glass tanks */
 #tray.drawer{display:flex;gap:6px;padding:0;overflow:visible;width:min(800px,calc(100vw - 16px));align-items:stretch;background:none;border:0;box-shadow:none;
-  --tw:160px;--th:112px;--rows:2;--rh:calc(var(--th) + 36px)}
+  --tw:160px;--th:112px;--rows:1;--rh:calc(var(--th) + 36px)}
 .dr-rows{flex:1;min-width:0;height:calc(var(--rows)*var(--rh));overflow:hidden;touch-action:none}
 .dr-row{height:var(--rh);position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:8px;box-sizing:border-box}
 .dr-strip{position:relative;z-index:1;display:flex;gap:14px;overflow:hidden;padding:10px 40px 0 14px;cursor:grab}
@@ -5055,8 +5055,8 @@ const MURK=hex('#4a6a2a');
 // =====================================================================
 const ACH=[
   {id:'firstbite',cat:'Care',t:'First Bite',d:'Feed a critter its first meal',k:'meals',n:1,rw:10},
-  {id:'hand10',cat:'Care',t:'Hand-feeder',d:'Feed from the tweezers 10 times',k:'handfeeds',n:10,rw:20},
-  {id:'hand50',cat:'Care',t:'Tweezer Master',d:'Feed from the tweezers 50 times',k:'handfeeds',n:50,rw:50},
+  {id:'hand10',cat:'Care',t:'Hand-feeder',d:'Hand-feed 10 times (tweezers or your hand)',k:'handfeeds',n:10,rw:20},
+  {id:'hand50',cat:'Care',t:'Tweezer Master',d:'Hand-feed 50 times',k:'handfeeds',n:50,rw:50},
   {id:'clean10',cat:'Care',t:'Tidy Keeper',d:'Scoop up 10 messes',k:'cleans',n:10,rw:15},
   {id:'clean50',cat:'Care',t:'Spotless Legend',d:'Scoop up 50 messes',k:'cleans',n:50,rw:40},
   {id:'treats10',cat:'Care',t:'Spoilt Rotten',d:'Buy 10 fancy treats (5+ coins)',k:'treats',n:10,rw:25},
@@ -5244,7 +5244,7 @@ function updatePlay(dt){
   if(hq&&(hq.caught||hq.dead)){game.held=null;hq.inHand=false;
     if(hq.caught){S.happy=Math.min(100,S.happy+6);SFX.play('sparkle');addCoins(3,P.x,P.y);addXP(6);track('handfeeds');reqEvent('hand');
       for(let i=0;i<8;i++){const a=rand(TAU),v=rand(14,30);spawn(w,'spark2',P.x,P.y,{vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.35,.6)});}
-      flash(`${game.name} took ${PREY_NAME[hq.type]} right from the tweezers!`);}}
+      flash(game.heldBy==='hand'?`${game.name} ate ${PREY_NAME[hq.type]} right out of your hand!`:`${game.name} took ${PREY_NAME[hq.type]} right from the tweezers!`);}}
   for(const p of w.prey){p.update(dt,w);floatPrey(p,w,dt);if(!p.caught&&!p.inHand&&!p.stale&&!LIVE_FOOD.includes(p.type)&&p.h<=0.5){p.age=(p.age||0)+dt;if(p.age>180)p.stale=true;}}
   // how fast things are moving (critters notice motion from much further away)
   const trackMv=o=>{if(!o)return;const x=o.x,y=o.y,v=o._px===undefined?0:Math.hypot(x-o._px,y-o._py)/Math.max(dt,1e-3);o._mv=(o._mv||0)+(v-(o._mv||0))*Math.min(1,dt*6);o._px=x;o._py=y;};
@@ -6511,7 +6511,7 @@ function movePinch(){const P=pinchPts(),nz=clamp(pinch.z0*P.d/pinch.d0,cam.zmin,
 // dragging a food straight out of the tray: after a short drag you're holding one, drop it in the tank
 window.addEventListener('pointermove',e=>{const D=ui.fdrag;if(!D)return;
   if(!D.active){if(Math.hypot(e.clientX-D.x,e.clientY-D.y)<6)return;const w=game.world;if(w.prey.length>=12){flash('That is plenty of food for now.');ui.fdrag=null;return;}
-    if(!buyFood(D.f)){ui.fdrag=null;return;}D.active=true;if(D.src)DRAWER.take(D.src);game.food=D.f;const[x,y]=toPix(e),q=makeFood(D.f,x,y+8,8);q.paid=FOOD_PRICE[D.f]||0;if(q.pts&&q.toScreen)q.toScreen();q.inHand=true;q.sx=x;q.sy=y;w.prey.push(q);game.held=q;game.heldT=performance.now();game.heldNew=null;SFX.play('tick');ui.renderTray();ui.tuckTray('drag');}
+    if(!buyFood(D.f)){ui.fdrag=null;return;}D.active=true;if(D.src)DRAWER.take(D.src);game.food=D.f;const[x,y]=toPix(e),q=makeFood(D.f,x,y+8,8);q.paid=FOOD_PRICE[D.f]||0;if(q.pts&&q.toScreen)q.toScreen();q.inHand=true;q.sx=x;q.sy=y;w.prey.push(q);game.held=q;game.heldBy='tweezers';game.heldT=performance.now();game.heldNew=null;SFX.play('tick');ui.renderTray();ui.tuckTray('drag');}
   const r=canvas.getBoundingClientRect(),[x,y]=toPix(e),P=game.pointer;P.x=x;P.y=y;P.cx=e.clientX;P.cy=e.clientY;if(game.held){game.held.sx=x;game.held.sy=y;}P.inside=e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;
   const tb=$('trashBtn');if(tb)tb.classList.toggle('hot',overTrash(e.clientX,e.clientY));});
 window.addEventListener('pointerup',e=>{const D=ui.fdrag;ui.fdrag=null;if(!D||!D.active)return;if(ui.tuck==='drag')setTimeout(()=>{if(ui.tuck==='drag')ui.tuckTray(null);},120);ui.fdragDone=true;setTimeout(()=>{ui.fdragDone=false;},0);const q=game.held;if(!q)return;
@@ -6546,7 +6546,7 @@ canvas.addEventListener('pointerdown',e=>{
     if(!q){if(w.prey.length>=12){flash('That is plenty of food for now.');return;}if(!buyFood(game.food))return;
       q=makeFood(game.food,x,y+8,8);q.__new=true;q.paid=FOOD_PRICE[game.food]||0;if(q.pts)q.toScreen();w.prey.push(q);if(q.type==='fly')SFX.play('buzz');}
     else if(q.pts)q.toScreen();
-    q.inHand=true;q.hidden=false;q.vh=0;q.sx=x;q.sy=y;q.x=x;q.y=y+8;q.h=8;if(q.type==='snail')q.hideT=0;game.held=q;game.heldT=performance.now();game.heldNew=q.__new?q:null;q.__new=false;SFX.play('tick');
+    holdFood(q,x,y,'tweezers');
   }else if(tool==='scoop'){scoopAt(x,y,true);
   }else if(tool==='grab'){
     if(pet.tryGrab(x,y)){game.grabbing=true;w.stats.happy=Math.max(0,w.stats.happy-1.4*(1.2-pet.mind.bold));SFX.play('squeak');}
@@ -6638,6 +6638,7 @@ function rimPoint(x,y){const T=TANK,dl=x-T.x0,dr=T.x1-x,dt=y-T.y0,db=T.y1-y,m=Ma
 function handDown(e){const[x,y]=toPix(e),w=game.world,pet=w.pet,P=game.pointer,now=performance.now();
   P.x=x;P.y=y;P.inside=true;P.touch=e.pointerType==='touch';P.vx=P.vy=0;P.lt=now;P.rub=P.rub||0;P.moved=0;
   if(onRim(x,y)){const[kx,ky]=rimPoint(x,y);knockAt(kx,ky);game.lastTap=null;return true;}
+  {const q=foodAt(w,x,y);if(q&&!q.stale){const dq=Math.hypot(q.x-x,q.y-(q.h||0)-y);if(!pet||pet.hitTest(x,y)<0||dq<4){if(q.pts&&q.toScreen)q.toScreen();holdFood(q,x,y,'hand');P.down=true;game.hand=null;game.lastTap=null;return true;}}}
   if(pet&&pet.hitTest(x,y)>=0){P.down=true;game.hand={mode:'touch',t:0,dist:0};return true;}
   const o=objectAt(x,y);if(o){P.down=true;game.hand={mode:'obj',o,t:0,dist:0};return true;}
   const L=game.lastTap;if(L&&now-L.t<380&&Math.hypot(L.x-x,L.y-y)<16){game.lastTap=null;knockAt(x,y);return true;}
@@ -6650,7 +6651,7 @@ function handStep(dt){const H=game.hand,P=game.pointer,w=game.world,pet=w.pet;if
 function handUp(){const H=game.hand;game.hand=null;if(!H)return;if(H.mode==='obj'&&H.o.onClick)H.o.onClick(game.world);
   else if(H.mode==='touch'&&H.t<HOLD_T){const pet=game.world.pet;if(pet.petMe&&pet.petMe()){const P=game.pointer;P.rub=(P.rub||0)+3;}}}
 function drawHand(w){const P=game.pointer,H=game.hand,x=Math.round(P.x),y=Math.round(P.y);let spr=HAND.open,lift=3;
-  if(game.grabbing||(H&&H.mode==='drag')){spr=HAND.carry;lift=5;}
+  if(game.grabbing||game.held||(H&&H.mode==='drag')){spr=HAND.carry;lift=5;}
   else if(H&&H.mode==='touch'&&H.t>0.12){spr=HAND.close;lift=1;}
   else if(H&&H.mode==='rub'){spr=Math.floor(w.t*9)%2?HAND.rub:HAND.open;lift=1;}
   else if(game.knockT>0||onRim(P.x,P.y)){spr=HAND.knock;lift=game.knockT>0.11?0:game.knockT>0?1:3;}
@@ -6677,6 +6678,8 @@ function trashAll(){const w=game.world,L=w.prey.filter(q=>!q.caught);
   if(!L.length){ui.toast('No food in the tank to clear.',true);SFX.play('tick');return;}
   for(const q of L)trashFood(q);SFX.play('thunk');ui.toast(`Cleared ${L.length} food${L.length>1?'s':''} from the tank.`,true);}
 function overTrash(cx,cy){const t=$('trashBtn');if(!t||t.offsetParent===null||cx===undefined||ui.tuck)return false;const r=t.getBoundingClientRect();return cx>=r.left-6&&cx<=r.right+6&&cy>=r.top-6&&cy<=r.bottom+6;}
+// pick a food up (tweezers or the bare hand): it follows the pointer until eaten or let go
+function holdFood(q,x,y,by){q.inHand=true;q.hidden=false;q.vh=0;q.sx=x;q.sy=y;q.x=x;q.y=y+8;q.h=8;if(q.type==='snail')q.hideT=0;game.held=q;game.heldBy=by;game.heldT=performance.now();game.heldNew=q.__new?q:null;q.__new=false;SFX.play('tick');}
 function dropHeld(){const q=game.held;if(!q)return;game.held=null;q.inHand=false;q.paid=0;q.h=8;q.vh=0;
   if(q.pts){q.toWorld(8);q.x=q.pts[0].x;q.y=q.pts[0].y;}if(q.type==='fly')q.targetH=rand(10,20);
   const w=game.world;if(w){w.foodMem=w.foodMem||[];w.foodMem.push({x:q.x,y:q.y});if(w.foodMem.length>4)w.foodMem.shift();}}
