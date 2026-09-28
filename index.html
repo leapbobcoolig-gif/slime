@@ -6320,7 +6320,7 @@ function camApply(){const vw=innerWidth,vh=innerHeight;if(!isFinite(cam.tx)||!is
   $('zLvl').textContent=(cam.z*100/Math.max(1e-6,1)).toFixed(0)+'%';$('zFollow').classList.toggle('on',cam.follow);}
 function setZoom(z,px,py){if(px===undefined){px=innerWidth/2;py=(cam.mT+innerHeight-cam.mB)/2;}
   const nz=clamp(z,cam.zmin,4),u=(px-cam.tx)/cam.z,v=(py-cam.ty)/cam.z;cam.tx=px-u*nz;cam.ty=py-v*nz;cam.z=nz;camApply();
-  if(Math.abs(nz-1)>0.05&&!cam.hinted){cam.hinted=true;ui.toast(game.pointer.touch?(FUN('tools')?'Pinch to zoom, drag with two fingers to look around.':'Pinch to zoom. Put your tool down (tap it again) to drag around.'):'Scroll to zoom, right-drag to look around',true);}}
+  if(Math.abs(nz-1)>0.05&&!cam.hinted){cam.hinted=true;ui.toast(game.pointer.touch?(FUN('tools')?'Pinch to zoom, drag to look around.':'Pinch to zoom. Put your tool down (tap it again) to drag around.'):'Scroll to zoom, right-drag to look around',true);}}
 function panBy(dx,dy){cam.tx+=dx;cam.ty+=dy;cam.follow=false;camApply();}
 function stageXY(x,y){return[x,y];}
 function camCenterOn(x,y,k){const s=cam.cw/W;cam.tx=lerp(cam.tx,innerWidth/2-x*s*cam.z,k);cam.ty=lerp(cam.ty,(cam.mT+innerHeight-cam.mB)/2-y*s*cam.z,k);camApply();}
@@ -6334,9 +6334,9 @@ function startPinch(){
   // a second finger cancels whatever the first one started; food conjured a moment ago just vanishes
   const q=game.held;if(q&&q===game.heldNew&&performance.now()-game.heldT<400){refundFood(q);game.held=null;const L=game.world.prey,i=L.indexOf(q);if(i>=0)L.splice(i,1);}
   up();game.panning=null;const P=pinchPts(),[mx,my]=stageXY(P.mx,P.my);pinch={d0:P.d,z0:cam.z,mx,my,u:(mx-cam.tx)/cam.z,v:(my-cam.ty)/cam.z};}
-function movePinch(){const P=pinchPts(),nz=clamp(pinch.z0*P.d/pinch.d0,cam.zmin,4),[mx,my]=stageXY(P.mx,P.my);
-  cam.tx=mx-pinch.u*nz;cam.ty=my-pinch.v*nz;cam.follow=false;cam.z=nz;camApply();
-  if(Math.abs(nz-1)>0.05&&!cam.hinted){cam.hinted=true;ui.toast(FUN('tools')?'Pinch to zoom, drag with two fingers to look around.':'Pinch to zoom. Put your tool down (tap it again) to drag around.',true);}}
+function movePinch(){const P=pinchPts(),nz=clamp(pinch.z0*P.d/pinch.d0,cam.zmin,4);
+  cam.tx=pinch.mx-pinch.u*nz;cam.ty=pinch.my-pinch.v*nz;cam.follow=false;cam.z=nz;camApply();
+  if(Math.abs(nz-1)>0.05&&!cam.hinted){cam.hinted=true;ui.toast(FUN('tools')?'Pinch to zoom, drag to look around.':'Pinch to zoom. Put your tool down (tap it again) to drag around.',true);}}
 // dragging a food straight out of the tray: after a short drag you're holding one, drop it in the tank
 window.addEventListener('pointermove',e=>{const D=ui.fdrag;if(!D)return;
   if(!D.active){if(Math.hypot(e.clientX-D.x,e.clientY-D.y)<6)return;const w=game.world;if(w.prey.length>=12){flash('That is plenty of food for now.');ui.fdrag=null;return;}
@@ -6357,8 +6357,9 @@ canvas.addEventListener('pointerdown',e=>{
   if(!game.tool&&!game.placing){// no tool: drag to pan; a still click still picks up coins or uses a toy
     const [px0,py0]=toPix(e),w0=game.world;
     for(let i=0;i<w0.coins.length;i++){const c=w0.coins[i];if(Math.hypot(c.x-px0,c.y-c.h-2.5-py0)<6){w0.coins.splice(i,1);addCoins(c.v,c.x,c.y-c.h);spawn(w0,'star',c.x,c.y-c.h-2,{life:0.18});if(!FUN('tools')||!w0.pet||w0.pet.hitTest(px0,py0)<0)return;break;}}
-    if(FUN('tools')){handDown(e);return;}
-    game.panning={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,obj:objectAt(px0,py0),free:true};canvas.style.cursor=FUN('tools')?'none':'grabbing';return;}
+    // Fun hand reads the context: critter = pet/pick up, toy = drag, rim/double-tap = knock; bare ground pans on touch (mouse pans with right/middle drag)
+    if(FUN('tools')){if(handDown(e)||e.pointerType!=='touch')return;}
+    game.panning={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,obj:FUN('tools')?null:objectAt(px0,py0),free:true};canvas.style.cursor=FUN('tools')?'none':'grabbing';return;}
   const P=game.pointer,[x,y]=toPix(e);P.x=x;P.y=y;P.down=true;P.inside=true;P.touch=e.pointerType==='touch';P.sprayT=0;P.vx=P.vy=0;P.lt=performance.now();
   const w=game.world,pet=w.pet,B=w.bounds;
   if(game.placing){if(e.button!==0)return;const id=game.placing;game.placing=null;
@@ -6459,7 +6460,7 @@ function up(){const P=game.pointer;P.down=false;SFX.mistOn(false);handUp();
     SFX.play('place');game.dragObj=null;markDirty();}}
 function pointerEnd(e){
   if(game.panning&&(e.pointerType==='mouse'||game.panning.free)){const pn=game.panning;game.panning=null;if(e.pointerType==='touch')touches.delete(e.pointerId);
-    if(pn.free){canvas.style.cursor=game.tool||FUN('tools')?'none':'grab';if(pn.obj&&pn.obj.onClick&&Math.hypot(e.clientX-pn.sx,e.clientY-pn.sy)<6)pn.obj.onClick(game.world);}return;}
+    if(pn.free){if(Math.hypot(e.clientX-pn.sx,e.clientY-pn.sy)>=6)game.lastTap=null;canvas.style.cursor=game.tool||FUN('tools')?'none':'grab';if(pn.obj&&pn.obj.onClick&&Math.hypot(e.clientX-pn.sx,e.clientY-pn.sy)<6)pn.obj.onClick(game.world);}return;}
   if(e.pointerType==='touch'){touches.delete(e.pointerId);
     if(pinch){if(touches.size<2){pinch=null;touchBlock=touches.size>0;}return;}
     if(touchBlock){if(touches.size===0)touchBlock=false;return;}}
