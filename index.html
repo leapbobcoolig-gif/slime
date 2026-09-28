@@ -145,6 +145,7 @@ body.gfx-low .dr-tank.meh::before{content:"";position:absolute;inset:0;backgroun
 .wb-st .bar i{display:block;height:100%;background:var(--c);width:var(--w);transition:width 1.1s cubic-bezier(.5,0,.3,1) .5s}
 #wbBody{font-size:17px;line-height:1.35;padding:2px 2px 10px}#wbBody p{margin:6px 0}#wbBody img{width:16px;height:16px;vertical-align:-2px}#wbBody .tip{font-size:14px;opacity:.75}
 @media (max-width:420px){#mWelcome .wb-top{flex-direction:column;align-items:stretch}#wbPet{align-self:center}#wbSay::before,#wbSay::after{display:none}}
+body.fun-tools.tool-feed #tray.drawer,body.fun-tools.tool-feed #tray.drawer *,body.fun-tools.tool-feed #trayTab,body.fun-tools.tool-feed #trayTab *{cursor:none!important}
 #dragCur{position:fixed;left:0;top:0;z-index:80;pointer-events:none;image-rendering:pixelated;display:none}
 @media (max-width:760px){#tray.drawer{--tw:130px;--th:91px}.dr-strip{gap:12px;padding:10px 30px 0 10px}}
 @media (max-height:500px) and (min-width:600px){#tray.drawer{--tw:104px;--th:73px;--rows:1}.dr-side .ti.trash{width:34px;height:34px}}
@@ -428,7 +429,7 @@ body.fun-hud .gtoast.out{transform:none;translate:-50% -10px;opacity:0}
   <button class="ibtn" id="zReset" title="Reset zoom (0)"><img class="px" alt="Reset zoom"></button>
 </div>
 
-<canvas id="dragCur" width="44" height="40"></canvas>
+<canvas id="dragCur" width="48" height="44"></canvas>
 <div id="dock" class="chunk">
   <div id="tray" class="chunk" hidden></div><button id="trayTab" hidden title="Show the food tray"></button>
   <div class="dgroup" id="tools"></div>
@@ -5412,14 +5413,18 @@ function drawTweezers(x,y,closed,tfb){const fb0=fb,F=tfb||fb0;
 }
 const ICONS={};
 // floating tweezers (a tiny canvas above the whole UI) while food is dragged over the drawer or dock
-const DRAGCUR={fb:new FB(44,40),tick(){if(!game.held&&!game.cursorUI)return;const P=game.pointer,cv=$('dragCur'),on=!!game.held&&game.tool==='feed'&&P.cx!==undefined&&(()=>{const e=document.elementFromPoint(P.cx,P.cy);return e&&e!==canvas&&!e.closest('#stage');})();
+const DRAGCUR={fb:new FB(48,44),lt:0,tick(){const P=game.pointer,cv=$('dragCur'),fun=FUN('tools')&&game.tool==='feed';
+  if(!game.held&&!(fun&&!P.touch)){if(game.cursorUI){game.cursorUI=false;cv.style.display='none';}return;}
+  let on=false;if(P.cx!==undefined&&game.tool==='feed'){const e=document.elementFromPoint(P.cx,P.cy),ui=e&&e!==canvas&&!e.closest('#stage');on=game.held?!!ui:!!(e&&e.closest('#tray,#trayTab'));}
   game.cursorUI=on;if(!on){if(cv.style.display!=='none')cv.style.display='none';return;}
-  const f=this.fb,q=game.held,r=canvas.getBoundingClientRect(),sc=r.width/W,tx=8,ty=32;f.px.fill(0);f.clearLayer();
-  const osx=q.sx,osy=q.sy;q.sx=tx;q.sy=ty;if(q.pts){const dx=tx-q.pts[0].x,dy=ty-q.pts[0].y;for(const p of q.pts){p.x+=dx;p.y+=dy;}}
-  if(q.layered){q.drawL(f);composite(f,FOOD_PAINTER);}else q.draw(f,game.world.t);
-  if(q.pts){const dx=osx-tx,dy=osy-ty;for(const p of q.pts){p.x+=dx;p.y+=dy;}}q.sx=osx;q.sy=osy;
-  drawTweezers(tx,ty,true,f);cv.getContext('2d').putImageData(f.img,0,0);
-  cv.style.display='block';cv.style.width=44*sc+'px';cv.style.height=40*sc+'px';cv.style.transform=`translate(${P.cx-tx*sc}px,${P.cy-ty*sc}px)`;}};
+  const f=this.fb,q=game.held,r=canvas.getBoundingClientRect(),sc=r.width/W,tx=9,ty=37,now=performance.now(),dt=clamp((now-this.lt)/1000,0,0.05);this.lt=now;f.px.fill(0);f.clearLayer();
+  if(q){const osx=q.sx,osy=q.sy;q.sx=tx;q.sy=ty;if(q.pts){const dx=tx-q.pts[0].x,dy=ty-q.pts[0].y;for(const p of q.pts){p.x+=dx;p.y+=dy;}}
+    if(q.layered){q.drawL(f);composite(f,FOOD_PAINTER);}else q.draw(f,game.world.t);
+    if(q.pts){const dx=osx-tx,dy=osy-ty;for(const p of q.pts){p.x+=dx;p.y+=dy;}}q.sx=osx;q.sy=osy;}
+  if(FUN('tools')){const M=game.toolMotion||(game.toolMotion={a:0,va:0,open:0.9,lt:0,glint:0,drips:[]}),tgt=q||P.down?0:DRAWER.tanks.some(T=>T.hot)?2.8:0.6;M.open+=(tgt-M.open)*Math.min(1,dt*(tgt===0?30:9));
+    paintTweezers(f,tx,ty,M.open,0.5+M.a*0.5);}else drawTweezers(tx,ty,true,f);
+  cv.getContext('2d').putImageData(f.img,0,0);
+  cv.style.display='block';cv.style.width=48*sc+'px';cv.style.height=44*sc+'px';cv.style.transform=`translate(${P.cx-tx*sc}px,${P.cy-ty*sc}px)`;}};
 function drawFoodAt(tfb,type,x,y,t){
   const q=ICONS[type]||(ICONS[type]=makeFood(type,0,0,0));q.caught=false;q.inHand=false;q.h=0;q.x=x;q.y=y;q.ang=-0.6;q.bites=0;q.landT=1;
   if(q.pts)q.pts.forEach((p,i)=>{p.x=x-3+i*q.seg;p.y=y+Math.sin(t*6+i*0.9)*0.4;});
@@ -5445,6 +5450,9 @@ function drawCursor(w){drawRequest(fb,w);
   if((t==='pet'||t==='tap')&&!(t==='pet'&&w.pet.hitTest(P.x,P.y)>=0)){const o=objectAt(P.x,P.y);if(o&&o.onClick){const a=w.t*4;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,x+Math.cos(aa)*6,y+Math.sin(aa)*6,hex('#ffe066'));}}}
 }
 // Fun mode: the tool you took off the pegboard is what you hold in the tank
+// the real tweezers with their tips at (x,y): used in the tank and floating over the UI
+function paintTweezers(f,x,y,open,ang,k=0.75){const c=Math.cos(ang),s=Math.sin(ang),hx=x+26*s*k,hy=y-26*c*k;if(f===fb)ddisc(f,x+1,y+3,2.2,0.62);
+  f.clearLayer();drawTool(f,'feed',hx,hy,ang,k,{open});composite(f,OBJ_PAINTER,{sAmt:.6,sdx:2,sdy:3});toolDetails(f,'feed',hx,hy,ang,k,{open});}
 function heldTool(w,t,x,y,P){const k=t==="mist"?0.85:0.75;let ang,wu,wv,o={t:w.t};
   let tx=x,ty=y;
   // every held tool leans into the way you move it, overshoots a touch and springs back upright
@@ -5456,8 +5464,10 @@ function heldTool(w,t,x,y,P){const k=t==="mist"?0.85:0.75;let ang,wu,wv,o={t:w.t
   else if(t==='feed'){// tweezers: tips at the pointer; jaws ease open near food, snap shut to pinch
     let near=null,bd=10;if(!game.held)for(const q of w.prey){if(q.caught||q.dead||q.stale||q.inHand)continue;const d=Math.hypot(q.x-x,q.y-(q.h||0)-y);if(d<bd){bd=d;near=q;}}
     const shut=!!game.held||P.down,tgt=shut?0:near?2.8:0.6,was=M.open;M.open+=(tgt-M.open)*Math.min(1,dt*(shut?30:9));if(was>0.5&&M.open<=0.5)M.glint=0.25;
-    ang=0.5+M.a;wu=0;wv=26;o.open=M.open;ddisc(fb,x+1,y+3,2.2,0.62);
-    if(near){const a=w.t*5;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,near.x+Math.cos(aa)*5,near.y-(near.h||0)+Math.sin(aa)*4,hex('#ffe9a0'));}}}
+    if(near){const a=w.t*5;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,near.x+Math.cos(aa)*5,near.y-(near.h||0)+Math.sin(aa)*4,hex('#ffe9a0'));}}
+    paintTweezers(fb,x,y,M.open,0.5+M.a);
+    if(M.glint>0){M.glint-=dt;const g=M.glint/0.25;for(const[dx,dy]of[[-2,-2],[2,-2],[0,-3],[-3,0],[3,0]])pmix(fb,x+dx*(1+(1-g)),y+dy*(1+(1-g))-1,hex('#ffffff'),g*0.9);}
+    return;}
   else if(t==='bubbles'){// bubble wand: ring at the pointer, a living soap film that bulges and lets bubbles go
     ang=0.45+M.a;wu=0;wv=19;o.film=1;ddisc(fb,x+2,y+6,3,0.7);}
   else{ang=0.55+(P.down?Math.sin(w.t*14)*0.12:0)+M.a;wu=0;wv=21.4;}
@@ -5465,7 +5475,6 @@ function heldTool(w,t,x,y,P){const k=t==="mist"?0.85:0.75;let ang,wu,wv,o={t:w.t
   const F=o.flip?-1:1,c=Math.cos(ang),s=Math.sin(ang),hx=tx-(F*wu*c-wv*s)*k,hy=ty-(F*wu*s+wv*c)*k-(t==='scoop'&&P.down?-2:0);
   ddisc(fb,t==='mist'?tx+4:x+3,t==='mist'?ty+16:y+5,t==='mist'?3:4,0.7);
   fb.clearLayer();drawTool(fb,t,hx,hy,ang,k,o);composite(fb,OBJ_PAINTER,{sAmt:.6,sdx:2,sdy:3});toolDetails(fb,t,hx,hy,ang,k,o);
-  if(t==='feed'&&M.glint>0){M.glint-=dt;const g=M.glint/0.25;for(const[dx,dy]of[[-2,-2],[2,-2],[0,-3],[-3,0],[3,0]])pmix(fb,x+dx*(1+(1-g)),y+dy*(1+(1-g))-1,hex('#ffffff'),g*0.9);}
   if(t==='bubbles'){// film bulge grows with each breath, then snaps back when a bubble breaks free
     const st=P.down?clamp(1-(game.bubbleT||0)/0.16,0,1):0.15+0.1*Math.sin(w.t*2.4),ax=Math.sin(ang),ay=-Math.cos(ang),r=1.4+st*2.6,cx=x-ax*st*3.2,cy=y-ay*st*3.2;
     for(let yy=Math.floor(cy-r-1);yy<=cy+r+1;yy++)for(let xx=Math.floor(cx-r-1);xx<=cx+r+1;xx++){const d=Math.hypot(xx+.5-cx,yy+.5-cy);if(d>r)continue;const e=d/r,h=Math.sin(xx*0.9+yy*0.7+w.t*4);
@@ -6496,7 +6505,7 @@ function petPreview(kind,cv){const PW=cv.width,PH=cv.height,pfb=new FB(PW,PH),bg
   const pw={stats:{fed:60,happy:80,water:80},prey:[],parts:[],ripples:[],bounds:{x0:16,y0:14,x1:PW-16,y1:PH-14},dayness:1,t:0,dish:null,hide:null,lampRock:null,toys:[],bubbles:[],allWater:sea};
   const pet=makePet(pw,kind,PW/2,PH/2);pet.preview=true;pw.pet=pet;return{ctx:cv.getContext('2d'),fb:pfb,bg,pet,pw,kind};}
 function setTool(t){
-  if(game.held)dropHeld();if(game.tool==='remote'&&t!=='remote'&&placedCount('rc')>0){const rc=game.world.toys.find(o=>o.id==='rc');if(rc)dust(game.world,rc.x,rc.y,6);storeObject('rc');game.world.rcTarget=null;SFX.engine(0);}game.placing=null;if(FUN('tools')&&PEG.fb)PEG.swap(game.tool,t);game.tool=t;game.hand=null;canvas.style.cursor=t||FUN('tools')?'none':'grab';
+  if(game.held)dropHeld();if(game.tool==='remote'&&t!=='remote'&&placedCount('rc')>0){const rc=game.world.toys.find(o=>o.id==='rc');if(rc)dust(game.world,rc.x,rc.y,6);storeObject('rc');game.world.rcTarget=null;SFX.engine(0);}game.placing=null;if(FUN('tools')&&PEG.fb)PEG.swap(game.tool,t);game.tool=t;document.body.classList.toggle('tool-feed',t==='feed');game.hand=null;canvas.style.cursor=t||FUN('tools')?'none':'grab';
   if(!t&&!game.panHinted&&!FUN('tools')){game.panHinted=true;ui.toast('No tool selected: drag to look around. Tap a tool to pick it up again.',true);}if(TOY_TOOLS.includes(t))game.toyTool=t;if(t==='remote'&&placedCount('rc')===0&&(save.inv.rc||0)>0){placeObject('rc',160,100);markDirty();}game.trayOpen=true;ui.renderTray();
 }
 function toggleLight(){const w=game.world;if(!w)return;w.dayTarget=w.dayTarget>0.5?0:1;SFX.play(w.dayTarget?'lightsOn':'lightsOff');
@@ -6537,6 +6546,7 @@ window.addEventListener('pointermove',e=>{const D=ui.fdrag;if(!D)return;
 window.addEventListener('pointerup',e=>{const D=ui.fdrag;ui.fdrag=null;if(!D||!D.active)return;if(ui.tuck==='drag')setTimeout(()=>{if(ui.tuck==='drag')ui.tuckTray(null);},120);ui.fdragDone=true;setTimeout(()=>{ui.fdragDone=false;},0);const q=game.held;if(!q)return;
   const tb=$('trashBtn');if(tb)tb.classList.remove('hot');const r=canvas.getBoundingClientRect(),inside=e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom&&!overTrash(e.clientX,e.clientY)&&!(document.elementFromPoint(e.clientX,e.clientY)||e.target).closest('#dock');
   if(inside){dropHeld();SFX.play('tick');}else{trashFood(q);if(D.src)DRAWER.putBack(D.src);}});
+window.addEventListener('pointermove',e=>{const P=game.pointer;P.cx=e.clientX;P.cy=e.clientY;},{passive:true});
 function toPix(e){const r=canvas.getBoundingClientRect();return[(e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H];}
 function objectAt(x,y){const w=game.world;let best=null,bd=1e9;for(const o of[...w.toys,...w.decor]){const d=Math.hypot(o.x-x,(o.y-(o.h||0)-3)-y);if(d<o.r+4&&d<bd){bd=d;best=o;}}return best;}
 canvas.addEventListener('contextmenu',e=>{e.preventDefault();if(game.placing){game.placing=null;ui.toast('Placement cancelled.',true);}});
