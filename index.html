@@ -4112,15 +4112,15 @@ function bakeWorld(world){
   rock(176,150,6,M.ROCK,5);rock(186,156,3.5,M.ROCK,3);rock(150,26,4.5,M.ROCK,4);rock(292,100,5,M.ROCK,4);
   composite(S,STATIC_PAINTER,{out:bg,sAmt:.6,sdx:2,sdy:3});S.clearLayer();
   // dish rim (ring with radial normals)
-  const d=world.dish;
-  for(let y=Math.floor(d.y-d.rr-1);y<=d.y+d.rr+1;y++)for(let x=Math.floor(d.x-d.rr-1);x<=d.x+d.rr+1;x++){
+  const d=world.dish;R.wIdx=[];R.wx=[];R.wy=[];R.wd=[];
+  if(!d){rock(248,50,7,M.ROCK,5);rock(259,58,4,M.ROCK,3);rock(240,60,3,M.ROCK,3);composite(S,STATIC_PAINTER,{out:bg,sAmt:.6,sdx:2,sdy:3});S.clearLayer();}
+  else{for(let y=Math.floor(d.y-d.rr-1);y<=d.y+d.rr+1;y++)for(let x=Math.floor(d.x-d.rr-1);x<=d.x+d.rr+1;x++){
     const dx=x+.5-d.x,dy=y+.5-d.y,dd=Math.hypot(dx,dy);if(dd<=d.rw||dd>=d.rr)continue;
     const u=(dd-(d.rw+d.rr)/2)/((d.rr-d.rw)/2),i=y*W+x;
     S.mat[i]=M.RIM;S.cls[i]=1;S.key[i]=4;S.nx[i]=dx/dd*u*0.92;S.ny[i]=dy/dd*u*0.92;S.ss[i]=0;S.ll[i]=0;S.touch(x,y,x,y);}
   composite(S,STATIC_PAINTER,{out:bg,sAmt:.6,sdx:2,sdy:3});S.clearLayer();
-  R.wIdx=[];R.wx=[];R.wy=[];R.wd=[];
   for(let y=Math.floor(d.y-d.rw);y<=d.y+d.rw;y++)for(let x=Math.floor(d.x-d.rw);x<=d.x+d.rw;x++){
-    const dd=Math.hypot(x+.5-d.x,y+.5-d.y);if(dd<d.rw-0.6){R.wIdx.push(y*W+x);R.wx.push(x);R.wy.push(y);R.wd.push(dd);}}
+    const dd=Math.hypot(x+.5-d.x,y+.5-d.y);if(dd<d.rw-0.6){R.wIdx.push(y*W+x);R.wx.push(x);R.wy.push(y);R.wd.push(dd);}}}
   // hide log (overlay, shadow onto bg)
   const hd=world.hide,c=Math.cos(hd.ang),s=Math.sin(hd.ang);
   S.cap(hd.x-c*hd.len/2,hd.y-s*hd.len/2,hd.r,hd.x+c*hd.len/2,hd.y+s*hd.len/2,hd.r,M.LOG,1,0,hd.len);
@@ -4772,13 +4772,13 @@ const WATERPREF={puffer:1,cuttle:1,axolotl:0.8,frog:0.5,turtle:0.5,salamander:0.
 const SEA_PETS=['cuttle','puffer'];
 function habitatOf(kind){if(SEA_PETS.includes(kind))return 'sea';if(kind==='kraken')return 'aqua';if(AMPHI.includes(kind)){const ps=save.pets[kind];return(ps&&ps.tank)||(AMPHI_TERRA.includes(kind)?'terra':'aqua');}return 'terra';}
 const tankKey=t=>t==='aqua'?'placedAqua':t==='sea'?'placedSea':'placed';
-function layoutTank(w,tank){w.air=null;w.anem=[];
+function layoutTank(w,tank,kind){w.air=null;w.anem=[];
   if(tank==='sea'){w.dish=null;w.hide={x:232,y:128,ang:0.32,len:40,r:4.5};w.lamp={x:160,y:40};w.lampRock=null;w.pads=[];w.air={x:214,y:30};w.airb=[];w.airT=0;w.anem=[{x:140,y:118,r:7,c:0},{x:40,y:112,r:6,c:1},{x:268,y:130,r:6,c:0},{x:190,y:150,r:5,c:1}];
     w.weeds=[[26,150],[46,160],[132,152],[180,26],[300,120],[72,26],[250,160],[20,64]].map(([x,y])=>({x,y,blades:Array.from({length:8},(_,k)=>({a:-Math.PI/2+(k-3.5)*0.22+rand(-0.1,0.1),len:rand(16,30),ph:rand(TAU),c:Math.random()<0.5}))}));}
   else if(tank==='aqua'){w.dish=null;w.hide={x:190,y:128,ang:-0.42,len:46,r:6.5};w.lamp={x:112,y:58};w.lampRock={x:112,y:64};
     w.pads=[[52,84,5.5,0.4,false],[63,93,4.2,2.2,true],[34,136,5,4.1,false],[128,148,5.8,1.2,false],[140,140,3.6,5.3,false]].map(([x,y,r,a,f])=>({x,y,ax:x,ay:y,vx:0,vy:0,r,ang:a,flower:f,ph:rand(TAU)}));
     w.weeds=[[26,60],[88,118],[150,120],[60,160],[120,86]].map(([x,y])=>({x,y,blades:Array.from({length:9},(_,k)=>({a:-0.9+(k-4)*0.14+rand(-0.1,0.1),len:rand(10,22),ph:rand(TAU),c:Math.random()<0.5}))}));}
-  else{w.dish={x:248,y:52,rw:12.5,rr:16.5};w.hide={x:88,y:140,ang:-0.12,len:48,r:11};w.lamp={x:70,y:46};w.lampRock={x:70,y:50};w.pads=[];w.weeds=[];}
+  else{w.dish=AMPHI.includes(kind)?{x:248,y:52,rw:12.5,rr:16.5}:null;w.hide={x:88,y:140,ang:-0.12,len:48,r:11};w.lamp={x:70,y:46};w.lampRock={x:70,y:50};w.pads=[];w.weeds=[];}
 }
 // depth of water under a point: 0 on land, >0 in water (up to 1 in the deep end)
 function waterAt(w,x,y){if(!w)return 0;if(w.allWater)return 1;
@@ -4882,8 +4882,8 @@ function drawSubPrey(w,q){const x0=Math.max(0,Math.floor(q.x-11)),x1=Math.min(W-
   if(q.layered){fb.clearLayer();q.drawL(fb);composite(fb,FOOD_PAINTER,{sAmt:.8,sdx:1,sdy:1});}else q.draw(fb,w.t);
   const d=Math.max(0.2,waterAt(w,q.x,q.y)),a=Math.min(0.7,(q.sink||0)*0.62*(0.5+0.5*d));
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;if(px[i]===SUBBUF[i])continue;px[i]=mixc(mixc(px[i],SUBBUF[i],a),SHEENC,sheen(x,y,w.t)*a*1.5);}}
-function setTank(tank,force){const w=game.world;if(w.hab===tank&&!force)return;
-  w.hab=tank;w.sea=tank==='sea';w.tank=w.sea?'aqua':tank;layoutTank(w,tank);w.foodMem=[];w.prey=[];w.ripples=[];w.parts=[];w.coins=[];w.bubbles=[];w.shrooms=[];w.mess=[];w.wet.fill(0);
+function setTank(tank,force,kind){const w=game.world;kind=kind||game.kind||save.cur;const dishy=tank==='terra'&&AMPHI.includes(kind);if(w.hab===tank&&!force&&!!w.dish===dishy)return;
+  w.hab=tank;w.sea=tank==='sea';w.tank=w.sea?'aqua':tank;layoutTank(w,tank,kind);w.foodMem=[];w.prey=[];w.ripples=[];w.parts=[];w.coins=[];w.bubbles=[];w.shrooms=[];w.mess=[];w.wet.fill(0);
   bakeWorld(w);staticDrawn=false;
 }
 // each critter keeps its own decor layout; toys go back in the bag when you switch critters
@@ -4930,7 +4930,7 @@ function startGame(kind,restoring){
   const w=game.world;
   if(w.pet&&game.kind){stashLayout(game.kind);if(kind!==game.kind)petSave(game.kind).toys=[];writeSave();}
   const same=kind===game.kind;if(game.kind&&!same&&!restoring)setTimeout(()=>track('visits'),0);game.req=null;game.reqT=rand(60,120);
-  setTank(habitatOf(kind));
+  setTank(habitatOf(kind),false,kind);
   if(!same||restoring||!w.pet)loadLayout(kind,restoring||same);
   game.kind=kind;if(!((DIET[kind]||{})[game.food]>=5))game.food=Object.entries(DIET[kind]).sort((a,b)=>b[1]-a[1])[0][0];if(typeof ui!=='undefined')ui.foodCat=null;const ps=petSave(kind);game.name=ps.name;
   w.prey=w.prey.filter(q=>!q.caught);w.parts.length=0;
@@ -4961,7 +4961,12 @@ function addMess(w,x,y,k){if(!w.mess)w.mess=[];if(w.mess.length>=12)return null;
 function messCount(w){let n=w.mess?w.mess.length:0;for(const q of w.prey)if(q.stale&&!q.dead)n++;return n;}
 function messAt(w,x,y){let best=null,bd=8;for(const m of w.mess||[]){const d=Math.hypot(m.x-x,m.y-y);if(d<bd){bd=d;best=m;}}
   for(const q of w.prey)if(q.stale&&!q.dead&&!q.caught){const d=Math.hypot(q.x-x,q.y-(q.h||0)-y);if(d<bd){bd=d;best=q;}}return best;}
-function scoopAt(x,y,click){const w=game.world,m=messAt(w,x,y);if(!m){if(click)SFX.play('swish');return false;}
+// food lying in the tank (not being eaten or carried): the scoop can throw it away
+function foodAt(w,x,y){let best=null,bd=7;for(const q of w.prey){if(q.dead||q.caught||q.inHand||q.carriedBy)continue;const d=Math.hypot(q.x-x,q.y-(q.h||0)-y);if(d<bd){bd=d;best=q;}}return best;}
+function scoopTarget(w,x,y){return messAt(w,x,y)||foodAt(w,x,y);}
+function scoopAt(x,y,click){const w=game.world,m=messAt(w,x,y);
+  if(!m){const q=foodAt(w,x,y);if(q){trashFood(q);SFX.play('scoop');for(let i=0;i<5;i++){const a=rand(TAU);spawn(w,'spark2',q.x+Math.cos(a)*3,q.y-(q.h||0)+Math.sin(a)*2,{vx:Math.cos(a)*rand(8,18),vy:Math.sin(a)*rand(6,12),life:rand(.25,.4)});}return true;}
+    if(click)SFX.play('swish');return false;}
   if(m.stale){trashFood(m);}else w.mess.splice(w.mess.indexOf(m),1);
   SFX.play('scoop');for(let i=0;i<6;i++){const a=rand(TAU);spawn(w,'spark2',m.x+Math.cos(a)*3,m.y-(m.h||0)+Math.sin(a)*2,{vx:Math.cos(a)*rand(10,22),vy:Math.sin(a)*rand(8,16),life:rand(.3,.5)});}
   if(w.tank==='aqua'&&waterAt(w,m.x,m.y)>0.05)w.ripples.push({x:m.x,y:m.y,age:0,s:0.5});
@@ -5369,12 +5374,12 @@ function drawCursor(w){drawRequest(fb,w);
   if(game.placing)return;
   if(t==='feed'&&game.cursorUI)return;
   if(t==='feed'){drawTweezers(x,y,!!game.held||P.down);if(!game.held)drawFoodAt(fb,game.food,x+7,y+7,w.t);}
-  else if(FUN('tools')&&(t==='mist'||t==='scoop')){heldTool(w,t,x,y,P);if(t==='scoop'){const m=messAt(w,P.x,P.y);if(m){const a=w.t*5;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,m.x+Math.cos(aa)*5,m.y-(m.h||0)+Math.sin(aa)*4,hex('#9ad8f0'));}}}}
+  else if(FUN('tools')&&(t==='mist'||t==='scoop')){heldTool(w,t,x,y,P);if(t==='scoop'){const m=scoopTarget(w,P.x,P.y);if(m){const a=w.t*5;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,m.x+Math.cos(aa)*5,m.y-(m.h||0)+Math.sin(aa)*4,hex('#9ad8f0'));}}}}
   else if(t==='mist'){const r=12;for(let i=0;i<24;i++){const a=i/24*TAU+w.t*0.8;if(i%2)pset(fb,x+Math.cos(a)*r,y+Math.sin(a)*r*0.8,CUR_PAL.w);}pset(fb,x,y,CUR_PAL.w);pset(fb,x+1,y+1,CUR_PAL.k);}
   else if(t==='pet')sprite(fb,CUR.pet,x-3,y-3,CUR_PAL);
   else if(t==='grab')sprite(fb,game.grabbing||game.dragObj?CUR.grabbing:CUR.grab,x-3,game.grabbing?y-7:y-3,CUR_PAL);
   else if(t==='tap')sprite(fb,CUR.tap,x-3,y,CUR_PAL);
-  else if(t==='scoop'){sprite(fb,CUR.scoop,x-3,y-6,CUR_PAL);const m=messAt(w,P.x,P.y);if(m){const a=w.t*5;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,m.x+Math.cos(aa)*5,m.y-(m.h||0)+Math.sin(aa)*4,hex('#9ad8f0'));}}}
+  else if(t==='scoop'){sprite(fb,CUR.scoop,x-3,y-6,CUR_PAL);const m=scoopTarget(w,P.x,P.y);if(m){const a=w.t*5;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,m.x+Math.cos(aa)*5,m.y-(m.h||0)+Math.sin(aa)*4,hex('#9ad8f0'));}}}
   else if(t==='bubbles')drawToolIcon(fb,'bubbles',x+4,y-4);
   else if(t==='remote'){const c=CUR_PAL.w;for(const[dx,dy]of[[-3,0],[-2,0],[2,0],[3,0],[0,-3],[0,-2],[0,2],[0,3]])pset(fb,x+dx,y+dy,c);pset(fb,x,y,hex('#ff3030'));}
   if((t==='pet'||t==='tap')&&!(t==='pet'&&w.pet.hitTest(P.x,P.y)>=0)){const o=objectAt(P.x,P.y);if(o&&o.onClick){const a=w.t*4;for(let i=0;i<4;i++){const aa=a+i*Math.PI/2;pset(fb,x+Math.cos(aa)*6,y+Math.sin(aa)*6,hex('#ffe066'));}}}
@@ -5404,7 +5409,7 @@ function renderObjects(list){
 function renderPlay(){
   const w=game.world,px=fb.px,pet=w.pet,P=game.pointer;FOOD_PAINTER.shells.length=0;OBJ_PAINTER.balls.length=0;OBJ_PAINTER.tops.length=0;OBJ_PAINTER.t=w.t;
   px.set(R.bg);
-  if(w.tank==='aqua')drawPool(w);else drawWater(w);drawWet(w);
+  if(w.tank==='aqua')drawPool(w);else if(w.dish)drawWater(w);drawWet(w);
   if(w.air){const B1=hex('#d8f4ff'),B2=hex('#8ac8e0');for(const b of w.airb){const x=b.x,y=b.y-b.h*0.55;if(b.r>1){pmix(fb,x,y,B2,0.8);pmix(fb,x+1,y,B2,0.8);pmix(fb,x,y+1,B2,0.8);pmix(fb,x+1,y+1,B2,0.6);pmix(fb,x,y,B1,0.9);}else pmix(fb,x,y,B1,0.55+0.35*(b.h/22));}}if(w.pads.length&&!(pet.dive>0.5))drawPads(fb,w);
   const drop=hex('#bfe4f2'),mistc=hex('#e8f4f6');
   for(const p of w.parts){
@@ -5728,8 +5733,7 @@ const DRAWER={on:false,el:null,tanks:[],rowsEl:null,drag:null,velX:0,velStrip:nu
         T.slots=spots.map(([x,y,a],i)=>({x,y,a,item:null,re:0.1*i,pop:0,ph:rand(TAU)}));this.bake(T);this.wire(T);this.tanks.push(T);}
       this.wireStrip(strip);}
     const side=document.createElement('div');side.className='dr-side';const track=document.createElement('div');track.className='dr-track';const thumb=document.createElement('div');thumb.className='dr-thumb';track.appendChild(thumb);this.thumb=thumb;this.track=track;
-    const tb=document.createElement('button');tb.className='ti trash';tb.id='trashBtn';tb.title='Trash: click to clear all food, or drag food here to throw it away';
-    tb.innerHTML=`<img class="px" src="${iconURL('trash')}" alt="">`;tb.addEventListener('click',()=>trashAll());side.append(track,tb);
+    side.append(track);
     this.el=[rows,side];this.wireVertical();},
   // ---------- tank backgrounds (drawn once) ----------
   bake(T){const bg=T.bg,S={w:TKW,h:TKH,px:bg},P=(x,y,c)=>pset(S,x,y,c),M=(x,y,c,a)=>{x=Math.floor(x);y=Math.floor(y);if(x>=0&&y>=0&&x<TKW&&y<TKH)bg[y*TKW+x]=mixc(bg[y*TKW+x],c,a);},sd=T.f.length*31+T.f.charCodeAt(0),f=T.th.bg;
@@ -5865,14 +5869,14 @@ const DRAWER={on:false,el:null,tanks:[],rowsEl:null,drag:null,velX:0,velStrip:nu
         T.liftT=1.8;SFX.play('pluck');for(const s2 of T.slots){const q=s2.item;if(q&&q.hidden){q.hidden=false;q.hideT=0;q.outT=2.5;q.want=40;q.runT=1.2;q.ang=Math.atan2(q.y-T.hide.y,q.x-T.hide.x)+rand(-0.6,0.6);}}}
       if(!sl)return;// empty glass: the row scrolls instead
       e.stopPropagation();try{cv.releasePointerCapture(e.pointerId);}catch(_){}ui.fdrag={f:T.f,x:e.clientX,y:e.clientY,active:false,src:{T,sl}};});
-    cv.addEventListener('click',()=>{if(ui.fdragDone){ui.fdragDone=false;return;}game.food=T.f;SFX.play('tick');this.refresh();ui.tuckTray('pick');});},
+    cv.addEventListener('click',()=>{if(ui.fdragDone)ui.fdragDone=false;});},
   // ---------- side-to-side: drag a row (with momentum) or scroll sideways ----------
   wireStrip(strip){
     strip.addEventListener('pointerdown',e=>{if(e.button>0)return;this.drag={strip,x:e.clientX,sx:strip.scrollLeft,lx:e.clientX,lt:performance.now(),moved:false,tank:e.target.closest('.dr-tank')};this.velX=0;strip.setPointerCapture(e.pointerId);});
     strip.addEventListener('pointermove',e=>{const D=this.drag;if(!D||D.strip!==strip)return;const dx=e.clientX-D.x;if(!D.moved&&Math.abs(dx)>5){D.moved=true;strip.classList.add('drag');}
       if(D.moved){strip.scrollLeft=D.sx-dx;const now=performance.now();this.velX=(D.lx-e.clientX)/Math.max(1,now-D.lt)*16;this.velStrip=strip;D.lx=e.clientX;D.lt=now;}});
     const end=()=>{const D=this.drag;if(!D||D.strip!==strip)return;this.drag=null;strip.classList.remove('drag');
-      if(!D.moved&&D.tank){const T=this.tanks.find(t=>t.el===D.tank);if(T){game.food=T.f;SFX.play('tick');this.refresh();ui.tuckTray('pick');}}};
+};
     strip.addEventListener('pointerup',end);strip.addEventListener('pointercancel',end);},
   // ---------- up/down: only the wheel or the scroll tab, one tray at a time ----------
   rowH(){return this.rowsEl.children[0].offsetHeight;},
@@ -5887,7 +5891,7 @@ const DRAWER={on:false,el:null,tanks:[],rowsEl:null,drag:null,velX:0,velStrip:nu
     const up=()=>{if(!this.thumbDrag)return;this.thumbDrag=false;this.goRow(Math.round(R.scrollTop/this.rowH()));};T.addEventListener('pointerup',up);T.addEventListener('pointercancel',up);},
   refresh(){const D=DIET[game.kind]||{};
     for(const sg of this.rowsEl.querySelectorAll('.dr-sign')){const c=FOOD_CATS.find(c=>c.id===sg.dataset.c),fav=c.foods.some(f=>(D[f]||0)>=8);sg.innerHTML=c.name.toUpperCase()+(fav?'<i>&#9829;</i>':'');}
-    for(const T of this.tanks){const lv=D[T.f]||0,pr=FOOD_PRICE[T.f]||0,nm=FOODS[T.f].label||FOODS[T.f].name;T.el.classList.toggle('meh',lv<=0);T.el.classList.toggle('on',game.food===T.f);
+    for(const T of this.tanks){const lv=D[T.f]||0,pr=FOOD_PRICE[T.f]||0,nm=FOODS[T.f].label||FOODS[T.f].name;T.el.classList.toggle('meh',lv<=0);
       T.tag.innerHTML=`<img class="px" src="${iconURL('coin')}" alt="">${pr}${lv>=8?'<i>&#9829;</i>':''}`;T.el.title=`${nm[0].toUpperCase()+nm.slice(1)} · ${pr} coin${pr===1?'':'s'}${lv>=8?' · a favourite!':lv<=0?` · ${game.name} won't eat this`:''}${save.coins<pr?' · not enough coins':''}`;}},
   mount(tr){if(!this.el)this.build();if(!this.on||this.el[0].parentNode!==tr){tr.innerHTML='';tr.append(...this.el);this.on=true;
       const i=FOOD_CATS.findIndex(c=>c.foods.includes(game.food));this.goRow(Math.max(0,i));this.rowsEl.scrollTop=this.target;
@@ -6221,9 +6225,7 @@ const ui={
       b.addEventListener('click',()=>{if(this.fdragDone){this.fdragDone=false;return;}game.food=f;SFX.play('tick');this.renderTray();this.tuckTray('pick');});
       b.addEventListener('pointerdown',e=>{if(e.button>0)return;this.fdrag={f,x:e.clientX,y:e.clientY,active:false};});tr.appendChild(b);}
       const maxN=Math.max(...FOOD_CATS.map(c=>c.foods.length));for(let k=FOOD_CATS.find(c=>c.id===this.foodCat).foods.length;k<maxN;k++){const fl=document.createElement('div');fl.className='ti filler';tr.appendChild(fl);}
-      const sep=document.createElement('div');sep.className='tsep';tr.appendChild(sep);
-      const tb=document.createElement('button');tb.className='ti trash';tb.id='trashBtn';tb.title='Trash: click to clear all food, or drag food here to throw it away';
-      tb.innerHTML=`<img class="px" src="${iconURL('trash')}" alt=""><span class="tl">trash</span>`;tb.addEventListener('click',()=>trashAll());tr.appendChild(tb);}
+}
     else{const owned=TOY_TOOLS.filter(toolOwned);
       if(!owned.length){const n=document.createElement('div');n.className='tray-note';n.innerHTML='No play tools yet. The toy machine has lasers, bubbles and feathers! <button>Open Gacha</button>';
         n.querySelector('button').addEventListener('click',()=>{G.m='toys';this.openModal('mGacha');});tr.appendChild(n);}
@@ -6484,6 +6486,7 @@ canvas.addEventListener('pointerdown',e=>{
   if(tool==='feed'){
     let q=null,bd=6;
     for(const p of w.prey){if(p.caught||p.dead||p.stale)continue;const d=Math.hypot(p.x-x,p.y-p.h-y);if(d<bd){bd=d;q=p;}}
+    if(!q&&FUN('food')&&DRAWER.on){if(!save.set.pluckTip){save.set.pluckTip=true;flash('Pluck food straight out of the little tanks below and drag it in.');}return;}
     if(!q){if(w.prey.length>=12){flash('That is plenty of food for now.');return;}if(!buyFood(game.food))return;
       q=makeFood(game.food,x,y+8,8);q.__new=true;q.paid=FOOD_PRICE[game.food]||0;if(q.pts)q.toScreen();w.prey.push(q);if(q.type==='fly')SFX.play('buzz');}
     else if(q.pts)q.toScreen();
