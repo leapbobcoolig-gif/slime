@@ -108,7 +108,7 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .db.on span{color:var(--ink)}
 .db.menu{background:#2a2433}
 /* Fun UI: a real pegboard canvas replaces the tool buttons */
-#gauges,#jar{display:none}
+#gauges{display:none}
 /* Fun food drawer: a stack of wooden trays, each holding a row of little glass tanks */
 #tray.drawer{display:flex;gap:6px;padding:0;overflow:visible;width:min(800px,calc(100vw - 16px));align-items:stretch;background:none;border:0;box-shadow:none;
   --tw:160px;--th:112px;--rows:2;--rh:calc(var(--th) + 36px)}
@@ -148,8 +148,6 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 @media (max-height:500px) and (min-width:600px){#tray.drawer{--tw:104px;--th:73px;--rows:1}.dr-side .ti.trash{width:34px;height:34px}}
 body.fun-needs #meters{display:none}body.fun-needs #gauges{display:flex;align-items:center;gap:8px;margin-left:8px}
 #gauges canvas{height:44px;width:auto;image-rendering:pixelated;filter:drop-shadow(0 2px 0 rgba(0,0,0,.45))}
-body.fun-coins #coins img{display:none}body.fun-coins #jar{display:block;height:40px;width:auto;image-rendering:pixelated;margin:-6px 0 -6px -2px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.4))}
-body.fun-coins #coinNum{background:#f0e2c0;color:#3a2410;padding:2px 6px 1px;border-radius:2px;box-shadow:0 0 0 2px #1a0f06;font-size:15px}
 #peg{display:none;height:88px;width:auto;image-rendering:pixelated;touch-action:none;cursor:pointer;border-radius:6px}
 body.fun-tools #tools{display:none}body.fun-tools #peg{display:block}
 body.fun-tools #dock{padding:4px;background:#1a0f06;border-color:#060a07;box-shadow:inset 0 0 0 2px #3a2410,0 5px 0 #040604,0 10px 18px rgba(0,0,0,.45)}
@@ -318,8 +316,8 @@ input[type=range]{accent-color:var(--moss);width:180px}
   .gwrap{grid-template-columns:1fr}.machine{justify-self:center}
   #gcv{width:256px;height:352px}
       }
-@media (max-width:340px){@media (max-width:760px){#peg{height:84px}body.fun-tools #dock{padding:3px}#gauges canvas{height:36px}body.fun-needs #gauges{gap:5px;margin-left:auto}body.fun-coins #jar{height:34px}}
-@media (max-height:500px) and (min-width:600px){#peg{height:54px}body.fun-tools #dock{padding:3px}#gauges canvas{height:32px}body.fun-coins #jar{height:30px}}
+@media (max-width:760px){#peg{height:84px}body.fun-tools #dock{padding:3px}#gauges canvas{height:36px}body.fun-needs #gauges{gap:5px;margin-left:auto}}
+@media (max-height:500px) and (min-width:600px){#peg{height:54px}body.fun-tools #dock{padding:3px}#gauges canvas{height:32px}}
 @media (orientation:portrait) and (min-width:761px) and (max-width:1100px){
   #top{flex-wrap:wrap;height:auto;padding-top:10px;row-gap:10px}
   #petCard{width:100%}#meters{margin-left:auto}
@@ -335,6 +333,69 @@ input[type=range]{accent-color:var(--moss);width:180px}
   #tray .tcats{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-right:2px}#tray .tcat{min-width:0;padding:2px 5px;font-size:9px}
   .tmsg{font-size:17px;padding:5px 12px 4px}
     }
+/* ===== Fun top bar: wood & brass (textures painted per element by SKIN) ===== */
+#moodFace{display:none}
+body.fun-hud #petCard,body.fun-hud #coins,body.fun-hud #zoomChip,body.fun-hud #trayTab,body.fun-hud #petStats{background:var(--skin) 0 0/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
+body.fun-hud #petCard{padding:6px 15px 9px 9px}
+body.fun-hud #top{height:calc(var(--top) + 12px);padding-top:6px}
+body.fun-hud #petName{font-family:var(--display);color:#f6e8c6;text-shadow:0 2px 0 #2a1608,1px 0 0 #2a1608}
+body.fun-hud #petName:hover{color:#ffe08a}
+body.fun-hud #petMood{display:none}
+body.fun-hud #moodFace{display:block;width:26px;height:26px;image-rendering:pixelated;flex:none;filter:drop-shadow(0 2px 0 rgba(0,0,0,.4));cursor:help}
+body.fun-hud #moodFace.thriving{animation:skhop 1.6s ease-in-out infinite}
+body.fun-hud #moodFace.grumpy{animation:skgrr 3.2s ease-in-out infinite}
+body.fun-hud #moodFace.flip{animation:skflip .5s ease-out}
+@keyframes skhop{0%,60%,100%{transform:translateY(0)}70%{transform:translateY(-4px) scale(1.05,.95)}80%{transform:translateY(0) scale(.95,1.06)}}
+@keyframes skgrr{0%,90%,100%{transform:none}92%{transform:translateX(-1px)}94%{transform:translateX(1px)}96%{transform:translateX(-1px)}}
+@keyframes skflip{0%{transform:rotateY(0) scale(1)}50%{transform:rotateY(90deg) scale(1.2)}100%{transform:rotateY(0) scale(1)}}
+body.fun-hud #petKind{align-self:flex-start;display:inline-block;margin-top:3px;padding:1px 8px 0 13px;font-size:15px;line-height:1.25;color:#3a2410;background:
+  radial-gradient(circle at 6px 50%,#2a1608 0 1.6px,transparent 2.2px),linear-gradient(#f4e6c4,#e4d0a4);clip-path:polygon(5px 0,100% 0,100% 100%,5px 100%,0 50%);
+  transform-origin:0 50%;animation:sksway 4s ease-in-out infinite;max-width:100%}
+body.fun-hud #petKind.swing{animation:skswing .9s cubic-bezier(.3,1.4,.5,1)}
+@keyframes sksway{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1deg)}}
+@keyframes skswing{0%{transform:rotate(-1.5deg)}25%{transform:rotate(7deg)}55%{transform:rotate(-4deg)}80%{transform:rotate(2deg)}100%{transform:rotate(-1.5deg)}}
+body.fun-hud #lvl{background:conic-gradient(#ff7aa8 calc(var(--p,0)*1turn),#3a1a28 0);box-shadow:none;border-radius:50%}
+body.fun-hud #lvl::before{inset:0;border-radius:0;background:var(--skin) 0 0/100% 100% no-repeat;image-rendering:pixelated}
+body.fun-hud #lvl b{color:#fff0c0;text-shadow:0 2px 0 #2a1608}
+body.fun-hud #lvl small{background:#e8b04a;color:#3a2006;box-shadow:0 0 0 2px #1a0c04;border-radius:2px}
+body.fun-hud #lvl.spin{animation:skspin .9s cubic-bezier(.3,1.3,.5,1)}
+@keyframes skspin{0%{transform:rotate(0) scale(1)}50%{transform:rotate(200deg) scale(1.3)}100%{transform:rotate(360deg) scale(1)}}
+body.fun-hud #gauges canvas{filter:drop-shadow(0 2px 0 rgba(0,0,0,.45))}
+body.fun-hud #top .ibtn,body.fun-hud #zoomChip .ibtn{background:var(--skin) 0 0/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;transition:none;padding-bottom:6px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.3))}
+body.fun-hud #top .ibtn img,body.fun-hud #zoomChip .ibtn img{filter:drop-shadow(0 2px 0 rgba(26,12,4,.7))}
+body.fun-hud #top .ibtn:hover,body.fun-hud #zoomChip .ibtn:hover{transform:none}
+body.fun-hud #top .ibtn:hover img,body.fun-hud #zoomChip .ibtn:hover img{animation:skwig .45s ease-in-out}
+body.fun-hud #top .ibtn:active,body.fun-hud #zoomChip .ibtn:active{background-image:var(--skin2);padding-bottom:0;padding-top:0}
+body.fun-hud .pop{animation:skpop .32s cubic-bezier(.3,1.6,.5,1)}
+@keyframes skpop{0%{transform:scale(1)}30%{transform:scale(1.14,.84)}65%{transform:scale(.94,1.08)}100%{transform:scale(1)}}
+@keyframes skwig{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}60%{transform:rotate(9deg)}}
+body.fun-hud #zoomChip .ibtn.on{background-image:var(--skin2)}
+body.fun-hud #zGrip{opacity:.7}
+body.fun-hud #zLvl{color:#f6e8c6;text-shadow:0 2px 0 #2a1608}
+body.fun-hud .mbtn .dot{top:-6px;left:-4px;width:15px;height:15px;background:radial-gradient(circle at 35% 35%,#ffb0b0 0 18%,#e03040 22% 62%,#8a1020 66%);box-shadow:0 2px 0 rgba(0,0,0,.45);animation:skpin 2.6s ease-in-out infinite}
+@keyframes skpin{0%,70%,100%{transform:translateY(0)}78%{transform:translateY(-6px)}86%{transform:translateY(0) scale(1.15,.85)}92%{transform:translateY(-2px)}}
+body.fun-hud #coins{padding:7px 14px 10px 10px;color:#ffe08a;text-shadow:0 2px 0 #2a1608}
+body.fun-hud #coins img{filter:drop-shadow(0 2px 0 rgba(26,12,4,.7))}
+body.fun-hud #zoomChip{padding:7px 6px 9px}
+body.fun-hud #trayTab{padding:4px 12px 7px 8px;color:#f6e8c6;text-shadow:0 2px 0 #2a1608}
+body.fun-hud #petStats{padding:14px 16px 16px;color:#f6e8c6;transform-origin:30px 0;animation:skunroll .35s cubic-bezier(.3,1.3,.5,1)}
+body.fun-hud #petStats .ps-t,body.fun-hud #petStats .ps-m,body.fun-hud #petStats .ps-n{color:#e8d4a8}body.fun-hud #petStats .ps-r span,body.fun-hud #petStats .ps-m b{color:#fff4d8}
+body.fun-hud #petStats .ps-r i{background:#2a1608;box-shadow:0 0 0 2px #1a0c04}
+@keyframes skunroll{from{transform:scaleY(.2);opacity:0}to{transform:none;opacity:1}}
+body.fun-hud #toast{top:calc(var(--top) + 10px)}
+body.fun-hud .tmsg{background:var(--skin) 0 0/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;color:#fbeed0;text-shadow:0 2px 0 #2a1608;padding:9px 18px 11px;
+  transform-origin:50% -12px;animation:skdrop .9s cubic-bezier(.3,1.2,.4,1);filter:drop-shadow(0 4px 0 rgba(0,0,0,.35));opacity:1}
+body.fun-hud .tmsg::before,body.fun-hud .tmsg::after{content:"";position:absolute;top:-12px;width:3px;height:14px;background:repeating-linear-gradient(#c8a060 0 3px,#8a6430 3px 6px);box-shadow:0 0 0 1px #2a1608}
+body.fun-hud .tmsg{position:relative}body.fun-hud .tmsg::before{left:16%}body.fun-hud .tmsg::after{right:16%}
+body.fun-hud .tmsg.old{transform:scale(.8) rotate(-2deg);opacity:.55}
+body.fun-hud .tmsg.old::before,body.fun-hud .tmsg.old::after,body.fun-hud .tmsg.gone::before,body.fun-hud .tmsg.gone::after{opacity:0}
+body.fun-hud .tmsg.event{color:#fff2c0}
+body.fun-hud .tmsg.event:not(.old){animation:skdrop .9s cubic-bezier(.3,1.2,.4,1)}
+body.fun-hud .gtoast{background:var(--skin) 0 0/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;padding:12px 22px 15px;transform:none;translate:-50% 0;
+  transform-origin:50% 0;animation:skdrop .9s cubic-bezier(.3,1.2,.4,1);filter:drop-shadow(0 5px 0 rgba(0,0,0,.4))}
+body.fun-hud .gtoast b{color:#fff0b0;text-shadow:0 2px 0 #2a1608}body.fun-hud .gtoast span{color:#fbeed0;text-shadow:0 2px 0 #2a1608}
+body.fun-hud .gtoast.out{transform:none;translate:-50% -10px;opacity:0}
+@keyframes skdrop{0%{transform:translateY(-40px) rotate(-7deg);opacity:0}35%{transform:translateY(0) rotate(5deg);opacity:1}60%{transform:rotate(-3deg)}82%{transform:rotate(1.2deg)}100%{transform:rotate(0)}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 
@@ -344,7 +405,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
 <div id="top">
   <div id="petCard" class="chunk">
     <div id="lvl" title="Bond level"><b id="lvlNum">1</b><small>LV</small></div>
-    <div id="petText"><div class="pnrow"><button id="petName" title="Personality and stats">…</button><span id="petMood"></span></div><span id="petKind">…</span></div>
+    <div id="petText"><div class="pnrow"><button id="petName" title="Personality and stats">…</button><span id="petMood"></span><canvas id="moodFace" class="px" width="13" height="13"></canvas></div><span id="petKind">…</span></div>
     <div id="petStats" class="chunk" hidden></div>
     <div id="meters">
       <div class="meter" id="mFed" title="Fed"><img class="px" id="icFed" alt=""><div class="bar"><i style="--c:var(--amber)"></i></div></div>
@@ -355,7 +416,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
     <div id="gauges"><canvas id="gFed" class="px" width="22" height="22"></canvas><canvas id="gWater" class="px" width="22" height="22"></canvas><canvas id="gHappy" class="px" width="22" height="22"></canvas></div>
   </div>
   <div id="topR">
-    <div id="coins" class="chunk" title="Coins"><canvas id="jar" class="px" width="18" height="24"></canvas><img class="px" id="icCoin" alt=""><span id="coinNum">0</span></div>
+    <div id="coins" class="chunk" title="Coins"><img class="px" id="icCoin" alt=""><span id="coinNum">0</span></div>
     <div id="menusTop"></div>
     <button class="ibtn" id="btnLight" title="Lights (L)"><img class="px" alt="Toggle lights"></button>
     <button class="ibtn" id="btnSettings" title="Settings"><img class="px" alt="Settings"></button>
@@ -5651,7 +5712,7 @@ const GAUGES={val:{fed:-1,water:-1,happy:-1},nv:0,nvv:0,jarKick:0,jarFill:-1,gr:
   fb(id,w,h){const k='_'+id;if(!this[k])this[k]={fb:new FB(w,h),ctx:$(id).getContext('2d')};return this[k];},
   tick(dt){const w=game.world;if(!w||!w.pet)return;const S=w.stats,t=w.t;
     for(const k of['fed','water','happy'])this.val[k]=this.val[k]<0?S[k]:this.val[k]+(S[k]-this.val[k])*Math.min(1,dt*3);
-    if(FUN('needs')){this.dial(dt,S,t);this.heart(dt,S,t,w.mood);this.card(S,t);}if(FUN('coins'))this.jar(dt,t);
+    if(FUN('needs')){this.dial(dt,S,t);this.heart(dt,S,t,w.mood);this.card(S,t);}
     this.tipT-=dt;if(this.tipT<=0){this.tipT=0.5;$('gWater').title=`Water ${S.water|0}% (mist to raise it)`;$('gHappy').title=`Happy ${S.happy|0}% · ${w.mood}`;$('gFed').title=`Fed ${S.fed|0}%`;$('coins').title=`${save.coins} coins`;}},
   // shared vial painter: a glass shape (mask), liquid up to a level with a wavy surface, bubbles, glint
   vial(id,mask,lvl,liq,t,o={}){const{fb,ctx}=this.fb(id,22,22),px=fb.px;px.fill(0);const jx=o.jx||0;
@@ -5686,16 +5747,6 @@ const GAUGES={val:{fed:-1,water:-1,happy:-1},nv:0,nvv:0,jarKick:0,jarFill:-1,gr:
     for(let y=0;y<4;y++)for(let x=9;x<=12;x++)px[y*22+x]=y===0||x===9||x===12?hex('#3a2010'):hex(y===1?'#c89058':'#a0703a');
     if(mood==='thriving'){for(let k=0;k<3;k++){const ph=(t*1.3+k/3)%1,x=4+k*6+Math.sin(t+k)*2,y=16-ph*14;if(ph<0.8)pset(fb,x,y,hex('#fff4b0'));}}
     if(mood==='grumpy'){const x=16,y=2+Math.sin(t*2)*0.5;for(const[u,v]of[[0,0],[1,0],[2,0],[-1,1],[0,1],[1,1],[2,1],[3,1]])pset(fb,x+u,y+v,hex('#8a94a8'));}
-    ctx.putImageData(fb.img,0,0);},
-  // coin jar: fills (log scale) as coins pile up; jiggles when coins land
-  jar(dt,t){const{fb,ctx}=this.fb('jar',18,24),px=fb.px;px.fill(0);this.jarKick=Math.max(0,this.jarKick-dt*3);
-    const tgt=clamp(Math.log10(save.coins+1)/3.4,0.04,1);this.jarFill=this.jarFill<0?tgt:this.jarFill+(tgt-this.jarFill)*Math.min(1,dt*4);
-    const jx=Math.round(Math.sin(t*40)*this.jarKick*1.2),GOLD=OR[61];
-    for(let y=4;y<24;y++)for(let x=1;x<17;x++){const neck=y<7,xl=neck?4:1,xr=neck?13:16;if(x<xl||x>xr)continue;const e=x===xl||x===xr||y===23||(y===7&&(x<5||x>12));const i=y*18+x+jx;if(x+jx<0||x+jx>=18)continue;
-      px[i]=e?hex('#1a2a30'):mixc(hex('#cfe8ec'),hex('#8ab0b8'),0.3);}
-    const top=22-Math.round(this.jarFill*14);for(let y=top;y<23;y++)for(let x=2;x<16;x++){const i=y*18+x+jx;const rowc=((y+(x>>1))&1)?GOLD[2]:GOLD[1];px[i]=(y===top&&((x+Math.floor(t))%3===0))?GOLD[3]:rowc;}
-    for(let y=0;y<4;y++)for(let x=3;x<15;x++)px[y*18+x+jx]=y===0||x===3||x===14?hex('#3a2010'):hex(y===1?'#c89058':'#a0703a');
-    for(let y=9;y<19;y+=1)if(y%3)pmix(fb,3+jx,y,hex('#ffffff'),0.7);
     ctx.putImageData(fb.img,0,0);},
 };
 
@@ -6153,7 +6204,10 @@ const ui={
     PEG.wire();
     for(const d of MENUS){const b=document.createElement('button');b.className='ibtn mbtn '+d.id;b.id='d-'+d.id;b.title=`${d.label} (${d.key})`;b.setAttribute('aria-label',d.label);b.innerHTML=`<img class="px" src="${iconURL(d.id)}" alt="">`;
       b.addEventListener('click',()=>{SFX.play('ui');this.openModal('m'+d.id[0].toUpperCase()+d.id.slice(1));});$('menusTop').appendChild(b);}
-    $('petName').addEventListener('click',e=>{e.stopPropagation();if(!game.kind)return;const st=$('petStats');if(st.hidden){this.renderStats();st.hidden=false;}else st.hidden=true;SFX.play('ui');});
+    document.addEventListener('pointerdown',e=>{if(!HUDSKIN.on)return;const b=e.target.closest('#top .ibtn,#zoomChip .ibtn,#coins,#trayTab');if(!b)return;b.classList.remove('pop');void b.offsetWidth;b.classList.add('pop');});
+    document.addEventListener('animationend',e=>{if(e.animationName==='skpop')e.target.classList.remove('pop');});
+    $('petCard').addEventListener('pointerdown',e=>{if(!HUDSKIN.on||e.target.closest('#petStats'))return;const k=$('petKind');k.classList.remove('swing');void k.offsetWidth;k.classList.add('swing');});
+    $('petName').addEventListener('click',e=>{e.stopPropagation();if(!game.kind)return;const st=$('petStats');if(st.hidden){this.renderStats();st.hidden=false;if(HUDSKIN.on)HUDSKIN.paint(st,'plate');}else st.hidden=true;SFX.play('ui');});
     document.addEventListener('pointerdown',e=>{const st=$('petStats');if(!st.hidden&&!e.target.closest('#petStats')&&!e.target.closest('#petName'))st.hidden=true;});
     $('coins').addEventListener('click',()=>this.openModal('mGacha'));
     $('btnLight').addEventListener('click',()=>toggleLight());$('btnSettings').addEventListener('click',()=>this.openModal('mSettings'));
@@ -6172,8 +6226,8 @@ const ui={
     const sp=$('setPieces');for(const P of FUN_PIECES){const r=document.createElement('div');r.className='srow';r.innerHTML=`<label>${P.name}<small>${P.fun}</small></label><div class="seg" data-k="${P.id}"><button class="btn alt" data-v="0">Basic</button><button class="btn alt" data-v="1">Fun</button></div>`;
       for(const b of r.querySelectorAll('button'))b.addEventListener('click',()=>{save.set.fun=save.set.fun||{};if(b.dataset.v==='1')save.set.fun[P.id]=1;else delete save.set.fun[P.id];markDirty();SFX.play('ui');this.applyIface();this.funHints();});sp.appendChild(r);}
     this.funHints=()=>{if(FUN('tools')&&!save.set.funHint){save.set.funHint=1;this.toast('Your hand does the petting now: rub to pet, hold to pick up, double-tap to knock on the glass. Tools hang on the pegboard.');}};
-    this.applyIface=()=>{if(save.set.iface==='fun'){save.set.fun=Object.fromEntries(FUN_PIECES.map(p=>[p.id,1]));}delete save.set.iface;if(save.set.fun)delete save.set.fun.room;
-      for(const P of FUN_PIECES)document.body.classList.toggle('fun-'+P.id,FUN(P.id));document.body.classList.toggle('fun',FUN_PIECES.some(p=>FUN(p.id)));
+    this.applyIface=()=>{if(save.set.iface==='fun'){save.set.fun=Object.fromEntries(FUN_PIECES.map(p=>[p.id,1]));}delete save.set.iface;if(save.set.fun){delete save.set.fun.room;if(save.set.fun.coins){delete save.set.fun.coins;if(save.set.fun.food&&save.set.fun.tools&&save.set.fun.needs)save.set.fun.hud=1;}}
+      for(const P of FUN_PIECES)document.body.classList.toggle('fun-'+P.id,FUN(P.id));HUDSKIN.refresh();document.body.classList.toggle('fun',FUN_PIECES.some(p=>FUN(p.id)));
       if(FUN('tools')&&['pet','grab','tap'].includes(game.tool))setTool(null);canvas.style.cursor=game.tool||FUN('tools')?'none':'grab';
       const all=FUN_PIECES.every(p=>FUN(p.id)),none=!FUN_PIECES.some(p=>FUN(p.id));for(const b of $('setIface').children)b.classList.toggle('on',b.dataset.v==='fun'?all:none);
       for(const seg of sp.querySelectorAll('.seg'))for(const b of seg.children)b.classList.toggle('on',(b.dataset.v==='1')===FUN(seg.dataset.k));
@@ -6235,10 +6289,10 @@ const ui={
   },
   // two-deep message stack: new text slides in on top, the previous one shrinks and fades below it
   showMsg(text,ev){const box=$('toast');
-    if(text===this.curMsg){if(ev){const top=box.querySelector('.tmsg:not(.old):not(.gone)');if(top){top.classList.add('event');top.style.animation='none';void top.offsetWidth;top.style.animation='';}}return;}
+    if(text===this.curMsg){if(ev){const top=box.querySelector('.tmsg:not(.old):not(.gone)');if(top){top.classList.add('event');if(HUDSKIN.on)HUDSKIN.paint(top,'signGold');top.style.animation='none';void top.offsetWidth;top.style.animation='';}}return;}
     this.curMsg=text;this.msgAt=performance.now();
     [...box.querySelectorAll('.tmsg:not(.gone)')].forEach((e,i)=>{if(i===0){e.classList.add('old');clearTimeout(e._fade);e._fade=setTimeout(()=>{if(e.isConnected&&!e.classList.contains('gone')){e.classList.add('gone');setTimeout(()=>e.remove(),700);}},3000);}else{e.classList.add('gone');setTimeout(()=>e.remove(),700);}});
-    const n=document.createElement('div');n.className='tmsg chunk'+(ev?' event':'');n.textContent=text;box.prepend(n);},
+    const n=document.createElement('div');n.className='tmsg chunk'+(ev?' event':'');n.textContent=text;box.prepend(n);if(HUDSKIN.on)HUDSKIN.paint(n,ev?'signGold':'sign');},
   toast(msg,ev){this.showMsg(msg,ev);if(ev)this.evT=2.8;},
   update(){
     const w=game.world;if(!w||!w.pet)return;const S=w.stats;
@@ -6262,7 +6316,7 @@ const ui={
     if(this.open==='mGacha'){gStep(dt);gDraw();}
     if(this.open==='mPets'||this.open==='mWelcome')this.tickPreviews(dt);
     if(DRAWER.on)DRAWER.tick(dt);DRAGCUR.tick();
-    if(FUN('tools'))PEG.tick(dt);if(FUN('needs')||FUN('coins'))GAUGES.tick(dt);
+    if(FUN('tools'))PEG.tick(dt);if(FUN('needs'))GAUGES.tick(dt);if(FUN('hud'))HUDSKIN.tick(dt);
     this.liveT=(this.liveT||0)-dt;if(this.liveT<=0){this.liveT=0.5;const c=$('psCud');if(c&&!$('petStats').hidden)c.innerHTML=this.cuddleHTML();if(this.open==='mGoals'){const r=$('gReset');if(r)r.textContent=dailyResetText();}}
   },
   renderStats(){const pet=game.world.pet;if(!pet)return;const M=pet.mind,B=MIND[game.kind]||MIND.default;
@@ -6273,12 +6327,12 @@ const ui={
   cuddleHTML(){const ps=petSave(),cs=cuddleState(ps),nx=cuddleNext(ps),grumpy=game.world&&game.world.mood==='grumpy';
     return `Cuddle coins <b style="color:#ff7a9a">${'&#9829;'.repeat(cs.n)}<span style="opacity:.3">${'&#9829;'.repeat(CUD_MAX-cs.n)}</span></b>${nx?` · next in ${mmss(nx)}`:''}${grumpy?' · <span style="color:#9ab4d0">too grumpy</span>':''}<i><em style="width:${Math.round(cs.love*100)}%"></em></i>`;},
   refreshPet(){if(!game.kind)return;$('petName').textContent=game.name+' ▾';$('petKind').textContent=SPECIES[game.kind].label+(game.world&&game.world.pet&&game.world.pet.mind?' · '+game.world.pet.mind.temper:'');this.refreshLevel();},
-  refreshLevel(){if(!game.kind)return;const ps=petSave();$('lvlNum').textContent=ps.lvl;$('lvl').style.setProperty('--p',(ps.xp/xpNeed(ps.lvl)).toFixed(3));},
+  refreshLevel(){if(!game.kind)return;const ps=petSave();if(this._lv&&ps.lvl>this._lv&&this._lvKind===game.kind){const L=$('lvl');L.classList.remove('spin');void L.offsetWidth;L.classList.add('spin');}this._lv=ps.lvl;this._lvKind=game.kind;$('lvlNum').textContent=ps.lvl;$('lvl').style.setProperty('--p',(ps.xp/xpNeed(ps.lvl)).toFixed(3));},
   refreshLight(){const d=game.world?game.world.dayTarget>0.5:true;$('btnLight').querySelector('img').src=iconURL(d?'sun':'moon');},
   tuckTray(mode){if(mode&&!save.set.trayTuck)return;const tr=$('tray'),tab=$('trayTab');if(!tr||!tab)return;if(mode==='drag'&&this.tuck==='pick')return;this.tuck=mode||null;
     tr.classList.toggle('tuck',!!mode);tab.hidden=!mode||tr.hidden;if(mode){tab.innerHTML='';if(game.food)tab.appendChild(foodCanvas(game.food));tab.insertAdjacentHTML('beforeend',mode==='drag'?'<span>DROP HERE TO PUT BACK</span>':'<span>FOOD &#9650;</span>');}},
   trayAfford(){for(const b of document.querySelectorAll('#tray .ti[data-f]'))b.classList.toggle('poor',save.coins<(FOOD_PRICE[b.dataset.f]||0));},
-  bumpCoins(){GAUGES.jarKick=1;const c=$('coins');c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump');},
+  bumpCoins(){const c=$('coins');c.classList.remove('bump');void c.offsetWidth;c.classList.add('bump');},
   coinFly(n,sx,sy){
     const fx=$('fx'),t=$('coins').getBoundingClientRect(),tx=t.left+18,ty=t.top+t.height/2;
     const fl=document.createElement('div');fl.className='floaty';fl.textContent='+'+n;fl.style.left=sx+'px';fl.style.top=(sy-10)+'px';fx.appendChild(fl);setTimeout(()=>fl.remove(),1300);
@@ -6300,7 +6354,7 @@ const ui={
   },
   // ---------- bag ----------
   goalTab:'today',
-  goalToast(title,sub){const box=$('fx'),d=document.createElement('div');d.className='gtoast chunk';d.innerHTML=`<b>${title}</b><span>${sub}</span>`;box.appendChild(d);setTimeout(()=>d.classList.add('out'),3200);setTimeout(()=>d.remove(),3900);},
+  goalToast(title,sub){const box=$('fx'),d=document.createElement('div');d.className='gtoast chunk';d.innerHTML=`<b>${title}</b><span>${sub}</span>`;box.appendChild(d);if(HUDSKIN.on)HUDSKIN.paint(d,'signGold');setTimeout(()=>d.classList.add('out'),3200);setTimeout(()=>d.remove(),3900);},
   renderGoals(){rollDaily();const tabs=$('goalTabs'),body=$('goalBody'),got=Object.keys(save.ach||{}).length;
     tabs.innerHTML='';for(const[k,l]of[['today','Today'],['ach',`Achievements <span class="n">${got}/${ACH.length}</span>`]]){const b=document.createElement('button');b.className='tab'+(this.goalTab===k?' on':'');b.innerHTML=l;b.addEventListener('click',()=>{this.goalTab=k;SFX.play('tick');this.renderGoals();});tabs.appendChild(b);}
     const bar=(v,n)=>`<i class="gbar"><em style="width:${Math.round(Math.min(1,v/n)*100)}%"></em></i>`,fmt=(v,t)=>t.sec?`${Math.floor(Math.min(v,t.n)/60)}:${String(Math.floor(Math.min(v,t.n))%60).padStart(2,'0')} / ${Math.floor(t.n/60)}:${String(t.n%60).padStart(2,'0')}`:`${Math.min(v,t.n)} / ${t.n}`;
@@ -6515,7 +6569,60 @@ const HAND={
  carry:["...........",".kkkkkkk...","khkhkhkhk..","kpkpkpkpk..","kskskskskk.","khppppppkhk",".kpppppppk.","..kpppppk..","...kkkkk..."],
  knock:["...........","..kkkkk....",".khpspsk...","khpspsppk..","kppppppkk..","khpppppkhk.",".kppppppk..","..kppppk...","...kkkk...."],
 };
-const FUN_PIECES=[{id:'food',name:'Food',fun:'Supply tanks you pluck food from'},{id:'tools',name:'Tools',fun:'Your hand + a pegboard of real tools'},{id:'needs',name:'Needs',fun:'Gauges on the glass; grime shows a dirty tank'},{id:'coins',name:'Coins',fun:'A coin jar that fills up'}];
+// =====================================================================
+//  Fun top bar skin: pixel wood & brass painted per element (so the grain never stretches or tiles),
+//  in the same style as the pegboard. Plates, keycap buttons, hanging signs, a brass medal and a mood face.
+// =====================================================================
+const HUDSKIN={on:false,tp:3,cache:new Map(),ro:null,faceT:0,blink:0,lastMood:'',
+  seedOf(s){let h=7;for(const c of String(s))h=(h*31+c.charCodeAt(0))%9973;return h;},
+  // tw x th texels; returns a data URL
+  draw(kind,tw,th,seed){const key=kind+':'+tw+':'+th+':'+seed;if(this.cache.has(key))return this.cache.get(key);
+    const cv=document.createElement('canvas');cv.width=tw;cv.height=th;const cx=cv.getContext('2d'),img=cx.createImageData(tw,th),d=new Uint32Array(img.data.buffer);
+    const put=(x,y,c)=>{if(x>=0&&y>=0&&x<tw&&y<th)d[y*tw+x]=c;},get=(x,y)=>d[y*tw+x];
+    const dark=hex('#1a0c04'),hi=hex('#e8b878'),BR=ramp('#6a4210','#b07820','#e8b04a','#fff0a8');
+    const W1=kind==='sign'||kind==='signGold'||kind==='paperless'?ramp('#6a4222','#8a5a30','#a8743e','#c08c52'):ramp('#4a2c14','#6a4222','#8a5a30','#a8743e');
+    const vert=kind==='strip',ph=kind==='btn'||kind==='btnDown'?99:7;
+    const wood=(x,y)=>{const u=vert?y:x,v=vert?x:y,pl=Math.floor((v+2)/ph),n0=fbm(u*0.06+pl*13+seed,v*0.4+pl*7,3),g=Math.sin(u*0.25+n0*9+pl*3+seed);
+      let c=W1[clamp(Math.floor(n0*3.2+(g>0.78?1:0)),0,3)];if(ph<99&&(v+2)%ph===0&&v>1)c=hex('#2a1608');else if(ph<99&&(v+2)%ph===1&&v>2)c=mixc(c,hex('#c89058'),0.3);
+      if(hash(u*3+seed,v*7)>0.94)c=shade(c,0.8);return c;};
+    const chamf=(x,y,W,H,r)=>{const cx2=x<r?r-x:x>W-1-r?x-(W-1-r):0,cy2=y<r?r-y:y>H-1-r?y-(H-1-r):0;return cx2+cy2>r;};
+    const screw=(x,y)=>{for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){const e=Math.abs(i)+Math.abs(j);put(x+i,y+j,e===2?BR[0]:(i+j<0?BR[3]:BR[2]));}put(x-1,y+1,BR[1]);put(x+1,y-1,BR[1]);put(x,y,BR[1]);put(x+1,y+2,shade(get(x+1,y+2)||dark,0.6));};
+    if(kind==='medal'){const R=tw/2,c0=(tw-1)/2;for(let y=0;y<th;y++)for(let x=0;x<tw;x++){const dx=x-c0,dy=y-c0,r=Math.hypot(dx,dy),l=-(dx+dy)/(r||1);
+        if(r>R-0.3)continue;if(r>R-1.3)put(x,y,dark);else if(r>R-3.3)put(x,y,BR[clamp(Math.round(1.6+l*1.3),0,3)]);else if(r>R-4.3)put(x,y,dark);else if(r>R-6.8)continue;else if(r>R-7.8)put(x,y,dark);
+        else put(x,y,mixc(wood(x,y),hex('#2a1608'),0.35));}}
+    else{const lip=kind==='btn'?3:kind==='btnDown'?1:kind==='paperless'?1:2,top=kind==='btnDown'?2:0,rr=kind==='btn'||kind==='btnDown'?2:2;
+      for(let y=top;y<th;y++)for(let x=0;x<tw;x++){const yy=y-top,H2=th-top;if(chamf(x,yy,tw,H2,rr))continue;
+        const edge=chamf(x-1,yy,tw,H2,rr)||chamf(x+1,yy,tw,H2,rr)||chamf(x,yy-1,tw,H2,rr)||chamf(x,yy+1,tw,H2,rr)||x===0||yy===0||x===tw-1||yy===H2-1;
+        if(edge){put(x,y,dark);continue;}
+        if(yy>=H2-1-lip){put(x,y,yy===H2-2?hex('#24120a'):shade(wood(x,y),0.5));continue;}
+        let c=wood(x,y);if(yy===1||x===1)c=mixc(c,hi,0.45);else if(x===tw-2)c=shade(c,0.7);
+        if(kind==='signGold'&&(yy===2||x===2||x===tw-3||yy===H2-2-lip)&&x>1&&x<tw-2)c=yy===2||x===2?BR[3]:BR[1];
+        put(x,y,c);}
+      if(kind==='plate'&&tw>=26){for(const[x,y]of[[3,3],[tw-4,3],[3,th-4-lip],[tw-4,th-4-lip]])screw(x,y);}
+      if(kind==='sign'||kind==='signGold'){for(const fx of[0.16,0.84]){const x=Math.round(tw*fx);put(x,2,dark);put(x+1,2,dark);put(x,3,shade(W1[0],0.6));put(x+1,3,BR[2]);}}}
+    cx.putImageData(img,0,0);const u=cv.toDataURL();this.cache.set(key,u);if(this.cache.size>300)this.cache.delete(this.cache.keys().next().value);return u;},
+  paint(el,kind){if(!el||!el.isConnected)return;const w=el.offsetWidth,h=el.offsetHeight;if(!w||!h)return;const tp=this.tp,tw=Math.max(6,Math.round(w/tp)),th=Math.max(6,Math.round(h/tp));
+    el.style.setProperty('--skin',`url(${this.draw(kind,tw,th,this.seedOf(el.id||el.className||kind))})`);
+    if(kind==='btn')el.style.setProperty('--skin2',`url(${this.draw('btnDown',tw,th,this.seedOf(el.id||kind))})`);},
+  targets(){const L=[[$('petCard'),'plate'],[$('coins'),'plaque'],[$('zoomChip'),'strip'],[$('lvl'),'medal'],[$('trayTab'),'plaque'],[$('petStats'),'plate']];
+    for(const b of document.querySelectorAll('#top .ibtn,#zoomChip .ibtn'))L.push([b,'btn']);for(const t of document.querySelectorAll('#toast .tmsg'))L.push([t,t.classList.contains('event')?'signGold':'sign']);return L;},
+  refresh(){const was=this.on;this.on=FUN('hud');this.tp=innerHeight<=500&&innerWidth>=600?2:3;if(was!==this.on&&typeof fit==='function')setTimeout(fit,0);if(!this.on)return;
+    if(!this.ro){this.ro=new ResizeObserver(es=>{if(!this.on)return;for(const e of es){const k=e.target._skin;if(k)this.paint(e.target,k);}});}
+    for(const[el,k]of this.targets()){if(!el)continue;if(el._skin!==k){el._skin=k;this.ro.observe(el);}this.paint(el,k);}},
+  // the little mood face: blinks, bounces when happy, scowls when grumpy, flips when the mood changes
+  tick(dt){const w=game.world,cv=$('moodFace');if(!w||!cv||!cv.offsetParent)return;const m=w.mood||'content',ctx=cv.getContext('2d');this.faceT+=dt;
+    if(m!==this.lastMood){if(this.lastMood){cv.classList.remove('flip');void cv.offsetWidth;cv.classList.add('flip');}this.lastMood=m;cv.className=cv.className.replace(/\b(thriving|content|grumpy)\b/g,'').trim()+' '+m;cv.title=m[0].toUpperCase()+m.slice(1);}
+    this.blink-=dt;if(this.blink<-0.14)this.blink=rand(2.2,4.5);const shut=this.blink<0;
+    const img=ctx.createImageData(13,13),d=new Uint32Array(img.data.buffer),P=(x,y,c)=>{if(x>=0&&y>=0&&x<13&&y<13)d[y*13+x]=c;},K=hex('#2a1608');
+    const F=m==='thriving'?ramp('#c88a10','#f0b830','#ffd86a','#fff4b8'):m==='grumpy'?ramp('#3a4a68','#5a6a8a','#8aa0c0','#c0d0e8'):ramp('#6a8a30','#90b048','#b8d870','#e0f4a8');
+    for(let y=0;y<13;y++)for(let x=0;x<13;x++){const dx=x-6,dy=y-6,r=Math.hypot(dx,dy);if(r>6.4)continue;P(x,y,r>5.5?K:F[clamp(Math.round(2.2-(dx+dy)*0.14-(r>4.6?0.8:0)),0,3)]);}
+    const ey=m==='grumpy'?6:5;for(const ex of[4,8]){if(shut||m==='thriving'&&Math.sin(this.faceT*2)>0.7){P(ex-1,ey,K);P(ex,ey,K);}else{P(ex,ey,K);P(ex,ey-1,K);}}
+    if(m==='grumpy'){P(3,3,K);P(4,4,K);P(9,3,K);P(8,4,K);for(let x=4;x<=8;x++)P(x,x===4||x===8?10:9,K);}
+    else if(m==='thriving'){for(let x=4;x<=8;x++)P(x,8,K);for(let x=5;x<=7;x++)P(x,9,hex('#c83838'));P(4,9,K);P(8,9,K);for(let x=5;x<=7;x++)P(x,10,K);P(2,7,hex('#ff8aa8'));P(10,7,hex('#ff8aa8'));}
+    else{P(4,8,K);P(8,8,K);for(let x=5;x<=7;x++)P(x,9,K);P(3,7,hex('#f0a0a0'));P(9,7,hex('#f0a0a0'));}
+    ctx.putImageData(img,0,0);},
+};
+const FUN_PIECES=[{id:'food',name:'Food',fun:'Supply tanks you pluck food from'},{id:'tools',name:'Tools',fun:'Your hand + a pegboard of real tools'},{id:'needs',name:'Needs',fun:'Gauges on the glass; grime shows a dirty tank'},{id:'hud',name:'Top bar',fun:'Wood & brass name plate, bouncy buttons, swinging signs'}];
 const FUN=k=>!!(save.set&&save.set.fun&&save.set.fun[k]);
 const HAND_PAL={k:hex('#1a0f0a'),p:hex('#f3c2a6'),s:hex('#cf8f78'),h:hex('#fff0e0')},HOLD_T=0.42;
 function funHand(){return FUN('tools')&&!game.tool&&!game.placing&&game.mode==='play';}
