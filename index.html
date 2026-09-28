@@ -121,8 +121,10 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .dr-sign{position:absolute;left:10px;bottom:-1px;z-index:2;font-family:var(--display);font-size:9px;letter-spacing:.1em;color:#3a2410;background:#e8d0a0;padding:2px 6px 1px;border-radius:2px;box-shadow:0 0 0 1.5px #3a2410}
 .dr-sign i{font-style:normal;color:#d0305a;margin-left:3px}
 .dr-tank{position:relative;flex:none}
-.dr-tank canvas{display:block;width:var(--tw);height:var(--th);image-rendering:pixelated;touch-action:none;filter:drop-shadow(3px 4px 0 rgba(0,0,0,.35))}
-.dr-tank.meh canvas{filter:grayscale(.7) brightness(.72) drop-shadow(3px 4px 0 rgba(0,0,0,.35))}
+.dr-tank{box-shadow:3px 4px 0 rgba(0,0,0,.35)}
+.dr-tank canvas{display:block;width:var(--tw);height:var(--th);image-rendering:pixelated;touch-action:none}
+body:not(.gfx-low) .dr-tank.meh canvas{filter:grayscale(.7) brightness(.72)}
+body.gfx-low .dr-tank.meh::before{content:"";position:absolute;inset:0;background:rgba(20,14,8,.5);pointer-events:none;z-index:1}
 .dr-tank.on::after{content:"";position:absolute;inset:-4px;border-radius:6px;box-shadow:0 0 0 2px #ffc24a,0 0 14px rgba(255,194,74,.55);pointer-events:none}
 .dr-tag{position:absolute;top:-9px;right:-6px;display:flex;align-items:center;gap:2px;padding:3px 6px 2px 5px;font-family:var(--display);font-size:11px;color:#3a2410;background:#ecd6a8;border-radius:2px 6px 6px 2px;box-shadow:0 0 0 1.5px #3a2410,1px 2px 0 1px rgba(0,0,0,.35);transform:rotate(9deg);pointer-events:none;z-index:2}
 .dr-tag::before{content:"";position:absolute;left:3px;top:50%;width:3px;height:3px;margin-top:-1.5px;border-radius:50%;background:#3a2410}
@@ -383,8 +385,9 @@ body.fun-hud #petStats .ps-t,body.fun-hud #petStats .ps-m,body.fun-hud #petStats
 body.fun-hud #petStats .ps-r i{background:#2a1608;box-shadow:0 0 0 2px #1a0c04}
 body.fun-hud #petStats{--mute:#efdcb4;--ink:#fff4dc}body.fun-hud #petStats *{text-shadow:0 1px 0 #1a0c04,1px 0 0 #1a0c04}
 @keyframes skunroll{from{transform:scaleY(.2);opacity:0}to{transform:none;opacity:1}}
-body.fun-hud .tmsg{background:var(--skin) 0 0/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;color:#fff4dc;text-shadow:1px 0 0 #1a0c04,-1px 0 0 #1a0c04,0 1px 0 #1a0c04,0 -1px 0 #1a0c04,0 2px 0 #1a0c04;padding:8px 16px 10px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.35));opacity:1}
+body.fun-hud .tmsg{background:var(--skin) 0 0/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;color:#fff4dc;text-shadow:1px 0 0 #1a0c04,-1px 0 0 #1a0c04,0 1px 0 #1a0c04,0 -1px 0 #1a0c04,0 2px 0 #1a0c04;padding:8px 16px 10px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.35))}
 body.fun-hud .tmsg.old{transform:scale(.82);opacity:.72;filter:saturate(.7) drop-shadow(0 3px 0 rgba(0,0,0,.35))}
+body.fun-hud .tmsg.gone{opacity:0;transform:scale(.75) translateY(-4px)}
 body.fun-hud .tmsg.event{color:#fff2c0}
 body.fun-hud .gtoast{background:var(--skin) 0 0/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;padding:12px 22px 15px;transform:none;translate:-50% 0;filter:drop-shadow(0 5px 0 rgba(0,0,0,.4))}
 body.fun-hud .gtoast b{color:#fff0b0;text-shadow:1px 0 0 #1a0c04,-1px 0 0 #1a0c04,0 1px 0 #1a0c04,0 -1px 0 #1a0c04,0 2px 0 #1a0c04}body.fun-hud .gtoast span{color:#fff4dc;text-shadow:1px 0 0 #1a0c04,-1px 0 0 #1a0c04,0 1px 0 #1a0c04,0 -1px 0 #1a0c04,0 2px 0 #1a0c04}
@@ -478,6 +481,7 @@ body.fun-hud .gtoast.out{transform:none;translate:-50% -10px;opacity:0}
   <div class="srow"><label>Slime face<small>Eyes and a smile on the jelly slime.</small></label><button class="sw" id="setSlimeFace" aria-label="Slime face"></button></div>
   <div class="srow"><label>Tuck food tray<small>The food tray tucks away while you carry or pick a food. Tap the little tab to bring it back.</small></label><button class="sw" id="setTrayTuck" aria-label="Tuck food tray"></button></div>
   <div class="srow"><label>Thought marks<small>Little ? ! and ... above critters while they think.</small></label><button class="sw" id="setThoughts" aria-label="Thought marks"></button></div>
+  <div class="srow"><label>Graphics<small id="gfxNote">Low makes the food tanks animate more lightly.</small></label><div class="seg" id="setGfx"><button class="btn alt" data-v="auto">Auto</button><button class="btn alt" data-v="high">High</button><button class="btn alt" data-v="low">Low</button></div></div>
   <div class="srow"><label>Pixel-perfect scaling<small>Crisper pixels, smaller tank.</small></label><button class="sw" id="setPixel" aria-label="Pixel-perfect scaling"></button></div>
   <div class="srow"><label for="setUi">Interface size<small id="setUiV">Auto</small></label><div style="display:flex;gap:8px;align-items:center"><input type="range" id="setUi" min="0.6" max="1.4" step="0.05"><button class="btn alt" id="setUiAuto" style="flex:none">Auto</button></div></div>
   <div class="srow"><label>Interface style<small>Mix and match: Fun (beta) turns each piece into a hands-on toy.</small></label><div class="seg" id="setIface"><button class="btn alt" data-v="basic">All basic</button><button class="btn alt" data-v="fun">All fun</button></div></div>
@@ -5408,7 +5412,7 @@ function drawTweezers(x,y,closed,tfb){const fb0=fb,F=tfb||fb0;
 }
 const ICONS={};
 // floating tweezers (a tiny canvas above the whole UI) while food is dragged over the drawer or dock
-const DRAGCUR={fb:new FB(44,40),tick(){const P=game.pointer,cv=$('dragCur'),on=!!game.held&&game.tool==='feed'&&P.cx!==undefined&&(()=>{const e=document.elementFromPoint(P.cx,P.cy);return e&&e!==canvas&&!e.closest('#stage');})();
+const DRAGCUR={fb:new FB(44,40),tick(){if(!game.held&&!game.cursorUI)return;const P=game.pointer,cv=$('dragCur'),on=!!game.held&&game.tool==='feed'&&P.cx!==undefined&&(()=>{const e=document.elementFromPoint(P.cx,P.cy);return e&&e!==canvas&&!e.closest('#stage');})();
   game.cursorUI=on;if(!on){if(cv.style.display!=='none')cv.style.display='none';return;}
   const f=this.fb,q=game.held,r=canvas.getBoundingClientRect(),sc=r.width/W,tx=8,ty=32;f.px.fill(0);f.clearLayer();
   const osx=q.sx,osy=q.sy;q.sx=tx;q.sy=ty;if(q.pts){const dx=tx-q.pts[0].x,dy=ty-q.pts[0].y;for(const p of q.pts){p.x+=dx;p.y+=dy;}}
@@ -5937,7 +5941,7 @@ const DRAWER={on:false,el:null,tanks:[],rowsEl:null,drag:null,velX:0,velStrip:nu
     for(const sg of this.rowsEl.querySelectorAll('.dr-sign')){const c=FOOD_CATS.find(c=>c.id===sg.dataset.c),fav=c.foods.some(f=>(D[f]||0)>=8);sg.innerHTML=c.name.toUpperCase()+(fav?'<i>&#9829;</i>':'');}
     for(const T of this.tanks){const lv=D[T.f]||0,pr=FOOD_PRICE[T.f]||0,nm=FOODS[T.f].label||FOODS[T.f].name;T.el.classList.toggle('meh',lv<=0);
       T.tag.innerHTML=`<img class="px" src="${iconURL('coin')}" alt="">${pr}${lv>=8?'<i>&#9829;</i>':''}`;T.el.title=`${nm[0].toUpperCase()+nm.slice(1)} · ${pr} coin${pr===1?'':'s'}${lv>=8?' · a favourite!':lv<=0?` · ${game.name} won't eat this`:''}${save.coins<pr?' · not enough coins':''}`;}},
-  mount(tr){if(!this.el)this.build();if(!this.on||this.el[0].parentNode!==tr){tr.innerHTML='';tr.append(...this.el);this.on=true;
+  mount(tr){this.vis=null;if(!this.el)this.build();if(!this.on||this.el[0].parentNode!==tr){tr.innerHTML='';tr.append(...this.el);this.on=true;
       const i=FOOD_CATS.findIndex(c=>c.foods.includes(game.food));this.goRow(Math.max(0,i));this.rowsEl.scrollTop=this.target;
       const T=this.tanks.find(t=>t.f===game.food);if(T)T.strip.scrollLeft=Math.max(0,T.el.offsetLeft-T.strip.offsetLeft-60);}this.refresh();},
   unmount(){if(!this.on)return;this.on=false;for(const T of this.tanks)for(const sl of T.slots)if(!sl.item)sl.re=Math.min(sl.re,0.3);},
@@ -5948,6 +5952,10 @@ const DRAWER={on:false,el:null,tanks:[],rowsEl:null,drag:null,velX:0,velStrip:nu
     if(!this.drag&&Math.abs(this.velX)>0.3&&this.velStrip){this.velStrip.scrollLeft+=this.velX;this.velX*=0.9;}
     const H=R.scrollHeight,V=R.clientHeight,th=Math.max(18,this.track.clientHeight*V/Math.max(V,H)),top=(this.track.clientHeight-th)*(H>V?R.scrollTop/(H-V):0);this.thumb.style.height=th+'px';this.thumb.style.top=top+'px';
     const rr=R.getBoundingClientRect();
+    if(document.body.classList.contains('gfx-low')){// light mode: fewer updates (same speed), visibility checked a few times a second
+      this.acc=(this.acc||0)+dt;this.visT=(this.visT||0)-dt;if(this.acc<1/40)return;const sdt=Math.min(0.1,this.acc);this.acc=0;
+      if(this.visT<=0||!this.vis){this.visT=0.25;this.vis=this.tanks.filter(T=>{const r=T.cv.getBoundingClientRect();return!(r.right<rr.left||r.left>rr.right||r.bottom<rr.top||r.top>rr.bottom);});}
+      this.half=(this.half||0)^1;this.vis.forEach((T,i)=>{T.lsdt=(T.lsdt||0)+sdt;if((i&1)===this.half){this.step(T,T.lsdt);T.lsdt=0;this.draw(T);}});return;}
     for(const T of this.tanks){const r=T.cv.getBoundingClientRect();if(r.right<rr.left||r.left>rr.right||r.bottom<rr.top||r.top>rr.bottom)continue;this.step(T,dt);this.draw(T);}},
   step(T,dt){const mw=T.mw,th=T.th;mw.t+=dt;mw.pet=T.hover?{preview:true,headPos:()=>({x:T.hover[0],y:T.hover[1]}),noise:()=>0.8}:null;
     if(T.hide){if(T.liftT>0)T.liftT-=dt;mw.hide=T.liftT>0?null:T.hide;}
@@ -5958,7 +5966,8 @@ const DRAWER={on:false,el:null,tanks:[],rowsEl:null,drag:null,velX:0,velStrip:nu
       else if(th.float){q.t=(q.t||0)+dt;q.x=sl.x+Math.sin(mw.t*0.45+sl.ph)*5;q.y=sl.y+Math.cos(mw.t*0.33+sl.ph)*3.5;q.h=3+Math.sin(mw.t*1.6+sl.ph)*1.5;q.ang+=dt*0.4;}
       else{q.t=(q.t||0)+dt;q.h=0;q.x=sl.x+Math.sin(mw.t*1.3+sl.ph)*0.25+(sl.shake>0?Math.sin(sl.shake*60)*0.8:0);q.y=sl.y;q.ang=sl.a;if(q.type==='grape')q.update(dt,mw);if(q.tube){q.update(dt,mw);const near=T.hover&&Math.hypot(T.hover[0]-sl.x,T.hover[1]-sl.y)<9;q.ret=lerp(q.ret||0,near?1:0,Math.min(1,dt*8));}}}},
   draw(T){const fb=T.fb,px=fb.px,t=T.mw.t,th=T.th,put=(x,y,c)=>pset(fb,x,y,c),mix=(x,y,c,a)=>pmix(fb,x,y,c,a),WHITE=hex('#ffffff'),GOLD=hex('#ffd86a');px.set(T.bg);
-    if(th.water)for(let y=5;y<TKH;y++)for(let x=0;x<TKW;x++){const a=Math.sin(x*0.42+Math.sin(y*0.33+t)*1.6+t*0.7)+Math.sin(y*0.5-t*0.6+x*0.1);if(a>1.35)mix(x,y,hex('#c8f4ff'),0.22*(a-1.35));}
+    const lite=document.body.classList.contains('gfx-low');
+    if(th.water)for(let y=5;y<TKH;y+=lite?2:1)for(let x=lite?(y&2)>>1:0;x<TKW;x+=lite?2:1){const a=Math.sin(x*0.42+Math.sin(y*0.33+t)*1.6+t*0.7)+Math.sin(y*0.5-t*0.6+x*0.1);if(a>1.35)mix(x,y,hex('#c8f4ff'),0.22*(a-1.35));}
     if(th.bg==='night')for(let k=0;k<16;k++){const x=Math.floor(hash(k,5)*TKW),y=Math.floor(5+hash(k,9)*(TKH-7)),tw=Math.sin(t*(1.3+k*0.27)+k);if(tw>0.1){put(x,y,mixc(hex('#7a7ab0'),WHITE,tw));if(tw>0.85){mix(x-1,y,WHITE,0.5);mix(x+1,y,WHITE,0.5);mix(x,y-1,WHITE,0.5);mix(x,y+1,WHITE,0.5);}}}
     if(th.bg==='magic')for(let k=0;k<6;k++){const ph=(t*0.25+k/6)%1,x=10+hash(k,2)*40+Math.sin(t+k)*2,y=TKH-4-ph*34;mix(x,y,hex('#9af8e8'),0.7*(1-ph));}
     const lifted=T.liftT>0,items=T.slots.map(sl=>sl.item).filter(q=>q&&!(q.hidden&&T.slab&&!lifted)).sort((a,b)=>a.y-b.y);
@@ -5987,7 +5996,7 @@ const DRAWER={on:false,el:null,tanks:[],rowsEl:null,drag:null,velX:0,velStrip:nu
     // the tank itself: a dark lid rim, glass edges catching the light, a back-wall shade and two soft reflections
     for(let y=0;y<6;y++)for(let x=0;x<TKW;x++){const i=y*TKW+x;px[i]=shade(px[i],0.66+y*0.06);}
     if(th.water)for(let x=1;x<TKW-1;x++){const y=4+Math.round(Math.sin(x*0.35+t*2.2)*0.7);mix(x,y,hex('#d8f8ff'),0.6);}
-    for(let y=0;y<TKH;y++)for(let x=0;x<TKW;x++){const d=x+y*0.9;if((d>8&&d<11)||(d>13&&d<14.5))mix(x,y,WHITE,0.09);}
+    if(!T.streak){T.streak=[];for(let y=0;y<TKH;y++)for(let x=0;x<TKW;x++){const d=x+y*0.9;if((d>8&&d<11)||(d>13&&d<14.5))T.streak.push(y*TKW+x);}}for(const i of T.streak)px[i]=mixc(px[i],WHITE,0.09);
     for(let x=0;x<TKW;x++){put(x,0,hex('#10140e'));put(x,1,hex('#3a4038'));mix(x,2,WHITE,0.22);put(x,TKH-1,hex('#10140e'));mix(x,TKH-2,hex('#000000'),0.3);}
     for(let y=0;y<TKH;y++){put(0,y,hex('#10140e'));put(TKW-1,y,hex('#10140e'));mix(1,y,WHITE,0.28);mix(TKW-2,y,hex('#000000'),0.25);}
     T.ctx.putImageData(fb.img,0,0);},
@@ -6219,6 +6228,7 @@ const ui={
     const sp=$('setPieces');for(const P of FUN_PIECES){const r=document.createElement('div');r.className='srow';r.innerHTML=`<label>${P.name}<small>${P.fun}</small></label><div class="seg" data-k="${P.id}"><button class="btn alt" data-v="0">Basic</button><button class="btn alt" data-v="1">Fun</button></div>`;
       for(const b of r.querySelectorAll('button'))b.addEventListener('click',()=>{save.set.fun=save.set.fun||{};if(b.dataset.v==='1')save.set.fun[P.id]=1;else delete save.set.fun[P.id];markDirty();SFX.play('ui');this.applyIface();this.funHints();});sp.appendChild(r);}
     this.funHints=()=>{if(FUN('tools')&&!save.set.funHint){save.set.funHint=1;this.toast('Your hand does the petting now: rub to pet, hold to pick up, double-tap to knock on the glass. Tools hang on the pegboard.');}};
+    for(const b of $('setGfx').children)b.addEventListener('click',()=>{save.set.gfx=b.dataset.v;markDirty();SFX.play('ui');applyGfx();});applyGfx();
     this.applyIface=()=>{if(save.set.iface==='fun'){save.set.fun=Object.fromEntries(FUN_PIECES.map(p=>[p.id,1]));}delete save.set.iface;if(save.set.fun){delete save.set.fun.room;if(save.set.fun.coins){delete save.set.fun.coins;if(save.set.fun.food&&save.set.fun.tools&&save.set.fun.needs)save.set.fun.hud=1;}}
       for(const P of FUN_PIECES)document.body.classList.toggle('fun-'+P.id,FUN(P.id));HUDSKIN.refresh();document.body.classList.toggle('fun',FUN_PIECES.some(p=>FUN(p.id)));
       if(FUN('tools')&&['pet','grab','tap'].includes(game.tool))setTool(null);canvas.style.cursor=game.tool||FUN('tools')?'none':'grab';
@@ -6614,6 +6624,10 @@ const HUDSKIN={on:false,tp:3,cache:new Map(),ro:null,faceT:0,blink:0,lastMood:''
     else{P(4,8,K);P(8,8,K);for(let x=5;x<=7;x++)P(x,9,K);P(3,7,hex('#f0a0a0'));P(9,7,hex('#f0a0a0'));}
     ctx.putImageData(img,0,0);},
 };
+// Graphics quality: Auto picks Low on phones (touch screens / small screens), High elsewhere
+function gfxAutoLow(){return matchMedia('(pointer:coarse)').matches||Math.min(innerWidth,innerHeight)<500;}
+function applyGfx(){const m=save.set.gfx||'auto',al=gfxAutoLow(),low=m==='low'||(m==='auto'&&al);document.body.classList.toggle('gfx-low',low);
+  const g=$('setGfx');if(g)for(const b of g.children)b.classList.toggle('on',b.dataset.v===m);const n=$('gfxNote');if(n)n.textContent=`Low makes the food tanks animate more lightly. Auto picks ${al?'Low':'High'} on this device.`;}
 const FUN_PIECES=[{id:'food',name:'Food',fun:'Supply tanks you pluck food from'},{id:'tools',name:'Tools',fun:'Your hand + a pegboard of real tools'},{id:'needs',name:'Needs',fun:'Gauges on the glass; grime shows a dirty tank'},{id:'hud',name:'Top bar',fun:'Wood & brass name plate, bouncy buttons, swinging signs'}];
 const FUN=k=>!!(save.set&&save.set.fun&&save.set.fun[k]);
 const HAND_PAL={k:hex('#1a0f0a'),p:hex('#f3c2a6'),s:hex('#cf8f78'),h:hex('#fff0e0')},HOLD_T=0.42;
