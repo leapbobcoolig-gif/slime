@@ -5343,16 +5343,28 @@ function drawWater(w){
 // Paludarium water: caustic webs on the bottom, foam at the shoreline, glints and ripples on the surface
 const vn=(x,y,t)=>0.5+0.5*Math.sin(x*0.05+t*0.3)*Math.cos(y*0.06-t*0.25);
 const CAUS=hex('#a8ecd6'),SPARK=hex('#f0fffa'),FOAM=hex('#d6eee4');
-function drawPool(w){const px=fb.px,T=w.t,I=R.pIdx,D=R.pD,X=R.pX,Y=R.pY,SH=R.pS,tq=Math.floor(T*3),sea=w.sea,murk=clamp((65-(w.stats.clean??100))/65,0,1)*0.3,rayK=sea?0.42*w.dayness+0.05:0;
+// pool water: identical maths to before, but every sine that depends only on x or only on y is tabled once per frame
+// and recombined per pixel with sin(a+b)=sin a cos b+cos a sin b, so the per-pixel loop has no trig at all
+const PT=(()=>{const f=n=>new Float32Array(n),o={};for(const k of['a1s','a1c','b1s','b1c','vx','h1s','h1c','h2s','h2c','r1s','r1c','r2s','r2c'])o[k]=f(W);for(const k of['a2s','a2c','b2s','b2c','vy','g1s','g1c','g2s','g2c','q1s','q1c','q2s','q2c'])o[k]=f(H);return o;})();
+function drawPool(w){const px=fb.px,T=w.t,I=R.pIdx,D=R.pD,X=R.pX,Y=R.pY,SH=R.pS,tq=Math.floor(T*3),sea=w.sea,murk=clamp((65-(w.stats.clean??100))/65,0,1)*0.3,rayK=sea?0.42*w.dayness+0.05:0,B=R.BAY;const {a1s,a1c,b1s,b1c,vx,h1s,h1c,h2s,h2c,r1s,r1c,r2s,r2c,a2s,a2c,b2s,b2c,vy,g1s,g1c,g2s,g2c,q1s,q1c,q2s,q2c}=PT;
+  for(let x=0;x<W;x++){let v=x*0.29+T*1.05;a1s[x]=Math.sin(v);a1c[x]=Math.cos(v);v=Math.sin(x*0.18-T*0.57)*1.7;b1s[x]=Math.sin(v);b1c[x]=Math.cos(v);vx[x]=Math.sin(x*0.05+T*0.3);
+    v=x*0.045+T*0.35;h1s[x]=Math.sin(v);h1c[x]=Math.cos(v);v=x*0.021-T*0.22;h2s[x]=Math.sin(v);h2c[x]=Math.cos(v);
+    if(sea){v=x*0.0275+T*0.22;r1s[x]=Math.sin(v);r1c[x]=Math.cos(v);v=x*0.01265-T*0.11+1.3;r2s[x]=Math.sin(v);r2c[x]=Math.cos(v);}}
+  for(let y=0;y<H;y++){let v=Math.sin(y*0.21+T*0.66)*1.7;a2s[y]=Math.sin(v);a2c[y]=Math.cos(v);v=y*0.34-T*0.85;b2s[y]=Math.sin(v);b2c[y]=Math.cos(v);vy[y]=Math.cos(y*0.06-T*0.25);
+    v=y*0.03;g1s[y]=Math.sin(v);g1c[y]=Math.cos(v);v=-y*0.052;g2s[y]=Math.sin(v);g2c[y]=Math.cos(v);
+    if(sea){v=-y*0.05;q1s[y]=Math.sin(v);q1c[y]=Math.cos(v);v=-y*0.023;q2s[y]=Math.sin(v);q2c[y]=Math.cos(v);}}
+  // only every K-th row is recomputed each frame (the rest reuse last result); the pool sits straight on the static background
+  if(PT.src!==I){PT.src=I;PT.pc=new Uint32Array(I.length);PT.full=true;}const K=document.body.classList.contains('gfx-low')?3:2,ph=(PT.fr=(PT.fr||0)+1)%K,PC=PT.pc,full=PT.full;PT.full=false;
   for(let k=0;k<I.length;k++){const x=X[k],y=Y[k],d=D[k],i=I[k];
-    if(SH[k]){px[i]=mixc(px[i],FOAM,0.28+0.22*Math.sin(T*2.1+x*0.35+y*0.27));continue;}
-    const a=Math.sin(x*0.29+T*1.05+Math.sin(y*0.21+T*0.66)*1.7)+Math.sin(y*0.34-T*0.85+Math.sin(x*0.18-T*0.57)*1.7);
-    const c=1-Math.min(1,Math.abs(a)*1.5),f=c*c*(0.46-0.4*d)*(0.75+0.5*vn(x,y,T))+(R.BAY[i]-0.5)*0.06;
-    if(f>0.06)px[i]=mixc(px[i],CAUS,Math.min(0.55,f));
-    const sh=sheen(x,y,T);if(sh>0.01)px[i]=mixc(px[i],SHEENC,sh);
-    if(sea){const u=x*0.55-y,r=Math.sin(u*0.05+T*0.22)*Math.sin(u*0.023-T*0.11+1.3);if(r>0.45)px[i]=mixc(px[i],RAYC,(r-0.45)*rayK*(1.2-d*0.5));}// slanting light shafts
-    if(murk>0.01)px[i]=mixc(px[i],MURK,murk*(0.6+0.4*d));
-    if(hash(i,tq)>0.9991)px[i]=mixc(px[i],SPARK,0.75);}
+    if(!full&&y%K!==ph){px[i]=PC[k];continue;}
+    if(SH[k]){px[i]=PC[k]=mixc(px[i],FOAM,0.28+0.22*Math.sin(T*2.1+x*0.35+y*0.27));continue;}
+    const a=(a1s[x]*a2c[y]+a1c[x]*a2s[y])+(b2s[y]*b1c[x]+b2c[y]*b1s[x]);
+    const c=1-Math.min(1,Math.abs(a)*1.5),f=c*c*(0.46-0.4*d)*(0.75+0.5*(0.5+0.5*vx[x]*vy[y]))+(B[i]-0.5)*0.06;
+    let col=px[i];if(f>0.06)col=mixc(col,CAUS,Math.min(0.55,f));
+    const sv=(h1s[x]*g1c[y]+h1c[x]*g1s[y])*0.5+(h2s[x]*g2c[y]+h2c[x]*g2s[y])*0.5;if(sv>0.25){const sh=(sv-0.25)*(sv-0.25)*0.4;if(sh>0.01)col=mixc(col,SHEENC,sh);}
+    if(sea){const r=(r1s[x]*q1c[y]+r1c[x]*q1s[y])*(r2s[x]*q2c[y]+r2c[x]*q2s[y]);if(r>0.45)col=mixc(col,RAYC,(r-0.45)*rayK*(1.2-d*0.5));}// slanting light shafts
+    if(murk>0.01)col=mixc(col,MURK,murk*(0.6+0.4*d));
+    if(hash(i,tq)>0.9991)col=mixc(col,SPARK,0.75);px[i]=PC[k]=col;}
   for(const r of w.ripples){const rad=0.8+r.age*13*(r.s||1),a=(1-r.age/1.1)*(r.s?0.8:1);if(a<=0)continue;const n=Math.max(10,Math.ceil(rad*7));
     for(let j=0;j<n;j++){const an=j/n*TAU,x=Math.floor(r.x+Math.cos(an)*rad),y=Math.floor(r.y+Math.sin(an)*rad*0.78);
       if(x<0||y<0||x>=W||y>=H)continue;const i=y*W+x;if(!R.depth[i])continue;px[i]=mixc(px[i],SPARK,0.5*a);}}
@@ -5391,11 +5403,13 @@ function drawPads(fb,w){
 }
 function drawWet(w){const px=fb.px,wet=w.wet,G=hex('#cfe6ee');
   for(let i=0;i<N;i++){const v=wet[i];if(v<0.03)continue;px[i]=shade(px[i],1-0.5*v);if(v>0.45&&R.glint[i])px[i]=mixc(px[i],G,0.7);}}
+const LCACHE={d:-1,src:null,f:new Float64Array(N*3)};
 function applyLight(d){
-  const px=fb.px,LD=R.LD,LN=R.LN,BAY=R.BAY;
-  for(let i=0,j=0;i<N;i++,j+=3){const c=px[i],b=BAY[i];
-    const lr=Math.floor((LN[j]+(LD[j]-LN[j])*d)*10+b)/10,lg=Math.floor((LN[j+1]+(LD[j+1]-LN[j+1])*d)*10+b)/10,lb=Math.floor((LN[j+2]+(LD[j+2]-LN[j+2])*d)*10+b)/10;
-    let r=(c&255)*lr,g=(c>>8&255)*lg,bl=(c>>>16&255)*lb;if(r>255)r=255;if(g>255)g=255;if(bl>255)bl=255;
+  const px=fb.px,LD=R.LD,LN=R.LN,BAY=R.BAY,L=LCACHE,F=L.f;
+  if(L.src!==LD||Math.abs(L.d-d)>0.002){L.src=LD;L.d=d;// the (quantised) light only changes during a lights on/off fade
+    for(let i=0,j=0;i<N;i++,j+=3){const b=BAY[i];F[j]=Math.floor((LN[j]+(LD[j]-LN[j])*d)*10+b)/10;F[j+1]=Math.floor((LN[j+1]+(LD[j+1]-LN[j+1])*d)*10+b)/10;F[j+2]=Math.floor((LN[j+2]+(LD[j+2]-LN[j+2])*d)*10+b)/10;}}
+  for(let i=0,j=0;i<N;i++,j+=3){const c=px[i];
+    let r=(c&255)*F[j],g=(c>>8&255)*F[j+1],bl=(c>>>16&255)*F[j+2];if(r>255)r=255;if(g>255)g=255;if(bl>255)bl=255;
     px[i]=(0xff000000|(bl<<16)|(g<<8)|r)>>>0;}
 }
 const CUR_PAL={k:hex('#0d110d'),w:hex('#f2f1e2'),p:hex('#f3c2a6'),g:hex('#9ccf6a')};
@@ -6347,7 +6361,8 @@ const ui={
     if(this.open==='mGacha'){gStep(dt);gDraw();}
     if(this.open==='mPets'||this.open==='mWelcome')this.tickPreviews(dt);
     if(DRAWER.on)DRAWER.tick(dt);DRAGCUR.tick();
-    if(FUN('tools'))PEG.tick(dt);if(FUN('needs'))GAUGES.tick(dt);if(FUN('hud'))HUDSKIN.tick(dt);
+    {const lo=document.body.classList.contains('gfx-low');this.hudAcc=(this.hudAcc||0)+dt;const go=!lo||this.hudAcc>=1/30,hd=this.hudAcc;if(go)this.hudAcc=0;
+    if(FUN('tools')&&go)PEG.tick(lo?hd:dt);if(FUN('needs')&&go)GAUGES.tick(lo?hd:dt);}if(FUN('hud'))HUDSKIN.tick(dt);
     this.liveT=(this.liveT||0)-dt;if(this.liveT<=0){this.liveT=0.5;const c=$('psCud');if(c&&!$('petStats').hidden)c.innerHTML=this.cuddleHTML();if(this.open==='mGoals'){const r=$('gReset');if(r)r.textContent=dailyResetText();}}
   },
   renderStats(){const pet=game.world.pet;if(!pet)return;const M=pet.mind,B=MIND[game.kind]||MIND.default;
