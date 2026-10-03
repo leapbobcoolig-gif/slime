@@ -1371,7 +1371,7 @@ class Pet{
   finishEating(){
     const p=this.held;if(!p)return;
     const w=this.world,S=w.stats;p.dead=true;
-    S.fed=Math.min(100,S.fed+p.value);S.happy=Math.min(100,S.happy+(DIET[this.kind][p.type]||2));
+    const pr=FOOD_PRICE[p.type]||1,pk=1+0.08*(pr-1);S.fed=Math.min(100,S.fed+p.value*pk);S.happy=Math.min(100,S.happy+(DIET[this.kind][p.type]||2)*pk);
     if(this.bulges&&this.kind==='snake')this.bulges.push({s:2.5,size:p.type==='egg'?1.6:0.9});
     const m=this.mouthScreen();
     for(let i=0;i<2;i++)spawn(w,'heart',m.x+rand(-3,3),m.y-4,{vy:-rand(12,18),life:1.3,ph:rand(TAU)});
@@ -1386,7 +1386,7 @@ class Pet{
     if(this.state==='petted')this.timer=0.8;
     // shy critters need a moment to warm up to being petted; bold, curious ones love it right away
     this.petWarm=Math.min(3,(this.petWarm||0)+0.05);const M=this.mind,warm=Math.min(1,this.petWarm/(1.6-M.bold*1.2));
-    this.world.stats.happy=Math.min(100,this.world.stats.happy+0.12*warm*(0.7+M.bold*0.3+M.cur*0.2));
+    this.world.stats.happy=Math.min(100,this.world.stats.happy+0.12*warm*(0.7+M.bold*0.3+M.cur*0.2)*(this.preview?1:Math.exp(-(game.petFat||0)/8)));
     return true;
   }
   // a tap on the glass: brave critters mostly just look, shy ones bolt
@@ -3955,7 +3955,7 @@ function updateParts(w,dt){
   const P=w.parts;
   for(let i=P.length-1;i>=0;i--){const p=P[i];p.life-=dt;
     switch(p.type){
-      case 'heart':p.y+=p.vy*dt;p.x+=Math.sin(p.life*6+p.ph)*0.25;break;
+      case 'heart':p.y+=p.vy*dt;p.x+=Math.sin(p.life*6+p.ph)*0.25+p.vx*dt;p.vx*=1-Math.min(1,dt*3);break;
       case 'zzz':p.x+=4*dt;p.y-=6*dt;break;
       case 'stink':p.y+=p.vy*dt;p.x+=Math.sin(p.life*5)*0.15;break;
       case 'spore':p.ph+=dt*3;p.x+=(p.vx+Math.sin(p.ph)*3)*dt;p.y+=p.vy*dt;p.vx*=1-dt*0.8;p.vy*=1-dt*0.4;break;
@@ -4835,7 +4835,7 @@ function createWorld(){
     feather:{kind:'feather',label:'the feather',play:true,on:false,x:160,y:90,h:5,vx:0,vy:0,dead:true,caught:false,cool:0,
       onCatch(){this.cool=0.9;this.vy-=90;this.vx+=rand(-60,60);this.h=12;SFX.play('flutter');}},
     onEvent:msg=>flash(`${game.name} ${msg}`)};
-  w.onEat=(pet,p)=>{if(pet.preview)return;track('meals');if(((DIET[pet.kind]||{})[p.type]||0)>=8)track('favmeals');reqEvent('food',p.type);if(!NO_POOP.includes(pet.kind)&&Math.random()<0.6&&!(game.poopT>0))game.poopT=rand(30,90);const m=pet.mouthScreen(),lv=(DIET[pet.kind]||{})[p.type]||0;addCoins(lv>=8?3:lv>=5?2:1,m.x,m.y);addXP(4);
+  w.onEat=(pet,p)=>{if(pet.preview)return;track('meals');if(((DIET[pet.kind]||{})[p.type]||0)>=8)track('favmeals');reqEvent('food',p.type);if(!NO_POOP.includes(pet.kind)&&Math.random()<0.6&&!(game.poopT>0))game.poopT=rand(30,90);const m=pet.mouthScreen(),lv=(DIET[pet.kind]||{})[p.type]||0;addCoins(lv>=8?3:lv>=5?2:1,m.x,m.y);const pr=FOOD_PRICE[p.type]||1;addXP(2+pr);if(pr>=5)for(let i=0;i<6;i++)spawn(w,'star',m.x+rand(-6,6),m.y-3+rand(-5,5),{life:rand(0.2,0.45)});if(lv>=8){const S=w.stats;S.happy=Math.min(100,S.happy+8);addXP(3);game.favBuff=90;SFX.play('levelup');for(let i=0;i<10;i++){const a=i/10*TAU;spawn(w,'heart',m.x+Math.cos(a)*4,m.y-4+Math.sin(a)*3,{vx:Math.cos(a)*14,vy:-rand(10,20)+Math.sin(a)*6,life:1.5,ph:rand(TAU)});}if(!game.favT||w.t-game.favT>40){game.favT=w.t;flash(`Favourite! ${game.name} loved ${PREY_NAME[p.type]}.`);}}
     if(p.type==='grape'){SFX.play('juicy');for(let i=0;i<9;i++){const a=rand(TAU);spawn(w,'crumb',m.x,m.y+(pet.h||0),{h:(pet.h||0)+2,vh:rand(20,45),vx:Math.cos(a)*rand(8,20),vy:Math.sin(a)*rand(5,14),life:1.2,c:hex(pick(['#b862e0','#f2c8ff','#7a2aa0']))});}}};
   w.onPlay=(pet,t)=>{if(pet.preview)return;const S=w.stats,k=t.kind;track('toyplays');if(k==='laser')track('laser');if(k==='bubble')track('bubbles');reqEvent('play',t instanceof Toy?t.id:k==='bubble'?'bubbles':k);if(t instanceof Toy)t.bore=Math.min(1,(t.bore||0)+0.22);S.happy=Math.min(100,S.happy+(k==='bubble'?1.5:3));addXP(k==='bubble'?1:2);
     if(k==='laser'){SFX.play('zap');spawn(w,'star',t.x,t.y,{life:0.18});}
@@ -4974,7 +4974,7 @@ function loadLayout(kind,withToys){const w=game.world,ps=petSave(kind);w.decor=[
   if(withToys)for(const p of(ps.toys||[]))if(ITEMS[p.id]&&(save.inv[p.id]||0)>placedCount(p.id))placeObject(p.id,p.x,p.y);
   ps.toys=withToys?ps.toys:[];}
 function applyAway(){const last=save.lastSeen;if(!last)return null;const ms=Math.min(Date.now()-last,3*86400000);if(ms<3*60000)return null;const hrs=ms/3600000;
-  const rate={fed:8,water:8,happy:6},cur=save.cur,out={hrs,cur,drop:{},gift:0,mess:0};
+  const rate={fed:5.6,water:8,happy:6},cur=save.cur,out={hrs,cur,drop:{},gift:0,mess:0};
   for(const[k,ps]of Object.entries(save.pets)){if(!ps.stats)continue;const floor=k===cur?30:60;
     for(const st of['fed','water','happy']){const v=ps.stats[st];if(v===undefined)continue;const nv=Math.max(Math.min(v,floor),v-rate[st]*hrs);if(k===cur)out.drop[st]=Math.round(v-nv);ps.stats[st]=Math.round(nv);}}
   const ps=cur&&save.pets[cur];if(ps){const n=Math.min(3,Math.floor(hrs/2));ps.mess=ps.mess||[];for(let i=0;i<n&&ps.mess.length<12;i++){ps.mess.push({x:Math.round(rand(40,280)),y:Math.round(rand(40,150)),k:cur==='golem'?'pebble':'drop'});out.mess++;}if(NO_POOP.includes(cur)){ps.mess.length-=out.mess;out.mess=0;}
@@ -5030,7 +5030,7 @@ function cuddleHeart(pet){const ps=petSave(),c=cuddleState(ps),w=game.world;
   if(c.n<=0){c.love=1;if(!game.cudNote||performance.now()-game.cudNote>15000){game.cudNote=performance.now();flash(`${game.name} is all cuddled out for now. More cuddle coins in ${mmss(cuddleNext(ps))}.`);}return;}
   c.love=Math.min(1,c.love+1/6+1e-6);markDirty();
   if(c.love>=0.999){c.love=0;if(c.n>=CUD_MAX)c.t=Date.now();c.n--;const S=w.stats,thr=w.mood==='thriving',n=4+Math.floor(rand(0,3))+Math.floor((ps.lvl-1)/3)+(thr?1:0),hd=pet.headPos();
-    SFX.play('coinburst');track('bursts');for(let i=0;i<n;i++){const a=i/n*TAU+rand(-0.3,0.3),v=rand(14,26);spawnCoin(w,hd.x,hd.y,1,{vx:Math.cos(a)*v,vy:Math.sin(a)*v*0.7,vh:rand(40,60),auto:rand(1.1,1.6)});}
+    SFX.play('coinburst');track('bursts');addXP(3);for(let i=0;i<n;i++){const a=i/n*TAU+rand(-0.3,0.3),v=rand(14,26);spawnCoin(w,hd.x,hd.y,1,{vx:Math.cos(a)*v,vy:Math.sin(a)*v*0.7,vh:rand(40,60),auto:rand(1.1,1.6)});}
     for(let i=0;i<6;i++)spawn(w,'star',hd.x+rand(-5,5),hd.y-4+rand(-4,4),{life:rand(0.15,0.3)});}
   const pc=$('psCud');if(pc&&!$('petStats').hidden)pc.innerHTML=ui.cuddleHTML();}
 // ---- Mess: droppings a while after meals, and food left lying about going stale. Scoop them up for a coin each ----
@@ -5211,14 +5211,14 @@ function storeObject(id){const w=game.world;for(const L of[w.decor,w.toys]){for(
 function updatePlay(dt){
   const w=game.world,S=w.stats,pet=w.pet,P=game.pointer;w.t+=dt;
   w.dayness+=(w.dayTarget-w.dayness)*Math.min(1,dt*0.9);
-  S.fed=Math.max(0,S.fed-0.24*dt);S.water=w.sea?100:Math.max(0,S.water-0.18*dt);
+  S.fed=Math.max(0,S.fed-0.17*dt);if(game.petFat)game.petFat*=Math.exp(-dt/90);if(game.favBuff>0)game.favBuff-=dt;S.water=w.sea?100:Math.max(0,S.water-0.18*dt);
   if(!w.mess)w.mess=[];for(const m of w.mess)m.t+=dt;
   if(game.poopT>0){game.poopT-=dt;if(game.poopT<=0&&pet&&!pet.preview){const c=Math.cos(pet.ang||0),sn=Math.sin(pet.ang||0),bx=(pet.x??pet.headPos().x)-c*6,by=(pet.y??pet.headPos().y)-sn*6;const m=addMess(w,bx,by,pet.kind==='golem'?'pebble':'drop');if(m){m.born=0;pet.plop=0.45;SFX.play('plop');dust(w,m.x,m.y,5);spawn(w,'stink',m.x,m.y-3,{vy:-6,life:1.6,max:1.6});
       save.set.poopN=(save.set.poopN||0)+1;if(save.set.poopN<=3)flash(`${game.name} left a little present. Grab the Scoop!`);}}}
   S.clean=clamp(100-messCount(w)*14,0,100);
   // mood: thriving when every need is met and the tank is clean; grumpy when something is badly wrong
   w.mood=(S.fed<25||S.water<25||S.happy<25||S.clean<30)?'grumpy':(S.fed>=70&&S.water>=70&&S.happy>=70&&S.clean>=70)?'thriving':'content';
-  S.happy=Math.max(0,S.happy-(0.09+(S.fed<25?0.3:0)+(S.water<25?0.3:0)+(S.clean<60?(60-S.clean)/60*0.14:0))*dt);
+  S.happy=Math.max(0,S.happy-(game.favBuff>0?0.5:1)*(0.09+(S.fed<25?0.3:0)+(S.water<25?0.3:0)+(S.clean<60?(60-S.clean)/60*0.14:0))*dt);
   if(pet&&!pet.preview){if(w.mood==='thriving'){game.sparkT=(game.sparkT||0)-dt;if(game.sparkT<=0){game.sparkT=rand(2.5,4.5);const h=pet.headPos();spawn(w,'spark2',h.x+rand(-6,6),h.y-4-(pet.h||0)+rand(-4,2),{vy:-rand(4,9),life:0.8});}}
     else if(w.mood==='grumpy'){game.grrT=(game.grrT||rand(4,8))-dt;if(game.grrT<=0){game.grrT=rand(10,16);think(pet,'grr');}}}
   const tool=game.tool;handStep(dt);
@@ -5235,7 +5235,7 @@ function updatePlay(dt){
     }else if(tool==='pet'||(!tool&&game.hand&&game.hand.mode==='rub')){
       if(pet.hitTest(P.x,P.y)>=0&&P.moved>0.5&&pet.petMe()){P.rub=(P.rub||0)+P.moved;
         if(P.rub>7){P.rub=0;spawn(w,'heart',P.x+rand(-2,2),P.y-3,{vy:-rand(12,18),life:1.2,ph:rand(TAU)});SFX.play('heart');
-          game.hearts++;if(game.hearts%3===0)addXP(1);track('hearts');reqEvent('pets');cuddleHeart(pet);}}
+          game.hearts++;game.petFat=(game.petFat||0)+1;track('hearts');reqEvent('pets');cuddleHeart(pet);}}
     }else if(tool==='scoop'){scoopAt(P.x,P.y,false);
     }else if(tool==='bubbles'){
       game.bubbleT-=dt;if(game.bubbleT<=0&&w.bubbles.length<14){game.bubbleT=0.16;SFX.play('blow');
@@ -6083,7 +6083,7 @@ const CAPCOL=['#ff6b6b','#ffc24a','#5cb4ff','#9cd35e','#b884ff','#ff7eb3','#45d1
 function gBalls(){G.balls=[];for(let i=0;i<15;i++)G.balls.push({x:64+rand(-26,26),y:62+rand(-12,18),vx:0,vy:0,r:7,c:pick(CAPCOL),rot:rand(TAU)});G.ballsFor=G.m;}
 // Friendlier gacha: things you don't own yet are NEW_BOOST times as likely (within the rarity odds),
 // decor/toys stack up to STACK_MAX, and any true repeat refunds 60% of the pull price.
-const NEW_BOOST=3,STACK_MAX=3,DUP_REFUND=0.6;
+const NEW_BOOST=1.6,STACK_MAX=3,DUP_REFUND=0.3;
 const isUnique=id=>ITEMS[id].cat==='hat'||ITEMS[id].cat==='tool';
 const itemFull=id=>(save.inv[id]||0)>=(isUnique(id)?1:STACK_MAX);
 function itemWeights(m){const pool=MACHINES[m].pool,byR=[0,1,2,3].map(r=>pool.filter(id=>ITEMS[id].r===r).length||1);
