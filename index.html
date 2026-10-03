@@ -387,6 +387,27 @@ body.fun-hud #petStats .ps-t,body.fun-hud #petStats .ps-m,body.fun-hud #petStats
 body.fun-hud #petStats .ps-r i{background:#2a1608;box-shadow:0 0 0 2px #1a0c04}
 body.fun-hud #petStats{--mute:#efdcb4;--ink:#fff4dc}body.fun-hud #petStats *{text-shadow:0 1px 0 #1a0c04,1px 0 0 #1a0c04}
 @keyframes skunroll{from{transform:scaleY(.2);opacity:0}to{transform:none;opacity:1}}
+/* Fun top bar: menus in the same wood & brass, calm wood behind text */
+body.fun-hud .modal .sheet{background:linear-gradient(rgba(50,30,14,.74),rgba(50,30,14,.74)) 12px 12px/calc(100% - 24px) calc(100% - 24px) no-repeat,var(--skin,#4e321a) 0 0/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;filter:drop-shadow(0 6px 0 rgba(0,0,0,.45));padding:22px 24px 24px;
+  --panel:#3e2814;--panel-2:#4e321a;--panel-3:#62401f;--line:#7a5430;--line-2:#a87a48;--ink:#fff4dc;--mute:#ead6ae;--moss:#ffd24a;--moss-d:#9a6a1a;color:var(--ink)}
+body.fun-hud .modal .sheet-h{background:#4e321a;margin:-22px -24px 14px;padding:16px 24px 10px;top:-22px;border-radius:0;box-shadow:0 3px 0 #2a1608}
+body.fun-hud .modal .sheet-h h2,body.fun-hud .rcard h3,body.fun-hud .gtitle{color:#fff2d4;text-shadow:1px 0 0 #1a0c04,-1px 0 0 #1a0c04,0 1px 0 #1a0c04,0 -1px 0 #1a0c04,0 2px 0 #1a0c04}
+body.fun-hud .modal .sheet *{border-color:#1a0c04}
+body.fun-hud .modal .sheet p,body.fun-hud .modal .sheet small,body.fun-hud .modal .sheet label{text-shadow:0 1px 0 rgba(26,12,4,.8)}
+body.fun-hud .modal .btn{background:linear-gradient(#c8945a,#8e5e32);color:#fff4dc;text-shadow:0 1px 0 #1a0c04,1px 0 0 #1a0c04;box-shadow:inset 0 2px 0 rgba(255,230,180,.35),0 3px 0 #1a0c04}
+body.fun-hud .modal .btn.alt{background:linear-gradient(#6e4826,#523418)}
+body.fun-hud .modal .btn.alt.on,body.fun-hud .modal .seg .btn.on{background:linear-gradient(#ffd870,#e0a83a);color:#3a2006;text-shadow:none}
+body.fun-hud .modal .btn.danger{background:linear-gradient(#c8584a,#8a2a22)}
+body.fun-hud .modal .tab{background:linear-gradient(#6e4826,#523418);box-shadow:inset 0 2px 0 rgba(255,230,180,.2),0 3px 0 #1a0c04;color:#f4e2bc}
+body.fun-hud .modal .tab.on{background:linear-gradient(#ffd870,#e0a83a);color:#3a2006;box-shadow:0 3px 0 #1a0c04}
+body.fun-hud .modal .ibtn{background:linear-gradient(#8e5e32,#6a4222);box-shadow:inset 0 2px 0 rgba(255,230,180,.3),0 3px 0 #1a0c04}
+body.fun-hud .modal .gcard,body.fun-hud .modal .ti,body.fun-hud .modal .chunk:not(.sheet){background:#3a2412;box-shadow:inset 0 0 0 2px #6a4826,0 3px 0 rgba(0,0,0,.3)}
+body.fun-hud .modal .gcard.done{background:#4a4014;box-shadow:inset 0 0 0 2px #c8a03a}
+body.fun-hud .modal .sw{background:#2a1608}body.fun-hud .modal .sw.on{background:#9a6a1a}
+body.fun-hud .modal .srow{border-bottom-color:#7a5430}
+body.fun-hud .modal .cg{background:#2a1608;box-shadow:inset 0 0 0 2px var(--rc,#6a4826)}body.fun-hud .modal .cg.unk::after{color:#8a6a44}
+body.fun-hud .modal .machine{background:#2a1608;box-shadow:inset 0 0 0 3px #6a4826}
+@media (max-width:760px){body.fun-hud .modal .sheet-h p{font-size:15px;line-height:1.1}body.fun-hud .modal .sheet-h h2{font-size:20px}}
 body.fun-hud .tmsg{background:var(--skin) 0 0/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;image-rendering:pixelated;color:#fff4dc;text-shadow:1px 0 0 #1a0c04,-1px 0 0 #1a0c04,0 1px 0 #1a0c04,0 -1px 0 #1a0c04,0 2px 0 #1a0c04;padding:8px 16px 10px;filter:drop-shadow(0 3px 0 rgba(0,0,0,.35))}
 body.fun-hud .tmsg.old{transform:scale(.82);opacity:.72;filter:saturate(.7) drop-shadow(0 3px 0 rgba(0,0,0,.35))}
 body.fun-hud .tmsg.gone{opacity:0;transform:scale(.75) translateY(-4px)}
@@ -6432,6 +6453,7 @@ const ui={
   openModal(id){
     if(this.open===id)return;if(this.open)this.close(true);
     const m=$(id);if(!m)return;m.hidden=false;this.open=id;SFX.play('whoosh');
+    if(HUDSKIN.on){const sh=m.querySelector('.sheet');if(sh){sh._skin='plate';if(HUDSKIN.ro)HUDSKIN.ro.observe(sh);requestAnimationFrame(()=>HUDSKIN.paint(sh,'plate'));}}
     if(game.held)dropHeld();
     if(id==='mGoals'){this.renderGoals();save.achNew=0;this.syncDock();}else if(id==='mBag')this.renderBag();else if(id==='mGacha')this.renderGacha();else if(id==='mPets')this.renderPets();
   },
