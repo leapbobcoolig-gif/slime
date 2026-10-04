@@ -3187,7 +3187,7 @@ class Bun extends Slime{
   onLand(k){if(this.preview)return;for(let i=0;i<Math.round(3*k);i++)spawn(this.world,'dust',this.x+rand(-5,5),this.y+rand(-1,1),{vx:rand(-12,12),vy:rand(-4,4),life:rand(.3,.5)});}
   finishEating(){const t=this.held?.type;super.finishEating();this.inside=null;this.colT=this.col=SLIME_COL.base;if(this.preview)return;const w=this.world;
     if(t==='butter'){this.butter=1;this.warm=1;SFX.play('sizzle');for(let i=0;i<8;i++)spawn(w,'spark',this.x+rand(-6,6),this.y-this.h-rand(1,8),{life:rand(0.6,1.1)});}
-    else if(t==='honey'){this.honey=1;SFX.play('yum');for(let i=0;i<6;i++)spawn(w,'spark',this.x+rand(-6,6),this.y-this.h-rand(1,8),{life:rand(0.6,1.1)});}
+    else if(t==='honey'){this.honey=1;w.stats.water=Math.min(100,w.stats.water+50);SFX.play('yum');for(let i=0;i<6;i++)spawn(w,'spark',this.x+rand(-6,6),this.y-this.h-rand(1,8),{life:rand(0.6,1.1)});}
     else SFX.play('yum');}
   update(dt){this.miniCD=1e9;this.mini=null;const w=this.world;super.update(this.honey>0.3?dt*0.85:dt);this.inside=null;this.col=this.colT=SLIME_COL.base;
     const st=this.state;
@@ -3229,7 +3229,6 @@ class Bun extends Slime{
     const P2=hex('#ff8a9a'),T=hex('#e0566a');
     for(const sd of[-1,1]){const ex=fx+(sd<0?-3:2),ey=fy;// round eyes, both lit from the top-left
       if(asleep){pset(fb,ex,ey,K);pset(fb,ex+1,ey,K);pmix(fb,ex-(sd<0?1:0)+(sd<0?0:2),ey-1,K,0.5);}
-      else if(happy&&!sad){pset(fb,ex,ey,K);pset(fb,ex+1,ey,K);pset(fb,ex+(sd<0?1:0),ey-1,K);pmix(fb,ex+(sd<0?0:1),ey-1,K,0.6);}
       else if(shut){pset(fb,ex,ey,K);pset(fb,ex+1,ey,K);}
       else{for(const[a,b]of[[0,0],[1,0],[0,-1],[1,-1]])pset(fb,ex+a,ey+b,K);pset(fb,ex+(sd<0?0:1),ey-1,W1);if(sad)pmix(fb,ex+(sd<0?0:1),ey-2,K,0.8);}
       pmix(fb,ex+(sd<0?-1:2),ey+1,P2,0.6);pmix(fb,ex+(sd<0?0:1),ey+1,P2,0.35);}
@@ -4991,6 +4990,9 @@ const AMPHI=['turtle','axolotl','frog','salamander','crab','snake'],AMPHI_TERRA=
 const DIVE_TEND={puffer:0.5,cuttle:0.55,axolotl:0.8,kraken:0.85,crab:1,turtle:0.35,salamander:0.4,frog:0.22,snake:0.2};
 const WATERPREF={puffer:1,cuttle:1,axolotl:0.8,frog:0.5,turtle:0.5,salamander:0.35,crab:0.3,snake:0.3,kraken:1};
 const SEA_PETS=['cuttle','puffer'];
+// sea critters have no water need; the dinner roll's 'water' meter is a honey meter (honey fills it, misting never does)
+const noWater=w=>!!(w&&w.sea);
+const honeyThirst=w=>!!(w&&w.pet&&w.pet.kind==='bun');
 function habitatOf(kind){if(SEA_PETS.includes(kind))return 'sea';if(kind==='kraken')return 'aqua';if(AMPHI.includes(kind)){const ps=save.pets[kind];return(ps&&ps.tank)||(AMPHI_TERRA.includes(kind)?'terra':'aqua');}return 'terra';}
 const tankKey=t=>t==='aqua'?'placedAqua':t==='sea'?'placedSea':'placed';
 function layoutTank(w,tank,kind){w.air=null;w.anem=[];
@@ -5123,13 +5125,13 @@ function applyAway(){const last=save.lastSeen;if(!last)return null;const ms=Math
   const ps=cur&&save.pets[cur];if(ps){const n=Math.min(3,Math.floor(hrs/2));ps.mess=ps.mess||[];for(let i=0;i<n&&ps.mess.length<12;i++){ps.mess.push({x:Math.round(rand(40,280)),y:Math.round(rand(40,150)),k:cur==='golem'?'pebble':'drop'});out.mess++;}if(NO_POOP.includes(cur)){ps.mess.length-=out.mess;out.mess=0;}
     if(save.lastMood==='thriving'&&hrs>=0.5){out.gift=Math.min(20,Math.max(2,Math.floor(hrs*4)));save.coins+=out.gift;}}
   return out;}
-function showWelcome(a){const name=game.name,h=a.hrs,t=h<1?`${Math.round(h*60)} minutes`:h<24?`${Math.round(h)} hour${Math.round(h)===1?'':'s'}`:`${Math.round(h/24)} day${Math.round(h/24)===1?'':'s'}`,d=a.drop,w=game.world,sea=!!w.sea,
+function showWelcome(a){const name=game.name,h=a.hrs,t=h<1?`${Math.round(h*60)} minutes`:h<24?`${Math.round(h)} hour${Math.round(h)===1?'':'s'}`:`${Math.round(h/24)} day${Math.round(h/24)===1?'':'s'}`,d=a.drop,w=game.world,sea=noWater(w),
     M=(w.pet&&w.pet.mind)||{},pick=L=>L[Math.floor(Math.random()*L.length)],fav=favFood(game.kind),favN=fav?({cricket:'crickets',fruit:'strawberries'}[fav]||FOODS[fav].label||FOODS[fav].name):'snacks';
   const worst=Object.entries(d).filter(([k])=>!(sea&&k==='water')).sort((x,y)=>y[1]-x[1])[0],need=worst&&worst[1]>=5?worst[0]:null;
   // what the critter has to say about it, in its own mood and personality
   const say=h<0.5?pick([`Back already? ${name} was only just getting comfy.`,`${name} barely noticed you were gone!`,`${name} blinks at you. Oh, hi again!`])
     :need==='fed'?pick([`${name}'s tummy is rumbling. Snack time?`,`${name} has been daydreaming about ${favN}.`,`${name} keeps glancing at the food drawer. Hint, hint.`])
-    :need==='water'?pick([`It got a bit dry in here. ${name} would love a misting.`,`${name} is hoping for a cool, drippy mist.`])
+    :need==='water'?(game.kind==='bun'?pick([`${name} is craving something sweet. A drop of honey would hit the spot.`,`${name} has been dreaming about honey.`]):pick([`It got a bit dry in here. ${name} would love a misting.`,`${name} is hoping for a cool, drippy mist.`]))
     :need==='happy'?pick([`${name} missed you! Come say hi.`,`${name} pressed right up to the glass the moment you came in.`,`${name} has been waiting for some attention.`])
     :M.bold>0.62?pick([`${name} patrolled every corner of the tank. All secure!`,`${name} explored, climbed, and explored some more.`,`${name} is fizzing with things to show you.`])
     :M.bold<0.36?pick([`${name} had a long, cosy nap tucked in its hide.`,`${name} spent a quiet while snoozing in the shade.`,`${name} peeks out to see who it is. Oh, it's you!`])
@@ -5280,10 +5282,10 @@ function wpick(L){let s=0;for(const o of L)s+=o.w;let r=Math.random()*s;for(cons
 function favFood(kind){const D=DIET[kind]||{},L=Object.entries(D).filter(([f])=>FOOD_PRICE[f]!==undefined).sort((a,b)=>b[1]-a[1]);const ok=L.filter(([f])=>save.coins>=(FOOD_PRICE[f]||0));return((ok[0]||L[0])||['cricket'])[0];}
 function newRequest(){const w=game.world,pet=w.pet,M=pet.mind,S=w.stats,D=DIET[game.kind]||{},L=[];
   if(w.mood==='grumpy'){// only the most urgent need
-    if(S.fed<25)L.push({w:1,type:'food',arg:favFood(game.kind)});else if(S.clean<30)L.push({w:1,type:'clean'});else if(S.water<25)L.push({w:1,type:'mist'});else L.push({w:1,type:'pets'});}
+    if(S.fed<25)L.push({w:1,type:'food',arg:favFood(game.kind)});else if(S.clean<30)L.push({w:1,type:'clean'});else if(S.water<25)L.push(honeyThirst(w)?{w:1,type:'food',arg:'honey'}:{w:1,type:'mist'});else L.push({w:1,type:'pets'});}
   else{const liked=Object.keys(D).filter(f=>D[f]>=6&&FOOD_PRICE[f]!==undefined);if(liked.length&&S.fed<85)L.push({w:1.2,type:'food',arg:pick(liked)});
     if(S.fed<90)L.push({w:0.5+M.bold*0.8,type:'hand'});L.push({w:0.4+M.patience*0.8+(1-M.energy)*0.4,type:'pets'});
-    if(MIST_LOVERS.includes(game.kind)&&!w.sea)L.push({w:1.1,type:'mist'});
+    if(MIST_LOVERS.includes(game.kind)&&!noWater(w))L.push({w:1.1,type:'mist'});
     const tools=TOY_TOOLS.filter(t=>t!=='remote'&&toolOwned(t)),toys=w.toys.filter(t=>t.playable).map(t=>t.id);
     if(tools.length||toys.length){const opt=[...tools,...toys];L.push({w:0.4+M.energy+M.cur*0.5,type:'play',arg:pick(opt)});}
     if(messCount(w)>=2)L.push({w:1.5,type:'clean'});}
@@ -5354,7 +5356,7 @@ function storeObject(id){const w=game.world;for(const L of[w.decor,w.toys]){for(
 function updatePlay(dt){
   const w=game.world,S=w.stats,pet=w.pet,P=game.pointer;w.t+=dt;
   w.dayness+=(w.dayTarget-w.dayness)*Math.min(1,dt*0.9);
-  S.fed=Math.max(0,S.fed-0.17*dt);if(game.petFat)game.petFat*=Math.exp(-dt/90);if(game.favBuff>0)game.favBuff-=dt;S.water=w.sea?100:Math.max(0,S.water-0.18*dt);
+  S.fed=Math.max(0,S.fed-0.17*dt);if(game.petFat)game.petFat*=Math.exp(-dt/90);if(game.favBuff>0)game.favBuff-=dt;S.water=noWater(w)?100:Math.max(0,S.water-(honeyThirst(w)?0.12:0.18)*dt);
   if(!w.mess)w.mess=[];for(const m of w.mess)m.t+=dt;
   if(game.poopT>0){game.poopT-=dt;if(game.poopT<=0&&pet&&!pet.preview){const c=Math.cos(pet.ang||0),sn=Math.sin(pet.ang||0),bx=(pet.x??pet.headPos().x)-c*6,by=(pet.y??pet.headPos().y)-sn*6;const m=addMess(w,bx,by,pet.kind==='golem'?'pebble':'drop');if(m){m.born=0;pet.plop=0.45;SFX.play('plop');dust(w,m.x,m.y,5);spawn(w,'stink',m.x,m.y-3,{vy:-6,life:1.6,max:1.6});
       save.set.poopN=(save.set.poopN||0)+1;if(save.set.poopN<=3)flash(`${game.name} left a little present. Grab the Scoop!`);}}}
@@ -5372,7 +5374,7 @@ function updatePlay(dt){
         spawn(w,'drop',P.x+Math.cos(a)*r*0.4,P.y+22+Math.sin(a)*r*0.4,{h:22,vh:-rand(0,20),vx:Math.cos(a)*r*1.6,vy:Math.sin(a)*r*1.2,life:3});
         if(Math.random()<0.5)spawn(w,'mist',P.x+rand(-3,3),P.y+rand(-3,3),{vx:rand(-20,20),vy:rand(-16,16),life:rand(.4,.8)});}
       if(Math.random()<dt*14)w.glassDrops.push({x:P.x+rand(-26,26),y:P.y+rand(-18,18),life:rand(7,14),r:Math.random()<0.25?2:1});
-      S.water=Math.min(100,S.water+3.5*dt);game.mistAcc=(game.mistAcc||0)+dt;{const hd0=pet.headPos();if(Math.hypot(hd0.x-P.x,hd0.y-P.y)<34)reqEvent('mist',null,dt);}
+      if(!honeyThirst(w))S.water=Math.min(100,S.water+3.5*dt);game.mistAcc=(game.mistAcc||0)+dt;{const hd0=pet.headPos();if(Math.hypot(hd0.x-P.x,hd0.y-P.y)<34)reqEvent('mist',null,dt);}
       const hd=pet.headPos();if(Math.hypot(hd.x-P.x,hd.y-P.y)<26)S.happy=clamp(S.happy+({lizard:0.6,snake:0.6,chameleon:1,tarantula:0.3,scorpion:0.4,kraken:2,cuttle:1.5,golem:2.5,turtle:1.5,bee:0.2,mush:4,bun:-2.5}[pet.kind]??3)*dt,0,100);
       for(const pl of w.plants)if(Math.hypot(pl.x-P.x,pl.y-P.y)<pl.reach+10)pl.dist=Math.max(pl.dist,0.8);
     }else if(tool==='pet'||(!tool&&game.hand&&game.hand.mode==='rub')){
@@ -5475,7 +5477,7 @@ function updatePlay(dt){
   // thought bubbles
   game.thinkT-=dt;if(game.thought){game.thought.t+=dt;if(game.thought.t>2.8)game.thought=null;}
   if(game.thinkT<=0){game.thinkT=rand(9,15);let ic=null;
-    if(S.fed<35)ic='food';else if(S.water<35)ic='water';else if(S.happy<30)ic='sad';else if(S.happy>85)ic='heart';else if(w.toys.length&&Math.random()<0.3)ic='play';
+    if(S.fed<35)ic='food';else if(S.water<35)ic=honeyThirst(w)?'food':'water';else if(S.happy<30)ic='sad';else if(S.happy>85)ic='heart';else if(w.toys.length&&Math.random()<0.3)ic='play';
     if(ic&&pet.state!=='sleeping'&&pet.state!=='grabbed')game.thought={icon:ic,t:0};}
   // ambience
   let nf=0,nc=0;for(const q of w.prey){if(q.caught)continue;if(q.type==='fly'&&(q.landT<=0||q.inHand))nf++;if(q.type==='cricket')nc++;}
@@ -5921,7 +5923,7 @@ const GAUGES={val:{fed:-1,water:-1,happy:-1},nv:0,nvv:0,jarKick:0,jarFill:-1,gr:
   tick(dt){const w=game.world;if(!w||!w.pet)return;const S=w.stats,t=w.t;
     for(const k of['fed','water','happy'])this.val[k]=this.val[k]<0?S[k]:this.val[k]+(S[k]-this.val[k])*Math.min(1,dt*3);
     if(FUN('needs')){this.dial(dt,S,t);this.heart(dt,S,t,w.mood);this.card(S,t);}
-    this.tipT-=dt;if(this.tipT<=0){this.tipT=0.5;$('gWater').title=`Water ${S.water|0}% (mist to raise it)`;$('gHappy').title=`Happy ${S.happy|0}% · ${w.mood}`;$('gFed').title=`Fed ${S.fed|0}%`;$('coins').title=`${save.coins} coins`;}},
+    this.tipT-=dt;if(this.tipT<=0){this.tipT=0.5;$('gWater').title=honeyThirst(w)?`Honey ${S.water|0}% (feed it honey to top it up)`:`Water ${S.water|0}% (mist to raise it)`;$('gHappy').title=`Happy ${S.happy|0}% · ${w.mood}`;$('gFed').title=`Fed ${S.fed|0}%`;$('coins').title=`${save.coins} coins`;}},
   // liquid level for a mask: 0% sits below the lowest inside row, 100% above the highest (so a full vial is brim-full)
   lvlOf(id,mask,v){const c=this['span_'+id]||(this['span_'+id]=(()=>{let t=99,b=0;for(let y=0;y<22;y++)for(let x=0;x<22;x++){if(!mask(x+.5,y+.5)||!mask(x-.5,y+.5)||!mask(x+1.5,y+.5)||!mask(x+.5,y-.5)||!mask(x+.5,y+1.5))continue;t=Math.min(t,y);b=Math.max(b,y);}return[t,b];})());
     return lerp(c[1]+1,c[0]-1.6,clamp(v/100,0,1));},
@@ -5935,7 +5937,7 @@ const GAUGES={val:{fed:-1,water:-1,happy:-1},nv:0,nvv:0,jarKick:0,jarFill:-1,gr:
     for(const[u,v]of o.glint||[])pmix(fb,u+jx,v,hex('#ffffff'),0.7);return fb;},
   // water: a droplet-shaped vial (hidden for aquarium critters)
   dial(dt,S,t){const m=(x,y)=>{const dx=x-11,dy=y-14;if(dx*dx+dy*dy<6.8*6.8)return true;return y>1.5&&y<14&&Math.abs(dx)<(y-1.5)/12.5*6.8;};
-    const lvl=this.lvlOf('gWater',m,this.val.water),low=S.water<25,fb=this.vial('gWater',m,lvl,[hex('#3a9ae0'),hex('#9ad8ff')],t,{bub:2,glint:[[7,11],[7,12],[8,10]],edge:low&&Math.floor(t*3)%2?hex('#d02020'):hex('#14304a')});
+    const hn=honeyThirst(game.world),lvl=this.lvlOf('gWater',m,this.val.water),low=S.water<25,fb=this.vial('gWater',m,lvl,hn?[hex('#e0901a'),hex('#ffd468')]:[hex('#3a9ae0'),hex('#9ad8ff')],t,{bub:2,glint:[[7,11],[7,12],[8,10]],edge:low&&Math.floor(t*3)%2?hex('#d02020'):hex('#14304a')});
     this._gWater.ctx.putImageData(fb.img,0,0);},
   // food: a tummy that fills with warm crunchy food; it rumbles when empty and burps when full
   card(S,t){const m=(x,y)=>{const u=(x-12.5)/8.2,v=(y-13.5)/6.4;if(u*u+v*v<1)return true;const tb=(px,py,ax,ay,bx,by,r)=>{const dx=bx-ax,dy=by-ay,k=clamp(((px-ax)*dx+(py-ay)*dy)/(dx*dx+dy*dy),0,1);return Math.hypot(px-(ax+dx*k),py-(ay+dy*k))<r;};
@@ -6527,14 +6529,15 @@ const ui={
   toast(msg,ev){this.showMsg(msg,ev);if(ev)this.evT=2.8;},
   update(){
     const w=game.world;if(!w||!w.pet)return;const S=w.stats;
-    if(this.seaShown!==!!w.sea){this.seaShown=!!w.sea;$('mWater').style.display=w.sea?'none':'';$('gWater').style.display=w.sea?'none':'';}
+    const dry=noWater(w);if(this.seaShown!==dry){this.seaShown=dry;$('mWater').style.display=dry?'none':'';$('gWater').style.display=dry?'none':'';}
+    const hn=honeyThirst(w);if(this.honeyShown!==hn){this.honeyShown=hn;$('mWater').querySelector('i').style.setProperty('--c',hn?'var(--amber)':'var(--teal)');$('mWater').title=hn?'Honey':'Water';}
     for(const[k,id]of[['fed','mFed'],['water','mWater'],['clean','mClean'],['happy','mHappy']]){const el=$(id);el.querySelector('i').style.width=(S[k]??100).toFixed(0)+'%';el.classList.toggle('low',(S[k]??100)<25);}
     if(this.moodShown!==w.mood){this.moodShown=w.mood;const m=$('petMood');m.className=w.mood||'content';m.textContent=w.mood==='thriving'?'✦ THRIVING':w.mood==='grumpy'?'☁ GRUMPY':'CONTENT';
       m.title=w.mood==='thriving'?'Fed, watered, happy and in a clean tank: plays more, leaves you tips and bonus cuddle coins':w.mood==='grumpy'?'Something is wrong (hungry, thirsty, sad or a dirty tank). Grumpy critters sulk and skip cuddle coins until it is fixed':'Doing fine. Keep everything above 70 and the tank clean to make it thrive';}
     if(this.evT<=0){let msg,now=true;
       if(game.placing)msg=`Click in the tank to place the ${ITEMS[game.placing].name.toLowerCase()} · Esc cancels`;
       else if(game.held&&!(DIET[game.kind][game.held.type]>0))msg=`${game.name} isn't interested in ${FOODS[game.held.type].label}.`;
-      else{now=false;let extra='';if(S.fed<25)extra=' It looks hungry.';else if(S.water<25)extra=' The tank feels dry.';else if(S.clean<30)extra=' The tank needs a scoop.';const st=game.thought&&THINK_SAY[game.thought.icon]?THINK_SAY[game.thought.icon]:w.pet.statusText();msg=`${game.name} ${st}${/[!.?]$/.test(st)?'':'.'}${extra}`;}
+      else{now=false;let extra='';if(S.fed<25)extra=' It looks hungry.';else if(S.water<25)extra=honeyThirst(w)?' It is craving some honey.':' The tank feels dry.';else if(S.clean<30)extra=' The tank needs a scoop.';const st=game.thought&&THINK_SAY[game.thought.icon]?THINK_SAY[game.thought.icon]:w.pet.statusText();msg=`${game.name} ${st}${/[!.?]$/.test(st)?'':'.'}${extra}`;}
       // status text has to settle for a moment before it replaces what's shown, so quick state flips don't flicker
       const t=performance.now();if(msg!==this.candMsg){this.candMsg=msg;this.candAt=t;}
       if(now||!this.curMsg||(msg!==this.curMsg&&t-this.candAt>600&&t-(this.msgAt||0)>1200))this.showMsg(msg,false);}
