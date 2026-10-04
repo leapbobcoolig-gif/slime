@@ -894,7 +894,7 @@ const PAL={
   bee:{yellow:ramp('#6a4408','#b8840e','#f0c030','#ffe680'),black:ramp('#1c1814','#312a22','#4a4034','#665a48'),eye:ramp('#040406','#0a0a10','#181824','#2c2c40'),head:ramp('#0a0908','#15120f','#231e19','#342d25'),white:ramp('#8a7e6a','#c8bca4','#ece2cc','#fffaee'),outline:'#0a0806'},
   shark:{body:ramp('#283c50','#3e5e7a','#6088a6','#8eb4d0'),belly:ramp('#a8b8c2','#dce6ec','#f4f8fa','#ffffff'),tip:ramp('#1a2630','#2a3a48','#3e5262','#566c7e'),eye:ramp('#020304','#0a0d10','#14181c','#20262c'),outline:'#08121c'},
   nudi:{body:ramp('#161c78','#2a3ec8','#5470f0','#9cb4ff'),white:ramp('#9a9ab4','#d4d6ec','#f2f2ff','#ffffff'),black:ramp('#06060e','#0c0c1c','#16162a','#22223a'),rim:ramp('#8a3606','#dc6a10','#ffa22e','#ffe07a'),rimD:ramp('#5a2404','#a04a0a','#d0781c','#f0a44a'),outline:'#0a0c22'},
-  pacfrog:{body:ramp('#24420c','#46781a','#78b42a','#b6e06a'),blotch:ramp('#2a1406','#4a280e','#6e4216','#925e24'),belly:ramp('#8a8058','#c8bc8a','#ece0b0','#fff8da'),mouth:ramp('#6a1a24','#b03a48','#e06a78','#ff9aa8'),eye:ramp('#5a3a08','#a87a14','#e8b830','#fff090'),outline:'#0c1404'},
+  pacfrog:{body:ramp('#2c5a10','#4e9a1e','#7cc634','#bfee6e'),lip:ramp('#8a6008','#c89418','#f0c43a','#fff08a'),blotch:ramp('#3a1608','#5e2810','#80401c','#a05a2a'),ink:ramp('#140a04','#24140a','#341e10','#442a16'),belly:ramp('#8a8058','#c8bc8a','#ece0b0','#fff8da'),mouth:ramp('#6a1a24','#b03a48','#e06a78','#ff9aa8'),eye:ramp('#5a3a08','#a87a14','#e8b830','#fff090'),outline:'#0c1404'},
   puffer:{body:ramp('#2a420e','#4e7a1c','#8cb832','#cce86a'),spot:ramp('#0c1406','#18260e','#243616','#30461e'),belly:ramp('#8a8a7a','#c8c8b4','#eeeee2','#ffffff'),
           fin:ramp('#6a6a3a','#a8a468','#d8d49a','#f4f0c8'),eye:ramp('#4a3408','#906c16','#d8ac30','#ffe476'),beak:ramp('#6a6258','#a09888','#d0c8b8','#f2ecdc'),outline:'#08120a'},
   mush:{cap:ramp('#5a0e10','#a01e22','#dc3a2e','#ff7a5a'),cap2:ramp('#3a1a4a','#6a3a8a','#a064c4','#d8a8f0'),spot:ramp('#b8a890','#e0d4bc','#f6eedc','#ffffff'),
@@ -2708,7 +2708,7 @@ class Spider extends Pet{
   Wg(lx,ly){const c=Math.cos(this.ang)*this.sc,s=Math.sin(this.ang)*this.sc;return[this.x+c*lx-s*ly,this.y+s*lx+c*ly];}
   headPos(){const[x,y]=this.Wg(5.5,0);return{x,y};}
   mouthScreen(){const[x,y]=this.W(5.2,0);return{x,y};}
-  hatAnchor(){const[x,y]=this.W(1.6,0);return{x,y:y-1,a:this.ang,s:0.95};}
+  hatAnchor(){const[x,y]=this.W(1.8,0);return{x,y:y-1,a:this.ang,s:0.95};}
   noise(){return clamp(this.speed/11,0,1.5);}
   goTo(tx,ty,dt,mode,arrive=3){
     const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y);
@@ -3286,18 +3286,18 @@ class Bun extends Slime{
 const SHARK_R=[4.5,4.6,4.2,3.5,2.7,1.9,1.25,0.8],SHARK_SEG=3.7;
 class Shark extends Pet{
   constructor(world,x,y){super();this.initCommon(world,'shark');
-    this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vx=0;this.vy=0;this.speed=0;this.sc=1;
+    this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vx=0;this.vy=0;this.spineeed=0;this.sc=1;
     this.outline=hex(PAL.shark.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.seam=2.2;
     this.tailPh=rand(TAU);this.roll=0;this.jaw=0;this.grin=0;this.wig=0;this.seed=rand(100);this.calmT=0;this.zig=0;
     // a spine of nodes trailing the head, so the body bends and swims in an S-curve
-    this.sp=[];for(let i=0;i<SHARK_R.length;i++)this.sp.push({x:x-Math.cos(this.ang)*i*SHARK_SEG,y:y-Math.sin(this.ang)*i*SHARK_SEG});}
+    this.spine=[];for(let i=0;i<SHARK_R.length;i++)this.spine.push({x:x-Math.cos(this.ang)*i*SHARK_SEG,y:y-Math.sin(this.ang)*i*SHARK_SEG});}
   isActive(){return this.preview||this.world.dayness>0.35;}
   W(lx,ly){const c=Math.cos(this.ang)*this.sc,s=Math.sin(this.ang)*this.sc;return[this.x+c*lx-s*ly,this.y-this.h+s*lx+c*ly];}
   headPos(){const[x,y]=this.W(8.0,0);return{x,y:y+this.h};}
   mouthScreen(){const[x,y]=this.W(7.0,0);return{x,y};}
-  hatAnchor(){const[x,y]=this.W(1.6,0);return{x,y:y-3.2,a:this.ang,s:1.25};}
+  hatAnchor(){const[x,y]=this.W(1.8,0);return{x,y:y-3.2,a:this.ang,s:1.25};}
   submerge(){return 0.3;}
-  noise(){return clamp(this.speed/14,0,1);}
+  noise(){return clamp(this.spineeed/14,0,1);}
   goTo(tx,ty,dt,mode,arrive=3){if(this.roll>0.4)return false;const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y),diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);
     this.ang+=clamp(diff,-2.6*dt,2.6*dt);const max=mode==='run'||mode==='lunge'?36:mode==='slow'||mode==='stalk'?8:15;let want=d>arrive?max*clamp(d/16,0.35,1):3;if(Math.abs(diff)>1.2)want*=0.4;
     const k=Math.min(1,dt*2.4);this.vx+=(Math.cos(this.ang)*want-this.vx)*k;this.vy+=(Math.sin(this.ang)*want-this.vy)*k;return d<=arrive;}
@@ -3321,7 +3321,7 @@ class Shark extends Pet{
     this.tx=clamp(this.x+Math.cos(a)*50,B.x0+8,B.x1-8);this.ty=clamp(this.y+Math.sin(a)*50,B.y0+8,B.y1-8);this.state='wander';this.pace='run';this.timer=1.5;this.zig=1.2;
     if(!this.preview){SFX.play('swish');think(this,'!');}}
   petMe(){const r=super.petMe();if(r&&!this.preview){if(this.calmT<=0.3&&this.roll<0.2)SFX.play('bloop');this.calmT=1.2;}return r;}
-  hitTest(x,y){const yy=y+this.h;for(let i=0;i<5;i++){const n=this.sp[i];if(Math.hypot(x-n.x,yy-n.y)<5.5)return 0;}const[hx,hy]=this.W(4.5,0);return Math.hypot(x-hx,y-hy)<5?0:-1;}
+  hitTest(x,y){const yy=y+this.h;for(let i=0;i<5;i++){const n=this.spine[i];if(Math.hypot(x-n.x,yy-n.y)<5.5)return 0;}const[hx,hy]=this.W(4.5,0);return Math.hypot(x-hx,y-hy)<5?0:-1;}
   tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;this.roll=0;if(!this.preview)SFX.play('plip');return true;}
   dragTo(x,y){this.grabX=x;this.grabY=y;}
   release(){if(this.state!=='grabbed')return;this.state='idle';this.timer=1;w_splash(this);}
@@ -3329,7 +3329,7 @@ class Shark extends Pet{
     // rubbed: rolls belly-up and goes floppy and calm ("tonic immobility")
     if(this.calmT>0)this.calmT-=dt;const calm=this.calmT>0&&this.state==='petted';
     const r0=this.roll;this.roll+=((calm?1:0)-this.roll)*Math.min(1,dt*(calm?2.2:1.6));this.wig=Math.max(this.wig,Math.min(1,Math.abs(this.roll-r0)/Math.max(dt,1e-3)*0.6));
-    this.tailPh+=dt*(3+this.speed*0.5)*(1-this.roll*0.85)+(this.state==='grabbed'?dt*16:0);this.wig=this.state==='grabbed'?1:Math.max(0,this.wig-dt*1.5);
+    this.tailPh+=dt*(3+this.spineeed*0.5)*(1-this.roll*0.85)+(this.state==='grabbed'?dt*16:0);this.wig=this.state==='grabbed'?1:Math.max(0,this.wig-dt*1.5);
     this.jaw=Math.max(0,this.jaw-dt*3);this.grin=Math.max(0,this.grin-dt*0.4);if(w.stats.happy>80)this.grin=Math.max(this.grin,0.5);
     if(this.state==='chew')this.jaw=0.4+0.4*Math.sin(this.t*16);
     if(this.state==='grabbed'){this.gt+=dt;this.h+=(4-this.h)*Math.min(1,dt*6);this.x=this.grabX;this.y=this.grabY+this.h;this.vx=this.vy=0;this.pts[0].x=this.x;this.pts[0].y=this.y;this.follow();this.syncHeld();return;}
@@ -3341,8 +3341,8 @@ class Shark extends Pet{
     if(this.x<B.x0+m||this.x>B.x1-m||this.y<B.y0+m||this.y>B.y1-m){// glide along the glass and curve back toward the middle
       const a=Math.atan2(90-this.y,160-this.x);this.ang+=clamp(wrapA(a-this.ang),-3*dt,3*dt);if(this.state==='wander')[this.tx,this.ty]=randomWaterSpot(w,0.3)||this.randomSpot();}
     this.x=clamp(this.x,B.x0+m,B.x1-m);this.y=clamp(this.y,B.y0+m,B.y1-m);
-    this.speed=Math.hypot(this.vx,this.vy);this.pts[0].x=this.x;this.pts[0].y=this.y;this.follow();this.syncHeld();}
-  follow(){const S=this.sp;S[0].x=this.x;S[0].y=this.y;let pa=this.ang+Math.PI;
+    this.spineeed=Math.hypot(this.vx,this.vy);this.pts[0].x=this.x;this.pts[0].y=this.y;this.follow();this.syncHeld();}
+  follow(){const S=this.spine;S[0].x=this.x;S[0].y=this.y;let pa=this.ang+Math.PI;
     for(let i=1;i<S.length;i++){const a=S[i-1],b=S[i];let ang=Math.atan2(b.y-a.y,b.x-a.x);const df=wrapA(ang-pa),lim=0.16;if(df>lim)ang=pa+lim;else if(df<-lim)ang=pa-lim;
       b.x=a.x+Math.cos(ang)*SHARK_SEG;b.y=a.y+Math.sin(ang)*SHARK_SEG;pa=ang;}}
   color(m,q,s,l,x,y){const P=PAL.shark,R=this.roll;
@@ -3354,10 +3354,11 @@ class Shark extends Pet{
       case M.EYE:return P.eye[q];
     }return INK;}
   // lateral swim wave added to the spine for drawing: stronger toward the tail
-  bent(i){const S=this.sp,n=S.length,a=S[Math.min(i,n-1)],b=S[Math.max(0,Math.min(i,n-1)-1)]||a,dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy)||1,f=i/(n-1),
-      amp=(0.5+Math.min(1,this.speed/16)*1.4)*(1-this.roll*0.85)+this.wig*1.5,o=Math.sin(this.tailPh-i*0.75)*amp*f*f;
+  bentF(f){const i=Math.floor(f),k=f-i,[a0,a1]=this.bent(i),[b0,b1]=this.bent(Math.min(this.spine.length-1,i+1));return[a0+(b0-a0)*k,a1+(b1-a1)*k];}
+  bent(i){const S=this.spine,n=S.length,a=S[Math.min(i,n-1)],b=S[Math.max(0,Math.min(i,n-1)-1)]||a,dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy)||1,f=i/(n-1),
+      amp=(0.5+Math.min(1,this.spineeed/16)*1.4)*(1-this.roll*0.85)+this.wig*1.5,o=Math.sin(this.tailPh-i*0.75)*amp*f*f;
     return[a.x+(-dy/d)*o,a.y-this.h+(dx/d)*o];}
-  draw(fb){const R=this.roll,S=this.sp,n=S.length,rA=R*Math.PI,cr=Math.cos(rA),sr=Math.sin(rA),fs=Math.sign(cr||1)*Math.max(0.22,Math.abs(cr));
+  draw(fb){const R=this.roll,S=this.spine,n=S.length,rA=R*Math.PI,cr=Math.cos(rA),sr=Math.sin(rA),fs=Math.sign(cr||1)*Math.max(0.22,Math.abs(cr));
     // fins are filled shapes: a curved leading edge sweeping back to a pointed tip, a concave trailing edge
     const fin=(F,r0,cL,tp,cT,r1,mat=M.LIMB,cl=1)=>{const P=[],q=(A,C,B,t)=>[(1-t)*(1-t)*A[0]+2*t*(1-t)*C[0]+t*t*B[0],(1-t)*(1-t)*A[1]+2*t*(1-t)*C[1]+t*t*B[1]];
       for(let i=0;i<=7;i++)P.push(F(...q(r0,cL,tp,i/7)));for(let i=1;i<=7;i++)P.push(F(...q(tp,cT,r1,i/7)));const[ax,ay]=F((r0[0]+r1[0])/2,(r0[1]+r1[1])/2),[bx,by]=F(...tp);fb.poly(P,mat,cl,ax,ay,bx,by,mat===M.CLAW?0.9:0.3,1.3);};
@@ -3365,7 +3366,7 @@ class Shark extends Pet{
     const at=i=>{const[x,y]=this.bent(i),[x2,y2]=this.bent(Math.max(0,i-1)),[x3,y3]=this.bent(Math.min(n-1,i+1));let dx=x2-x3,dy=y2-y3;const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;return(u,v)=>[x+dx*u-dy*v,y+dy*u+dx*v];};
     // pectoral fins: broad wings from just behind the head, swept back
     for(const sd of[-1,1]){const fl=Math.sin(this.tailPh*0.5+sd)*0.4,v=k=>sd*k*fs,F=(u,w)=>this.W(u,w);
-      fin(F,[2.2,v(3.4)],[-0.6+fl*0.3,v(10.4)],[-8.6+fl,v(11.4)],[-4.6,v(6.2)],[-5.0,v(3.0)]);}
+      fin(F,[-0.6,v(3.4)],[-2.4+fl*0.3,v(7.6)],[-8.0+fl,v(8.6)],[-5.8,v(5.4)],[-4.6,v(3.0)]);}
     // small pelvic fins further back
     {const F=at(4);for(const sd of[-1,1]){const v=k=>sd*k*fs;fin(F,[1.4,v(1.6)],[0,v(3.6)],[-2.6,v(4.6)],[-1.6,v(2.6)],[-1.8,v(1.4)]);}}
     // tail: a tall slender upper lobe and a short lower one, flicking with the swim wave
@@ -3376,21 +3377,24 @@ class Shark extends Pet{
       fb.cap(u0,u1,SHARK_R[n-1]+0.1,t0+c*3.8,t1+s*3.8,0.55,M.BODY,2,n-1,n,0.6);}
     // the body: chunky and smooth along the bending spine, with a soft rounded snout
     for(let i=0;i<n-1;i++){const[a0,a1]=this.bent(i),[b0,b1]=this.bent(i+1);fb.cap(a0,a1,SHARK_R[i],b0,b1,SHARK_R[i+1],M.BODY,2,i,i+1,0.6);}
-    const[h0,h1]=this.W(0,0),[m0,m1]=this.W(4.0,0),[n0,n1]=this.W(7.8,0);fb.cap(h0,h1,SHARK_R[0],m0,m1,3.5,M.BODY,2,0,0,0.7);fb.cap(m0,m1,3.5,n0,n1,1.1,M.BODY,2,0,0,0.7);
-    // the dorsal fin from above: a slim swept blade along the back, sliding off to one side as it rolls
-    if(R<0.55){const F=at(1),o=sr*3.4,k=1-R*1.2;fin(F,[2.6,o-0.9*k],[0.6,o-1.0*k],[-4.8,o],[0.6,o+1.0*k],[2.6,o+0.9*k],M.CLAW,R>0.15?3:2);}
+    const[h0,h1]=this.W(0,0),[m0,m1]=this.W(4.0,0),[n0,n1]=this.W(7.2,0);fb.cap(h0,h1,SHARK_R[0],m0,m1,3.5,M.BODY,2,0,0,0.7);fb.cap(m0,m1,3.5,n0,n1,1.8,M.BODY,2,0,0,0.7);
+    // the dorsal fin stands up off its back (the classic shark fin), leaning over and sinking away as it rolls
+    if(R<0.5){const[b0,b1]=this.bentF(0.55),[c0,c1]=this.bentF(2.1),hgt=7.2*Math.max(0,Math.cos(rA*1.6))*(0.55+0.45*Math.abs(Math.cos(this.ang))),lean=sr*5;let x1=b0,x2=c0;if(Math.abs(x2-x1)<3.4){const m=(x1+x2)/2,sg=x2>=x1?1:-1;x1=m-1.7*sg;x2=m+1.7*sg;}
+      const ax=x1+(x2-x1)*0.78+lean,ay=b1+(c1-b1)*0.78-this.h*0-hgt,q=(A,C,B,t)=>[(1-t)*(1-t)*A[0]+2*t*(1-t)*C[0]+t*t*B[0],(1-t)*(1-t)*A[1]+2*t*(1-t)*C[1]+t*t*B[1]],P=[],B1=[x1,b1],B2=[x2,c1],AP=[ax,ay];
+      const cL=[x1+(ax-x1)*0.25,b1+(ay-b1)*0.75],cT=[(ax+x2)/2-(x2-x1)*0.05,(ay+c1)/2+hgt*0.12];
+      for(let i=0;i<=8;i++)P.push(q(B1,cL,AP,i/8));for(let i=1;i<=6;i++)P.push(q(AP,cT,B2,i/6));fb.poly(P,M.CLAW,3,(x1+x2)/2,(b1+c1)/2,ax,ay,0.6,1.1);}
     // friendly eyes on the sides of the head
-    for(const sd of[-1,1]){const t=sd*1.2+rA;if(Math.cos(t)<-0.55)continue;const[e0,e1]=this.W(5.0,Math.sin(t)*2.6);fb.cap(e0,e1,1.15,e0,e1,1.15,M.EYE,3,0,0,1.5);}}
+    if(R>0.6)for(const sd of[-1,1]){const t=sd*1.2+rA;if(Math.cos(t)<-0.55)continue;const[e0,e1]=this.W(4.6,Math.sin(t)*3.0);fb.cap(e0,e1,0.85,e0,e1,0.85,M.EYE,3,0,0,1.5);}}
   drawExtras(fb){const K=hex('#05080a'),Wh=hex('#ffffff'),c=Math.cos(this.ang),s=Math.sin(this.ang),R=this.roll,rA=R*Math.PI,shut=this.blink>0||this.state==='sleeping'||R>0.8;
-    for(const sd of[-1,1]){const t=sd*1.2+rA;if(Math.cos(t)<-0.55)continue;const[e0,e1]=this.W(5.0,Math.sin(t)*2.6);if(shut){for(let k=-1;k<=1;k++)pset(fb,e0-s*k*0.9,e1+c*k*0.9,K);}else{pset(fb,e0-c*0.4-s*sd*0.3,e1-s*0.4+c*sd*0.3,Wh);}}
+    if(R>0.6)for(const sd of[-1,1]){const t=sd*1.2+rA;if(Math.cos(t)<-0.55)continue;const[e0,e1]=this.W(4.6,Math.sin(t)*3.0);if(shut){for(let k=-1;k<=1;k++)pset(fb,e0-s*k*0.9,e1+c*k*0.9,K);}else{pset(fb,e0-c*0.4-s*sd*0.3,e1-s*0.4+c*sd*0.3,Wh);}}
     // gill slits
     for(const sd of[-1,1]){const t=sd*1.25+rA;if(Math.cos(t)<-0.2)continue;for(let k=0;k<5;k++){for(const f of[0.78,0.95]){const[g0,g1]=this.W(2.6-k*0.8,Math.sin(t)*4.2*f);pmix(fb,g0,g1,K,0.5);}}}
     // a soft little smile under the snout, tiny teeth when it chomps
-    if(R<0.3||R>0.7)for(let k=-2;k<=2;k++){const[a0,a1]=this.W(6.6-Math.abs(k)*0.4-this.jaw*0.8,k*0.75);pmix(fb,a0,a1,K,0.5);}
+    if(R>0.7)for(let k=-2;k<=2;k++){const[a0,a1]=this.W(6.6-Math.abs(k)*0.4-this.jaw*0.8,k*0.75);pmix(fb,a0,a1,K,0.5);}
     if(this.jaw>0.3||this.grin>0.6)for(const k of[-1,1]){const[a0,a1]=this.W(6.1-this.jaw*0.8,k*0.8);pset(fb,a0,a1,Wh);}
     if(this.state==='petted'||R>0.3)for(const sd of[-1,1]){const[b0,b1]=this.W(3.4,sd*3.6);pmix(fb,b0,b1,hex('#ff9ab0'),0.45);}}
   statusText(){if(this.roll>0.5)return 'rolled belly-up and went all floppy and calm';switch(this.state){
-    case 'idle':case 'wander':return this.speed>14?'is zooming around the tank':'is cruising lazy loops';case 'hunt':return 'has spotted something tasty...';case 'strike':return 'CHOMP!';
+    case 'idle':case 'wander':return this.spineeed>14?'is zooming around the tank':'is cruising lazy loops';case 'hunt':return 'has spotted something tasty...';case 'strike':return 'CHOMP!';
     case 'chew':return `is munching ${PREY_NAME[this.held?.type]||'something'}`;case 'sleeping':return 'is resting on the sand, gills pumping';case 'grabbed':return 'is wiggling its little tail';}
     return Pet.prototype.statusText.call(this);}
 }
@@ -3486,15 +3490,18 @@ class Nudi extends Pet{
 const PAC_SPOTS=[[-2.6,0,1.9],[0.4,-3.0,1.35],[0.4,3.0,1.35],[-4.6,-2.8,1.2],[-4.6,2.8,1.2],[2.2,0,1.0],[-1.0,-5.0,0.85],[-1.0,5.0,0.85],[4.4,-1.6,0.6],[4.4,1.6,0.6]];
 class PacFrog extends Pet{
   constructor(world,x,y){super();this.initCommon(world,'pacfrog');
-    this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.sc=1;
+    this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.sc=1.3;
     this.outline=hex(PAL.pacfrog.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.seam=2.5;this.frame={x,y,c:1,s:0};
     this.bury=0;this.sitT=0;this.mouth=0;this.puff=0;this.puffT=0;this.annoy=0;this.step=0;this.cheek=0;this.wet=0;this.croakT=rand(10,22);this.croaking=0;this.hopT=0;this.unbury=false;this.eyes=[];this.wantBury=false;this.under=null;}
   isActive(){return true;}
   W(lx,ly){const c=Math.cos(this.ang)*this.sc,s=Math.sin(this.ang)*this.sc;return[this.x+c*lx-s*ly,this.y-this.h+s*lx+c*ly];}
   R(){return 6.6*(1+this.puff*0.22);}
-  headPos(){const[x,y]=this.W(5.6,0);return{x,y:y+this.h};}
-  mouthScreen(){const[x,y]=this.W(7.2,0);return{x,y};}
-  hatAnchor(){const[x,y]=this.W(0.8,0);return{x,y:y-3-this.puff*2+this.bury*1.6,a:this.ang,s:1.15};}
+  // drawn front-on like the photos: a big round dome sitting on the ground, face slid toward where it's heading
+  geo(){const rx=9.4*(1+this.puff*0.2)+this.cheek*1.4,H=12.4*(1+this.puff*0.16),sink=this.bury*H*0.62,yb=this.y-this.h+sink,cy=yb-H*0.5,c=Math.cos(this.ang),fwd=Math.sin(this.ang)>-0.55;
+    return{rx,H,sink,yb,cy,c,fwd,fx:this.x+c*rx*0.26,my:cy+H*0.1};}
+  headPos(){const G=this.geo();return{x:this.x+G.c*G.rx*0.7,y:this.y+Math.sin(this.ang)*2};}
+  mouthScreen(){const G=this.geo();return{x:this.x+G.c*G.rx*0.75,y:G.yb-4.5};}
+  hatAnchor(){const G=this.geo();return{x:this.x-G.c*0.6,y:G.cy-G.H*0.5-0.5,a:this.ang,s:1.15,fy:0.5,eye:{x:G.fx,y:G.cy-G.H*0.36,sp:G.rx*0.42}};}
   noise(){return clamp(this.speed/12,0,1);}
   goTo(tx,ty,dt,mode,arrive=3){const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y),diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);this.ang+=clamp(diff,-2*dt,2*dt);
     if(this.bury>0.25||this.puff>0.4){this.unbury=true;this.speed=0;return false;}// has to dig itself out first
@@ -3515,7 +3522,7 @@ class PacFrog extends Pet{
   startle(x,y){if(this.state==='grabbed'||this.state==='fall')return;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.doPuff();}
   doPuff(){if(this.puffT>0.3)return;this.puffT=rand(1.6,2.4);this.annoy=0;this.bury=0;if(!this.preview){SFX.play('eek');think(this,'!');}}
   petMe(){if(this.puffT>0)return false;const r=super.petMe();if(r&&!this.preview){this.annoy+=0.009;if(this.annoy>1)this.doPuff();else{this.gT=(this.gT||0)-1/60;if(this.gT<=0){this.gT=rand(1.2,2);SFX.play('croak');}}}return r;}
-  hitTest(x,y){const[cx,cy]=this.W(1,0);return Math.hypot(x-cx,y-cy)<this.R()+2?0:-1;}
+  hitTest(x,y){const G=this.geo();return Math.hypot((x-this.x)/(G.rx+2),(y-G.cy)/(G.H*0.55+2))<1?0:-1;}
   tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;this.bury=0;if(!this.preview)SFX.play('eek');return true;}
   dragTo(x,y){this.grabX=x;this.grabY=y;}
   release(){if(this.state!=='grabbed')return;this.state='fall';this.vh=0;}
@@ -3540,59 +3547,60 @@ class PacFrog extends Pet{
     // a deep, grumpy croak now and then (more at night)
     this.croakT-=dt*(w.dayness<0.5?2:1);if(this.croakT<=0){this.croakT=rand(14,30);if(!this.preview&&this.state!=='sleeping'){SFX.play('croakdeep');this.croaking=0.7;}}if(this.croaking>0)this.croaking-=dt;
     this.pts[0].x=this.x;this.pts[0].y=this.y;this.syncHeld();}
-  color(m,q,s,l,x,y){const P=PAL.pacfrog,F=this.frame,dx=x+.5-F.x,dy=y+.5-F.y,u=(dx*F.c+dy*F.s)/this.sc,v=(-dx*F.s+dy*F.c)/this.sc;
+  color(m,q,s,l,x,y){const P=PAL.pacfrog,F=this.frame,px=x+.5,py=y+.5;
     switch(m){
       case M.BODY:{if(this.wet>0.3&&q===3&&hash(x*3,y*5)>0.4)return P.belly[3];
-        // big brown blotches outlined darker, like a real Cranwell's horned frog
-        const wob=(vnoise(u*0.9+3,v*0.9+8)-0.5)*0.45;for(const[bu,bv,br]of PAC_SPOTS){const d=Math.hypot(u-bu,v-bv)/br+wob;if(d<1)return d>0.82?P.blotch[Math.max(0,q-1)]:P.blotch[Math.min(3,q)];if(d<1.15)return P.body[Math.min(3,q+1)];}
-        if(hash(x*7,y*5)>0.93)return P.body[Math.min(3,q+1)];return P.body[q];}
-      case M.LIMB:{if(q<=1&&hash(x*5,y*3)>0.7)return P.blotch[1];return P.body[Math.max(0,q-1)];}
-      case M.TOE:return P.body[Math.min(3,q)];
+        // below the huge mouth line: a yellow lip, then a cream belly with dark freckles
+        if(F.fwd){const t=(px-F.fx)/(F.rx*0.95),my=F.my+t*t*F.H*0.12;if(Math.abs(t)<1.05&&py>my+0.4){if(py<my+1.9)return P.lip[q];return vnoise(px*0.9+F.sd,py*0.9)>0.72?P.ink[1]:P.belly[q];}}
+        // big brown blotches ringed in black, like a Cranwell's
+        const u=(px-F.x)/F.rx,v=(py-F.cy)/F.H,n=vnoise(u*9+F.sd,v*5.2+7);if(n>0.585)return P.blotch[q];if(n>0.52)return P.ink[q>2?1:0];
+        if(hash(x*7,y*5)>0.94)return P.body[Math.min(3,q+1)];return P.body[q];}
+      case M.LIMB:return s>0.45&&s<0.62?P.ink[1]:P.body[Math.max(0,q-1)];
+      case M.TOE:return P.lip[q];
       case M.EYE:return P.eye[q];
       case M.CLAW:return P.mouth[q];
     }return INK;}
-  draw(fb){const W=(u,v)=>this.W(u,v),R=this.R(),bu=this.bury,g=this.state==='grabbed',t=this.t,air=clamp(this.h/3,0,1),tuck=Math.max(this.puff,bu>0.15?1:0);
-    // remember what's underneath, so digging in can cover it with the real ground (not a lighter patch)
-    {const[cx,cy]=W(1,0),rr=Math.ceil(R+5),x0=Math.max(0,Math.floor(cx-rr)),y0=Math.max(0,Math.floor(cy-rr)),x1=Math.min(fb.w-1,Math.ceil(cx+rr)),y1=Math.min(fb.h-1,Math.ceil(cy+rr));
+  draw(fb){const G=this.geo(),{rx,H,yb,cy,c,fwd,fx}=G,x=this.x,g=this.state==='grabbed',t=this.t,air=clamp(this.h/3,0,1),mo=this.mouth;
+    this.frame={x,cy,rx,H,fx,fwd,my:G.my,sd:this.seed||(this.seed=rand(50))};
+    // remember the ground underneath, so digging in can cover it with the real soil
+    {const x0=Math.max(0,Math.floor(x-rx-7)),x1=Math.min(fb.w-1,Math.ceil(x+rx+7)),y0=Math.max(0,Math.floor(cy-H)),y1=Math.min(fb.h-1,Math.ceil(yb+5));
       const n=(x1-x0+1)*(y1-y0+1);if(!this.under||this.under.buf.length<n)this.under={buf:new Uint32Array(n)};const U=this.under;U.x0=x0;U.y0=y0;U.x1=x1;U.y1=y1;
-      let k=0;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)U.buf[k++]=fb.px[y*fb.w+x];}
-    // legs stay mostly tucked under that huge round body: just the hands and the big hind feet poke out at the sides.
-    // on a hop the hind legs shove out behind and the hands reach forward to catch the landing
-    if(tuck<0.5)for(const sd of[-1,1]){const[hx,hy]=W(-3.4,sd*4.6);let ax,ay,tx,ty;
-      if(g){const sw=Math.sin(t*2.6+sd)*1.2;ax=hx+sd*1.6+sw;ay=hy+7;tx=ax+sd*0.5;ty=ay+3.4;}else{[ax,ay]=W(lerp(-4.4,-9.0,air),sd*lerp(6.6,5.4,air));[tx,ty]=W(lerp(-5.8,-12.6,air),sd*lerp(8.0,6.0,air));}
-      fb.cap(hx,hy,2.4,ax,ay,1.4,M.LIMB,1);fb.cap(ax,ay,1.3,tx,ty,0.8,M.LIMB,1);
-      const ba=Math.atan2(ty-ay,tx-ax);for(let j=0;j<4;j++){const a=ba+(j-1.5)*0.5,px=tx+Math.cos(a)*1.9,py=ty+Math.sin(a)*1.9;fb.cap(tx,ty,.5,px,py,.45,M.TOE,1);fb.cap(px,py,.6,px,py,.6,M.TOE,1,0,0,1);}}
-    if(tuck<0.5)for(const sd of[-1,1]){const[sx,sy]=W(2.6,sd*4.8);let fx,fy;
-      if(g){fx=sx+sd*1.2+Math.sin(t*9+sd)*0.8;fy=sy+4.2;}else[fx,fy]=W(lerp(4.4,6.8,air),sd*lerp(6.9,6.4,air));
-      fb.cap(sx,sy,1.5,fx,fy,0.9,M.LIMB,1);
-      const ba=Math.atan2(fy-sy,fx-sx);for(let j=0;j<4;j++){const a=ba+(j-1.5)*0.55,px=fx+Math.cos(a)*1.5,py=fy+Math.sin(a)*1.5;fb.cap(fx,fy,.45,px,py,.38,M.TOE,1);fb.cap(px,py,.5,px,py,.5,M.TOE,1,0,0,1);}}
-    // gulping: the lower jaw drops forward and the big pink mouth shows in front of the head
-    const mo=this.mouth;if(mo>0.15){const ch=this.cheek*1.3;for(let k=-7;k<=7;k++){const an=k/7*1.15,f=1-Math.abs(k)/9,ex=Math.cos(an)*R*0.86,ey=Math.sin(an)*(R*0.86+2.4+ch),
-        [jx,jy]=W(1.0+ex+mo*3.0*f+0.8,ey*1.04),[ix,iy]=W(1.0+ex+mo*2.0*f-0.4,ey);fb.cap(jx,jy,1.1,jx,jy,1.1,M.BODY,2,0,0,0.05);fb.cap(ix,iy,0.8+mo*1.4*f,ix,iy,0.8+mo*1.4*f,M.CLAW,2,0,0,0.3);}}
-    // body: a huge round dumpling, wider than it is long; the cheeks bulge out sideways as it chews
-    const ch=this.cheek*1.3,sq=1+this.puff*0.15;let a=W(-2.6,0),b=W(-2.6,0);fb.cap(a[0],a[1],R*0.86,b[0],b[1],R*0.86,M.BODY,2,0,0,0.6);
-    a=W(1.0,-(2.4+ch)*sq);b=W(1.0,(2.4+ch)*sq);fb.cap(a[0],a[1],R*0.92,b[0],b[1],R*0.92,M.BODY,2,0,0,0.75);
-    const[m0,m1]=W(0,0);this.frame={x:m0,y:m1,c:Math.cos(this.ang),s:Math.sin(this.ang)};
-    // eyes ride high on the top of the head, set wide apart, each under a little pointed horn
-    this.eyes.length=0;const ev=R*0.58+ch*0.5;
-    for(const sd of[-1,1]){const[e0,e1]=W(2.4,sd*ev);fb.cap(e0,e1,2.3,e0,e1,2.3,M.BODY,2,0,0,1.4);fb.cap(e0,e1,1.6,e0,e1,1.6,M.EYE,3,0,0,1.5);this.eyes.push([e0,e1]);
-      const[h0,h1]=W(1.4,sd*(ev+1.4)),[h2,h3]=W(-0.4,sd*(ev+2.3));fb.cap(h0,h1,1.0,h2,h3,0.3,M.BODY,2,0,0,1.9);}}
-  drawExtras(fb){const W=(u,v)=>this.W(u,v),K=hex('#0c1004'),c=Math.cos(this.ang),s=Math.sin(this.ang),rad=this.R(),sc=this.sc;
-    // dug in: soil covers all but the top of its back and its eyes
-    const bu=this.bury,U=this.under;if(bu>0.05&&U){const[cx,cy]=W(1,0),rr=rad+4.5,W2=fb.w,cw=U.x1-U.x0+1;
-      for(let y=U.y0;y<=U.y1;y++)for(let x=U.x0;x<=U.x1;x++){const d=Math.hypot(x+.5-cx,y+.5-cy)/rr;if(d>1)continue;
-        let nearEye=false;for(const[ex,ey]of this.eyes)if(Math.hypot(x+.5-ex,y+.5-ey)<2.0)nearEye=true;if(nearEye)continue;
-        const lim=1-0.62*bu+(hash(x*3,y*5)-0.5)*0.08;if(d<lim){if(d>lim-0.09*bu*1.2)fb.px[y*W2+x]=shade(fb.px[y*W2+x],0.72);continue;}const under=U.buf[(y-U.y0)*cw+(x-U.x0)];
-        fb.px[y*W2+x]=d<lim+0.07?shade(under,0.78):under;}}
-    // eyes: a gold iris with a horizontal pupil; angry brows when puffed; shut when blinking or asleep
+      let k=0;for(let y=y0;y<=y1;y++)for(let xx=x0;xx<=x1;xx++)U.buf[k++]=fb.px[y*fb.w+xx];}
+    const tuck=this.puff>0.5||this.bury>0.15;
+    // big hind legs folded at the sides; on a hop they shove out behind
+    if(!tuck)for(const sd of[-1,1]){const hx=x-c*rx*0.25+sd*rx*0.72,hy=yb-3.2;let fx2=x+sd*rx*0.98-c*(2+6*air),fy2=yb-0.8+air*1.5;if(g){fx2=hx+sd*1.5+Math.sin(t*9+sd);fy2=yb+4;}
+      fb.cap(hx,hy,3.0,fx2,fy2,1.3,M.LIMB,1,0,1);for(let k=-1;k<=1;k++)fb.cap(fx2,fy2,0.6,fx2+sd*1.4+k*0.9-c*air,fy2+1.0,0.5,M.TOE,1);}
+    // the body: one big round dumpling, the back a little higher than the face
+    {const L=rx-H*0.5;fb.cap(x-L,cy+0.6,H*0.5,x+L,cy+0.6,H*0.5,M.BODY,2,0,0,0.6);fb.cap(x-c*rx*0.22,cy-0.8,H*0.44,x-c*rx*0.22,cy-0.8,H*0.44,M.BODY,2,0,0,0.65);
+      if(fwd)fb.cap(fx-rx*0.4,cy+H*0.16,H*0.34,fx+rx*0.4,cy+H*0.16,H*0.34,M.BODY,2,0,0,0.75);}
+    // gulping: the jaw drops open into a huge pink mouth
+    if(mo>0.15&&fwd){const t2=rx*0.55;fb.cap(fx-t2,G.my+0.4+mo*0.8,0.5+mo*1.15,fx+t2,G.my+0.4+mo*0.8,0.5+mo*1.15,M.CLAW,3,0,0,0.4);}
+    // short front legs planted in front, yellow fingers splayed
+    if(this.puff<0.5)for(const sd of[-1,1]){const sx=fx+sd*rx*0.5,sy=yb-3.6;let hx=fx+sd*rx*0.64+c*1.6*air,hy=yb-0.4;if(g){hx=sx+sd;hy=yb+2.5+Math.sin(t*9+sd)*0.6;}
+      fb.cap(sx,sy,1.8,hx,hy,1.2,M.LIMB,2,0,1,0.95);for(let k=-1;k<=1;k++)fb.cap(hx,hy,0.55,hx+k*1.1+sd*0.4,hy+0.9,0.45,M.TOE,2,0,0,1.0);}
+    // domed eyes on top of the head, each under a little pointed horn
+    this.eyes.length=0;const ey=cy-H*0.34;
+    for(const sd of[-1,1]){const ex=fx+sd*rx*0.42;fb.cap(ex,ey+0.6,3.0,ex,ey+0.6,3.0,M.BODY,2,0,0,1.3);if(fwd)fb.cap(ex,ey,2.15,ex,ey,2.15,M.EYE,3,0,0,1.5);this.eyes.push([ex,ey]);
+      fb.cap(ex+sd*0.4-c*0.5,ey-2.0,1.2,ex+sd*1.5-c*1.4,ey-4.6,0.3,M.BODY,2,0,0,1.9);}}
+  drawExtras(fb){const G=this.geo(),{rx,H,yb,cy,c,fwd,fx}=G,K=hex('#0c1004'),x=this.x;
+    // dug in: it sinks into the soil and the ground in front closes over everything but its eyes and back
+    const bu=this.bury,U=this.under;if(bu>0.05&&U){const gy=this.y-this.h,cw=U.x1-U.x0+1;
+      for(let y=U.y0;y<=U.y1;y++)for(let xx=U.x0;xx<=U.x1;xx++){const tt=(xx+.5-x)/(rx+2);if(Math.abs(tt)>1)continue;const cut=gy-2.4+2.4*Math.sqrt(1-tt*tt)+(hash(xx*3,7)-0.5)*0.8;
+        if(y+.5<cut){if(y+.5>cut-1.2)fb.px[y*fb.w+xx]=shade(fb.px[y*fb.w+xx],0.7);continue;}
+        let ne=false;for(const[ex,ey]of this.eyes)if(Math.hypot(xx+.5-ex,y+.5-ey)<2.6)ne=true;if(ne)continue;
+        const und=U.buf[(y-U.y0)*cw+(xx-U.x0)];fb.px[y*fb.w+xx]=y+.5<cut+1.2?shade(und,0.72):und;}}
+    if(!fwd)return;// walking away: just its back
+    // eyes: big glossy black pupils in a gold ring; angry brows when puffed; shut when blinking or asleep
     const shut=this.blink>0||this.state==='sleeping',mad=this.puff>0.4;
-    for(const[e0,e1]of this.eyes){if(shut){pset(fb,e0-s*0.9,e1+c*0.9,K);pset(fb,e0,e1,K);pset(fb,e0+s*0.9,e1-c*0.9,K);continue;}
-      const px=Math.round(e0+c*0.3-0.5),py=Math.round(e1+s*0.3-0.5);pset(fb,px,py,K);pset(fb,px+1,py,K);pset(fb,px,py+1,K);pset(fb,px+1,py+1,K);pset(fb,px,py,hex('#fff8d0'));
-      if(mad){pset(fb,e0-c*1.6,e1-s*1.6,K);pset(fb,e0-c*1.4-s*1.0,e1-s*1.4+c*1.0,K);}}
-    // the famous wide mouth line around the front of its face
-    if(this.mouth<0.15&&this.bury<0.6){const ch=this.cheek*1.3;for(let k=-10;k<=10;k++){const a=k/10*1.25,ex=Math.cos(a)*rad*0.86,ey=Math.sin(a)*(rad*0.86+2.4+ch),[x,y]=W(1.0+ex,ey);pmix(fb,x,y,K,Math.abs(k)>8?0.25:0.55);}}
-    // croaking: the throat puffs and a little sound ring shows
-    if(this.croaking>0){const[x,y]=W(rad+1.5,0),r=(0.7-this.croaking)*6;for(let a=0;a<8;a++)pmix(fb,x+Math.cos(a)*r,y+Math.sin(a)*r*0.7,hex('#ffffff'),0.4*this.croaking);}}
+    for(const[e0,e1]of this.eyes){const ix=Math.round(e0-0.5),iy=Math.round(e1-0.5);if(shut){for(let k=-2;k<=2;k++)pset(fb,ix+k,iy,K);continue;}
+      for(let yy=-2;yy<=2;yy++)for(let xx=-2;xx<=2;xx++)if(Math.hypot(xx,yy)<1.6)pset(fb,ix+xx+Math.round(c*0.4),iy+yy,K);
+      pset(fb,ix-1+Math.round(c*0.4),iy-1,hex('#ffffff'));
+      if(mad){const sd=e0<fx?-1:1;pset(fb,ix-sd*2,iy-3,K);pset(fb,ix-sd,iy-3,K);pset(fb,ix,iy-2,K);pset(fb,ix+sd,iy-2,K);}}
+    // the famous wide mouth line, curling up at the corners
+    if(this.mouth<0.15&&this.bury<0.5)for(let px=Math.floor(fx-rx*0.95);px<=fx+rx*0.95;px++){const t=(px+.5-fx)/(rx*0.95),my=G.my+t*t*H*0.12;if(Math.abs(px+.5-x)>rx-0.6)continue;pmix(fb,px,my,K,Math.abs(t)>0.85?0.35:0.7);}
+    else if(this.mouth>=0.15){const t2=rx*0.55,ly=G.my+0.4+this.mouth*0.8+0.5+this.mouth*1.15;for(let px=Math.floor(fx-t2);px<=fx+t2;px++)pmix(fb,px,ly,hex('#f0c43a'),0.8);}
+    // croaking: the throat balloons and a little sound ring shows
+    if(this.croaking>0){const r=(0.7-this.croaking)*6,yy=G.my+3;for(let a=0;a<8;a++)pmix(fb,fx+c*rx*0.9+Math.cos(a)*r,yy+Math.sin(a)*r*0.7,hex('#ffffff'),0.4*this.croaking);}}
   statusText(){if(this.puff>0.5)return 'puffed up and SQUEAKED at you! Too much petting';if(this.bury>0.5)return this.state==='hunt'?'is buried, waiting for its snack to come closer...':'is dug into the soil with just its eyes peeking out';
     switch(this.state){case 'idle':return 'is sitting there like a grumpy dumpling';case 'wander':return 'is waddling somewhere very slowly';case 'chew':return `is gulping down ${PREY_NAME[this.held?.type]||'something'}, cheeks bulging`;
       case 'petted':return 'is tolerating your pats (for now)';case 'grabbed':return 'puffed up and is kicking its little legs';case 'strike':return 'GULP!';}
@@ -3615,7 +3623,7 @@ class Bee extends Pet{
   W(lx,ly){const c=Math.cos(this.ang)*this.sc,s=Math.sin(this.ang)*this.sc;return[this.x+c*lx-s*ly,this.y-this.dh+s*lx+c*ly];}
   headPos(){const c=Math.cos(this.ang),s=Math.sin(this.ang);return{x:this.x+c*4.4*this.sc,y:this.y+s*4.4*this.sc};}
   mouthScreen(){const[x,y]=this.W(6.0,0);return{x,y};}
-  hatAnchor(){const[x,y]=this.W(1.6,0);return{x,y:y-2.4,a:this.ang,s:0.95};}
+  hatAnchor(){const[x,y]=this.W(1.8,0);return{x,y:y-2.4,a:this.ang,s:0.95};}
   noise(){return clamp(this.speed/12,0,1)*(this.h>3?0.25:1);}
   airborne(){return this.h>0.3;}
   // flying: glides toward the target with a bit of inertia; has to take off before it can go anywhere
@@ -5418,7 +5426,7 @@ const SUB1=new Uint32Array(N),SUBTMP=new Uint32Array(N),MASKM=new Uint8Array(N),
 const PART_H=[0.62,0.08,0.34,0.58,0.62,0.62,0.62,0.62];
 function subBegin(w,pet){subRect=null;if(!(w.tank==='aqua'||w.dish||pet.translucent))return;
   const h=pet.headPos();let ax=h.x,ay=h.y,bx=h.x,by=h.y;const add=(x,y)=>{if(x<ax)ax=x;if(x>bx)bx=x;if(y<ay)ay=y;if(y>by)by=y;};
-  if(pet.x!==undefined)add(pet.x,pet.y);if(pet.pts)for(const q of pet.pts)add(q.x,q.y);if(pet.sp)for(const q of pet.sp)add(q.x,q.y);const r=28;
+  if(pet.x!==undefined)add(pet.x,pet.y);if(pet.pts)for(const q of pet.pts)add(q.x,q.y);if(pet.spine)for(const q of pet.spine)add(q.x,q.y);const r=28;
   const x0=Math.max(0,Math.floor(ax-r)),x1=Math.min(W-1,Math.ceil(bx+r)),y0=Math.max(0,Math.floor(ay-r-16-(pet.h||0))),y1=Math.min(H-1,Math.ceil(by+r));
   for(let y=y0;y<=y1;y++){const o=y*W;SUBBUF.set(fb.px.subarray(o+x0,o+x1+1),o+x0);}subRect=[x0,y0,x1,y1];}
 function subMid(pet){if(!subRect)return;const[x0,y0,x1,y1]=subRect;
