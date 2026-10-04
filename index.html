@@ -879,7 +879,7 @@ const PAL={
   cuttle:{body:ramp('#3a2a20','#6a4c38','#a07a5a','#d4b28a'),dark:ramp('#1a100c','#34221a','#523826','#6e5036'),pale:ramp('#8a8070','#c2b6a2','#e6dccc','#fff8ee'),
           fin:ramp('#5e5652','#9a908a','#d2cac2','#f6f2ec'),irid:ramp('#1e4a58','#2e7a8a','#4ab0b8','#9ae8e0'),eye:ramp('#6a6040','#a89a68','#d8cc98','#fbf4d0'),outline:'#120c08'},
   bee:{yellow:ramp('#6a4408','#b8840e','#f0c030','#ffe680'),black:ramp('#1c1814','#312a22','#4a4034','#665a48'),eye:ramp('#040406','#0a0a10','#181824','#2c2c40'),head:ramp('#0a0908','#15120f','#231e19','#342d25'),white:ramp('#8a7e6a','#c8bca4','#ece2cc','#fffaee'),outline:'#0a0806'},
-  shark:{body:ramp('#344248','#566a72','#7e949a','#a8bcc0'),belly:ramp('#a4acb0','#d8dee0','#f4f6f6','#ffffff'),tip:ramp('#06080a','#121618','#1e2428','#2c3438'),eye:ramp('#020304','#0a0d10','#14181c','#20262c'),outline:'#08121c'},
+  shark:{body:ramp('#283c50','#3e5e7a','#6088a6','#8eb4d0'),belly:ramp('#a8b8c2','#dce6ec','#f4f8fa','#ffffff'),tip:ramp('#1a2630','#2a3a48','#3e5262','#566c7e'),eye:ramp('#020304','#0a0d10','#14181c','#20262c'),outline:'#08121c'},
   nudi:{body:ramp('#161c78','#2a3ec8','#5470f0','#9cb4ff'),white:ramp('#9a9ab4','#d4d6ec','#f2f2ff','#ffffff'),black:ramp('#06060e','#0c0c1c','#16162a','#22223a'),rim:ramp('#8a3606','#dc6a10','#ffa22e','#ffe07a'),rimD:ramp('#5a2404','#a04a0a','#d0781c','#f0a44a'),outline:'#0a0c22'},
   pacfrog:{body:ramp('#24420c','#46781a','#78b42a','#b6e06a'),blotch:ramp('#2a1406','#4a280e','#6e4216','#925e24'),belly:ramp('#8a8058','#c8bc8a','#ece0b0','#fff8da'),mouth:ramp('#6a1a24','#b03a48','#e06a78','#ff9aa8'),eye:ramp('#5a3a08','#a87a14','#e8b830','#fff090'),outline:'#0c1404'},
   puffer:{body:ramp('#2a420e','#4e7a1c','#8cb832','#cce86a'),spot:ramp('#0c1406','#18260e','#243616','#30461e'),belly:ramp('#8a8a7a','#c8c8b4','#eeeee2','#ffffff'),
@@ -1174,7 +1174,7 @@ const FOOD_ORDER=['cricket','roach','worm','waxworm','fly','snail','bloodworm','
 const FOOD_CATS=[{id:'bugs',name:'Bugs',foods:['cricket','roach','worm','waxworm','fly','snail']},{id:'water',name:'Water',foods:['bloodworm','shrimp','minnow']},{id:'garden',name:'Garden',foods:['fruit','greens','egg','flower','grape']},{id:'magic',name:'Magic',foods:['stars','moonberry','geode']},{id:'treats',name:'Treats',foods:['butter','honey']}];
 const CRUMB={cricket:hex('#6a4a2a'),worm:hex('#c89a4a'),waxworm:hex('#f0e0c0'),snail:hex('#8a7a6a'),fruit:hex('#d83040'),egg:hex('#f0e8d0'),fly:hex('#303030'),greens:hex('#6ab038'),roach:hex('#5a3418'),bloodworm:hex('#a01a1a'),shrimp:hex('#e89a86'),minnow:hex('#a8c0d0'),moonberry:hex('#4a8ae8'),geode:hex('#a45ae0'),flower:hex('#f6f0e0'),grape:hex('#b860dc'),stars:hex('#ffe070'),butter:hex('#f6dc80'),honey:hex('#e09020')};
 // Hunting styles: how long they stalk, how close before they commit, and how they rush.
-const HUNT={shark:{st:[0.6,1.5],near:30,rush:'run'},nudi:{st:[0,0.2],near:80,rush:'slow'},pacfrog:{st:[3,6],near:16,rush:'walk',ambush:true},mush:{st:[0.4,1.2],near:20,rush:'walk'},puffer:{st:[0.3,1.0],near:26,rush:'walk'},bee:{st:[0.1,0.5],near:40,rush:'walk'},lizard:{st:[0.3,1.4],near:42,rush:'run'},salamander:{st:[0.6,2.0],near:28,rush:'run'},snake:{st:[0.8,2.2],near:32,rush:'run'},
+const HUNT={shark:{st:[0.6,1.5],near:30,rush:'run'},nudi:{st:[0,0.2],near:80,rush:'slow'},pacfrog:{st:[1.2,2.6],near:18,rush:'run',ambush:true},mush:{st:[0.4,1.2],near:20,rush:'walk'},puffer:{st:[0.3,1.0],near:26,rush:'walk'},bee:{st:[0.1,0.5],near:40,rush:'walk'},lizard:{st:[0.3,1.4],near:42,rush:'run'},salamander:{st:[0.6,2.0],near:28,rush:'run'},snake:{st:[0.8,2.2],near:32,rush:'run'},
   chameleon:{st:[1.0,2.4],near:40,rush:'run'},dragon:{st:[0.5,1.6],near:36,rush:'run'},gecko:{st:[0.8,2.0],near:30,rush:'run'},slime:{st:[0.2,0.8],near:40,rush:'run'},axolotl:{st:[0.3,1.0],near:26,rush:'run'},millipede:{st:[0,0],near:0,rush:'walk'},frog:{st:[0.2,1.0],near:40,rush:'run'},tarantula:{st:[0.6,1.8],near:40,rush:'pounce',ambush:true},scorpion:{st:[0.5,1.6],near:36,rush:'pounce',ambush:true},kraken:{st:[0.2,0.7],near:44,rush:'run'},cuttle:{st:[0.9,2.0],near:32,rush:'run'},golem:{st:[0,0.3],near:60,rush:'walk'},
   crab:{st:[0,0.5],near:30,rush:'run'},turtle:{st:[0,0],near:0,rush:'walk'},gsnail:{st:[0,0],near:0,rush:'walk'}};
 const BITER={shark:{iv:.35,snd:'chomp',t:1.4},nudi:{iv:.8,snd:'plip',t:3},pacfrog:{iv:.5,snd:'chomp',t:2.2},mush:{iv:.5,snd:'chew',t:2.4},puffer:{iv:.4,snd:'crunch',t:2.2},bee:{iv:.55,snd:'plip',t:2.4},crab:{iv:.62,snd:'snap',t:2.6},turtle:{iv:.6,snd:'chomp',t:2.4},gsnail:{iv:.9,snd:'squelch',t:3.2},tarantula:{iv:.35,snd:'chew',t:2.2},scorpion:{iv:.42,snd:'snap',t:2.4},kraken:{iv:.4,snd:'chew',t:2.2},cuttle:{iv:.45,snd:'chew',t:2},golem:{iv:.55,snd:'chomp',t:2.6}};
@@ -3270,19 +3270,19 @@ class Bun extends Slime{
 //  Always cruising in lazy loops; spots food, then darts in for a CHOMP. Rub it and it rolls belly-up
 //  and goes all floppy and calm. Tap the glass and it zigzags away. Naps on the sand at night.
 // =====================================================================
-const SHARK_R=[3.1,3.0,2.7,2.2,1.7,1.25,0.85,0.55],SHARK_SEG=3;
+const SHARK_R=[4.5,4.6,4.2,3.5,2.7,1.9,1.25,0.8],SHARK_SEG=3.7;
 class Shark extends Pet{
   constructor(world,x,y){super();this.initCommon(world,'shark');
     this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vx=0;this.vy=0;this.speed=0;this.sc=1;
-    this.outline=hex(PAL.shark.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.seam=0.6;
+    this.outline=hex(PAL.shark.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.seam=2.2;
     this.tailPh=rand(TAU);this.roll=0;this.jaw=0;this.grin=0;this.wig=0;this.seed=rand(100);this.calmT=0;this.zig=0;
     // a spine of nodes trailing the head, so the body bends and swims in an S-curve
     this.sp=[];for(let i=0;i<SHARK_R.length;i++)this.sp.push({x:x-Math.cos(this.ang)*i*SHARK_SEG,y:y-Math.sin(this.ang)*i*SHARK_SEG});}
   isActive(){return this.preview||this.world.dayness>0.35;}
   W(lx,ly){const c=Math.cos(this.ang)*this.sc,s=Math.sin(this.ang)*this.sc;return[this.x+c*lx-s*ly,this.y-this.h+s*lx+c*ly];}
-  headPos(){const[x,y]=this.W(6.2,0);return{x,y:y+this.h};}
-  mouthScreen(){const[x,y]=this.W(5.2,0);return{x,y};}
-  hatAnchor(){const[x,y]=this.W(0.6,0);return{x,y:y-2.4,a:this.ang,s:1.0};}
+  headPos(){const[x,y]=this.W(8.0,0);return{x,y:y+this.h};}
+  mouthScreen(){const[x,y]=this.W(7.0,0);return{x,y};}
+  hatAnchor(){const[x,y]=this.W(1.6,0);return{x,y:y-3.2,a:this.ang,s:1.25};}
   submerge(){return 0.3;}
   noise(){return clamp(this.speed/14,0,1);}
   goTo(tx,ty,dt,mode,arrive=3){if(this.roll>0.4)return false;const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y),diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);
@@ -3295,11 +3295,11 @@ class Shark extends Pet{
     if(!act&&w.hide&&!this.preview&&Math.random()<0.6){const c=Math.cos(w.hide.ang),s=Math.sin(w.hide.ang),k=rand(-12,12);this.tx=w.hide.x+c*k;this.ty=w.hide.y+s*k+8;this.state='sleep';this.timer=20;return;}
     if(Math.random()<0.15){this.state='idle';this.timer=rand(1.5,3);return;}
     const t=randomWaterSpot(w,0.3)||this.randomSpot();[this.tx,this.ty]=t;this.pace=Math.random()<0.5?'slow':'walk';this.state='wander';this.timer=12;}
-  canStrike(p){if(this.roll>0.3)return false;const hd=this.headPos(),d=Math.hypot(p.x-hd.x,p.y-hd.y);return d<9&&(p.h<3||(p.inHand&&p.h<12)||(p.play&&p.h<9))&&Math.abs(wrapA(Math.atan2(p.y-this.y,p.x-this.x)-this.ang))<0.8;}
+  canStrike(p){if(this.roll>0.3)return false;const hd=this.headPos(),d=Math.hypot(p.x-hd.x,p.y-hd.y);return d<11&&(p.h<3||(p.inHand&&p.h<12)||(p.play&&p.h<9))&&Math.abs(wrapA(Math.atan2(p.y-this.y,p.x-this.x)-this.ang))<0.8;}
   startStrike(p){this.tg={t:0,p};if(!this.preview)SFX.play('swish');}
   updateStrike(dt){const T=this.tg;if(!T)return 'miss';const p=T.p;T.t+=dt;if(p.dead||p.caught){this.tg=null;return 'miss';}
     this.faceToward(p.x,p.y,dt*3);this.jaw=Math.min(1,T.t/0.1);if(T.t<0.2){this.vx+=Math.cos(this.ang)*120*dt;this.vy+=Math.sin(this.ang)*120*dt;}
-    const hd=this.headPos();if(T.t>0.1&&Math.hypot(p.x-hd.x,(p.y-p.h)-hd.y)<7){p.caught=true;this.held=p;this.tg=null;catchFx(this,p);
+    const hd=this.headPos();if(T.t>0.1&&Math.hypot(p.x-hd.x,(p.y-p.h)-hd.y)<8){p.caught=true;this.held=p;this.tg=null;catchFx(this,p);
       if(!this.preview){SFX.play('chomp');this.world.ripples.push({x:hd.x,y:hd.y,age:0,s:0.6});}this.jaw=0;this.grin=1;return 'caught';}
     if(T.t>0.4){this.tg=null;return 'miss';}return null;}
   syncHeld(){if(this.held){const m=this.mouthScreen();this.held.sx=m.x;this.held.sy=m.y;}}
@@ -3308,15 +3308,15 @@ class Shark extends Pet{
     this.tx=clamp(this.x+Math.cos(a)*50,B.x0+8,B.x1-8);this.ty=clamp(this.y+Math.sin(a)*50,B.y0+8,B.y1-8);this.state='wander';this.pace='run';this.timer=1.5;this.zig=1.2;
     if(!this.preview){SFX.play('swish');think(this,'!');}}
   petMe(){const r=super.petMe();if(r&&!this.preview){if(this.calmT<=0.3&&this.roll<0.2)SFX.play('bloop');this.calmT=1.2;}return r;}
-  hitTest(x,y){const yy=y+this.h;for(let i=0;i<5;i++){const n=this.sp[i];if(Math.hypot(x-n.x,yy-n.y)<4.2)return 0;}const[hx,hy]=this.W(3.5,0);return Math.hypot(x-hx,y-hy)<4?0:-1;}
+  hitTest(x,y){const yy=y+this.h;for(let i=0;i<5;i++){const n=this.sp[i];if(Math.hypot(x-n.x,yy-n.y)<5.5)return 0;}const[hx,hy]=this.W(4.5,0);return Math.hypot(x-hx,y-hy)<5?0:-1;}
   tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;this.roll=0;if(!this.preview)SFX.play('plip');return true;}
   dragTo(x,y){this.grabX=x;this.grabY=y;}
   release(){if(this.state!=='grabbed')return;this.state='idle';this.timer=1;w_splash(this);}
   update(dt){const w=this.world;this.t+=dt;this.blinkT-=dt;if(this.blinkT<0){this.blink=0.13;this.blinkT=rand(3,6);}if(this.blink>0)this.blink-=dt;
     // rubbed: rolls belly-up and goes floppy and calm ("tonic immobility")
     if(this.calmT>0)this.calmT-=dt;const calm=this.calmT>0&&this.state==='petted';
-    this.roll+=((calm?1:0)-this.roll)*Math.min(1,dt*(calm?3:2));
-    this.tailPh+=dt*(3+this.speed*0.5)*(1-this.roll*0.85)+(this.state==='grabbed'?dt*16:0);this.wig=this.state==='grabbed'?1:Math.max(0,this.wig-dt*2);
+    const r0=this.roll;this.roll+=((calm?1:0)-this.roll)*Math.min(1,dt*(calm?2.2:1.6));this.wig=Math.max(this.wig,Math.min(1,Math.abs(this.roll-r0)/Math.max(dt,1e-3)*0.6));
+    this.tailPh+=dt*(3+this.speed*0.5)*(1-this.roll*0.85)+(this.state==='grabbed'?dt*16:0);this.wig=this.state==='grabbed'?1:Math.max(0,this.wig-dt*1.5);
     this.jaw=Math.max(0,this.jaw-dt*3);this.grin=Math.max(0,this.grin-dt*0.4);if(w.stats.happy>80)this.grin=Math.max(this.grin,0.5);
     if(this.state==='chew')this.jaw=0.4+0.4*Math.sin(this.t*16);
     if(this.state==='grabbed'){this.gt+=dt;this.h+=(4-this.h)*Math.min(1,dt*6);this.x=this.grabX;this.y=this.grabY+this.h;this.vx=this.vy=0;this.pts[0].x=this.x;this.pts[0].y=this.y;this.follow();this.syncHeld();return;}
@@ -3324,7 +3324,7 @@ class Shark extends Pet{
     this.brain(dt);
     if(this.zig>0){this.zig-=dt;this.ang+=Math.sin(this.t*18)*dt*5;}
     if(this.roll>0.3){this.vx*=1-Math.min(1,dt*3);this.vy*=1-Math.min(1,dt*3);}
-    const B=w.bounds,m=5*this.sc;this.x+=this.vx*dt;this.y+=this.vy*dt;
+    const B=w.bounds,m=8;this.x+=this.vx*dt;this.y+=this.vy*dt;
     if(this.x<B.x0+m||this.x>B.x1-m||this.y<B.y0+m||this.y>B.y1-m){// glide along the glass and curve back toward the middle
       const a=Math.atan2(90-this.y,160-this.x);this.ang+=clamp(wrapA(a-this.ang),-3*dt,3*dt);if(this.state==='wander')[this.tx,this.ty]=randomWaterSpot(w,0.3)||this.randomSpot();}
     this.x=clamp(this.x,B.x0+m,B.x1-m);this.y=clamp(this.y,B.y0+m,B.y1-m);
@@ -3332,37 +3332,41 @@ class Shark extends Pet{
   follow(){const S=this.sp;S[0].x=this.x;S[0].y=this.y;for(let i=1;i<S.length;i++){const a=S[i-1],b=S[i],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1;b.x=a.x+dx/d*SHARK_SEG;b.y=a.y+dy/d*SHARK_SEG;}}
   color(m,q,s,l,x,y){const P=PAL.shark,R=this.roll;
     switch(m){
-      case M.BODY:{if(R>0.5)return Math.abs(l)>0.85?P.body[q]:P.belly[q];// belly-up: all pale tummy
-        // countershaded: grey-brown back, the white belly showing along the flanks
-        if(Math.abs(l)>0.9)return P.belly[Math.min(3,q+1)];if(Math.abs(l)>0.82)return mixc(P.body[q],P.belly[q],0.45);return P.body[Math.min(q,2)];}
-      case M.LIMB:if(R>0.5)return P.belly[q];return s>0.7?P.tip[q]:P.body[q];// fins with the black tips it's named for
+      case M.BODY:{// blue back, white belly; as it rolls over the belly sweeps across from one flank to the other
+        const th=0.84-1.95*R,e=l-th;if(e>0.08||(l<-0.86&&R<0.35))return P.belly[Math.min(3,q+1)];if(e>-0.06)return mixc(P.body[q],P.belly[q],0.5);return P.body[q];}
+      case M.LIMB:if(R>0.6)return P.belly[q];return s>0.78?P.tip[Math.min(3,q+1)]:P.body[q];// fins with the black tips it's named for
+      case M.CLAW:return s>0.75?P.tip[q]:P.body[Math.max(0,q-1)];// the dorsal fin: a shade darker, black-tipped
       case M.EYE:return P.eye[q];
     }return INK;}
   // lateral swim wave added to the spine for drawing: stronger toward the tail
   bent(i){const S=this.sp,n=S.length,a=S[Math.min(i,n-1)],b=S[Math.max(0,Math.min(i,n-1)-1)]||a,dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy)||1,f=i/(n-1),
       amp=(0.5+Math.min(1,this.speed/16)*1.4)*(1-this.roll*0.85)+this.wig*1.5,o=Math.sin(this.tailPh-i*0.75)*amp*f*f;
     return[a.x+(-dy/d)*o,a.y-this.h+(dx/d)*o];}
-  draw(fb){const R=this.roll,S=this.sp,n=S.length,c=Math.cos(this.ang),s=Math.sin(this.ang);
-    // pectoral fins: long and swept back from behind the head, black-tipped
-    for(const sd of[-1,1]){const fl=Math.sin(this.tailPh*0.5+sd)*0.4,[r0,r1]=this.W(-0.8,sd*2.0),[m0,m1]=this.W(-2.6+fl*0.5,sd*(4.6-R*1.4)),[e0,e1]=this.W(-5.2+fl,sd*(7.2-R*2.4));fb.cap(r0,r1,1.9,m0,m1,1.1,M.LIMB,1,0,0.55,0.3);fb.cap(m0,m1,1.1,e0,e1,0.4,M.LIMB,1,0.55,1,0.3);}
-    // small pelvic fins further back
-    {const[p0,p1]=this.bent(4);for(const sd of[-1,1]){const[q0,q1]=this.bent(5),dx=q0-p0,dy=q1-p1,d=Math.hypot(dx,dy)||1;fb.cap(p0,p1,0.8,p0+dx/d*2+(-dy/d)*sd*2.4,p1+dy/d*2+(dx/d)*sd*2.4,0.35,M.LIMB,1,0,1,0.2);}}
-    // tail: the long upper lobe and short lower lobe of a reef shark, flicking with the swim wave
-    {const[t0,t1]=this.bent(n-1),[u0,u1]=this.bent(n-2),dx=t0-u0,dy=t1-u1,d=Math.hypot(dx,dy)||1,bx=dx/d,by=dy/d,sw=Math.sin(this.tailPh-n*0.75)*0.35;
-      for(const[sd,L]of[[-1,6.4],[1,4.2]]){const a=Math.atan2(by,bx)+sd*0.55+sw;fb.cap(t0,t1,0.75,t0+Math.cos(a)*L,t1+Math.sin(a)*L,0.3,M.LIMB,1,0,1,0.2);}}
-    // the body: a smooth torpedo along the bending spine, with a pointed snout
+  draw(fb){const R=this.roll,S=this.sp,n=S.length,rA=R*Math.PI,cr=Math.cos(rA),sr=Math.sin(rA),fs=Math.sign(cr||1)*Math.max(0.22,Math.abs(cr));
+    // pectoral fins: broad, rounded and swept back
+    for(const sd of[-1,1]){const fl=Math.sin(this.tailPh*0.5+sd)*0.5,[r0,r1]=this.W(0.2,sd*3.2),[m0,m1]=this.W(-2.0+fl*0.5,sd*6.8*fs),[e0,e1]=this.W(-5.4+fl,sd*10.2*fs);
+      fb.cap(r0,r1,2.3,m0,m1,1.4,M.LIMB,1,0,0.55,0.3);fb.cap(m0,m1,1.4,e0,e1,0.35,M.LIMB,1,0.55,1,0.3);}
+    // little pelvic fins further back
+    {const[p0,p1]=this.bent(4),[q0,q1]=this.bent(5),dx=q0-p0,dy=q1-p1,d=Math.hypot(dx,dy)||1;for(const sd of[-1,1])fb.cap(p0,p1,1.1,p0+dx/d*2.4+(-dy/d)*sd*3.4*fs,p1+dy/d*2.4+(dx/d)*sd*3.4*fs,0.6,M.LIMB,1,0,1,0.2);}
+    // tail: a rounded fork, upper lobe a little longer, flicking with the swim wave
+    {const[t0,t1]=this.bent(n-1),[u0,u1]=this.bent(n-2),dx=t0-u0,dy=t1-u1,d=Math.hypot(dx,dy)||1,ba=Math.atan2(dy,dx),sw=Math.sin(this.tailPh-n*0.75)*0.35;
+      for(const[sd,L]of[[-1,10.5],[1,5.4]]){const a=ba+sd*0.68+sw,mx=t0+Math.cos(a)*L*0.5,my=t1+Math.sin(a)*L*0.5;fb.cap(t0,t1,1.1,mx,my,1.1,M.LIMB,1,0,0.6,0.2);fb.cap(mx,my,1.1,t0+Math.cos(a)*L,t1+Math.sin(a)*L,0.3,M.LIMB,1,0.6,1,0.2);}}
+    // the body: chunky and smooth along the bending spine, with a soft rounded snout
     for(let i=0;i<n-1;i++){const[a0,a1]=this.bent(i),[b0,b1]=this.bent(i+1);fb.cap(a0,a1,SHARK_R[i],b0,b1,SHARK_R[i+1],M.BODY,2,i,i+1,0.6);}
-    const[h0,h1]=this.W(0,0),[m0,m1]=this.W(3.6,0),[n0,n1]=this.W(6.3,0);fb.cap(h0,h1,SHARK_R[0],m0,m1,2.3,M.BODY,2,0,0,0.7);fb.cap(m0,m1,2.3,n0,n1,0.8,M.BODY,2,0,0,0.7);
-    // dorsal fin standing up from its back
-    if(R<0.5){const[d0,d1]=this.bent(1),[d2,d3]=this.bent(2),mx=(d0+d2)/2,my=(d1+d3)/2;fb.cap(d0,d1,0.9,mx,my,0.5,M.LIMB,3,0,0.6,1.4);fb.cap(mx,my,0.5,d2,d3,0.25,M.LIMB,3,0.6,1,1.5);}
-    // small eyes on the sides of the head
-    for(const sd of[-1,1]){const[e0,e1]=this.W(3.5,sd*1.9);fb.cap(e0,e1,0.55,e0,e1,0.55,M.EYE,3,0,0,1.5);}}
-  drawExtras(fb){const K=hex('#05080a'),Wh=hex('#ffffff'),c=Math.cos(this.ang),s=Math.sin(this.ang),R=this.roll;
-    if(!(this.blink>0||this.state==='sleeping'||R>0.5))for(const sd of[-1,1]){const[e0,e1]=this.W(3.6,sd*2.0);pset(fb,e0-c*0.4,e1-s*0.4,Wh);}
-    // gill slits behind the head
-    if(R<0.5)for(const sd of[-1,1])for(let k=0;k<4;k++){const[g0,g1]=this.W(1.4-k*0.75,sd*2.75);pmix(fb,g0,g1,K,0.35);}
-    // a flash of tiny teeth when it chomps
-    if(this.jaw>0.3)for(const k of[-1,0,1]){const[a0,a1]=this.W(5.0,k*0.9);pset(fb,a0,a1,Wh);}}
+    const[h0,h1]=this.W(0,0),[m0,m1]=this.W(4.0,0),[n0,n1]=this.W(7.8,0);fb.cap(h0,h1,SHARK_R[0],m0,m1,3.5,M.BODY,2,0,0,0.7);fb.cap(m0,m1,3.5,n0,n1,1.1,M.BODY,2,0,0,0.7);
+    // a rounded dorsal fin
+    if(R<0.55){const[d0,d1]=this.bent(1),[d2,d3]=this.bent(2),[u0,u1]=this.bent(0),dx=d2-u0,dy=d3-u1,dl=Math.hypot(dx,dy)||1,ox=(-dy/dl)*sr*3.6,oy=(dx/dl)*sr*3.6,k=1-R*1.4,mx=(d0+d2)/2+ox,my=(d1+d3)/2+oy;
+      fb.cap(u0*0.4+d0*0.6+ox,u1*0.4+d1*0.6+oy,1.35*k,mx,my,0.85*k,M.CLAW,3,0,0.6,1.6);fb.cap(mx,my,0.85*k,d2+ox,d3+oy,0.25*k,M.CLAW,3,0.6,1,1.7);}
+    // friendly eyes on the sides of the head
+    for(const sd of[-1,1]){const t=sd*1.2+rA;if(Math.cos(t)<-0.55)continue;const[e0,e1]=this.W(5.0,Math.sin(t)*2.6);fb.cap(e0,e1,1.15,e0,e1,1.15,M.EYE,3,0,0,1.5);}}
+  drawExtras(fb){const K=hex('#05080a'),Wh=hex('#ffffff'),c=Math.cos(this.ang),s=Math.sin(this.ang),R=this.roll,rA=R*Math.PI,shut=this.blink>0||this.state==='sleeping'||R>0.8;
+    for(const sd of[-1,1]){const t=sd*1.2+rA;if(Math.cos(t)<-0.55)continue;const[e0,e1]=this.W(5.0,Math.sin(t)*2.6);if(shut){for(let k=-1;k<=1;k++)pset(fb,e0-s*k*0.9,e1+c*k*0.9,K);}else{pset(fb,e0-c*0.4-s*sd*0.3,e1-s*0.4+c*sd*0.3,Wh);}}
+    // gill slits
+    for(const sd of[-1,1]){const t=sd*1.25+rA;if(Math.cos(t)<-0.2)continue;for(let k=0;k<5;k++){for(const f of[0.78,0.95]){const[g0,g1]=this.W(2.6-k*0.8,Math.sin(t)*4.2*f);pmix(fb,g0,g1,K,0.5);}}}
+    // a soft little smile under the snout, tiny teeth when it chomps
+    if(R<0.3||R>0.7)for(let k=-2;k<=2;k++){const[a0,a1]=this.W(6.6-Math.abs(k)*0.4-this.jaw*0.8,k*0.75);pmix(fb,a0,a1,K,0.5);}
+    if(this.jaw>0.3||this.grin>0.6)for(const k of[-1,1]){const[a0,a1]=this.W(6.1-this.jaw*0.8,k*0.8);pset(fb,a0,a1,Wh);}
+    if(this.state==='petted'||R>0.3)for(const sd of[-1,1]){const[b0,b1]=this.W(3.4,sd*3.6);pmix(fb,b0,b1,hex('#ff9ab0'),0.45);}}
   statusText(){if(this.roll>0.5)return 'rolled belly-up and went all floppy and calm';switch(this.state){
     case 'idle':case 'wander':return this.speed>14?'is zooming around the tank':'is cruising lazy loops';case 'hunt':return 'has spotted something tasty...';case 'strike':return 'CHOMP!';
     case 'chew':return `is munching ${PREY_NAME[this.held?.type]||'something'}`;case 'sleeping':return 'is resting on the sand, gills pumping';case 'grabbed':return 'is wiggling its little tail';}
@@ -3472,13 +3476,13 @@ class PacFrog extends Pet{
   noise(){return clamp(this.speed/12,0,1);}
   goTo(tx,ty,dt,mode,arrive=3){const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y),diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);this.ang+=clamp(diff,-2*dt,2*dt);
     if(this.bury>0.25||this.puff>0.4){this.unbury=true;this.speed=0;return false;}// has to dig itself out first
-    const max=mode==='run'||mode==='lunge'?13:mode==='slow'||mode==='stalk'?4:7,want=d>arrive?max*(Math.abs(diff)>1?0.3:1):0;
+    const max=mode==='run'||mode==='lunge'?16:mode==='slow'||mode==='stalk'?4:7,want=d>arrive?max*(Math.abs(diff)>1?0.3:1):0;
     this.speed+=(want-this.speed)*Math.min(1,dt*4);this.sitT=0;return d<=arrive;}
   stop(dt){this.speed+=(0-this.speed)*Math.min(1,dt*5);}
   faceToward(x,y,dt){this.ang+=clamp(wrapA(Math.atan2(y-this.y,x-this.x)-this.ang),-1.6*dt,1.6*dt);}
   decide(){if(Math.random()<0.6){this.state='idle';this.timer=rand(7,15);return;}// mostly it just sits (and digs in)
     [this.tx,this.ty]=this.randomSpot();this.pace='slow';this.state='wander';this.timer=10;}
-  canStrike(p){if(this.puff>0.4)return false;const hd=this.headPos(),d=Math.hypot(p.x-hd.x,p.y-hd.y);return d<13&&(p.h<4||(p.inHand&&p.h<12)||(p.play&&p.h<9))&&Math.abs(wrapA(Math.atan2(p.y-this.y,p.x-this.x)-this.ang))<0.9;}
+  canStrike(p){if(this.puff>0.4)return false;const hd=this.headPos(),d=Math.hypot(p.x-hd.x,p.y-hd.y);return d<16&&(p.h<4||(p.inHand&&p.h<12)||(p.play&&p.h<9))&&Math.abs(wrapA(Math.atan2(p.y-this.y,p.x-this.x)-this.ang))<0.9;}
   startStrike(p){this.tg={t:0,p};this.bury=0;this.unbury=false;this.vh=30;this.h=0.1;const d=Math.hypot(p.x-this.x,p.y-this.y)||1,go=Math.max(0,d-6.5)/0.28;this.lx=(p.x-this.x)/d*go;this.ly=(p.y-this.y)/d*go;
     if(!this.preview){SFX.play('swish');dust(this.world,this.x,this.y,5);}}
   updateStrike(dt){const T=this.tg;if(!T)return 'miss';const p=T.p;T.t+=dt;if(p.dead||p.caught){this.tg=null;return 'miss';}
