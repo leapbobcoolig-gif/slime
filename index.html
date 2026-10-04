@@ -3179,7 +3179,7 @@ class Bun extends Slime{
   bodyW(){return(7.4+this.proof*0.9)*(1+this.sq*0.2+this.puff*0.14);}
   faceX(){return this.x+Math.cos(this.ang)*this.bodyW()*0.14;}
   mouthScreen(){return{x:this.faceX(),y:this.y-this.h-this.bodyH()*0.3};}
-  hatAnchor(){const H=this.bodyH();return{x:this.x,y:this.y-this.h-H-0.6,a:this.ang,s:1.0,fy:0.5,eye:{x:this.faceX()+0.5,y:this.y-this.h-H*0.4+0.6,sp:2.5}};}
+  hatAnchor(){const H=this.bodyH();return{x:this.x,y:this.y-this.h-H-0.6,a:this.ang,s:1.0,fy:0.5,eye:{x:this.faceX()+0.5,y:this.y-this.h-H*0.48+0.6,sp:2.5}};}
   hitTest(x,y){return Math.hypot((x-this.x)/(this.bodyW()+2),(y-(this.y-this.h-this.bodyH()*0.5))/(this.bodyH()*0.75+2))<1?0:-1;}
   petMe(){const r=Pet.prototype.petMe.call(this);if(r&&!this.preview){this.puff=Math.min(1,this.puff+0.25);this.warm=Math.min(1,this.warm+0.02);
       this.fwT=(this.fwT||0)-1/60;if(this.fwT<=0){this.fwT=0.5;SFX.play('fwump');for(let i=0;i<3;i++)spawn(this.world,'steam',this.x+rand(-5,5),this.y-this.h-this.bodyH()*0.7+rand(-2,2),{vx:rand(-10,10),vy:rand(-12,-4),life:rand(.4,.7),ph:0});}}
@@ -3225,18 +3225,19 @@ class Bun extends Slime{
     // glossy glaze glint that slides a touch as it turns
     const gx=x-rx*0.42-c*0.8,gy=y-H*0.82;pset(fb,gx,gy,BUNC.glaze);pset(fb,gx+1,gy-1,W1);pset(fb,gx+2,gy-1,BUNC.glaze);if(this.butter>0.3){pset(fb,gx+4,gy-1.5,W1);pset(fb,gx+1,gy+1,BUNC.glaze);}
     if(!fwd)return;// walking away: no face
-    const fx=Math.round(this.faceX()),fy=Math.round(y-H*0.4),asleep=this.state==='sleeping'||this.eyesClosed,happy=this.state==='petted'||this.world.stats.happy>80||this.honey>0.3,sad=this.soggy>0.3,shut=asleep||this.blink>0;
-    for(const sd of[-1,1]){const ex=fx+(sd<0?-3:2),ey=fy;
-      if(asleep){pset(fb,ex-1,ey,K);pset(fb,ex,ey+1,K);pset(fb,ex+1,ey,K);}
-      else if(happy&&!sad){pset(fb,ex-1,ey,K);pset(fb,ex,ey-1,K);pset(fb,ex+1,ey,K);}
+    const fx=Math.round(this.faceX()),fy=Math.round(y-H*0.48),asleep=this.state==='sleeping'||this.eyesClosed,happy=this.state==='petted'||this.world.stats.happy>80||this.honey>0.3,sad=this.soggy>0.3,shut=asleep||this.blink>0;
+    const P2=hex('#ff8a9a'),T=hex('#e0566a');
+    for(const sd of[-1,1]){const ex=fx+(sd<0?-3:2),ey=fy;// round eyes, both lit from the top-left
+      if(asleep){pset(fb,ex,ey,K);pset(fb,ex+1,ey,K);pmix(fb,ex-(sd<0?1:0)+(sd<0?0:2),ey-1,K,0.5);}
+      else if(happy&&!sad){pset(fb,ex,ey,K);pset(fb,ex+1,ey,K);pset(fb,ex+(sd<0?1:0),ey-1,K);pmix(fb,ex+(sd<0?0:1),ey-1,K,0.6);}
       else if(shut){pset(fb,ex,ey,K);pset(fb,ex+1,ey,K);}
-      else{for(const[a,b]of[[0,0],[1,0],[0,-1],[1,-1]])pset(fb,ex+a,ey+b,K);pset(fb,ex+1,ey-1,W1);if(sad){pset(fb,ex+(sd<0?-1:2),ey-2,K);}}
-      pmix(fb,ex+(sd<0?-1:1),ey+2,hex('#ff8a8a'),0.65);pmix(fb,ex+(sd<0?0:2),ey+2,hex('#ff8a8a'),0.45);}
-    const my=fy+3;// a small mouth centred under the eyes
-    if(this.state==='chew'){pset(fb,fx,my,K);if(Math.sin(this.t*14)>0){pset(fb,fx,my+1,K);pset(fb,fx-1,my,K);pset(fb,fx+1,my,K);}}
-    else if(sad){pset(fb,fx-1,my+1,K);pset(fb,fx,my,K);pset(fb,fx+1,my+1,K);}
-    else if(happy){pset(fb,fx-1,my,K);pset(fb,fx,my+1,K);pset(fb,fx+1,my,K);}
-    else if(!asleep){pmix(fb,fx-1,my,K,0.5);pset(fb,fx,my,K);pmix(fb,fx+1,my,K,0.5);}}
+      else{for(const[a,b]of[[0,0],[1,0],[0,-1],[1,-1]])pset(fb,ex+a,ey+b,K);pset(fb,ex+(sd<0?0:1),ey-1,W1);if(sad)pmix(fb,ex+(sd<0?0:1),ey-2,K,0.8);}
+      pmix(fb,ex+(sd<0?-1:2),ey+1,P2,0.6);pmix(fb,ex+(sd<0?0:1),ey+1,P2,0.35);}
+    const my=fy+1;// a tiny mouth tucked right under the eyes
+    if(this.state==='chew'){if(Math.sin(this.t*14)>0){pset(fb,fx,my,K);pset(fb,fx,my+1,T);}else{pmix(fb,fx-1,my,K,0.7);pset(fb,fx,my,K);pmix(fb,fx+1,my,K,0.7);}}
+    else if(sad){pmix(fb,fx-1,my+1,K,0.8);pset(fb,fx,my,K);pmix(fb,fx+1,my+1,K,0.8);}
+    else if(happy){pmix(fb,fx-2,my-1,K,0.7);pset(fb,fx-1,my,K);pset(fb,fx,my,K);pset(fb,fx+1,my,K);pmix(fb,fx+2,my-1,K,0.7);pset(fb,fx,my+1,T);pmix(fb,fx-1,my+1,K,0.6);pmix(fb,fx+1,my+1,K,0.6);}
+    else if(!asleep){pset(fb,fx-1,my,K);pset(fb,fx,my,K);pset(fb,fx+1,my,K);pmix(fb,fx,my+1,hex('#7a2a30'),0.85);}}
   glow(fb,night){const k=night*this.warm*0.55;if(k<0.04)return;const x=this.x,y=this.y-this.h-this.bodyH()*0.5;
     for(let yy=-7;yy<=7;yy++)for(let xx=-10;xx<=10;xx++){const d=Math.hypot(xx/10,yy/7);if(d>=1)continue;const f=k*(1-d)*(1-d);padd(fb,x+xx,y+yy,70*f,36*f,8*f);}}
   statusText(){if(this.soggy>0.4)return 'is soggy and sulking. It hates the mister!';if(this.state==='basking')return this.toast>0.5?'is getting lovely and toasty':'is warming up under the lamp';
