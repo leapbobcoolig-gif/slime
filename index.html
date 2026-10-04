@@ -1142,7 +1142,7 @@ const SPECIES={
     blurb:'Springy and wide-eyed. Hops with squash and stretch and snaps flies out of the air with a long tongue. A night owl.',
     names:['Pip','Lily','Bog','Mango','Pickle','Nori','Bean'],outline:PAL.frog.outline},
   dart:{label:'Poison dart frog',latin:'Dendrobates tinctorius',
-    blurb:'A tiny glossy jewel in warning colours (every one is a different morph). Busy by day: quick hops, toe-tapping hunts and a buzzy trill when it rains.',
+    blurb:'A tiny glossy jewel in warning-blue with bold black spots. Busy by day: quick hops, toe-tapping hunts and a buzzy trill when it rains.',
     names:['Jelly','Blu','Gem','Zip','Berry','Sprinkle','Pebble','Dot'],outline:'#05060c'},
 };
 // how much each species likes each food (0 = won't eat it)
@@ -1867,12 +1867,13 @@ class Frog extends Pet{
 }
 
 // =====================================================================
-//  Poison dart frog: a tiny, glossy jewel of a frog in warning colours (one of four morphs per pet).
+//  Poison dart frog: a tiny, glossy jewel of a frog in warning-blue with bold black spots.
 //  Bold and busy by day: quick little hops, taps its toes while it stalks a fly, flicks out a short
 //  tongue, and sings a buzzy trill with its throat puffing out, especially when it rains (misting).
 //  Picked up, its warning colours flash; petted, it settles and glints.
 // =====================================================================
 const EYE_DARK=ramp('#05060a','#0c0e16','#1a1e2c','#3a4056');
+// the classic blue is the dart frog's look; the other morphs are kept for a future colour-swatch feature
 const DART_MORPHS=[
   {name:'blue',  body:ramp('#2458c4','#3478ea','#509cff','#8cc8ff'),spot:ramp('#03050e','#070b1e','#0e1636','#1a2652'),leg:ramp('#0c1a52','#142c7a','#1f42a4','#3e66c8'),throat:ramp('#4a6ab8','#7a9ee6','#b4d0fa','#eef4ff'),pat:0,
    spots:[[11.4,0,1.4],[8.9,-0.56,0.85],[9.1,0.58,0.85]]},
@@ -1883,7 +1884,7 @@ const DART_MORPHS=[
    spots:[[10.9,0.05,1.6],[8.3,-0.62,0.85],[8.5,0.64,0.8],[13.1,-0.7,0.85]]}];
 class DartFrog extends Frog{
   constructor(world,x,y){super(world,x,y,'dart');this.sc=0.96;this.call=0;this.callT=rand(6,14);this.warn=0;this.tap=0;this.glint=0;
-    const ps=save.pets&&save.pets.dart;this.morph=ps&&ps.morph!=null?ps.morph:Math.floor(Math.random()*DART_MORPHS.length);if(ps)ps.morph=this.morph;this.seed=rand(40);}
+    this.morph=0;const ps=save.pets&&save.pets.dart;if(ps)delete ps.morph;this.seed=rand(40);}// always the classic blue (other morphs wait for a swatch feature)
   get pal(){return DART_MORPHS[this.morph%DART_MORPHS.length];}
   isActive(){return this.preview||this.world.dayness>0.4;}// out and about in daylight, unlike the night-owl tree frog
   canStrike(p){if(this.mode!=='sit')return false;const m=this.mouthScreen(),py=p.y-p.h,d=Math.hypot(p.x-m.x,py-m.y);
