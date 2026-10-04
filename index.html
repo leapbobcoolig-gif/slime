@@ -598,6 +598,9 @@ const SFX=(()=>{
     lightsOff:()=>{noise(0.02,{freq:4000,gain:0.2});tone(220,0.9,{attack:0.25,gain:0.06});tone(330,1.0,{attack:0.35,gain:0.04});},
     lightsOn:()=>{noise(0.02,{freq:4000,gain:0.2});tone(660,0.15,{delay:0.05,type:'triangle',gain:0.06});tone(990,0.22,{delay:0.13,type:'triangle',gain:0.05});},
     trill:()=>{for(let k=0;k<9;k++)tone(3100+(k%2)*260,0.032,{delay:k*0.042,type:'square',to:2800,gain:0.026});},
+    peep:()=>{tone(3600,0.07,{to:4400,gain:0.035});},peeps:()=>{for(let k=0;k<4;k++)tone(3800+rand(-200,300),0.06,{delay:k*0.08,to:4600,gain:0.035});},
+    cheep:()=>{tone(3200,0.05,{to:4200,gain:0.03});tone(3800,0.06,{delay:0.07,to:4800,gain:0.03});},peck:()=>{tone(2400,0.012,{type:'square',gain:0.02});},
+    scratch:()=>{noise(0.05,{freq:2400,gain:0.02});noise(0.05,{delay:0.08,freq:2200,gain:0.02});},shakeoff:()=>{for(let k=0;k<5;k++)noise(0.04,{delay:k*0.05,freq:2800,gain:0.02});tone(3400,0.07,{delay:0.28,to:2600,gain:0.03});},
     croak:()=>{for(let k=0;k<2;k++){tone(125,0.13,{type:'sawtooth',delay:k*0.17,to:96,gain:0.05});noise(0.12,{delay:k*0.17,filter:'lowpass',freq:400,gain:0.08});}},
     hum:()=>tone(165,0.55,{attack:0.18,to:140,gain:0.02}),
     ui:()=>tone(1500,0.02,{type:'square',gain:0.02}),
@@ -1145,6 +1148,9 @@ const SPECIES={
   frog:{label:'Red-eyed tree frog',latin:'Agalychnis callidryas',
     blurb:'Springy and wide-eyed. Hops with squash and stretch and snaps flies out of the air with a long tongue. A night owl.',
     names:['Pip','Lily','Bog','Mango','Pickle','Nori','Bean'],outline:PAL.frog.outline},
+  chick:{label:'Baby chick',latin:'Gallus gallus (very small)',
+    blurb:'A round puff of yellow fluff. Trots about bobbing its head, pecks at everything, peeps a lot and follows your hand around like a duckling.',
+    names:['Peep','Nugget','Sunny','Puff','Butter','Chirp','Pip','Mochi'],outline:'#3a2604'},
   dart:{label:'Poison dart frog',latin:'Dendrobates tinctorius',
     blurb:'A tiny glossy jewel in warning-blue with bold black spots. Busy by day: quick hops, toe-tapping hunts and a buzzy trill when it rains.',
     names:['Jelly','Blu','Gem','Zip','Berry','Sprinkle','Pebble','Dot'],outline:'#05060c'},
@@ -1167,6 +1173,7 @@ const DIET={
   bun:{butter:10,honey:9,fruit:7,grape:6,greens:5,flower:4,moonberry:6,stars:6},
   slime:{butter:7,honey:8,flower:8,grape:9,stars:9,cricket:7,roach:7,worm:7,waxworm:8,fly:6,snail:6,fruit:8,egg:7,greens:7,bloodworm:7,shrimp:6,minnow:6,moonberry:10,geode:7},
   frog:{fly:9,cricket:6,waxworm:7,worm:4,roach:5,snail:0,fruit:0,egg:0,greens:0,bloodworm:6,shrimp:3,minnow:5,moonberry:0,geode:0},
+  chick:{seeds:10,worm:9,waxworm:9,cricket:7,greens:6,grape:5,fruit:5,flower:3,gummy:3,fly:3,roach:2},
   dart:{fly:10,cricket:6,waxworm:5,worm:3,roach:3,snail:0,fruit:0,egg:0,greens:0,bloodworm:6,shrimp:2,minnow:0,moonberry:0,geode:0},
   lizard:{cricket:9,roach:8,waxworm:8,worm:6,fly:4,snail:3,fruit:3,egg:0,greens:2,bloodworm:3,shrimp:0,minnow:0,moonberry:3,geode:0},
   salamander:{worm:9,waxworm:8,snail:6,roach:6,cricket:5,fly:3,fruit:0,egg:0,bloodworm:9,shrimp:5,minnow:5,moonberry:0,geode:0},
@@ -1195,9 +1202,9 @@ const CRUMB={cricket:hex('#6a4a2a'),worm:hex('#c89a4a'),waxworm:hex('#f0e0c0'),s
 Object.assign(CRUMB,{seeds:hex('#d8b870'),firefly:hex('#c8e860'),gummy:hex('#ff5a6a')});
 // Hunting styles: how long they stalk, how close before they commit, and how they rush.
 const HUNT={shark:{st:[0.6,1.5],near:30,rush:'run'},nudi:{st:[0,0.2],near:80,rush:'slow'},mush:{st:[0.4,1.2],near:20,rush:'walk'},puffer:{st:[0.3,1.0],near:26,rush:'walk'},bee:{st:[0.1,0.5],near:40,rush:'walk'},lizard:{st:[0.3,1.4],near:42,rush:'run'},salamander:{st:[0.6,2.0],near:28,rush:'run'},snake:{st:[0.8,2.2],near:32,rush:'run'},
-  chameleon:{st:[1.0,2.4],near:40,rush:'run'},dragon:{st:[0.5,1.6],near:36,rush:'run'},gecko:{st:[0.8,2.0],near:30,rush:'run'},slime:{st:[0.2,0.8],near:40,rush:'run'},axolotl:{st:[0.3,1.0],near:26,rush:'run'},millipede:{st:[0,0],near:0,rush:'walk'},frog:{st:[0.2,1.0],near:40,rush:'run'},dart:{st:[0.1,0.6],near:30,rush:'run'},tarantula:{st:[0.6,1.8],near:40,rush:'pounce',ambush:true},scorpion:{st:[0.5,1.6],near:36,rush:'pounce',ambush:true},kraken:{st:[0.2,0.7],near:44,rush:'run'},cuttle:{st:[0.9,2.0],near:32,rush:'run'},golem:{st:[0,0.3],near:60,rush:'walk'},
+  chameleon:{st:[1.0,2.4],near:40,rush:'run'},dragon:{st:[0.5,1.6],near:36,rush:'run'},gecko:{st:[0.8,2.0],near:30,rush:'run'},slime:{st:[0.2,0.8],near:40,rush:'run'},axolotl:{st:[0.3,1.0],near:26,rush:'run'},millipede:{st:[0,0],near:0,rush:'walk'},frog:{st:[0.2,1.0],near:40,rush:'run'},dart:{st:[0.1,0.6],near:30,rush:'run'},chick:{st:[0.1,0.5],near:28,rush:'run'},tarantula:{st:[0.6,1.8],near:40,rush:'pounce',ambush:true},scorpion:{st:[0.5,1.6],near:36,rush:'pounce',ambush:true},kraken:{st:[0.2,0.7],near:44,rush:'run'},cuttle:{st:[0.9,2.0],near:32,rush:'run'},golem:{st:[0,0.3],near:60,rush:'walk'},
   crab:{st:[0,0.5],near:30,rush:'run'},turtle:{st:[0,0],near:0,rush:'walk'},gsnail:{st:[0,0],near:0,rush:'walk'}};
-const BITER={shark:{iv:.35,snd:'chomp',t:1.4},nudi:{iv:.8,snd:'plip',t:3},mush:{iv:.5,snd:'chew',t:2.4},puffer:{iv:.4,snd:'crunch',t:2.2},bee:{iv:.55,snd:'plip',t:2.4},crab:{iv:.62,snd:'snap',t:2.6},turtle:{iv:.6,snd:'chomp',t:2.4},gsnail:{iv:.9,snd:'squelch',t:3.2},tarantula:{iv:.35,snd:'chew',t:2.2},scorpion:{iv:.42,snd:'snap',t:2.4},kraken:{iv:.4,snd:'chew',t:2.2},cuttle:{iv:.45,snd:'chew',t:2},golem:{iv:.55,snd:'chomp',t:2.6}};
+const BITER={chick:{iv:.28,snd:'peck',t:1.0},shark:{iv:.35,snd:'chomp',t:1.4},nudi:{iv:.8,snd:'plip',t:3},mush:{iv:.5,snd:'chew',t:2.4},puffer:{iv:.4,snd:'crunch',t:2.2},bee:{iv:.55,snd:'plip',t:2.4},crab:{iv:.62,snd:'snap',t:2.6},turtle:{iv:.6,snd:'chomp',t:2.4},gsnail:{iv:.9,snd:'squelch',t:3.2},tarantula:{iv:.35,snd:'chew',t:2.2},scorpion:{iv:.42,snd:'snap',t:2.4},kraken:{iv:.4,snd:'chew',t:2.2},cuttle:{iv:.45,snd:'chew',t:2},golem:{iv:.55,snd:'chomp',t:2.6}};
 const PREY_NAME=Object.fromEntries(Object.entries(FOODS).map(([k,v])=>[k,v.name]));
 
 // =====================================================================
@@ -1519,6 +1526,7 @@ const MIND={
   salamander:{sight:[60,2.2,1.5],smell:32,vib:0,think:0.85,cur:0.45,bold:0.4,smart:0.35,focus:0.5,energy:0.35,patience:0.5},
   snake:{sight:[70,2.0,1.8],smell:42,vib:30,think:0.85,cur:0.5,bold:0.5,smart:0.6,focus:0.8,energy:0.4,patience:0.8},
   frog:{sight:[110,3.0,1.0],motionOnly:true,smell:12,vib:0,think:0.3,cur:0.4,bold:0.4,smart:0.4,focus:0.7,energy:0.4,patience:0.9},
+  chick:{sight:[140,2.8,1.4],smell:10,vib:20,think:0.4,cur:0.85,bold:0.35,smart:0.3,focus:0.5,energy:0.85,patience:0.4},
   dart:{sight:[100,3.0,1.0],motionOnly:true,smell:10,vib:0,think:0.25,cur:0.7,bold:0.7,smart:0.4,focus:0.8,energy:0.8,patience:0.6},
   tarantula:{sight:[30,3.0,1.3],smell:14,vib:85,think:0.6,cur:0.35,bold:0.7,smart:0.65,focus:0.85,energy:0.35,patience:0.9},
   scorpion:{sight:[35,3.0,1.3],smell:16,vib:80,think:0.55,cur:0.4,bold:0.75,smart:0.6,focus:0.85,energy:0.4,patience:0.85},
@@ -3589,6 +3597,91 @@ class Nudi extends Pet{
     return Pet.prototype.statusText.call(this);}
 }
 // =====================================================================
+//  Baby chick: a round puff of yellow fluff. Trots about bobbing its head, pecks at the ground and its food,
+//  scratches the dirt, peeps a lot, follows the hand around like a duckling, flutters its stubby wings when
+//  it's happy, shakes itself off when misted and naps at night with its head tucked into its fluff.
+// =====================================================================
+const CHICKC={down:ramp('#a87a08','#e2b420','#ffe050','#fff6b4'),beak:ramp('#a04a08','#e07a14','#ffa83a','#ffd890'),outline:'#3a2604'};
+class Chick extends Pet{
+  constructor(world,x,y){super();this.initCommon(world,'chick');
+    this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.sc=1;this.outline=hex(CHICKC.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.seam=3;
+    this.step=0;this.peck=0;this.peckT=rand(1,3);this.peep=0;this.peepT=rand(2,5);this.flap=0;this.scratch=0;this.scratchT=rand(6,12);this.shake=0;this.wet=0;this.tuck=0;this.bob=0;this.fl=rand(TAU);}
+  isActive(){return this.preview||this.world.dayness>0.3;}
+  W(u,v){const c=Math.cos(this.ang),s=Math.sin(this.ang);return[this.x+c*u-s*v,this.y-this.h+s*u+c*v];}
+  hu(){return 3.6+this.peck*1.8+this.bob*0.5-this.tuck*1.5;}
+  headPos(){const[x,y]=this.W(this.hu()+1,0);return{x,y:y+this.h};}
+  mouthScreen(){const[x,y]=this.W(this.hu()+3.8,0);return{x,y};}
+  hatAnchor(){const[x,y]=this.W(this.hu()-0.3,0);return{x,y:y-2.6,a:this.ang,s:0.95};}
+  noise(){return clamp(this.speed/20,0,0.6);}
+  goTo(tx,ty,dt,mode,arrive=3){const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y),diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);this.ang+=clamp(diff,-5*dt,5*dt);
+    const max=mode==='run'||mode==='lunge'?32:mode==='slow'||mode==='stalk'?9:19,want=d>arrive?max*(Math.abs(diff)>1.1?0.25:1):0;this.speed+=(want-this.speed)*Math.min(1,dt*7);return d<=arrive;}
+  stop(dt){this.speed+=(0-this.speed)*Math.min(1,dt*8);}
+  faceToward(x,y,dt){this.ang+=clamp(wrapA(Math.atan2(y-this.y,x-this.x)-this.ang),-5*dt,5*dt);}
+  decide(){const P=game.pointer;
+    // like a duckling, it often trots after the hand
+    if(!this.preview&&P.inside&&Math.random()<0.45){this.tx=P.x;this.ty=P.y;this.pace='walk';this.state='wander';this.timer=4;return;}
+    if(Math.random()<0.45){this.state='idle';this.timer=rand(2,5);return;}[this.tx,this.ty]=this.randomSpot();this.pace=Math.random()<0.25?'run':'walk';this.state='wander';this.timer=8;}
+  canStrike(p){const m=this.mouthScreen(),d=Math.hypot(p.x-m.x,(p.y-p.h)-m.y);return d<7&&(p.h<3||(p.inHand&&p.h<12));}
+  startStrike(p){this.tg={t:0,p};}
+  updateStrike(dt){const T=this.tg;if(!T)return 'miss';const p=T.p;T.t+=dt;if(p.dead||p.caught){this.tg=null;return 'miss';}
+    this.faceToward(p.x,p.y,dt*2);this.peck=Math.sin(Math.min(1,T.t/0.16)*Math.PI);if(T.t>0.08&&T.t<0.2){const m=this.mouthScreen();if(Math.hypot(p.x-m.x,(p.y-p.h)-m.y)<5){p.caught=true;this.held=p;this.tg=null;catchFx(this,p);if(!this.preview)SFX.play('peck');return 'caught';}}
+    if(T.t>0.5){this.tg=null;this.goTo(p.x,p.y,dt,'walk',1);return 'miss';}return null;}
+  syncHeld(){if(this.held){const m=this.mouthScreen();this.held.sx=m.x;this.held.sy=m.y;}}
+  finishEating(){super.finishEating();if(!this.preview){this.flap=1;this.vh=26;this.h=0.1;SFX.play('cheep');}}
+  startle(x,y){if(this.state==='grabbed'||this.state==='fall')return;if(this.held)this.finishEating();this.tg=null;this.prey=null;
+    const a=Math.atan2(this.y-y,this.x-x),B=this.world.bounds;this.ang=a;this.tx=clamp(this.x+Math.cos(a)*40,B.x0+6,B.x1-6);this.ty=clamp(this.y+Math.sin(a)*40,B.y0+6,B.y1-6);this.state='wander';this.pace='run';this.timer=1.4;this.flap=1;this.vh=30;this.h=0.1;
+    if(!this.preview){SFX.play('peeps');think(this,'!');this.fluff(5);}}
+  fluff(n){const w=this.world;for(let i=0;i<n;i++)spawn(w,'down',this.x+rand(-4,4),this.y+rand(-3,3),{h:rand(3,8),vx:rand(-6,6),vy:rand(-4,4),ph:rand(TAU),life:rand(1.2,2)});}
+  petMe(){const r=super.petMe();if(r&&!this.preview){this.pT=(this.pT||0)-1/60;if(this.pT<=0){this.pT=rand(0.9,1.6);SFX.play('cheep');this.flap=Math.max(this.flap,0.6);}}return r;}
+  hitTest(x,y){const[cx,cy]=this.W(0,0);return Math.hypot(x-cx,y-cy)<8?0:-1;}
+  tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;if(!this.preview)SFX.play('peeps');return true;}
+  dragTo(x,y){this.grabX=x;this.grabY=y;}
+  release(){if(this.state!=='grabbed')return;this.state='fall';this.vh=0;}
+  update(dt){const w=this.world;this.t+=dt;this.blinkT-=dt;if(this.blinkT<0){this.blink=0.12;this.blinkT=rand(2,5);}if(this.blink>0)this.blink-=dt;
+    this.flap=Math.max(0,this.flap-dt*1.2);this.peep=Math.max(0,this.peep-dt*5);this.shake=Math.max(0,this.shake-dt*1.6);this.scratch=Math.max(0,this.scratch-dt*2);
+    this.tuck+=((this.state==='sleeping'?1:0)-this.tuck)*Math.min(1,dt*3);
+    // misting: it hates getting wet and gives itself a big shake
+    const P=game.pointer,misted=!this.preview&&game.tool==='mist'&&P.down&&P.inside&&Math.hypot(P.x-this.x,P.y-this.y)<30;if(misted)this.wet=Math.min(1,this.wet+dt*2);else if(this.wet>0.4&&this.shake<=0){this.shake=1;this.wet=0;if(!this.preview){SFX.play('shakeoff');this.fluff(3);for(let i=0;i<6;i++)spawn(w,'drop',this.x,this.y,{h:4,vh:rand(10,30),vx:rand(-30,30),vy:rand(-20,20),life:1});w.stats.happy=Math.max(0,w.stats.happy-3);}}else this.wet=Math.max(0,this.wet-dt*0.2);
+    if(this.state==='grabbed'){this.gt+=dt;this.h+=(10-this.h)*Math.min(1,dt*8);this.x=this.grabX;this.y=this.grabY+this.h;this.flap=Math.max(this.flap,0.8);this.step+=dt*20;this.peepT-=dt*3;if(this.peepT<=0){this.peepT=rand(0.5,1);if(!this.preview)SFX.play('peep');this.peep=1;}this.pts[0].x=this.x;this.pts[0].y=this.y;return;}
+    if(this.state==='fall'){this.vh-=240*dt;this.h+=this.vh*dt;this.flap=1;if(this.h<=0){this.h=0;this.vh=0;this.state='idle';this.timer=1;if(!this.preview){SFX.play('land');dust(w,this.x,this.y,4);this.fluff(2);}}this.pts[0].x=this.x;this.pts[0].y=this.y;return;}
+    if(this.h>0||this.vh>0){this.vh-=200*dt;this.h+=this.vh*dt;if(this.h<=0){this.h=0;this.vh=0;}}
+    this.brain(dt);
+    // a little trotting gait: feet step, the head bobs back and forth like a real chick
+    this.step+=this.speed*dt*0.9;this.bob=this.speed>1?Math.max(0,Math.sin(this.step*2)):this.bob*(1-Math.min(1,dt*6));
+    if(this.state!=='strike'&&this.state!=='chew')this.peck*=1-Math.min(1,dt*10);
+    if(this.state==='idle'&&this.isActive()&&this.speed<1){// idle pecks at the ground, the odd scratch, lots of peeping
+      this.peckT-=dt;if(this.peckT<=0){this.peckT=rand(0.6,2.2);this.pk=0.001;if(!this.preview&&Math.random()<0.5)SFX.play('peck');}
+      if(this.pk>0){this.pk+=dt;this.peck=Math.max(this.peck,Math.sin(Math.min(1,this.pk/0.18)*Math.PI));if(this.pk>0.18){this.pk=0;const m=this.mouthScreen();if(!this.preview)spawn(w,'dust',m.x,m.y+1,{vx:rand(-6,6),vy:rand(-3,3),life:0.25});}}
+      this.scratchT-=dt;if(this.scratchT<=0){this.scratchT=rand(7,14);this.scratch=1;if(!this.preview){SFX.play('scratch');const[bx,by]=this.W(-5,0);dust(w,bx,by+this.h,5);}}}
+    if(this.state==='chew'){this.peck=0.4+0.4*Math.max(0,Math.sin(this.t*14));}
+    if(this.isActive()&&this.state!=='sleeping'){this.peepT-=dt*(w.stats.fed<30?2:1);if(this.peepT<=0){this.peepT=rand(2.5,6);this.peep=1;if(!this.preview)SFX.play('peep');}}
+    const B=w.bounds;this.x+=Math.cos(this.ang)*this.speed*dt;this.y+=Math.sin(this.ang)*this.speed*dt;this.x=clamp(this.x,B.x0+6,B.x1-6);this.y=clamp(this.y,B.y0+6,B.y1-6);
+    this.pts[0].x=this.x;this.pts[0].y=this.y;this.syncHeld();}
+  color(m,q,s,l,x,y){const C=CHICKC;switch(m){
+    case M.BODY:{if(this.wet>0.3&&hash(x*3,y*5)>0.6)return C.down[Math.max(0,q-1)];const h=hash(x*5,y*3);if(h>0.9)return C.down[Math.min(3,q+1)];if(h<0.06)return C.down[Math.max(0,q-1)];return C.down[q];}
+    case M.TOE:case M.CLAW:return C.beak[q];}return INK;}
+  draw(fb){const W=(u,v)=>this.W(u,v),t=this.t,g=this.state==='grabbed'||this.state==='fall',puff=this.tuck*0.5+(this.wet>0.3?-0.4:0),sh=Math.sin(t*40)*this.shake*1.2;
+    // little orange feet, stepping (or kicking back when scratching, dangling when held)
+    for(const sd of[-1,1]){const st=g?Math.sin(t*20+sd)*0.8:Math.sin(this.step*2+(sd>0?0:Math.PI))*Math.min(1,this.speed/6)-(this.scratch>0&&sd>0?Math.max(0,Math.sin(t*22))*3*this.scratch:0);
+      const[fx,fy]=W(0.8+st*2.2,sd*2.6);fb.cap(fx,fy+(g?3:0),0.55,fx,fy+(g?3:0),0.55,M.TOE,1);for(let k=-1;k<=1;k++){const a=this.ang+k*0.5;fb.cap(fx,fy+(g?3:0),0.4,fx+Math.cos(a)*2,fy+(g?3:0)+Math.sin(a)*2,0.35,M.TOE,1);}}
+    // round fluffy body, fluffy edge, tail tuft, stubby wings (they flutter when it's happy)
+    const[bx,by]=W(-1.2,sh*0.4);fb.cap(bx,by,5.4+puff,bx,by,5.4+puff,M.BODY,2,0,0,0.6);
+    for(let i=0;i<16;i++){const a=i/16*TAU,r=5.2+puff+hash(i*7,3)*0.6+(this.wet>0.3?-0.3:0),[px,py]=[bx+Math.cos(a)*r,by+Math.sin(a)*r];fb.cap(px,py,1.0,px,py,1.0,M.BODY,2,0,0,0.1);}
+    {const[a0,a1]=W(-6.4,sh*0.6);fb.cap(a0,a1,1.3,a0,a1,1.3,M.BODY,2,0,0,0.2);}
+    const fl=Math.sin(t*34)*this.flap;for(const sd of[-1,1]){const[w0,w1]=W(-0.8,sd*4.6+sh*0.4),[w2,w3]=W(-3.4-this.flap*0.4,sd*(5.4+Math.max(0,fl)*1.1+this.flap*0.5)+sh*0.4);fb.cap(w0,w1,1.6,w2,w3,1.2+this.flap*0.2,M.BODY,2,0,0,0.9);}
+    // head (bobs while walking, dips to peck, tucks back to sleep), fuzzy tuft on top, beak
+    const hu=this.hu(),[hx,hy]=W(hu,sh);fb.cap(hx,hy,3.6-this.tuck*0.4,hx,hy,3.6-this.tuck*0.4,M.BODY,2,0,0,1.2);
+    for(let i=0;i<3;i++){const[px,py]=W(hu-0.6+i*0.6,(i-1)*0.9+sh);fb.cap(px,py-2.6+Math.abs(i-1)*0.6,0.7,px,py-3.4,0.5,M.BODY,2,0,0,1.4);}
+    const op=this.peep*0.7;if(this.tuck<0.7)for(const sd of(op>0.1?[-1,1]:[0])){const[b0,b1]=W(hu+2.8,sd*op+sh),[b2,b3]=W(hu+5.0,sd*op*1.6+sh);fb.cap(b0,b1,1.1,b2,b3,0.3,M.CLAW,3,0,0,1.4);}
+    this.eyes=[-1,1].map(sd=>W(hu+0.9,sd*2.0+sh));}
+  drawExtras(fb){const K=hex('#100a06');if(!this.eyes)return;const shut=this.blink>0||this.tuck>0.5||this.state==='petted'&&Math.sin(this.t*3)>0.3;
+    for(const[ex,ey]of this.eyes){const ix=Math.round(ex-0.5),iy=Math.round(ey-0.5);if(shut){pset(fb,ix,iy+1,K);pset(fb,ix+1,iy+1,K);continue;}pset(fb,ix,iy,K);pset(fb,ix+1,iy,K);pset(fb,ix,iy+1,K);pset(fb,ix+1,iy+1,K);pset(fb,ix,iy,hex('#ffffff'));}}
+  statusText(){if(this.shake>0.3)return 'is shaking itself dry. Hmph!';if(this.state==='grabbed')return 'is peeping and flapping its little wings';if(this.tuck>0.5)return 'is napping with its head tucked into its fluff';
+    if(this.state==='chew')return `is gobbling ${PREY_NAME[this.held?.type]||'something'}`;if(this.scratch>0.3)return 'is scratching around in the dirt';
+    if(this.state==='wander'&&game.pointer.inside&&Math.hypot(this.tx-game.pointer.x,this.ty-game.pointer.y)<6)return 'is trotting after your hand';if(this.state==='idle')return 'is pecking around for crumbs';
+    return Pet.prototype.statusText.call(this);}
+}
+// =====================================================================
 //  Bumblebee: a chunky, fluffy flier. Bumbles around on blurred wings, lands to sip from flowers
 //  and fruit, trundles about on foot, does a waggle dance and naps with its wings folded.
 // =====================================================================
@@ -4485,6 +4578,7 @@ function updateParts(w,dt){
       case 'mist':p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=1-dt*2;p.vy*=1-dt*2;break;
       case 'fdrop':p.vh-=120*dt;p.h+=p.vh*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.h<=1.8)p.life=0;break;
       case 'smoke':p.y-=7*dt;p.x+=p.vx*dt;p.vx*=1-dt;break;
+      case 'down':p.ph+=dt*4;p.h=Math.max(0,p.h-dt*3);p.x+=(p.vx+Math.sin(p.ph)*4)*dt;p.y+=p.vy*dt;p.vx*=1-dt*1.5;p.vy*=1-dt*1.5;break;
       case 'steam':p.y+=p.vy*dt;p.vy*=1-dt*0.6;p.x+=p.vx*dt+Math.sin(p.life*5+p.ph)*0.12;break;
       case 'lava':p.vh-=140*dt;p.h+=p.vh*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.h<0){p.h=0;p.vh=0;p.vx*=0.4;p.vy*=0.4;}break;
       case 'num':p.y-=(p.life>0.9?14:2)*dt;break;
@@ -4811,7 +4905,7 @@ const TOY_LABEL={ball:'the beach ball',squeaky:'the squeaky duck',bell:'the jing
   yarn:'the yarn ball',dice:'the foam die',plush:'the octopus plush',spinner:'the spinning top',rc:'the RC car',musicbox:'the music box',bubbler:'the bubble machine',butterfly:'the clockwork butterfly'};
 const TOY_TOOLS=['laser','bubbles','feather','remote'];
 const toolOwned=x=>x==='remote'?(save.inv.rc||0)>0:(save.inv[x]||0)>0;
-const ROSTER=['bun','shark','nudi','dart','frog','lizard','salamander','snake','chameleon','dragon','golem','mush','gecko','axolotl','millipede','bee','slime','tarantula','scorpion','kraken','cuttle','puffer','crab','turtle','gsnail'];
+const ROSTER=['bun','shark','nudi','chick','dart','frog','lizard','salamander','snake','chameleon','dragon','golem','mush','gecko','axolotl','millipede','bee','slime','tarantula','scorpion','kraken','cuttle','puffer','crab','turtle','gsnail'];
 
 // =====================================================================
 //  Save (localStorage, wrapped so the game still works without it)
@@ -4839,7 +4933,7 @@ function writeSave(){
 function petSave(kind=game.kind){return save.pets[kind]||(save.pets[kind]={name:pick(SPECIES[kind].names),xp:0,lvl:1,hat:null,stats:null});}
 const xpNeed=l=>40+l*25;
 // Frog, lizard and salamander are free; the rest cost coins (anyone adopted before pricing stays owned).
-const FREE_PETS=['frog','lizard','salamander'],PET_PRICE=100,PET_PRICES={shark:180,nudi:140,dart:130,bun:150,golem:150,kraken:200,cuttle:150,bee:120,puffer:150,mush:150};
+const FREE_PETS=['frog','lizard','salamander'],PET_PRICE=100,PET_PRICES={shark:180,nudi:140,dart:130,chick:110,bun:150,golem:150,kraken:200,cuttle:150,bee:120,puffer:150,mush:150};
 const petPrice=k=>PET_PRICES[k]||PET_PRICE;
 const petOwned=k=>FREE_PETS.includes(k)||!!save.pets[k]||save.owned.includes(k);
 
@@ -5353,7 +5447,7 @@ const $=id=>document.getElementById(id);
 const game={mode:'boot',tool:'feed',food:'cricket',toyTool:null,world:null,pointer:{x:-99,y:-99,down:false,inside:false,moved:0,sprayT:0,vx:0,vy:0,lt:0},
   shake:0,flashT:0,flashMsg:'',name:'',kind:'',uiT:0,grabbing:false,chirpT:4,croakT:6,held:null,placing:null,dragObj:null,
   coinT:rand(15,30),thinkT:6,thought:null,hearts:0,bubbleT:0,trayOpen:true,firstRun:false};
-const makePet=(w,kind,x,y)=>kind==='frog'?new Frog(w,x,y):kind==='dart'?new DartFrog(w,x,y):kind==='crab'?new Crab(w,x,y):kind==='turtle'?new Turtle(w,x,y):kind==='gsnail'?new GSnail(w,x,y):
+const makePet=(w,kind,x,y)=>kind==='frog'?new Frog(w,x,y):kind==='dart'?new DartFrog(w,x,y):kind==='chick'?new Chick(w,x,y):kind==='crab'?new Crab(w,x,y):kind==='turtle'?new Turtle(w,x,y):kind==='gsnail'?new GSnail(w,x,y):
   kind==='tarantula'?new Spider(w,x,y):kind==='scorpion'?new Scorpion(w,x,y):kind==='kraken'?new Kraken(w,x,y):kind==='cuttle'?new Cuttle(w,x,y):kind==='bun'?new Bun(w,x,y):kind==='shark'?new Shark(w,x,y):kind==='nudi'?new Nudi(w,x,y):kind==='golem'?new Golem(w,x,y):kind==='bee'?new Bee(w,x,y):kind==='mush'?new Mush(w,x,y):kind==='puffer'?new Puffer(w,x,y):kind==='chameleon'?new Chameleon(w,x,y):kind==='dragon'?new Dragon(w,x,y):kind==='gecko'?new Gecko(w,x,y):kind==='axolotl'?new Axolotl(w,x,y):kind==='millipede'?new Millipede(w,x,y):kind==='slime'?new Slime(w,x,y):new Walker(w,kind,x,y);
 function createWorld(){
   const w={stats:{fed:72,happy:70,water:68},prey:[],parts:[],ripples:[],glassDrops:[],glassRings:[],fireflies:[],motes:[],
@@ -6122,6 +6216,7 @@ function renderPlay(){
   if(game.held&&!game.cursorUI){const q=game.held;if(q.layered){fb.clearLayer();q.drawL(fb);composite(fb,FOOD_PAINTER);}else q.draw(fb,w.t);}
   for(const p of w.parts){if(p.type==='drop')pset(fb,p.x,p.y-p.h,drop);else if(p.type==='mist')pmix(fb,p.x,p.y,mistc,clamp(p.life,0,1)*0.6);
     else if(p.type==='fdrop')pmix(fb,p.x,p.y-p.h,hex('#bfefff'),0.85);
+    else if(p.type==='down'){const f=clamp(p.life,0,1);pmix(fb,p.x,p.y-p.h,hex('#fff2a0'),0.9*f);pmix(fb,p.x+1,p.y-p.h,hex('#ffe060'),0.5*f);}
     else if(p.type==='steam'){const k=clamp(p.life/p.max,0,1),f=Math.min(0.9,Math.sin(k*Math.PI)*0.85);for(let j=0;j<4;j++){const yy=p.y-j,xx=p.x+Math.sin(p.ph+j*0.9+p.life*3)*(0.6+j*0.35);pmix(fb,xx,yy,hex('#fbf6ee'),f*(1-j*0.18));if(j<2)pmix(fb,xx+1,yy,hex('#fbf6ee'),f*0.35);}}
     else if(p.type==='smoke'){const f=clamp(p.life/2,0,1)*0.45,r=1+(1-f)*2;for(const[dx,dy]of[[0,0],[1,0],[0,1],[-1,0],[0,-1]])pmix(fb,p.x+dx*r*0.6,p.y+dy*r*0.6,hex('#b8b0a8'),f);}}
   for(let k=0;k<R.frameIdx.length;k++){const i=R.frameIdx[k];px[i]=R.frame[i];}
@@ -6364,9 +6459,9 @@ const DR_THEME={
   greens:null,egg:{lift:1,spots:[[25,23,0.3],[35,22,2.3],[30,29,1.2]],bg:'nest'},
   flower:{lift:2,spots:[[15,15,0.2],[27,11,1.2],[42,14,2.6],[21,27,0.8],[36,27,1.9],[48,24,0.5]],bg:'daisy'},
   grape:{lift:3,spots:[[9,20,0],[19,26,0],[29,21,0],[39,27,0],[49,21,0],[27,33,0]],bg:'vine'},
-  butter:{spots:[[21,20,0.2],[30,18,-0.1],[39,21,0.3],[25,28,0.1],[35,28,-0.2]],bg:'butter'},honey:{spots:[[25,28,0],[33,25,1],[41,29,2],[29,34,3],[38,34,4]],bg:'honey'},
-  seeds:{lift:1,spots:[[24,30,0.3],[36,27,1.4],[47,31,2.2],[30,37,0.9],[43,38,2.8]],bg:'seed'},firefly:{n:6,live:1,bg:'dusk',fglow:1},
-  gummy:{lift:2,spots:[[22,22,0.2],[31,19,-0.3],[40,22,0.4],[26,30,-0.2],[36,30,0.3]],bg:'candy'},
+  butter:{lift:2,spots:[[31,15,0.15],[36,18,0.35],[41,21,0.55],[34,25,0.2],[40,28,0.45]],bg:'board'},honey:{lift:1,spots:[[14,21,0],[26,15,0],[37,23,0],[48,17,0],[30,31,0]],bg:'hive'},
+  seeds:{lift:1,spots:[[25,17,0],[34,16,0],[29,22,0],[23,26,0],[35,26,0]],bg:'sunflower'},firefly:{n:6,live:1,bg:'dusk',fglow:1},
+  gummy:{lift:2,spots:[[24,18,0.2],[33,15,-0.3],[40,20,0.4],[27,26,-0.2],[37,27,0.3]],bg:'gumjar'},
   stars:{n:6,float:1,lift:3,bg:'night'},moonberry:{lift:3,spots:[[17,15,0],[29,10,0],[42,14,0],[36,25,0]],glow:1,bg:'magic'},geode:{lift:2,spots:[[17,26,0.3],[31,20,1.2],[45,27,2.4]],bg:'rocks'},
 };
 {const cx=30,cy=21,L=[];for(let i=0;i<6;i++){const a=-Math.PI/2+0.4+i/6*TAU,r=12.2;L.push([cx+Math.cos(a)*r*1.15,cy+Math.sin(a)*r*0.85,a]);}DR_THEME.greens={spots:L,bg:'lettuce'};}
@@ -6499,39 +6594,66 @@ const DRAWER={on:false,el:null,tanks:[],rowsEl:null,drag:null,velX:0,velStrip:nu
       for(const[vx,vy]of[[9,20],[19,26],[29,21],[39,27],[49,21],[27,33]]){const y0=10+Math.sin(vx*0.18)*3;drLeaf(PH(3.6),vx+1,vy-3,-0.5,7,3.2,LEAF2,0.12);for(let y=y0;y<vy-2;y++)P(vx+Math.sin(y)*0.4,y,hex('#4a3a1a'));}}
     else if(f==='night'){fill((x,y)=>{const n=fbm(x*0.08+sd,y*0.1,3);let c=mixc(hex('#060822'),hex('#1a1648'),y/TKH);c=mixc(c,hex('#4a2a7a'),clamp(n-0.5,0,1)*0.8);c=mixc(c,hex('#1a4a6a'),clamp(fbm(x*0.06+40,y*0.08,3)-0.55,0,1)*0.9);return c;});
       disc(49,10,4.2,(x,y,d)=>{if(Math.hypot(x+.5-47.6,y+.5-9)>3.3)P(x,y,d<0.6?hex('#fff8d8'):hex('#f0e0a0'));});disc(49,10,7,(x,y,d)=>{if(d>0.62)M(x,y,hex('#fff4c8'),0.1*(1-d));});}
-    else if(f==='butter'){// red gingham cloth with a white butter dish in the middle
-      fill((x,y)=>{const a=Math.floor((x+1)/4)&1,b=Math.floor((y+2)/4)&1;let c=a&&b?hex('#c43c38'):a||b?hex('#e8908a'):hex('#f6eee6');if(hash(x*3+sd,y*5)>0.9)c=shade(c,0.9);return c;});
-      dome(30,24,21,12,2.4,0.3);box(30,24,21,12,(x,y,e)=>P(x,y,e>0.9?hex('#8a8c94'):e>0.82?hex('#dcdde2'):e>0.74?hex('#c8cad2'):mixc(hex('#ffffff'),hex('#eceef2'),e)));
-      for(let k=0;k<6;k++)P(48+hash(k,3)*8,6+hash(k,4)*6,hex('#f8e8a0'));}
-    else if(f==='honey'){// a wooden board: honey jar, a saucer of drops, a honey dipper and a corner of honeycomb
-      fill((x,y)=>{const n=fbm(x*0.04+sd,y*0.5,2),g=Math.sin(x*0.3+n*6);return mixc(hex('#7a4a1e'),hex('#b07a40'),n*0.8+(g>0.7?0.2:0));});
-      for(let gy=0;gy<5;gy++)for(let gx=0;gx<5;gx++){const cx=44+gx*4.4+(gy&1)*2.2,cy=-1+gy*3.8;dome(cx,cy,2.3,2.3,1.6,0.4);box(cx,cy,2.3,2.3,(x,y,e)=>P(x,y,e>0.7?hex('#c8901c'):mixc(hex('#ffc84a'),hex('#e08a10'),e)));}
-      dome(11,13,9,9,2.6,0.4);box(11,13,9,9,(x,y,e)=>P(x,y,e>0.88?hex('#5a4a34'):e>0.76?hex('#e8e2d4'):mixc(hex('#ffbe40'),hex('#b06008'),e*0.9)));
-      dome(33,30,15,9,1.3,0.3);box(33,30,15,9,(x,y,e)=>P(x,y,e>0.88?hex('#8a8a90'):mixc(hex('#fffaf2'),hex('#e8e2d6'),e)));
-      cyl(2,37,15,25,1.1,0.4);for(let k=0;k<=13;k++){const x=2+k,y=37-k*12/13;P(x,y,hex('#c89050'));P(x,y-1,hex('#8a5a28'));}
-      dome(16,24,2.4,2.4,1.8,0.5);box(16,24,2.4,2.4,(x,y,e)=>P(x,y,((x+y)&1)&&e>0.4?hex('#a86010'):hex('#f0a830')));}
-    else if(f==='seed'){// a wooden board, an open burlap sack spilling seed, and a little tin scoop
-      fill((x,y)=>{const n=fbm(x*0.05+sd,y*0.6,2),g=Math.sin(y*0.9+n*5);let c=mixc(hex('#8a6038'),hex('#b88a58'),n*0.8);if(g>0.82)c=shade(c,0.82);if((y+1)%9===0)c=hex('#4a3018');return c;});
-      // the sack: a lumpy hessian bag lying open at the top-left, its mouth full of seed
-      const sx=13,sy=13;dome(sx,sy,13,11,5,0.6);box(sx,sy,13,11,(x,y,e)=>{const wv=((x+(y>>1))&1)?1:0,hh=hash(x*3+sd,y*5),an=Math.atan2(y-sy,x-sx);let c=mixc(hex('#9a7a4c'),hex('#c4a470'),wv*0.45+hh*0.25);if(Math.abs(Math.sin(an*5))<0.1&&e<0.7)c=shade(c,0.8);if(e>0.9)c=hex('#5a4024');else if(e>0.66)c=e>0.8?hex('#d8bc88'):hex('#b8965e');P(x,y,c);});
-      pit(sx+2,sy+2,7,5.6,2);box(sx+2,sy+2,7,5.6,(x,y,e)=>{const k=hash(x*7+sd,y*3),c=k>0.66?hex('#2e2a24'):k>0.4?hex('#ecc860'):k>0.2?hex('#d0a456'):hex('#f0ead8');P(x,y,e>0.88?hex('#4a3018'):c);});
-      // a drift of spilled seed fanning out of the sack's mouth
-      for(let k=0;k<70;k++){const a=0.55+(hash(k,1)-0.5)*0.9,r=8+hash(k,2)*16,x=sx+2+Math.cos(a)*r,y=sy+2+Math.sin(a)*r*0.8,kk=hash(k,3),c=kk>0.66?hex('#2e2a24'):kk>0.4?hex('#ecc860'):kk>0.2?hex('#d0a456'):hex('#f0ead8');P(x,y,c);hs(x,y,0.6);if(kk>0.66)P(x+1,y,hex('#d8d0bc'));}
-      // tin scoop at the bottom-right
-      cyl(44,10,56,6,2.6,0.6);for(let k=0;k<=12;k++){const x=44+k,y=10-k*4/12;for(let w=-2;w<=2;w++)P(x,y+w,w===-2?hex('#f4f6f8'):w===2?hex('#6a707a'):hex('#b8c0c8'));}cyl(56,6,61,4,0.9,0.8);for(let k=0;k<5;k++)P(56+k,6-k*0.4,hex('#5a3a1e'));}
-    else if(f==='dusk'){// a mossy meadow at dusk: dark grass, clover, a few closed flowers and dew
-      fill((x,y)=>{const n=fbm(x*0.18+sd,y*0.18,3),h=hash(x*3,y*5+sd);let c=mixc(hex('#16302a'),hex('#28503a'),n);c=mixc(c,hex('#1c2a4a'),0.2+0.2*(1-y/TKH));if(h>0.95)c=hex('#4a7a48');return c;});bump(0.8);
-      const GR=ramp('#10281a','#22482a','#36703c','#5aa05a');for(let k=0;k<26;k++){const bx=hash(k,1)*TKW,by=8+hash(k,2)*34;for(let j=0;j<5;j++)drLeaf(PH(1.2),bx,by,-Math.PI/2+(j-2)*0.38+(hash(k,j)-0.5)*0.3,4+hash(k,j+9)*4,0.9,GR);}
-      for(const[cx,cy]of[[14,30],[44,14],[50,34]])for(let j=0;j<3;j++)drLeaf(PH(1.4),cx,cy,j/3*TAU+cx,3.4,2.2,ramp('#123a20','#1e5a2e','#2e7a3e','#56a85a'));
-      for(const[fx,fy]of[[30,12],[9,15],[38,36]]){dome(fx,fy,1.6,1.6,1.4);disc(fx,fy,1.6,(x,y,d)=>P(x,y,d<0.5?hex('#e8e0f8'):hex('#9a8ac8')));}
-      for(let k=0;k<14;k++){const x=hash(k,41)*TKW,y=8+hash(k,42)*34;P(x,y,hex('#9ad8e8'));}}
-    else if(f==='candy'){// candy-stripe paper with a frilly white paper cup of gummies and a swirly lollipop
-      fill((x,y)=>{const st=((x+y)%10+10)%10;let c=st<5?hex('#ffc8dc'):hex('#fff4f8');if(hash(x*3+sd,y*5)>0.94)c=hex('#ffffff');return c;});
-      const cx=31,cy=26;for(let y=0;y<TKH;y++)for(let x=0;x<TKW;x++){const e=Math.hypot((x-cx-2)/19,(y-cy-2)/12);if(e<1.1&&e>0.9)M(x,y,hex('#a05878'),0.25);}
-      dome(cx,cy,18,11,2.2,0.3);box(cx,cy,18.5,11.5,(x,y,e)=>{const a=Math.atan2(y+.5-cy,x+.5-cx),fr=0.86+0.06*Math.sin(a*22);if(e>fr+0.1)return;let c;if(e>fr)c=Math.sin(a*22)>0?hex('#ffffff'):hex('#e4dce4');else if(e>fr-0.08)c=hex('#d8d0dc');else c=mixc(hex('#fffafc'),hex('#f0e8f0'),e);P(x,y,c);});
-      // lollipop: a red and white swirl on a stick, lying in the top-right corner
-      cyl(43,9,58,3,0.8,0.5);for(let k=0;k<=15;k++)P(43+k,9-k*6/15,hex('#f4f0e8'));dome(50,6,5,5,2.2,0.5);disc(50,6,5,(x,y,d)=>{const a=Math.atan2(y+.5-6,x+.5-50),sw=Math.sin(a*2+d*9);P(x,y,d>0.86?hex('#a01828'):sw>0?hex('#ff3a4a'):hex('#fff4f4'));});
-      for(let k=0;k<22;k++){const x=hash(k,51)*TKW,y=hash(k,52)*TKH;const c=[hex('#ff7aa8'),hex('#7ad0ff'),hex('#ffe066'),hex('#a8f07a')][k%4];P(x,y,c);}}
+    else if(f==='board'){// a wooden chopping board: a block of butter in its peeled-back wrapper, fresh pats sliced off the end, the knife
+      fill((x,y)=>{const n=fbm(x*0.05+sd,y*0.7,2),g=Math.sin(y*1.1+n*4);let c=mixc(hex('#5a3a22'),hex('#7a5232'),n);if((y+3)%10===0)c=hex('#2e1c10');if(g>0.85)c=shade(c,0.85);return c;});
+      // the board: pale wood with rounded corners and a handle hole
+      const bx0=3,by0=7,bx1=57,by1=40,rr=5;dome(30,23.5,27,16.5,2,0.12);
+      for(let y=by0;y<=by1;y++)for(let x=bx0;x<=bx1;x++){const cx2=clamp(x,bx0+rr,bx1-rr),cy2=clamp(y,by0+rr,by1-rr);const d=Math.hypot(x-cx2,y-cy2);if(d>rr)continue;
+        const hole=Math.hypot((x-52)/2.2,(y-23.5)/3.4)<1;if(hole){P(x,y,hex('#2a1a0e'));HG[y*TKW+x]=0;continue;}
+        const n=fbm(x*0.07+sd,y*0.5+3,2),g=Math.sin(y*1.6+n*5+x*0.04);let c=mixc(hex('#c89a62'),hex('#e6c08a'),n);if(g>0.8)c=shade(c,0.9);if(d>rr-1.2)c=d>rr-0.5?hex('#7a5430'):hex('#a8784a');P(x,y,c);}
+      // wrapper paper folded open under the block, with a blue printed band
+      box(15,18,12,8.5,(x,y,e)=>{const v=y-18;let c=hex('#f4f2ec');if(Math.abs(v)>6.6&&Math.abs(v)<7.8)c=hex('#3a6ac8');if(e>0.94)c=hex('#c8c4b8');if(((x*3+y)&7)===0)c=shade(c,0.95);P(x,y,c);hs(x,y,0.4);});
+      // the butter block: a soft rounded slab, its cut end facing the pats
+      for(let y=12;y<=24;y++)for(let x=6;x<=24;x++){const cx2=clamp(x,8,22),cy2=clamp(y,14,22);if(Math.hypot(x-cx2,y-cy2)>2.2)continue;const i=y*TKW+x;let c=x>=23?hex('#fff4c4'):y>=23?hex('#d8b450'):x<=7||y<=12?hex('#ffe890'):hex('#fbe492');if(x<23&&y<23&&hash(x*5+sd,y*3)>0.94)c=hex('#fffbe0');if(x>=23&&(y&1))c=hex('#f8e8a8');P(x,y,c);HG[i]=Math.max(HG[i],x>=23||y>=23?2.6:4.2);}
+      // the knife: steel blade with a buttery smear, wooden handle with brass rivets
+      cyl(22,36,44,33,1.4,0.6);for(let k=0;k<=22;k++){const x=22+k,y=36-k*3/22;P(x,y-1,hex('#f2f6fa'));P(x,y,hex('#b8c2cc'));P(x,y+1,hex('#7a848e'));}
+      for(let k=0;k<5;k++)P(25+k,35.4-k*0.15,hex('#fff0a8'));cyl(44,33,55,31.5,1.6,0.8);for(let k=0;k<=11;k++){const x=44+k,y=33-k*1.5/11;P(x,y-1,hex('#8a5a30'));P(x,y,hex('#6a4022'));P(x,y+1,hex('#4a2a14'));}P(47,32.6,hex('#f0c860'));P(52,31.9,hex('#f0c860'));}
+    else if(f==='hive'){// a beehive frame packed with honeycomb: capped cells, open cells brimming with honey, a bee or two
+      fill(()=>hex('#5a3a1a'));const bar=(y0,y1)=>{for(let y=y0;y<=y1;y++)for(let x=0;x<TKW;x++){const n=fbm(x*0.06+sd,y*0.8,2);let c=mixc(hex('#a8743e'),hex('#c89458'),n);if(y===y0)c=hex('#e0b070');if(y===y1)c=hex('#5a3418');P(x,y,c);hs(x,y,3.4);}};
+      const cell=3.3,cen=[];for(let r=-1;r<10;r++)for(let q=-1;q<12;q++){const cx2=q*cell*1.73+(r&1)*cell*0.865,cy2=7+r*cell*1.5;cen.push({x:cx2,y:cy2,k:hash(q+sd,r)});}
+      const spots=T.th.spots;for(const C of cen){let open=C.k<0.6;for(const[sx,sy]of spots)if(Math.hypot(C.x-sx,C.y-sy)<cell*1.1)open=true;C.open=open;C.empty=!open&&C.k>0.93;}
+      for(let y=6;y<TKH-4;y++)for(let x=0;x<TKW;x++){let d1=1e9,d2=1e9,c1=null;for(const C of cen){const d=Math.hypot(x+.5-C.x,(y+.5-C.y)*1.05);if(d<d1){d2=d1;d1=d;c1=C;}else if(d<d2)d2=d;}
+        const i=y*TKW+x,lx=x+.5-c1.x,ly=y+.5-c1.y;
+        if(d2-d1<1.25){P(x,y,d2-d1<0.5?hex('#8a5a10'):lx+ly<0?hex('#f0c060'):hex('#b8801c'));HG[i]=2.8;continue;}// wax walls
+        if(c1.open){P(x,y,d1<1.0&&lx+ly<-0.2?hex('#fff6c0'):lx+ly<-0.9?hex('#ffc844'):d1>2.1?hex('#b86a0a'):hex('#f0a01c'));HG[i]=1.0;}// brimming honey, a glint in each cell
+        else if(c1.empty){P(x,y,d1>1.5?hex('#7a4c12'):hex('#4a2c0a'));HG[i]=0.6;}
+        else{P(x,y,lx+ly<-1.2?hex('#fff8d8'):lx+ly>1.6?hex('#d8b460'):hex('#f6e4a4'));HG[i]=2.3+0.4*(1-d1/3);}}// capped
+      bar(1,5);bar(TKH-4,TKH-1);
+      const bee=(bx,by,a)=>{const c=Math.cos(a),s2=Math.sin(a);for(let k=-2;k<=2;k++){const x=bx+c*k,y=by+s2*k;P(x,y,k===2?hex('#1a1206'):(k&1)?hex('#1a1206'):hex('#f4c020'));P(x-s2,y+c,(k&1)?hex('#2a1e0a'):hex('#d8a018'));hs(x,y,4);}for(const sd2 of[-1,1]){M(bx-s2*sd2*2-c,by+c*sd2*2-s2,hex('#eaf6ff'),0.7);M(bx-s2*sd2*2.6-c*1.6,by+c*sd2*2.6-s2*1.6,hex('#eaf6ff'),0.55);}};
+      bee(9,30,0.4);bee(52,28,2.6);}
+    else if(f==='sunflower'){// a big sunflower head lying in the grass: golden petals round a spiralling disc of seeds
+      soil('#2e2414','#4a3a20');bump(0.7);const cx=29,cy=21,LG=ramp('#163a14','#2a6224','#448a34','#70b450');
+      for(const[x,y,a,L]of[[18,30,2.45,15],[42,30,0.7,15],[42,12,-0.6,13],[17,12,-2.5,13]])drLeaf(PH(1),x,y,a,L,4.6,LG,0.12,1);
+      for(let y=0;y<TKH;y++)for(let x=0;x<TKW;x++){const e=Math.hypot((x-cx-2)/21,(y-cy-2)/16);if(e<1)M(x,y,hex('#000000'),0.4*(1-e));}
+      const PT=[ramp('#9a5a06','#d89010','#f8c020','#ffe880'),ramp('#b06a08','#e8a414','#ffd030','#fff09a')];
+      for(let layer=0;layer<2;layer++)for(let k=0;k<20;k++){const a=k/20*TAU+layer*TAU/40,r=10.5-layer*0.6,x=cx+Math.cos(a)*r*1.15,y=cy+Math.sin(a)*r*0.85;drLeaf(PH(2.2+layer*0.6),x,y,a,8.5-layer*1.4,2.3,PT[layer],0.05);}
+      const R0=11,seeds=[];for(let i=1;i<200;i++){const r=0.78*Math.sqrt(i),a=i*2.39996;if(r>R0)break;seeds.push([cx+Math.cos(a)*r*1.15,cy+Math.sin(a)*r*0.85,r/R0]);}
+      dome(cx,cy,R0*1.15,R0*0.85,3.4,0.45);
+      box(cx,cy,R0*1.15,R0*0.85,(x,y,e,i)=>{let d1=1e9,S=null;for(const sdd of seeds){const d=Math.hypot(x+.5-sdd[0],y+.5-sdd[1]);if(d<d1){d1=d;S=sdd;}}
+        let c;if(e>0.92)c=hex('#d86a0c');else if(S[2]<0.3)c=d1<0.55?hex('#8a7a2a'):hex('#4a4214');else if(d1>0.75)c=hex('#1a1008');else{const lx=x+.5-S[0],ly=y+.5-S[1];c=lx+ly<-0.3?(S[2]>0.7?hex('#9a8e7a'):hex('#6a4a2a')):S[2]>0.7?hex('#4a443a'):hex('#2e1e10');}
+        P(x,y,c);HG[i]+=d1<0.75?0.5*(1-d1/0.75):0;});}
+    else if(f==='gumjar'){// looking down into a glass candy jar heaped with gummy bears; its lid set aside
+      fill((x,y)=>{const n=fbm(x*0.05+sd,y*0.6,2),g=Math.sin(y*1.2+n*5);let c=mixc(hex('#8a5a3a'),hex('#b07a52'),n);if((y+2)%11===0)c=hex('#4a2a18');if(g>0.86)c=shade(c,0.86);return c;});
+      const cx=29,cy=22,RX=19.5,RY=15;for(let y=0;y<TKH;y++)for(let x=0;x<TKW;x++){const e=Math.hypot((x-cx-2.5)/RX,(y-cy-2.5)/RY);if(e<1.05)M(x,y,hex('#000000'),0.45*Math.min(1,(1.05-e)*4));}
+      // the heap of gummies inside, a mound in the middle
+      dome(cx,cy,RX*0.86,RY*0.86,5,0.6);const GM=PAL.food3.gummy,gs=[];for(let k=0;k<190;k++){const a=hash(k,11+sd)*TAU,r=Math.sqrt(hash(k,12))*0.86;gs.push([cx+Math.cos(a)*r*RX*0.95,cy+Math.sin(a)*r*RY*0.95,k%4,hash(k,13)*TAU]);}gs.sort((a,b)=>a[1]-b[1]);
+      box(cx,cy,RX*0.86,RY*0.86,(x,y)=>P(x,y,hex('#3a1a28')));
+      for(const[gx,gy,ci,ga]of gs){const C=GM[ci],ca=Math.cos(ga)*0.4;for(let yy=-3;yy<=3;yy++)for(let xx=-3;xx<=3;xx++){const x=Math.round(gx)+xx,y=Math.round(gy)+yy;if(Math.hypot((x-cx)/(RX*0.86),(y-cy)/(RY*0.86))>=1)continue;
+          const u=x+.5-gx,v=y+.5-gy,b=Math.hypot(u-ca*0.5,(v-0.6))<1.5,h2=Math.hypot(u+ca,(v+1.0))<1.15,ear=Math.hypot(Math.abs(u)-0.9,v+1.9)<0.6;if(!(b||h2||ear))continue;
+          P(x,y,mixc(u+v<-1?C[3]:u+v>1.2?C[1]:C[2],hex('#5a3a48'),0.12));}}
+      // thick glass rim catching the light
+      box(cx,cy,RX,RY,(x,y,e,i)=>{if(e<0.86)return;const a=Math.atan2(y-cy,x-cx);let c=mixc(bg[i],hex('#dff4ff'),0.55);if(e>0.95)c=hex('#5a7a8a');else if(a<-1.2&&a>-2.8&&e<0.92)c=hex('#ffffff');P(x,y,c);hs(x,y,5.5);});
+      // the lid: a red-and-white checked cloth cap on a metal ring, in the corner
+      dome(53,7,6.5,5,2.4,0.4);box(53,7,6.5,5,(x,y,e)=>{const ch=((Math.floor(x/2)+Math.floor(y/2))&1);P(x,y,e>0.82?(x+y<60?hex('#e8eef2'):hex('#8a949c')):ch?hex('#e83a48'):hex('#fff4f4'));});}
+    else if(f==='dusk'){// a twilight garden: a lush clump of tall grass, white moonflowers, a glowing mushroom, moonlit dew
+      fill((x,y)=>{const n=fbm(x*0.14+sd,y*0.14,3),h=hash(x*3,y*5+sd);let c=mixc(hex('#141e30'),hex('#22343a'),n);if(h>0.95)c=hex('#3a4a5a');return c;});bump(0.8);
+      const cx=28,cy=24;for(let y=0;y<TKH;y++)for(let x=0;x<TKW;x++){const e=Math.hypot((x-cx-2)/22,(y-cy-2)/15);if(e<1)M(x,y,hex('#000000'),0.4*(1-e));}
+      const DG=[ramp('#0c1c1a','#163228','#22503a','#3a7a5a'),ramp('#10261e','#1e4232','#2e6448','#5aa080'),ramp('#163228','#285a40','#3e8458','#7ac8a0')];
+      dome(cx,cy,19,13,5,0.6);for(let layer=0;layer<3;layer++){const R0=[11,6,2][layer],R1=[18,12,7][layer];for(let k=0;k<(layer===2?12:26);k++){const a=hash(k,layer*5+3)*TAU,r=R0+hash(k,layer+7)*(R1-R0),x=cx+Math.cos(a)*r*1.1,y=cy+Math.sin(a)*r*0.75,dir=a+(hash(k,layer+9)-0.5)*1.2;
+        drLeaf(PH((xx,yy)=>HG[clamp(Math.floor(yy),0,TKH-1)*TKW+clamp(Math.floor(xx),0,TKW-1)]+0.5),x,y,dir,7.5-layer,1.6,DG[layer],0.04);}}
+      for(const[fx,fy]of[[14,14],[41,13],[19,32],[44,30],[31,20]]){dome(fx,fy,2.2,2,2.4);for(let k=0;k<5;k++){const a=k/5*TAU+fx;const px2=fx+Math.cos(a)*1.4,py2=fy+Math.sin(a)*1.2;P(px2,py2,hex('#f4f2ff'));P(px2+0.6,py2+0.4,hex('#c8c4e8'));}P(fx,fy,hex('#ffe070'));}
+      dome(52,9,3.4,2.8,2.6,0.5);box(52,9,3.4,2.8,(x,y,e)=>P(x,y,e>0.8?hex('#1a6a7a'):x+y<60?hex('#9af8ff'):hex('#4ad0e0')));for(const[x,y]of[[51,8],[53,10],[50,10]])P(x,y,hex('#e8ffff'));
+      for(let k=0;k<20;k++){const x=hash(k,41)*TKW,y=6+hash(k,42)*34;P(x,y,hex('#a8d8f8'));}}
     else if(f==='magic'){soil('#160c24','#2a183e');for(let k=0;k<30;k++){const x=hash(k,1)*TKW,y=hash(k,2)*TKH;P(x,y,hex(hash(k,3)>0.5?'#3ac8b0':'#8a6ae0'));}
       const base=[30,TKH-3];for(const[tx,ty]of[[17,15],[29,10],[42,14],[36,25]]){const n=22;let px0=base[0],py0=base[1];for(let j=0;j<=n;j++){const f2=j/n,x=lerp(base[0],tx,f2)+Math.sin(f2*5+tx)*1.6,y=lerp(base[1],ty+2,f2);P(x,y,hex('#2aa890'));P(x+1,y,hex('#1a7a6a'));hs(x,y,2.5+f2*1.5);hs(x+1,y,2.5+f2*1.5);
         if(j%6===3)drLeaf(PH(3),x,y,Math.atan2(ty-base[1],tx-base[0])+(j%12===3?1.1:-1.1),5,1.8,ramp('#0e4a44','#1a8a7a','#3ad0b8','#9af8e8'));}}}
@@ -6632,6 +6754,8 @@ const DRAWER={on:false,el:null,tanks:[],rowsEl:null,drag:null,velX:0,velStrip:nu
     if(th.fglow)for(const sl of T.slots){const q=sl.item;if(q&&q.glow){q.glow(fb,1,t);const p=this.pos(q),b=0.12+q.lit*0.25;for(let y=-7;y<=7;y++)for(let x=-7;x<=7;x++){const d=Math.hypot(x,y)/7.5;if(d<1)padd(fb,p.x+x,p.y+y,90*b*(1-d),130*b*(1-d),40*b*(1-d));}}}
     if(th.glow)for(const sl of T.slots){if(!sl.item)continue;const p=this.pos(sl.item),g=0.3+0.15*Math.sin(t*3+sl.ph);for(let y=-5;y<=5;y++)for(let x=-5;x<=5;x++){const d=Math.hypot(x,y);if(d>2.4&&d<5)mix(p.x+x,p.y+y,hex('#8ad8ff'),g*(1-(d-2.4)/2.6));}}
     if(th.float)for(const sl of T.slots){if(!sl.item)continue;const p=this.pos(sl.item);if(Math.sin(t*4+sl.ph)>0.55){put(p.x+3,p.y-3,WHITE);put(p.x-3,p.y+2,hex('#fff4b0'));}}
+    if(th.bg==='hive'){const a=t*0.4,bx=30+Math.cos(a)*16,by=22+Math.sin(a*1.3)*8,da=Math.atan2(Math.cos(a*1.3)*1.3*8,-Math.sin(a)*16),c=Math.cos(da),s2=Math.sin(da);for(let k=-2;k<=2;k++){put(bx+c*k,by+s2*k,(k&1)||k===2?hex('#1a1206'):hex('#f4c020'));}const fl=(Math.floor(t*30)&1)?1.4:1;for(const sd2 of[-1,1])mix(bx-s2*sd2*2*fl-c,by+c*sd2*2*fl-s2,hex('#eaf6ff'),0.7);}
+    if(th.bg==='dusk'){const g=0.5+0.2*Math.sin(t*1.7);for(let y=-6;y<=6;y++)for(let x=-7;x<=7;x++){const d=Math.hypot(x/7,y/6);if(d<1)padd(fb,52+x,9+y,30*g*(1-d),110*g*(1-d),130*g*(1-d));}}
     if(th.bg==='jar'){for(let x=4;x<TKW-4;x++)for(let y=1;y<4;y++)if((x+y)%2===0)mix(x,y,hex('#8a9098'),0.8);}
     for(const sl of T.slots){if(sl.puff){const k=sl.puff.t/0.4,r=(1-k)*6+1;for(let a=0;a<7;a++){const an=a*TAU/7+k;put(sl.puff.x+Math.cos(an)*r,sl.puff.y+Math.sin(an)*r*0.7,th.water?hex('#cfefff'):th.live?hex('#d8b888'):hex('#b8f080'));}}
       const q=sl.item;if(!q)continue;const p=this.pos(q);
@@ -7084,7 +7208,7 @@ const ui={
     $('petsSub').textContent=first2?`Frog, lizard and salamander are free. The others cost ${PET_PRICE}+ coins each.`:`Free critters are always here. Others cost ${PET_PRICE}+ coins to adopt. Everyone keeps their name, bond and hat. Water-lovers live in the paludarium.`;
     $('petsX').hidden=first2;
     const ro=$('roster');ro.innerHTML='';this.previews=[];
-    const PET_GROUPS=[['Amphibians',['frog','dart','salamander','axolotl']],['Reptiles',['lizard','gecko','chameleon','dragon','snake','turtle']],['Arthropods',['tarantula','scorpion','crab','millipede','bee']],['Molluscs',['gsnail','cuttle','nudi']],['Fish',['puffer','shark']],['Fantasy',['slime','golem','mush','kraken','bun']]];
+    const PET_GROUPS=[['Amphibians',['frog','dart','salamander','axolotl']],['Reptiles',['lizard','gecko','chameleon','dragon','snake','turtle']],['Arthropods',['tarantula','scorpion','crab','millipede','bee']],['Molluscs',['gsnail','cuttle','nudi']],['Birds',['chick']],['Fish',['puffer','shark']],['Fantasy',['slime','golem','mush','kraken','bun']]];
     const order=[];for(const[g,ks]of PET_GROUPS)for(const k of ks)if(ROSTER.includes(k))order.push([g,k]);for(const k of ROSTER)if(!order.some(o=>o[1]===k))order.push(['Other',k]);
     let lastG='';
     for(const[grp,kind]of order){if(grp!==lastG){lastG=grp;const hd=document.createElement('div');hd.className='rgroup';hd.textContent=grp;ro.appendChild(hd);}
