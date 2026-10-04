@@ -598,6 +598,7 @@ const SFX=(()=>{
     lightsOff:()=>{noise(0.02,{freq:4000,gain:0.2});tone(220,0.9,{attack:0.25,gain:0.06});tone(330,1.0,{attack:0.35,gain:0.04});},
     lightsOn:()=>{noise(0.02,{freq:4000,gain:0.2});tone(660,0.15,{delay:0.05,type:'triangle',gain:0.06});tone(990,0.22,{delay:0.13,type:'triangle',gain:0.05});},
     trill:()=>{for(let k=0;k<9;k++)tone(3100+(k%2)*260,0.032,{delay:k*0.042,type:'square',to:2800,gain:0.026});},
+    absorb:()=>{tone(880,0.18,{to:1760,gain:0.03});tone(1320,0.2,{delay:0.06,to:2640,gain:0.02});},chime:()=>{for(const[f,d]of[[1568,0],[2093,0.07],[2637,0.14]])tone(f,0.22,{delay:d,gain:0.022});},whoosh:()=>noise(0.28,{freq:1400,to:400,q:0.8,gain:0.04}),
     peep:()=>{tone(3600,0.07,{to:4400,gain:0.035});},peeps:()=>{for(let k=0;k<4;k++)tone(3800+rand(-200,300),0.06,{delay:k*0.08,to:4600,gain:0.035});},
     cheep:()=>{tone(3200,0.05,{to:4200,gain:0.03});tone(3800,0.06,{delay:0.07,to:4800,gain:0.03});},peck:()=>{tone(2400,0.012,{type:'square',gain:0.02});},
     scratch:()=>{noise(0.05,{freq:2400,gain:0.02});noise(0.05,{delay:0.08,freq:2200,gain:0.02});},shakeoff:()=>{for(let k=0;k<5;k++)noise(0.04,{delay:k*0.05,freq:2800,gain:0.02});tone(3400,0.07,{delay:0.28,to:2600,gain:0.03});},
@@ -1148,6 +1149,9 @@ const SPECIES={
   frog:{label:'Red-eyed tree frog',latin:'Agalychnis callidryas',
     blurb:'Springy and wide-eyed. Hops with squash and stretch and snaps flies out of the air with a long tongue. A night owl.',
     names:['Pip','Lily','Bog','Mango','Pickle','Nori','Bean'],outline:PAL.frog.outline},
+  wisp:{label:"Will-o'-wisp",latin:'Ignis fatuus',
+    blurb:'A living flame of foxfire. Floats and flickers, glows in the dark, beckons you to follow, and absorbs its food in a flare of sparks. Hates water.',
+    names:['Flicker','Ember','Lumen','Wick','Glim','Foxfire','Pip','Spark'],outline:'#0a1240'},
   chick:{label:'Baby chick',latin:'Gallus gallus (very small)',
     blurb:'A round puff of yellow fluff. Trots about bobbing its head, pecks at everything, peeps a lot and follows your hand around like a duckling.',
     names:['Peep','Nugget','Sunny','Puff','Butter','Chirp','Pip','Mochi'],outline:'#3a2604'},
@@ -1173,6 +1177,7 @@ const DIET={
   bun:{butter:10,honey:9,fruit:7,grape:6,greens:5,flower:4,moonberry:6,stars:6},
   slime:{butter:7,honey:8,flower:8,grape:9,stars:9,cricket:7,roach:7,worm:7,waxworm:8,fly:6,snail:6,fruit:8,egg:7,greens:7,bloodworm:7,shrimp:6,minnow:6,moonberry:10,geode:7},
   frog:{fly:9,cricket:6,waxworm:7,worm:4,roach:5,snail:0,fruit:0,egg:0,greens:0,bloodworm:6,shrimp:3,minnow:5,moonberry:0,geode:0},
+  wisp:{firefly:10,moonberry:9,stars:9,geode:5,flower:3,honey:3,gummy:4},
   chick:{seeds:10,worm:9,waxworm:9,cricket:7,greens:6,grape:5,fruit:5,flower:3,gummy:3,fly:3,roach:2},
   dart:{fly:10,cricket:6,waxworm:5,worm:3,roach:3,snail:0,fruit:0,egg:0,greens:0,bloodworm:6,shrimp:2,minnow:0,moonberry:0,geode:0},
   lizard:{cricket:9,roach:8,waxworm:8,worm:6,fly:4,snail:3,fruit:3,egg:0,greens:2,bloodworm:3,shrimp:0,minnow:0,moonberry:3,geode:0},
@@ -1202,9 +1207,9 @@ const CRUMB={cricket:hex('#6a4a2a'),worm:hex('#c89a4a'),waxworm:hex('#f0e0c0'),s
 Object.assign(CRUMB,{seeds:hex('#d8b870'),firefly:hex('#c8e860'),gummy:hex('#ff5a6a')});
 // Hunting styles: how long they stalk, how close before they commit, and how they rush.
 const HUNT={shark:{st:[0.6,1.5],near:30,rush:'run'},nudi:{st:[0,0.2],near:80,rush:'slow'},mush:{st:[0.4,1.2],near:20,rush:'walk'},puffer:{st:[0.3,1.0],near:26,rush:'walk'},bee:{st:[0.1,0.5],near:40,rush:'walk'},lizard:{st:[0.3,1.4],near:42,rush:'run'},salamander:{st:[0.6,2.0],near:28,rush:'run'},snake:{st:[0.8,2.2],near:32,rush:'run'},
-  chameleon:{st:[1.0,2.4],near:40,rush:'run'},dragon:{st:[0.5,1.6],near:36,rush:'run'},gecko:{st:[0.8,2.0],near:30,rush:'run'},slime:{st:[0.2,0.8],near:40,rush:'run'},axolotl:{st:[0.3,1.0],near:26,rush:'run'},millipede:{st:[0,0],near:0,rush:'walk'},frog:{st:[0.2,1.0],near:40,rush:'run'},dart:{st:[0.1,0.6],near:30,rush:'run'},chick:{st:[0.1,0.5],near:28,rush:'run'},tarantula:{st:[0.6,1.8],near:40,rush:'pounce',ambush:true},scorpion:{st:[0.5,1.6],near:36,rush:'pounce',ambush:true},kraken:{st:[0.2,0.7],near:44,rush:'run'},cuttle:{st:[0.9,2.0],near:32,rush:'run'},golem:{st:[0,0.3],near:60,rush:'walk'},
+  chameleon:{st:[1.0,2.4],near:40,rush:'run'},dragon:{st:[0.5,1.6],near:36,rush:'run'},gecko:{st:[0.8,2.0],near:30,rush:'run'},slime:{st:[0.2,0.8],near:40,rush:'run'},axolotl:{st:[0.3,1.0],near:26,rush:'run'},millipede:{st:[0,0],near:0,rush:'walk'},frog:{st:[0.2,1.0],near:40,rush:'run'},dart:{st:[0.1,0.6],near:30,rush:'run'},chick:{st:[0.1,0.5],near:28,rush:'run'},wisp:{st:[0.2,0.6],near:40,rush:'walk'},tarantula:{st:[0.6,1.8],near:40,rush:'pounce',ambush:true},scorpion:{st:[0.5,1.6],near:36,rush:'pounce',ambush:true},kraken:{st:[0.2,0.7],near:44,rush:'run'},cuttle:{st:[0.9,2.0],near:32,rush:'run'},golem:{st:[0,0.3],near:60,rush:'walk'},
   crab:{st:[0,0.5],near:30,rush:'run'},turtle:{st:[0,0],near:0,rush:'walk'},gsnail:{st:[0,0],near:0,rush:'walk'}};
-const BITER={chick:{iv:.28,snd:'peck',t:1.0},shark:{iv:.35,snd:'chomp',t:1.4},nudi:{iv:.8,snd:'plip',t:3},mush:{iv:.5,snd:'chew',t:2.4},puffer:{iv:.4,snd:'crunch',t:2.2},bee:{iv:.55,snd:'plip',t:2.4},crab:{iv:.62,snd:'snap',t:2.6},turtle:{iv:.6,snd:'chomp',t:2.4},gsnail:{iv:.9,snd:'squelch',t:3.2},tarantula:{iv:.35,snd:'chew',t:2.2},scorpion:{iv:.42,snd:'snap',t:2.4},kraken:{iv:.4,snd:'chew',t:2.2},cuttle:{iv:.45,snd:'chew',t:2},golem:{iv:.55,snd:'chomp',t:2.6}};
+const BITER={wisp:{iv:.5,snd:'tink2',t:1.6},chick:{iv:.28,snd:'peck',t:1.0},shark:{iv:.35,snd:'chomp',t:1.4},nudi:{iv:.8,snd:'plip',t:3},mush:{iv:.5,snd:'chew',t:2.4},puffer:{iv:.4,snd:'crunch',t:2.2},bee:{iv:.55,snd:'plip',t:2.4},crab:{iv:.62,snd:'snap',t:2.6},turtle:{iv:.6,snd:'chomp',t:2.4},gsnail:{iv:.9,snd:'squelch',t:3.2},tarantula:{iv:.35,snd:'chew',t:2.2},scorpion:{iv:.42,snd:'snap',t:2.4},kraken:{iv:.4,snd:'chew',t:2.2},cuttle:{iv:.45,snd:'chew',t:2},golem:{iv:.55,snd:'chomp',t:2.6}};
 const PREY_NAME=Object.fromEntries(Object.entries(FOODS).map(([k,v])=>[k,v.name]));
 
 // =====================================================================
@@ -1526,6 +1531,7 @@ const MIND={
   salamander:{sight:[60,2.2,1.5],smell:32,vib:0,think:0.85,cur:0.45,bold:0.4,smart:0.35,focus:0.5,energy:0.35,patience:0.5},
   snake:{sight:[70,2.0,1.8],smell:42,vib:30,think:0.85,cur:0.5,bold:0.5,smart:0.6,focus:0.8,energy:0.4,patience:0.8},
   frog:{sight:[110,3.0,1.0],motionOnly:true,smell:12,vib:0,think:0.3,cur:0.4,bold:0.4,smart:0.4,focus:0.7,energy:0.4,patience:0.9},
+  wisp:{sight:[160,3.4,1.0],smell:0,vib:0,think:0.7,cur:0.9,bold:0.6,smart:0.7,focus:0.6,energy:0.6,patience:0.7},
   chick:{sight:[140,2.8,1.4],smell:10,vib:20,think:0.4,cur:0.85,bold:0.35,smart:0.3,focus:0.5,energy:0.85,patience:0.4},
   dart:{sight:[100,3.0,1.0],motionOnly:true,smell:10,vib:0,think:0.25,cur:0.7,bold:0.7,smart:0.4,focus:0.8,energy:0.8,patience:0.6},
   tarantula:{sight:[30,3.0,1.3],smell:14,vib:85,think:0.6,cur:0.35,bold:0.7,smart:0.65,focus:0.85,energy:0.35,patience:0.9},
@@ -3597,6 +3603,96 @@ class Nudi extends Pet{
     return Pet.prototype.statusText.call(this);}
 }
 // =====================================================================
+//  Will-o'-wisp: a living flame of foxfire, drawn in light (no outline, no shading) after the night falls
+//  so it truly glows. Floats and bobs, leans as it glides, drifts between electric blue and foxfire green,
+//  beckons ahead of your hand like the wisps that lead travellers astray, pulls food into its flame and
+//  absorbs it in a flare of sparks, flares up when petted, gutters and darts off when startled, hisses and
+//  steams when misted, and by day dozes as a small ember.
+// =====================================================================
+const WISPA=[hex('#3a1a8a'),hex('#5a3cf0'),hex('#38c8ff'),hex('#bafcff'),hex('#ffffff')],WISPB=[hex('#0e4a5a'),hex('#18a888'),hex('#56f0c0'),hex('#d4ffee'),hex('#ffffff')];
+class Wisp extends Pet{
+  constructor(world,x,y){super();this.initCommon(world,'wisp');
+    this.x=x;this.y=y;this.ang=0;this.h=8;this.vx=0;this.vy=0;this.speed=0;this.sc=1;this.outline=hex('#0a1240');this.n=1;this.pts=[{x,y}];this.gt=0;
+    this.joy=0;this.dim=0;this.flare=0;this.snuff=0;this.wet=0;this.hue=rand(TAU);this.motes=[];this.embT=0;this.embers=[];this.trail=[];this.seed=rand(50);}
+  isActive(){return true;}
+  ember(){return this.state==='sleeping'?1:0;}
+  core(){return{x:this.x,y:this.y-this.h};}
+  lure(){return this.ember()>0.5||this.wet>0.3?null:{x:this.x,y:this.y,h:this.h};}
+  headPos(){return{x:this.x,y:this.y};}
+  mouthScreen(){const c=this.core();return{x:c.x,y:c.y+0.5};}
+  hatAnchor(){const c=this.core();return{x:c.x,y:c.y-this.flameH()*0.55,a:0,s:0.95};}
+  noise(){return 0.05;}
+  flameH(){return(14+this.joy*4+this.flare*5)*(1-this.snuff*0.55)*(1-this.wet*0.4)*(1-this.dimK()*0.55);}
+  flameR(){return(5.4+this.joy*0.6+this.flare*1.2)*(1-this.snuff*0.4)*(1-this.wet*0.3)*(1-this.dimK()*0.35);}
+  dimK(){return Math.max(this.ember()*0.9,this.dim);}
+  goTo(tx,ty,dt,mode,arrive=3){const d=Math.hypot(tx-this.x,ty-this.y),max=mode==='run'||mode==='lunge'?42:mode==='slow'||mode==='stalk'?9:18,want=d>arrive?max*clamp(d/14,0.3,1):0,a=Math.atan2(ty-this.y,tx-this.x),k=Math.min(1,dt*3);
+    this.vx+=(Math.cos(a)*want-this.vx)*k;this.vy+=(Math.sin(a)*want-this.vy)*k;return d<=arrive;}
+  stop(dt){const k=Math.min(1,dt*2.5);this.vx-=this.vx*k;this.vy-=this.vy*k;}
+  faceToward(){}
+  decide(){const P=game.pointer;
+    // like the wisps of old it beckons: floats a little way ahead of your hand and waits
+    if(!this.preview&&P.inside&&Math.random()<0.5){const a=Math.atan2(this.y-P.y,this.x-P.x)+rand(-0.8,0.8),B=this.world.bounds;this.tx=clamp(P.x+Math.cos(a)*16,B.x0+8,B.x1-8);this.ty=clamp(P.y+Math.sin(a)*12,B.y0+8,B.y1-8);this.state='wander';this.pace='walk';this.timer=4;return;}
+    if(Math.random()<0.35){this.state='idle';this.timer=rand(2,5);return;}[this.tx,this.ty]=this.randomSpot();this.pace=Math.random()<0.3?'slow':'walk';this.state='wander';this.timer=9;}
+  canStrike(p){const c=this.core(),d=Math.hypot(p.x-c.x,(p.y-p.h)-c.y-this.h*0.6);return Math.hypot(p.x-this.x,p.y-this.y)<9&&(p.h<14||p.inHand)&&d<22;}
+  startStrike(p){this.tg={t:0,p};}
+  updateStrike(dt){const T=this.tg;if(!T)return 'miss';const p=T.p;T.t+=dt;if(p.dead||p.caught){this.tg=null;return 'miss';}
+    this.goTo(p.x,p.y,dt,'walk',0.5);this.h+=(4-this.h)*Math.min(1,dt*4);// dips down over the food
+    if(T.t>0.25&&Math.hypot(p.x-this.x,p.y-this.y)<5){p.caught=true;this.held=p;this.tg=null;catchFx(this,p);if(!this.preview)SFX.play('absorb');return 'caught';}
+    if(T.t>3){this.tg=null;return 'miss';}return null;}
+  syncHeld(){if(this.held){const c=this.core(),k=this.state==='chew'?Math.min(1,(this.chewT||0)*1.5):0;this.held.sx=c.x;this.held.sy=c.y+1.5-k*1.5;}}
+  finishEating(){super.finishEating();this.flare=1;if(!this.preview){SFX.play('chime');for(let i=0;i<12;i++)this.embers.push({x:this.x+rand(-3,3),y:this.y-this.h+rand(-3,3),vx:rand(-14,14),vy:rand(-26,-6),life:rand(0.5,1)});}}
+  startle(x,y){if(this.state==='grabbed')return;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.snuff=1;
+    const a=Math.atan2(this.y-y,this.x-x),B=this.world.bounds;this.vx+=Math.cos(a)*50;this.vy+=Math.sin(a)*50;this.tx=clamp(this.x+Math.cos(a)*45,B.x0+8,B.x1-8);this.ty=clamp(this.y+Math.sin(a)*45,B.y0+8,B.y1-8);this.state='wander';this.pace='run';this.timer=1.5;
+    if(!this.preview){SFX.play('whoosh');think(this,'!');const c=this.core();spawn(this.world,'smoke',c.x,c.y,{vx:0,life:1.4});}}
+  petMe(){const r=super.petMe();if(r&&!this.preview){this.joy=Math.min(1,this.joy+0.06);this.pT=(this.pT||0)-1/60;if(this.pT<=0){this.pT=rand(1,1.8);SFX.play('chime');}}return r;}
+  hitTest(x,y){const c=this.core();return Math.hypot(x-c.x,y-(c.y-3))<9?0:-1;}
+  tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;if(!this.preview)SFX.play('chime');return true;}
+  dragTo(x,y){this.grabX=x;this.grabY=y;}
+  release(){if(this.state!=='grabbed')return;this.state='idle';this.timer=1;}
+  update(dt){const w=this.world;this.t+=dt;if(this.state==='chew')this.chewT=(this.chewT||0)+dt;else this.chewT=0;
+    this.joy=Math.max(this.state==='petted'?this.joy:0,this.joy-dt*0.25);this.flare=Math.max(0,this.flare-dt*1.2);this.snuff=Math.max(0,this.snuff-dt*0.6);
+    this.dim+=(clamp((40-w.stats.happy)/40,0,0.6)-this.dim)*Math.min(1,dt);this.hue+=dt*0.35;
+    // misting: it hisses, shrinks and steams, and is in a sulk for a while
+    const P=game.pointer,misted=!this.preview&&game.tool==='mist'&&P.down&&P.inside&&Math.hypot(P.x-this.x,P.y-this.y+this.h)<26;
+    if(misted){if(this.wet<0.2&&!this.preview)SFX.play('sizzle');this.wet=Math.min(1,this.wet+dt*2.5);this.hissT=(this.hissT||0)-dt;if(this.hissT<=0){this.hissT=0.12;const c=this.core();spawn(w,'steam',c.x+rand(-3,3),c.y-rand(2,8),{vy:rand(-12,-6),vx:rand(-3,3),ph:rand(TAU),life:rand(0.8,1.3)});}if(!this.preview)w.stats.happy=Math.max(0,w.stats.happy-dt*4);}
+    else this.wet=Math.max(0,this.wet-dt*0.3);
+    if(this.state==='grabbed'){this.gt+=dt;this.x+=(this.grabX-this.x)*Math.min(1,dt*12);const ty=this.grabY+this.h;this.y+=(ty-this.y)*Math.min(1,dt*12);this.vx=(this.grabX-this.x)*4;this.vy=0;this.pts[0].x=this.x;this.pts[0].y=this.y;this.tick(dt);return;}
+    this.brain(dt);
+    const sleeping=this.state==='sleeping',hT=sleeping?2.5:this.state==='strike'?this.h:8+Math.sin(this.t*2+this.seed)*1.6;this.h+=(hT-this.h)*Math.min(1,dt*2);
+    const B=w.bounds,m=8;this.x+=this.vx*dt;this.y+=this.vy*dt;if(this.x<B.x0+m||this.x>B.x1-m)this.vx*=-0.5;if(this.y<B.y0+m||this.y>B.y1-m)this.vy*=-0.5;this.x=clamp(this.x,B.x0+m,B.x1-m);this.y=clamp(this.y,B.y0+m,B.y1-m);
+    this.speed=Math.hypot(this.vx,this.vy);this.pts[0].x=this.x;this.pts[0].y=this.y;this.syncHeld();this.tick(dt);}
+  tick(dt){// embers rising off the tip and a short trail of afterimages
+    this.embT-=dt;if(this.embT<=0&&this.ember()<1){this.embT=rand(0.15,0.35)/(1+this.joy+this.flare);const c=this.core();this.embers.push({x:c.x+rand(-1.5,1.5),y:c.y-this.flameH()*0.8,vx:rand(-3,3),vy:rand(-14,-8),life:rand(0.6,1.1)});}
+    for(const e of this.embers){e.x+=e.vx*dt;e.y+=e.vy*dt;e.vx*=1-dt;e.life-=dt;}this.embers=this.embers.filter(e=>e.life>0);
+    const c=this.core();this.trail.unshift({x:c.x,y:c.y});if(this.trail.length>14)this.trail.pop();}
+  color(){return INK;}
+  draw(fb){}// it's all light: drawn in glow(), after the night falls
+  pal(){const k=0.5+0.5*Math.sin(this.hue);return WISPA.map((a,i)=>mixc(a,WISPB[i],k));}
+  glow(fb,night){const pal=this.pal(),c=this.core(),cx=c.x,cy=c.y,x=this.x,y=this.y,t=this.t,H=this.flameH()+Math.sin(t*11)*0.8,r0=this.flameR(),vx=this.vx,e=this.ember(),bright=(1-this.dimK()*0.5);
+    const add=(px,py,col,f)=>padd(fb,px,py,((col)&255)*f,((col>>8)&255)*f,((col>>16)&255)*f);
+    // a pool of light on the ground and a soft halo, much stronger at night
+    const gk=(0.35+night*0.65)*bright;for(let yy=-6;yy<=6;yy++)for(let xx=-16;xx<=16;xx++){const d=Math.hypot(xx/16,yy/6);if(d<1)add(x+xx,y+yy,pal[2],(1-d)*(1-d)*0.55*gk);}
+    for(let yy=-22;yy<=12;yy++)for(let xx=-16;xx<=16;xx++){const d=Math.hypot(xx/16,(yy+4)/17);if(d<1)add(cx+xx,cy+yy,pal[2],(1-d)*(1-d)*(0.85+0.15*Math.sin(t*9))*0.45*gk);}
+    // afterimages when it moves
+    const sp=Math.hypot(vx,this.vy);if(sp>8)for(let k=3;k<this.trail.length;k+=3){const T=this.trail[k],rr=r0*(1-k/18);for(let yy=-5;yy<=5;yy++)for(let xx=-5;xx<=5;xx++){const d=Math.hypot(xx,yy)/rr;if(d<1)pmix(fb,T.x+xx,T.y+yy,pal[1],(1-d)*0.25*Math.min(1,sp/30));}}
+    // the flame: a turbulent field mapped onto a glowing ramp, swaying and leaning gently away from where it's going
+    const lean=clamp(vx*0.1,-4,4);
+    const field=(px,py)=>{const dx0=px-cx,dy=py-cy;if(dy>0)return 1-Math.hypot(dx0,dy*1.1)/r0;const up=Math.min(1,-dy/H),dx=dx0+(vnoise(py*0.33,t*3.5+this.seed)-0.5)*4*up+lean*up*up,wdt=r0*Math.pow(Math.max(0,1-up),0.6);if(wdt<=0.05)return -1;
+      let I=1-Math.abs(dx)/wdt;I-=vnoise(px*0.5+3,py*0.42+t*8)*0.42*up;I-=up*0.12;return I;};
+    for(let py=Math.floor(cy-H-3);py<=cy+r0+1;py++)for(let px=Math.floor(cx-r0-5);px<=cx+r0+5;px++){const I=field(px+.5,py+.5)*bright;if(I<=0)continue;const d=hash(px*13,py*7)*0.12;
+      if(I>0.72-d)pset(fb,px,py,pal[4]);else if(I>0.5-d)pset(fb,px,py,pal[3]);else if(I>0.3-d)pset(fb,px,py,pal[2]);else if(I>0.12-d)pset(fb,px,py,pal[1]);else pmix(fb,px,py,pal[0],0.7);}
+    // eyes: glance where it's going, happy arcs when it's delighted, sleepy lines as an ember
+    const K=mixc(pal[0],hex('#05061a'),0.6),ex=Math.round(cx-0.5),ey=Math.round(cy+0.2),lk=Math.round(clamp(vx*0.05,-1,1)),happy=this.joy>0.4||this.flare>0.5;
+    for(const sd of[-2,2]){if(e>0.5){pset(fb,ex+sd-1,ey,K);pset(fb,ex+sd,ey,K);}else if(happy){pset(fb,ex+sd-1,ey+1,K);pset(fb,ex+sd,ey,K);pset(fb,ex+sd+1,ey+1,K);}
+      else if(this.wet>0.4||this.snuff>0.5){pset(fb,ex+sd,ey,K);pset(fb,ex+sd+(sd<0?1:-1),ey-1,K);}else{pset(fb,ex+sd+lk,ey-1,K);pset(fb,ex+sd+lk,ey,K);pset(fb,ex+sd+lk,ey+1,K);}}
+    // motes circling it, embers rising off the tip
+    if(e<0.5)for(let i=0;i<3;i++){const a=t*2.2+i*TAU/3,px=cx+Math.cos(a)*(9+this.joy*2),py=cy-3+Math.sin(a)*3,front=Math.sin(a)>0;pset(fb,px,py,front?pal[4]:pal[2]);if(front){pmix(fb,px+1,py,pal[3],0.6);pmix(fb,px-1,py,pal[3],0.6);}}
+    for(const m of this.embers)pmix(fb,m.x,m.y,pal[3],Math.min(1,m.life*1.4));}
+  statusText(){if(this.state==='grabbed')return 'is fizzing in your hand';if(this.ember()>0.5)return 'is dozing as a little ember';if(this.wet>0.3)return 'is hissing and steaming. It does NOT like water!';
+    if(this.state==='chew')return `is absorbing ${PREY_NAME[this.held?.type]||'something'} into its flame`;if(this.joy>0.5||this.flare>0.4)return 'is flaring up, all bright and happy';
+    if(this.state==='wander'&&game.pointer.inside&&Math.hypot(this.tx-game.pointer.x,this.ty-game.pointer.y)<24)return 'is beckoning you to follow...';if(this.state==='wander')return 'is drifting about the tank';return 'is flickering quietly';}
+}
+// =====================================================================
 //  Baby chick: a round puff of yellow fluff. Trots about bobbing its head, pecks at the ground and its food,
 //  scratches the dirt, peeps a lot, follows the hand around like a duckling, flutters its stubby wings when
 //  it's happy, shakes itself off when misted and naps at night with its head tucked into its fluff.
@@ -4524,7 +4620,8 @@ class Firefly extends Fly{
   constructor(x,y,h){super(x,y,h);this.type='firefly';this.value=FOODS.firefly.value;this.flier=true;this.lit=0;this.blinkT=rand(0.3,2.2);this.targetH=rand(7,16);}
   update(dt,w){if(this.caught||this.inHand){this.lit=0.6+0.4*Math.sin(this.t*9);this.t+=dt;return;}
     this.t+=dt;this.blinkT-=dt;if(this.blinkT<=0){this.blinkT=rand(0.9,2.2);this.flash=0.001;}if(this.flash>0){this.flash+=dt;this.lit=this.flash<0.18?this.flash/0.18:Math.max(0,1-(this.flash-0.18)/0.9);if(this.flash>1.1)this.flash=0;}else this.lit=Math.max(0,this.lit-dt);
-    const B=w.bounds,s=preyScare(this,w,12);
+    const B=w.bounds,lure=w.pet&&w.pet.lure&&w.pet.lure(),s=lure?null:preyScare(this,w,12);
+    if(lure&&Math.hypot(lure.x-this.x,lure.y-this.y)<70){this.landT=0;this.ang+=wrapA(Math.atan2(lure.y-this.y,lure.x-this.x)-this.ang)*dt*2.5;this.targetH=lure.h;}// moth-to-flame: drawn to the wisp's light
     if(this.landT>0){this.landT-=dt;this.h=Math.max(0,this.h-24*dt);if(s)this.landT=0;if(this.landT<=0)this.targetH=rand(7,16);return;}
     this.ang+=(vnoise(this.t*0.9,this.seed)-0.5)*6*dt;const cx=(B.x0+B.x1)/2,cy=(B.y0+B.y1)/2;
     if(this.x<B.x0+12||this.x>B.x1-12||this.y<B.y0+12||this.y>B.y1-12)this.ang+=wrapA(Math.atan2(cy-this.y,cx-this.x)-this.ang)*dt*3;
@@ -4905,7 +5002,7 @@ const TOY_LABEL={ball:'the beach ball',squeaky:'the squeaky duck',bell:'the jing
   yarn:'the yarn ball',dice:'the foam die',plush:'the octopus plush',spinner:'the spinning top',rc:'the RC car',musicbox:'the music box',bubbler:'the bubble machine',butterfly:'the clockwork butterfly'};
 const TOY_TOOLS=['laser','bubbles','feather','remote'];
 const toolOwned=x=>x==='remote'?(save.inv.rc||0)>0:(save.inv[x]||0)>0;
-const ROSTER=['bun','shark','nudi','chick','dart','frog','lizard','salamander','snake','chameleon','dragon','golem','mush','gecko','axolotl','millipede','bee','slime','tarantula','scorpion','kraken','cuttle','puffer','crab','turtle','gsnail'];
+const ROSTER=['bun','shark','nudi','wisp','chick','dart','frog','lizard','salamander','snake','chameleon','dragon','golem','mush','gecko','axolotl','millipede','bee','slime','tarantula','scorpion','kraken','cuttle','puffer','crab','turtle','gsnail'];
 
 // =====================================================================
 //  Save (localStorage, wrapped so the game still works without it)
@@ -4933,7 +5030,7 @@ function writeSave(){
 function petSave(kind=game.kind){return save.pets[kind]||(save.pets[kind]={name:pick(SPECIES[kind].names),xp:0,lvl:1,hat:null,stats:null});}
 const xpNeed=l=>40+l*25;
 // Frog, lizard and salamander are free; the rest cost coins (anyone adopted before pricing stays owned).
-const FREE_PETS=['frog','lizard','salamander'],PET_PRICE=100,PET_PRICES={shark:180,nudi:140,dart:130,chick:110,bun:150,golem:150,kraken:200,cuttle:150,bee:120,puffer:150,mush:150};
+const FREE_PETS=['frog','lizard','salamander'],PET_PRICE=100,PET_PRICES={shark:180,nudi:140,dart:130,chick:110,wisp:160,bun:150,golem:150,kraken:200,cuttle:150,bee:120,puffer:150,mush:150};
 const petPrice=k=>PET_PRICES[k]||PET_PRICE;
 const petOwned=k=>FREE_PETS.includes(k)||!!save.pets[k]||save.owned.includes(k);
 
@@ -5447,7 +5544,7 @@ const $=id=>document.getElementById(id);
 const game={mode:'boot',tool:'feed',food:'cricket',toyTool:null,world:null,pointer:{x:-99,y:-99,down:false,inside:false,moved:0,sprayT:0,vx:0,vy:0,lt:0},
   shake:0,flashT:0,flashMsg:'',name:'',kind:'',uiT:0,grabbing:false,chirpT:4,croakT:6,held:null,placing:null,dragObj:null,
   coinT:rand(15,30),thinkT:6,thought:null,hearts:0,bubbleT:0,trayOpen:true,firstRun:false};
-const makePet=(w,kind,x,y)=>kind==='frog'?new Frog(w,x,y):kind==='dart'?new DartFrog(w,x,y):kind==='chick'?new Chick(w,x,y):kind==='crab'?new Crab(w,x,y):kind==='turtle'?new Turtle(w,x,y):kind==='gsnail'?new GSnail(w,x,y):
+const makePet=(w,kind,x,y)=>kind==='frog'?new Frog(w,x,y):kind==='dart'?new DartFrog(w,x,y):kind==='chick'?new Chick(w,x,y):kind==='wisp'?new Wisp(w,x,y):kind==='crab'?new Crab(w,x,y):kind==='turtle'?new Turtle(w,x,y):kind==='gsnail'?new GSnail(w,x,y):
   kind==='tarantula'?new Spider(w,x,y):kind==='scorpion'?new Scorpion(w,x,y):kind==='kraken'?new Kraken(w,x,y):kind==='cuttle'?new Cuttle(w,x,y):kind==='bun'?new Bun(w,x,y):kind==='shark'?new Shark(w,x,y):kind==='nudi'?new Nudi(w,x,y):kind==='golem'?new Golem(w,x,y):kind==='bee'?new Bee(w,x,y):kind==='mush'?new Mush(w,x,y):kind==='puffer'?new Puffer(w,x,y):kind==='chameleon'?new Chameleon(w,x,y):kind==='dragon'?new Dragon(w,x,y):kind==='gecko'?new Gecko(w,x,y):kind==='axolotl'?new Axolotl(w,x,y):kind==='millipede'?new Millipede(w,x,y):kind==='slime'?new Slime(w,x,y):new Walker(w,kind,x,y);
 function createWorld(){
   const w={stats:{fed:72,happy:70,water:68},prey:[],parts:[],ripples:[],glassDrops:[],glassRings:[],fireflies:[],motes:[],
@@ -5660,7 +5757,7 @@ function cuddleHeart(pet){const ps=petSave(),c=cuddleState(ps),w=game.world;
     for(let i=0;i<6;i++)spawn(w,'star',hd.x+rand(-5,5),hd.y-4+rand(-4,4),{life:rand(0.15,0.3)});}
   const pc=$('psCud');if(pc&&!$('petStats').hidden)pc.innerHTML=ui.cuddleHTML();}
 // ---- Mess: droppings a while after meals, and food left lying about going stale. Scoop them up for a coin each ----
-const NO_POOP=['slime','mush','bee','bun'],LIVE_FOOD=['cricket','roach','fly','firefly','minnow','shrimp','snail','worm','waxworm'];
+const NO_POOP=['slime','mush','bee','bun','wisp'],LIVE_FOOD=['cricket','roach','fly','firefly','minnow','shrimp','snail','worm','waxworm'];
 function addMess(w,x,y,k){if(!w.mess)w.mess=[];if(w.mess.length>=12)return null;const B=w.bounds,m={x:clamp(x,B.x0+2,B.x1-2),y:clamp(y,B.y0+2,B.y1-2),k:k||'drop',t:0,s:rand(0.85,1.2),a:rand(TAU),born:1};w.mess.push(m);return m;}
 function messCount(w){let n=w.mess?w.mess.length:0;for(const q of w.prey)if(q.stale&&!q.dead)n++;return n;}
 function messAt(w,x,y){let best=null,bd=8;for(const m of w.mess||[]){const d=Math.hypot(m.x-x,m.y-y);if(d<bd){bd=d;best=m;}}
@@ -7205,7 +7302,7 @@ const ui={
     $('petsSub').textContent=first2?`Frog, lizard and salamander are free. The others cost ${PET_PRICE}+ coins each.`:`Free critters are always here. Others cost ${PET_PRICE}+ coins to adopt. Everyone keeps their name, bond and hat. Water-lovers live in the paludarium.`;
     $('petsX').hidden=first2;
     const ro=$('roster');ro.innerHTML='';this.previews=[];
-    const PET_GROUPS=[['Amphibians',['frog','dart','salamander','axolotl']],['Reptiles',['lizard','gecko','chameleon','dragon','snake','turtle']],['Arthropods',['tarantula','scorpion','crab','millipede','bee']],['Molluscs',['gsnail','cuttle','nudi']],['Birds',['chick']],['Fish',['puffer','shark']],['Fantasy',['slime','golem','mush','kraken','bun']]];
+    const PET_GROUPS=[['Amphibians',['frog','dart','salamander','axolotl']],['Reptiles',['lizard','gecko','chameleon','dragon','snake','turtle']],['Arthropods',['tarantula','scorpion','crab','millipede','bee']],['Molluscs',['gsnail','cuttle','nudi']],['Birds',['chick']],['Fish',['puffer','shark']],['Fantasy',['slime','golem','mush','kraken','bun','wisp']]];
     const order=[];for(const[g,ks]of PET_GROUPS)for(const k of ks)if(ROSTER.includes(k))order.push([g,k]);for(const k of ROSTER)if(!order.some(o=>o[1]===k))order.push(['Other',k]);
     let lastG='';
     for(const[grp,kind]of order){if(grp!==lastG){lastG=grp;const hd=document.createElement('div');hd.className='rgroup';hd.textContent=grp;ro.appendChild(hd);}
