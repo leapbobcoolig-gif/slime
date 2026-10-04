@@ -3752,7 +3752,7 @@ class FuzzWorm extends Pet{
       for(let it=0;it<10;it++)for(let i=0;i<R.length-1;i++){const a=R[i],c=R[i+1],dx=c.x-a.x,dy=c.y-a.y,d=Math.hypot(dx,dy)||1e-3,f=(d-seg)/d,wa=i===gi?0:i+1===gi?1:0.5,wc=1-wa;
         a.x+=dx*f*wa;a.y+=dy*f*wa;c.x-=dx*f*wc;c.y-=dy*f*wc;}}}
   // while held or dropping, the body comes from the rope; screen y = ground y - height
-  ropeLayout(){const R=this.rope,S=this.segs,h=this.h,N=this.N,base=this.state==='fall'?this.dropH:h;S.length=N;
+  ropeLayout(){this.rear=0;const R=this.rope,S=this.segs,h=this.h,N=this.N,base=this.state==='grabbed'?h:this.dropH;S.length=N;
     const gi=this.grabI||0,wg=this.state==='grabbed'?1:0;
     for(let i=0;i<N;i++){const f=i/(N-1),sw=wg*Math.sin(this.t*5-i*0.4)*Math.abs(i-gi)*0.06;S[i]={x:R[i].x+sw,y:R[i].y+base,z:h+(this.boing>0?Math.sin(f*Math.PI)*this.boing*2:0)};}
     this.x=S[0].x;this.y=S[0].y;}
