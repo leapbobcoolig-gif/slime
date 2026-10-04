@@ -2528,7 +2528,7 @@ class Slime extends Pet{
   // ---- body helpers
   headPos(){return this.pts[0];}
   mouthScreen(){return{x:this.x+Math.cos(this.ang)*1.5,y:this.y-this.h-2};}
-  hatAnchor(){return{x:this.x,y:this.y-this.h-this.R*0.55*(1+this.sq*0.4),a:this.ang,s:1.05};}
+  hatAnchor(){const c=Math.cos(this.ang),s=Math.sin(this.ang);return{x:this.x,y:this.y-this.h-this.R*0.55*(1+this.sq*0.4),a:this.ang,s:1.05,eye:{x:this.x+c*this.R*0.25+0.5,y:this.y-this.h+s*this.R*0.15-1.5+1.5,sp:2.8}};}
   noise(){return clamp(this.speed/40,0,1.2);}
   color(m,q,s,l,x,y){const C=this.cr;if(m===M.BODY){if(s>0.86)return C[Math.min(3,q+1)];if(s<0.55&&((x+y)&1)&&q>0)return C[q-1];return C[q];}return C[q];}
   // ---- movement: squish-hops toward a target
@@ -3434,7 +3434,7 @@ class Mush extends Pet{
   headPos(){const c=Math.cos(this.ang),s=Math.sin(this.ang);return{x:this.x+c*2.6*this.sc,y:this.y+s*2.6*this.sc};}
   // the mouth is on the front of the stem; the view is from above and in front, so the face shows unless it's walking away
   mouthScreen(){const sc=this.sc;return{x:this.x+Math.cos(this.ang)*1.6*sc*this.face,y:this.y-this.h-1.8*sc*(1-this.duck*0.8)};}
-  hatAnchor(){const c=this.capC;return{x:c.x,y:c.y-c.ry*0.55,a:this.ang,s:1.1,fy:0.5};}
+  hatAnchor(){const c=this.capC,sc=this.sc,f=this.face;return{x:c.x,y:c.y-c.ry*0.55,a:this.ang,s:1.1,fy:0.5,eye:this.duck<0.5&&f>=0.3?{x:this.x+Math.cos(this.ang)*1.3*sc*f+Math.cos(this.ang)*this.lean*1.2,y:this.y-this.h-2.4*sc+0.3,sp:1.6}:null};}
   noise(){return clamp(this.speed/6,0,1)*0.6;}
   goTo(tx,ty,dt,mode,arrive=3){const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y),dc=Math.hypot(tx-this.x,ty-this.y),done=d<=arrive||dc<=arrive+3;
     const max=mode==='run'?11:mode==='stalk'?3:mode==='slow'?3.5:6;const diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);
@@ -4360,7 +4360,7 @@ const HAT_PAINTER={outline:hex('#0a0708'),seam:1.1,color(m,q,s,l,x,y){
   switch(m){
     case HM.STRIPE:return((Math.floor(s*0.9)&1)?HR[45]:HR[43])[q];
     case HM.TOPC:return(s>0.35&&s<2.0?HR[41]:HR[40])[q];
-    case HM.COWC:return(s>0.4&&s<1.1?HR[50]:HR[49])[q];
+    case HM.COWC:return(s>0.3&&s<1.3?HR[49]:HR[50])[q];
     case HM.BEANIEC:return(s<0.55?HR[42]:HR[51])[q];
     case HM.PROPC:return(l<-0.33?HR[41]:l>0.33?HR[45]:HR[51])[q];
   }
@@ -4373,20 +4373,21 @@ function drawHat(fb,id,A,t){
   switch(id){
     case 'party':C(P(0,0,0),3.0,P(0,0,7),0.35,HM.STRIPE,0,0,7);D(P(0,0,7.6),1.1,HM.WHITE,1.5);break;
     case 'bow':D(P(0,-2.1,1),1.9,HM.PINK);D(P(0,2.1,1),1.9,HM.PINK);D(P(0,0,1),1.0,HM.PINKD,2);break;
-    case 'flower':for(let k=0;k<6;k++){const a=k/6*TAU;D(P(Math.cos(a)*2.7,Math.sin(a)*2.7,0.6),1.25,[HM.PINK,HM.YELLOW,HM.WHITE][k%3],k*0.2);
-      D(P(Math.cos(a)*2.7,Math.sin(a)*2.7,0.8),0.45,HM.ORANGE,2);}break;
+    case 'flower':for(let k=0;k<10;k++){const a1=k/10*TAU,a2=(k+1)/10*TAU;C(P(Math.cos(a1)*2.8,Math.sin(a1)*2.8,0.3),0.5,P(Math.cos(a2)*2.8,Math.sin(a2)*2.8,0.3),0.5,HM.GREEN,0);}
+      for(let k=0;k<5;k++){const a=k/5*TAU+0.3,u=Math.cos(a)*2.8,v=Math.sin(a)*2.8;D(P(u,v,0.8),1.55,[HM.PINK,HM.WHITE,HM.YELLOW,HM.PINK,HM.WHITE][k],1+k*0.1);D(P(u,v,1.2),0.6,HM.ORANGE,2.2);}break;
     case 'beanie':C(P(0,0,0),3.3,P(0,0,1.8),2.8,HM.BEANIEC,0,0,1.8);D(P(0,0,4),1.4,HM.WHITE,1.5);break;
     case 'tophat':D(P(0,0,0),4.4,HM.METAL,0);D(P(0,0,0.15),3.9,HM.BLACK,0.3);C(P(0,0,0.3),2.7,P(0,0,5.4),2.8,HM.TOPC,1,0,5);break;
-    case 'cowboy':C(P(0,-2,0),3.4,P(0,2,0),3.4,HM.TAN,0);C(P(0,0,0.2),2.3,P(0,0,3.2),2.0,HM.COWC,1,0,3);break;
-    case 'shades':D(P(0.6,-1.45,0.3),1.25,HM.BLACK,1);D(P(0.6,1.45,0.3),1.25,HM.BLACK,1);C(P(0.6,-0.5,0.3),0.35,P(0.6,0.5,0.3),0.35,HM.BLACK,1);break;
+    case 'cowboy':C(P(0,-2.2,0),3.3,P(0,2.2,0),3.3,HM.BROWN,0);for(const sd of[-1,1])C(P(0,sd*4.2,0.6),1.6,P(0,sd*5.0,1.8),1.0,HM.BROWN,0.4);C(P(0,0,0.2),2.4,P(0,0,3.4),2.0,HM.COWC,1,0,3.4);D(P(-0.3,0,3.5),1.2,HM.BROWN,1.6);break;
+    case 'shades':if(A.eye){const E=A.eye,r=1.6/S,z=E.z||1.5;for(const sd of[-1,1]){const p=[E.x+sd*E.sp,E.y-z];D(p,r,HM.BLACK,1.2);D([p[0]-0.6,p[1]-0.6],0.4/S,HM.WHITE,2.4);}C([E.x-E.sp+1.2,E.y-z],0.35/S,[E.x+E.sp-1.2,E.y-z],0.35/S,HM.BLACK,1.3);break;}
+      for(const sd of[-1,1]){D(P(2.4,sd*1.9,0.6),1.75,HM.BLACK,1.2);D(P(2.1,sd*1.9-0.6,1.1),0.42,HM.WHITE,2.4);C(P(2.2,sd*1.9,0.6),0.35,P(0.4,sd*3.1,0.6),0.3,HM.BLACK,1);}C(P(2.4,-0.4,0.6),0.4,P(2.4,0.4,0.6),0.4,HM.BLACK,1.3);break;
     case 'propeller':{C(P(0,0,0),2.9,P(0,0,1.5),2.5,HM.PROPC,0,0,1.5);C(P(0,0,1.8),0.3,P(0,0,3.2),0.3,HM.METAL,1);
       const a=t*16;for(const[k,m]of[[0,HM.YELLOW],[Math.PI,HM.RED]])C(P(0,0,3.4),0.7,P(Math.cos(a+k)*3.4,Math.sin(a+k)*3.4,3.4),0.35,m,2);break;}
     case 'wizard':D(P(0,0,0),4.4,HM.PURPLE,0);C(P(0,0,0.3),3.0,P(-1.4,0.3,8.8),0.35,HM.PURPLE,1,0,9);break;
-    case 'crown':C(P(0,0,0),3.0,P(0,0,1.6),3.0,HM.GOLD,0);D(P(0,0,1.7),2.25,HM.GOLDD,1);
-      for(let k=0;k<5;k++){const a=k/5*TAU+0.3,u=Math.cos(a)*2.6,v=Math.sin(a)*2.6;C(P(u,v,1.4),0.6,P(u,v,3.4),0.3,HM.GOLD,1.5+(u>0?1:0));}
-      D(P(2.9,0,0.9),0.65,HM.RUBY,3);break;
+    case 'crown':C(P(0,0,0),3.0,P(0,0,1.4),3.0,HM.GOLD,0);D(P(0,0,1.5),1.8,HM.PURPLE,0.8);
+      for(let k=0;k<5;k++){const a=k/5*TAU+0.3,u=Math.cos(a)*2.7,v=Math.sin(a)*2.7;C(P(u,v,1.2),0.9,P(u,v,3.6),0.45,HM.GOLD,1.5+(u>0?1:0));D(P(u,v,3.8),0.5,HM.YELLOW,2.6);}
+      D(P(3.0,0,0.8),0.8,HM.RUBY,3);D(P(0,-3.0,0.8),0.6,HM.BLUE,2.8);D(P(0,3.0,0.8),0.6,HM.BLUE,2.8);break;
     case 'ufo':{const hz=14+Math.sin(t*2)*1;D(P(0,0,hz),4.2,HM.METAL,0);D(P(0,0,hz+1),2.0,HM.GLASS,1);break;}
-    case 'cap':D(P(2.5,0,0.2),2.2,HM.RED,0);C(P(0,0,0),3.0,P(0,0,1.5),2.6,HM.RED,1,0,1.5);D(P(0,0,2.9),0.55,HM.WHITE,2);break;
+    case 'cap':C(P(2.2,0,0.3),2.2,P(4.0,0,0.2),1.7,HM.BLUE,0);C(P(0,0,0),3.0,P(0,0,1.6),2.6,HM.RED,1,0,1.6);D(P(1.6,0,1.6),1.0,HM.WHITE,1.4);D(P(0,0,3.0),0.6,HM.WHITE,2);break;
     case 'strawhat':D(P(0,0,0),5.2,HM.TAN,0);C(P(0,0,0.3),2.4,P(0,0,2.4),2.2,HM.TAN,1,0,2);C(P(0,0,0.5),2.55,P(0,0,1.1),2.5,HM.RED,1.5);break;
     case 'bunny':for(const sd of[-1,1]){C(P(-0.5,sd*2.0,0.3),1.25,P(-1.3,sd*3.3,7.0),1.05,HM.WHITE,1);C(P(-0.2,sd*2.05,1.4),0.6,P(-1.0,sd*3.2,6.2),0.5,HM.PINK,2);}break;
     case 'leaf':C(P(-2.8,-0.6,0.9),1.0,P(2.8,0.6,1.8),1.0,HM.GREEN,0);D(P(0,0,1.4),2.3,HM.GREEN,0.5);C(P(2.9,0.6,1.8),0.3,P(3.9,1.0,2.6),0.25,HM.BROWN,1);break;
@@ -4404,8 +4405,8 @@ function drawHat(fb,id,A,t){
     case 'jester':{const wb=Math.sin(t*4)*0.6;C(P(0,0,0),3.0,P(0,0,1.2),2.8,HM.PURPLE,0);
       C(P(0,-1.4,1.3),1.4,P(-1.5,-4.6,5.4+wb),0.5,HM.PURPLE,1);C(P(0,1.4,1.3),1.4,P(-1.5,4.6,5.4-wb),0.5,HM.YELLOW,1);
       D(P(-1.6,-4.8,5.2+wb),0.7,HM.GOLD,2);D(P(-1.6,4.8,5.2-wb),0.7,HM.GOLD,2);break;}
-    case 'antlers':for(const sd of[-1,1]){C(P(0,sd*1.8,0.4),0.6,P(-0.8,sd*3.3,6.2),0.4,HM.BROWN,1);C(P(-0.4,sd*2.6,3.4),0.42,P(1.3,sd*3.9,5.2),0.3,HM.BROWN,1.2);
-      C(P(-0.7,sd*3.1,5.2),0.36,P(-2.3,sd*4.3,7),0.28,HM.BROWN,1.2);D(P(-0.8,sd*3.3,6.3),0.6,HM.GREEN,1.6);}break;
+    case 'antlers':for(const sd of[-1,1]){C(P(0,sd*1.9,0.4),0.95,P(-0.8,sd*3.6,6.2),0.6,HM.BROWN,1);C(P(-0.4,sd*2.8,3.4),0.6,P(1.4,sd*4.3,5.2),0.45,HM.BROWN,1.2);
+      C(P(-0.7,sd*3.3,5.2),0.5,P(-2.4,sd*4.7,7),0.4,HM.BROWN,1.2);D(P(-0.8,sd*3.3,6.3),0.6,HM.GREEN,1.6);}break;
     case 'stars':break;
   }
 }
