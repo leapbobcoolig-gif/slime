@@ -3737,18 +3737,38 @@ class FuzzWorm extends Pet{
     const a=Math.atan2(this.y-y,this.x-x),B=this.world.bounds;this.ang=a;this.tx=clamp(this.x+Math.cos(a)*50,B.x0+8,B.x1-8);this.ty=clamp(this.y+Math.sin(a)*50,B.y0+8,B.y1-8);this.state='wander';this.pace='run';this.timer=1.2;this.zipT=0;this.pauseT=0;this.poof=1;
     if(!this.preview){SFX.play('squeak');think(this,'!');}}
   petMe(){const r=super.petMe();if(r&&!this.preview){this.poof=Math.min(1,this.poof+0.05);this.wig=Math.min(1,this.wig+0.05);this.pT=(this.pT||0)-1/60;if(this.pT<=0){this.pT=rand(1,1.8);SFX.play('squeak');}}return r;}
-  hitTest(x,y){for(let i=0;i<22;i+=2){const q=this.segs[i];if(Math.hypot(x-q.x,y-(q.y-q.z))<this.rad(i/(this.N-1))+2.5)return 0;}return -1;}
-  tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;this.curl=0;if(!this.preview)SFX.play('squeak');return true;}
+  hitTest(x,y){for(let i=0;i<22;i+=2){const q=this.segs[i];if(Math.hypot(x-q.x,y-(q.y-q.z))<this.rad(i/(this.N-1))+2.5)return i;}return -1;}
+  // picked up: the body turns into a soft rope hanging from wherever you pinched it, starting from exactly where it was lying
+  tryGrab(x,y){const gi=this.hitTest(x,y);if(gi<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;this.curl=0;this.vh=0;
+    this.grabI=gi;this.rope=this.segs.map(q=>({x:q.x,y:q.y-q.z,px:q.x,py:q.y-q.z}));this.grabOff={x:this.rope[gi].x-x,y:this.rope[gi].y-y};if(!this.preview)SFX.play('squeak');return true;}
   dragTo(x,y){this.grabX=x;this.grabY=y;}
-  release(){if(this.state!=='grabbed')return;this.state='fall';this.vh=0;this.h=12;}
+  release(){if(this.state!=='grabbed')return;this.state='fall';this.vh=0;this.dropH=this.h;}
+  ropeStep(dt){const R=this.rope,gi=this.grabI,seg=this.seg,k=Math.exp(-dt*12);this.grabOff.x*=k;this.grabOff.y*=k;
+    this.h+=(10-this.h)*Math.min(1,dt*8);
+    const n=Math.max(1,Math.ceil(dt/0.017)),h=dt/n,grav=260*h*h;
+    for(let s=0;s<n;s++){
+      for(let i=0;i<R.length;i++){if(i===gi)continue;const p=R[i],vx=(p.x-p.px)*0.94,vy=(p.y-p.py)*0.94;p.px=p.x;p.py=p.y;p.x+=vx+(Math.random()-0.5)*0.02;p.y+=vy+grav;}
+      const g=R[gi];g.x=g.px=this.grabX+this.grabOff.x;g.y=g.py=this.grabY+this.grabOff.y;
+      for(let it=0;it<10;it++)for(let i=0;i<R.length-1;i++){const a=R[i],c=R[i+1],dx=c.x-a.x,dy=c.y-a.y,d=Math.hypot(dx,dy)||1e-3,f=(d-seg)/d,wa=i===gi?0:i+1===gi?1:0.5,wc=1-wa;
+        a.x+=dx*f*wa;a.y+=dy*f*wa;c.x-=dx*f*wc;c.y-=dy*f*wc;}}}
+  // while held or dropping, the body comes from the rope; screen y = ground y - height
+  ropeLayout(){const R=this.rope,S=this.segs,h=this.h,N=this.N,base=this.state==='fall'?this.dropH:h;S.length=N;
+    const gi=this.grabI||0,wg=this.state==='grabbed'?1:0;
+    for(let i=0;i<N;i++){const f=i/(N-1),sw=wg*Math.sin(this.t*5-i*0.4)*Math.abs(i-gi)*0.06;S[i]={x:R[i].x+sw,y:R[i].y+base,z:h+(this.boing>0?Math.sin(f*Math.PI)*this.boing*2:0)};}
+    this.x=S[0].x;this.y=S[0].y;}
+  // landed: lay the head's path history along the body as it actually lies, so nothing bridges back to where it was picked up
+  settle(){const S=this.segs,N=this.N,a=S[N-2],b=S[N-1],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1;this.trail=S.map(q=>({x:q.x,y:q.y}));
+    for(let i=1;i<=30;i++)this.trail.push({x:b.x+dx/d*i*this.seg,y:b.y+dy/d*i*this.seg});
+    this.x=S[0].x;this.y=S[0].y;this.ang=Math.atan2(S[0].y-S[1].y,S[0].x-S[1].x);this.rope=null;}
   update(dt){const w=this.world;this.t+=dt;this.blinkT-=dt;if(this.blinkT<0){this.blink=0.12;this.blinkT=rand(2,5);}if(this.blink>0)this.blink-=dt;
     this.poof=Math.max(this.state==='petted'?0.7:0,this.poof-dt*0.8);this.wig=Math.max(this.state==='petted'?0.8:0,this.wig-dt*0.7);this.boing=Math.max(0,this.boing-dt*2.5);
     this.curl+=((this.state==='sleeping'?1:0)-this.curl)*Math.min(1,dt*2.5);
     // misted: its fuzz goes flat and soggy, then it shakes it out with a poof
     const P=game.pointer,misted=!this.preview&&game.tool==='mist'&&P.down&&P.inside&&Math.hypot(P.x-this.x,P.y-this.y)<34;if(misted)this.wet=Math.min(1,this.wet+dt*2);else if(this.wet>0.5&&!(this.dryT>0)){this.dryT=1.2;}
     if(this.dryT>0){this.dryT-=dt;if(this.dryT<=0){this.wet=0;this.poof=1;if(!this.preview){SFX.play('shakeoff');for(let i=0;i<6;i++)spawn(w,'drop',this.x,this.y,{h:3,vh:rand(10,26),vx:rand(-30,30),vy:rand(-20,20),life:1});}}}else if(!misted)this.wet=Math.max(0,this.wet-dt*0.1);
-    if(this.state==='grabbed'){this.gt+=dt;this.x=this.grabX;this.y=this.grabY;this.layout(dt);this.pts[0].x=this.x;this.pts[0].y=this.y;return;}
-    if(this.state==='fall'){this.vh-=260*dt;this.h+=this.vh*dt;if(this.h<=0){this.h=0;if(this.vh<-30){this.vh=-this.vh*0.45;this.boing=1;if(!this.preview)SFX.play('boingy');}else{this.vh=0;this.state='idle';this.timer=1;}}this.layout(dt);this.pts[0].x=this.x;this.pts[0].y=this.y;return;}
+    if(this.state==='grabbed'){this.gt+=dt;this.ropeStep(dt);this.layout(dt);this.pts[0].x=this.x;this.pts[0].y=this.y;return;}
+    if(this.state==='fall'){this.vh-=260*dt;this.h+=this.vh*dt;let landed=false;if(this.h<=0){this.h=0;if(this.vh<-30){this.vh=-this.vh*0.45;this.boing=1;if(!this.preview)SFX.play('boingy');}else{this.vh=0;this.state='idle';this.timer=1;landed=true;}}
+      if(landed){this.ropeLayout();this.settle();}this.layout(dt);this.pts[0].x=this.x;this.pts[0].y=this.y;return;}
     this.brain(dt);
     // rears up its snoot to have a look at your hand (or the food it's after)
     const look=(this.state==='idle'||this.state==='hunt'||this.state==='notice')&&this.speed<4&&this.curl<0.3,tr=look?(P.inside&&!this.preview||this.state!=='idle'?1:0.4+0.4*Math.sin(this.t*0.7)):0;
@@ -3757,16 +3777,16 @@ class FuzzWorm extends Pet{
     const T0=this.trail[0];if(Math.hypot(this.x-T0.x,this.y-T0.y)>0.5){this.trail.unshift({x:this.x,y:this.y});if(this.trail.length>80)this.trail.pop();}
     this.layout(dt);this.pts[0].x=this.x;this.pts[0].y=this.y;this.syncHeld();}
   // place the body: along the path the snoot took (so it follows like a real worm), blended into a donut while it naps, dangling when held
-  layout(dt){const N=this.N,seg=this.seg,S=this.segs,T=this.trail,t=this.t;S.length=N;
+  layout(dt){if(this.rope&&(this.state==='grabbed'||this.state==='fall'))return this.ropeLayout();
+    const N=this.N,seg=this.seg,S=this.segs,T=this.trail,t=this.t;S.length=N;
     let acc=0,k=0;const along=[];along.push({x:this.x,y:this.y});
     for(let i=1;i<N;i++){const want=i*seg;while(k<T.length-1){const a=T[k],b=T[k+1],L=Math.hypot(b.x-a.x,b.y-a.y);if(acc+L>=want){const f=L>0?(want-acc)/L:0;along.push({x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f});break;}acc+=L;k++;}
       if(along.length<=i){const a=along[i-1],q=along[i-2]||{x:a.x+Math.cos(this.ang),y:a.y+Math.sin(this.ang)},dx=a.x-q.x,dy=a.y-q.y,d=Math.hypot(dx,dy)||1;along.push({x:a.x+dx/d*seg,y:a.y+dy/d*seg});}}
     let ca=this.ang+Math.PI+this.lookA*0.6;const cur=[{x:this.x,y:this.y}];for(let i=1;i<N;i++){ca+=0.34;const q=cur[i-1];cur.push({x:q.x+Math.cos(ca)*seg*0.9,y:q.y+Math.sin(ca)*seg*0.9});}
-    const g=this.state==='grabbed',wg=(0.25+this.wig*0.9+Math.min(1,this.speed/30)*0.4)*(1-this.curl),c=this.curl;
+    const wg=(0.25+this.wig*0.9+Math.min(1,this.speed/30)*0.4)*(1-this.curl),c=this.curl;
     for(let i=0;i<N;i++){const A=along[i],C=cur[i],f=i/(N-1);let x=A.x*(1-c)+C.x*c,y=A.y*(1-c)+C.y*c;
       const nx=i>0?-(along[i].y-along[i-1].y):0,ny=i>0?(along[i].x-along[i-1].x):0,nl=Math.hypot(nx,ny)||1,o=Math.sin(i*0.55-t*7)*wg*f*1.4;x+=nx/nl*o;y+=ny/nl*o;
       let z=this.h+this.rear*Math.pow(Math.max(0,(10-i)/10),1.3)*5.5;
-      if(g){x=this.x+Math.sin(t*3+i*0.35)*i*0.12;y=this.y+i*seg*0.92;z=0;}
       if(this.boing>0)z+=Math.sin(f*Math.PI)*this.boing*2;S[i]={x,y,z};}}
   color(m,q,s,l,x,y){if(m===M.EYE)return FUZZC.eye[q];if(m===M.BODY){const R=FUZZC[this.col]||FUZZC.pink,h=hash(x*3+Math.round(s*40),y*5);let qq=clamp(q+(h>0.86?1:h<0.08?-1:0),0,3);if(this.wet>0.4)qq=Math.max(0,qq-1);return R[qq];}return INK;}
   draw(fb){const S=this.segs,N=this.N;
