@@ -3707,13 +3707,14 @@ const FUZZC={pink:ramp('#9a1654','#e43888','#ff6eae','#ffb6d8'),eye:ramp('#8e96a
 class FuzzWorm extends Pet{
   constructor(world,x,y){super();this.initCommon(world,'fuzzworm');
     this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.sc=1;this.outline=hex(FUZZC.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.seam=99;
-    this.N=24;this.seg=1.9;this.trail=[];this.segs=[];this.zipT=0;this.pauseT=0;this.rear=0;this.curl=0;this.poof=0;this.wet=0;this.boing=0;this.lookA=0;this.wig=0;this.col='pink';
+    this.N=30;this.seg=1.9;this.trail=[];this.segs=[];this.zipT=0;this.pauseT=0;this.rear=0;this.curl=0;this.poof=0;this.wet=0;this.boing=0;this.lookA=0;this.wig=0;this.col='pink';
     for(let i=0;i<60;i++)this.trail.push({x:x-Math.cos(this.ang)*i*0.8,y:y-Math.sin(this.ang)*i*0.8});this.layout(0);}
   isActive(){return true;}
-  rad(f){const p=1+this.poof*0.18-this.wet*0.2;return(f<0.2?0.85+f*1.2:f<0.28?1.1+(f-0.2)/0.08*3.0:f<0.42?4.1:f<0.6?4.1-(f-0.42)*4.5:Math.max(0.55,3.3-(f-0.6)*7.0))*p;}
+  rad(f){const p=1+this.poof*0.18-this.wet*0.2,u=f*(this.N-1)*this.seg;// by distance from the snoot tip, so the snoot and head keep their size
+    return(u<8.7?0.85+u*0.0275:u<12.2?1.1+(u-8.7)/3.5*3.0:u<18.4?4.1:u<32?4.1-(u-18.4)*0.06:Math.max(0.55,3.3-(u-32)*0.13))*p;}
   headPos(){return{x:this.x,y:this.y};}
   mouthScreen(){const q=this.segs[0];return{x:q.x,y:q.y-q.z};}
-  hatAnchor(){const q=this.segs[8];return{x:q.x,y:q.y-q.z-3.4,a:this.ang,s:0.95};}
+  hatAnchor(){const q=this.segs[7];return{x:q.x,y:q.y-q.z-3.4,a:this.ang,s:0.95};}
   noise(){return clamp(this.speed/40,0,0.5);}
   // twitchy zips: it dashes in short bursts and stops dead, as if something's tugging an invisible string
   goTo(tx,ty,dt,mode,arrive=3){const d=Math.hypot(tx-this.x,ty-this.y);if(d<=arrive){this.speed*=1-Math.min(1,dt*10);return true;}
@@ -3736,7 +3737,7 @@ class FuzzWorm extends Pet{
     const a=Math.atan2(this.y-y,this.x-x),B=this.world.bounds;this.ang=a;this.tx=clamp(this.x+Math.cos(a)*50,B.x0+8,B.x1-8);this.ty=clamp(this.y+Math.sin(a)*50,B.y0+8,B.y1-8);this.state='wander';this.pace='run';this.timer=1.2;this.zipT=0;this.pauseT=0;this.poof=1;
     if(!this.preview){SFX.play('squeak');think(this,'!');}}
   petMe(){const r=super.petMe();if(r&&!this.preview){this.poof=Math.min(1,this.poof+0.05);this.wig=Math.min(1,this.wig+0.05);this.pT=(this.pT||0)-1/60;if(this.pT<=0){this.pT=rand(1,1.8);SFX.play('squeak');}}return r;}
-  hitTest(x,y){for(let i=0;i<16;i+=2){const q=this.segs[i];if(Math.hypot(x-q.x,y-(q.y-q.z))<this.rad(i/(this.N-1))+2.5)return 0;}return -1;}
+  hitTest(x,y){for(let i=0;i<22;i+=2){const q=this.segs[i];if(Math.hypot(x-q.x,y-(q.y-q.z))<this.rad(i/(this.N-1))+2.5)return 0;}return -1;}
   tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;this.curl=0;if(!this.preview)SFX.play('squeak');return true;}
   dragTo(x,y){this.grabX=x;this.grabY=y;}
   release(){if(this.state!=='grabbed')return;this.state='fall';this.vh=0;this.h=12;}
@@ -3774,7 +3775,7 @@ class FuzzWorm extends Pet{
     const hl=0.3+this.poof*0.5-this.wet*0.35;for(let i=1;i<N;i++){const f=i/(N-1),r=this.rad(f),q=S[i];for(let k=0;k<7;k++){const aa=hash(i*7+k,k*3+1)*TAU+Math.sin(this.t*9+i)*this.wig*0.3,L=r+Math.max(0.1,hl+hash(i,k*5)*(r>1.5?0.9:0.35)),cx=q.x,cy=q.y-q.z;
       fb.cap(cx+Math.cos(aa)*r*0.6,cy+Math.sin(aa)*r*0.6,0.7,cx+Math.cos(aa)*L,cy+Math.sin(aa)*L,0.5,M.BODY,2,f,f,0.2);}}
     // little googly eyes: shaded beads on top of the head
-    const h=S[8],a=S[7],b=S[9],dx=a.x-b.x,dy=(a.y-a.z)-(b.y-b.z),dl=Math.hypot(dx,dy)||1,nx=-dy/dl,ny=dx/dl;
+    const h=S[6],a=S[5],b=S[7],dx=a.x-b.x,dy=(a.y-a.z)-(b.y-b.z),dl=Math.hypot(dx,dy)||1,nx=-dy/dl,ny=dx/dl;
     this.eyes=[-1,1].map(sd=>[h.x+nx*sd*1.75,h.y-h.z+ny*sd*1.75-0.6,dx/dl,dy/dl]);if(this.curl<0.6)for(const[ex,ey]of this.eyes)fb.cap(ex,ey,1.3,ex,ey,1.3,M.EYE,3,0,0,1.2);}
   drawExtras(fb){if(!this.eyes||this.curl>=0.6)return;const K=hex('#111111'),shut=this.blink>0;
     this.eyes.forEach(([ex,ey,fx,fy],j)=>{if(shut){pset(fb,Math.round(ex-1),Math.round(ey),K);pset(fb,Math.round(ex),Math.round(ey),K);return;}
