@@ -6459,9 +6459,9 @@ const DR_THEME={
   greens:null,egg:{lift:1,spots:[[25,23,0.3],[35,22,2.3],[30,29,1.2]],bg:'nest'},
   flower:{lift:2,spots:[[15,15,0.2],[27,11,1.2],[42,14,2.6],[21,27,0.8],[36,27,1.9],[48,24,0.5]],bg:'daisy'},
   grape:{lift:3,spots:[[9,20,0],[19,26,0],[29,21,0],[39,27,0],[49,21,0],[27,33,0]],bg:'vine'},
-  butter:{lift:2,spots:[[31,15,0.15],[36,18,0.35],[41,21,0.55],[34,25,0.2],[40,28,0.45]],bg:'board'},honey:{lift:1,spots:[[14,21,0],[26,15,0],[37,23,0],[48,17,0],[30,31,0]],bg:'hive'},
+  butter:{lift:2,spots:[[31,15,0.15],[36,18,0.35],[41,21,0.55],[34,25,0.2],[40,28,0.45]],bg:'board'},honey:{lift:1,spots:[[17.5,13.8,0],[35.5,13.8,0],[22,21.6,0],[40,21.6,0],[26.5,29.4,0]],bg:'hive'},
   seeds:{lift:1,spots:[[25,17,0],[34,16,0],[29,22,0],[23,26,0],[35,26,0]],bg:'sunflower'},firefly:{n:6,live:1,bg:'dusk',fglow:1},
-  gummy:{lift:2,spots:[[24,18,0.2],[33,15,-0.3],[40,20,0.4],[27,26,-0.2],[37,27,0.3]],bg:'gumjar'},
+  gummy:{lift:1,spots:[[11,15,0],[31,15,0],[41,15,0],[21,29,0],[41,29,0]],bg:'mould'},
   stars:{n:6,float:1,lift:3,bg:'night'},moonberry:{lift:3,spots:[[17,15,0],[29,10,0],[42,14,0],[36,25,0]],glow:1,bg:'magic'},geode:{lift:2,spots:[[17,26,0.3],[31,20,1.2],[45,27,2.4]],bg:'rocks'},
 };
 {const cx=30,cy=21,L=[];for(let i=0;i<6;i++){const a=-Math.PI/2+0.4+i/6*TAU,r=12.2;L.push([cx+Math.cos(a)*r*1.15,cy+Math.sin(a)*r*0.85,a]);}DR_THEME.greens={spots:L,bg:'lettuce'};}
@@ -6608,19 +6608,17 @@ const DRAWER={on:false,el:null,tanks:[],rowsEl:null,drag:null,velX:0,velStrip:nu
       // the knife: steel blade with a buttery smear, wooden handle with brass rivets
       cyl(22,36,44,33,1.4,0.6);for(let k=0;k<=22;k++){const x=22+k,y=36-k*3/22;P(x,y-1,hex('#f2f6fa'));P(x,y,hex('#b8c2cc'));P(x,y+1,hex('#7a848e'));}
       for(let k=0;k<5;k++)P(25+k,35.4-k*0.15,hex('#fff0a8'));cyl(44,33,55,31.5,1.6,0.8);for(let k=0;k<=11;k++){const x=44+k,y=33-k*1.5/11;P(x,y-1,hex('#8a5a30'));P(x,y,hex('#6a4022'));P(x,y+1,hex('#4a2a14'));}P(47,32.6,hex('#f0c860'));P(52,31.9,hex('#f0c860'));}
-    else if(f==='hive'){// a beehive frame packed with honeycomb: capped cells, open cells brimming with honey, a bee or two
-      fill(()=>hex('#5a3a1a'));const bar=(y0,y1)=>{for(let y=y0;y<=y1;y++)for(let x=0;x<TKW;x++){const n=fbm(x*0.06+sd,y*0.8,2);let c=mixc(hex('#a8743e'),hex('#c89458'),n);if(y===y0)c=hex('#e0b070');if(y===y1)c=hex('#5a3418');P(x,y,c);hs(x,y,3.4);}};
-      const cell=3.3,cen=[];for(let r=-1;r<10;r++)for(let q=-1;q<12;q++){const cx2=q*cell*1.73+(r&1)*cell*0.865,cy2=7+r*cell*1.5;cen.push({x:cx2,y:cy2,k:hash(q+sd,r)});}
-      const spots=T.th.spots;for(const C of cen){let open=C.k<0.6;for(const[sx,sy]of spots)if(Math.hypot(C.x-sx,C.y-sy)<cell*1.1)open=true;C.open=open;C.empty=!open&&C.k>0.93;}
-      for(let y=6;y<TKH-4;y++)for(let x=0;x<TKW;x++){let d1=1e9,d2=1e9,c1=null;for(const C of cen){const d=Math.hypot(x+.5-C.x,(y+.5-C.y)*1.05);if(d<d1){d2=d1;d1=d;c1=C;}else if(d<d2)d2=d;}
-        const i=y*TKW+x,lx=x+.5-c1.x,ly=y+.5-c1.y;
-        if(d2-d1<1.25){P(x,y,d2-d1<0.5?hex('#8a5a10'):lx+ly<0?hex('#f0c060'):hex('#b8801c'));HG[i]=2.8;continue;}// wax walls
-        if(c1.open){P(x,y,d1<1.0&&lx+ly<-0.2?hex('#fff6c0'):lx+ly<-0.9?hex('#ffc844'):d1>2.1?hex('#b86a0a'):hex('#f0a01c'));HG[i]=1.0;}// brimming honey, a glint in each cell
-        else if(c1.empty){P(x,y,d1>1.5?hex('#7a4c12'):hex('#4a2c0a'));HG[i]=0.6;}
-        else{P(x,y,lx+ly<-1.2?hex('#fff8d8'):lx+ly>1.6?hex('#d8b460'):hex('#f6e4a4'));HG[i]=2.3+0.4*(1-d1/3);}}// capped
-      bar(1,5);bar(TKH-4,TKH-1);
-      const bee=(bx,by,a)=>{const c=Math.cos(a),s2=Math.sin(a);for(let k=-2;k<=2;k++){const x=bx+c*k,y=by+s2*k;P(x,y,k===2?hex('#1a1206'):(k&1)?hex('#1a1206'):hex('#f4c020'));P(x-s2,y+c,(k&1)?hex('#2a1e0a'):hex('#d8a018'));hs(x,y,4);}for(const sd2 of[-1,1]){M(bx-s2*sd2*2-c,by+c*sd2*2-s2,hex('#eaf6ff'),0.7);M(bx-s2*sd2*2.6-c*1.6,by+c*sd2*2.6-s2*1.6,hex('#eaf6ff'),0.55);}};
-      bee(9,30,0.4);bee(52,28,2.6);}
+    else if(f==='hive'){// a honeycomb frame with big, clean cells: golden honey glinting in the open ones, pale wax caps up top, a bee
+      const R=5.2,cen=[];for(let r=-1;r<7;r++)for(let q=-1;q<8;q++)cen.push({x:4+q*9+((r&1)?4.5:0),y:6+r*7.8,r,q});
+      for(const C of cen){C.cap=C.r<=0||(C.r===1&&hash(C.q,7)>0.5)||(C.r===4&&hash(C.q,3)>0.6);for(const[sx,sy]of T.th.spots)if(Math.hypot(C.x-sx,C.y-sy)<1)C.cap=false;}
+      const hexd=(dx,dy)=>{dx=Math.abs(dx);dy=Math.abs(dy);return Math.max(dx*0.866+dy*0.5,dy)/R;};// 1 at the cell edge (pointy-top hexagon)
+      for(let y=0;y<TKH;y++)for(let x=0;x<TKW;x++){const i=y*TKW+x;let C=null,bd=9;for(const c of cen){const d=hexd(x+.5-c.x,y+.5-c.y);if(d<bd){bd=d;C=c;}}
+        const lx=x+.5-C.x,ly=y+.5-C.y,lit=lx+ly<0;
+        if(bd>0.8){P(x,y,bd>0.94?hex('#6a3c08'):lit?hex('#ffe08a'):hex('#e0aa48'));HG[i]=2.6;continue;}// wax walls, lit along the top-left
+        if(C.cap){P(x,y,lx+ly<-2.4?hex('#fff8dc'):lx+ly>2.4?hex('#dcbc70'):hex('#f6e0a0'));HG[i]=2.3-bd*0.6;}// capped
+        else{let c=hex('#ec9a1a');if(lx+ly>2.2||bd>0.68)c=hex('#bc6c0a');const gx=lx+1.6,gy=ly+1.6;if(gx*gx+gy*gy<1.6)c=hex('#fff4b8');else if(Math.abs(Math.hypot(lx,ly)-2.6)<0.6&&lit)c=hex('#ffc650');P(x,y,c);HG[i]=1.0;}}// honey
+      for(let y=0;y<3;y++)for(let x=0;x<TKW;x++){P(x,y,y===2?hex('#5a3418'):(x%9===4)?hex('#9a6834'):hex('#b8844a'));hs(x,y,3.4);}
+      for(let y=TKH-3;y<TKH;y++)for(let x=0;x<TKW;x++){P(x,y,y===TKH-3?hex('#d8a868'):(x%9===4)?hex('#9a6834'):hex('#b8844a'));hs(x,y,3.4);}}
     else if(f==='sunflower'){// a big sunflower head lying in the grass: golden petals round a spiralling disc of seeds
       soil('#2e2414','#4a3a20');bump(0.7);const cx=29,cy=21,LG=ramp('#163a14','#2a6224','#448a34','#70b450');
       for(const[x,y,a,L]of[[18,30,2.45,15],[42,30,0.7,15],[42,12,-0.6,13],[17,12,-2.5,13]])drLeaf(PH(1),x,y,a,L,4.6,LG,0.12,1);
@@ -6632,19 +6630,18 @@ const DRAWER={on:false,el:null,tanks:[],rowsEl:null,drag:null,velX:0,velStrip:nu
       box(cx,cy,R0*1.15,R0*0.85,(x,y,e,i)=>{let d1=1e9,S=null;for(const sdd of seeds){const d=Math.hypot(x+.5-sdd[0],y+.5-sdd[1]);if(d<d1){d1=d;S=sdd;}}
         let c;if(e>0.92)c=hex('#d86a0c');else if(S[2]<0.3)c=d1<0.55?hex('#8a7a2a'):hex('#4a4214');else if(d1>0.75)c=hex('#1a1008');else{const lx=x+.5-S[0],ly=y+.5-S[1];c=lx+ly<-0.3?(S[2]>0.7?hex('#9a8e7a'):hex('#6a4a2a')):S[2]>0.7?hex('#4a443a'):hex('#2e1e10');}
         P(x,y,c);HG[i]+=d1<0.75?0.5*(1-d1/0.75):0;});}
-    else if(f==='gumjar'){// looking down into a glass candy jar heaped with gummy bears; its lid set aside
-      fill((x,y)=>{const n=fbm(x*0.05+sd,y*0.6,2),g=Math.sin(y*1.2+n*5);let c=mixc(hex('#8a5a3a'),hex('#b07a52'),n);if((y+2)%11===0)c=hex('#4a2a18');if(g>0.86)c=shade(c,0.86);return c;});
-      const cx=29,cy=22,RX=19.5,RY=15;for(let y=0;y<TKH;y++)for(let x=0;x<TKW;x++){const e=Math.hypot((x-cx-2.5)/RX,(y-cy-2.5)/RY);if(e<1.05)M(x,y,hex('#000000'),0.45*Math.min(1,(1.05-e)*4));}
-      // the heap of gummies inside, a mound in the middle
-      dome(cx,cy,RX*0.86,RY*0.86,5,0.6);const GM=PAL.food3.gummy,gs=[];for(let k=0;k<190;k++){const a=hash(k,11+sd)*TAU,r=Math.sqrt(hash(k,12))*0.86;gs.push([cx+Math.cos(a)*r*RX*0.95,cy+Math.sin(a)*r*RY*0.95,k%4,hash(k,13)*TAU]);}gs.sort((a,b)=>a[1]-b[1]);
-      box(cx,cy,RX*0.86,RY*0.86,(x,y)=>P(x,y,hex('#3a1a28')));
-      for(const[gx,gy,ci,ga]of gs){const C=GM[ci],ca=Math.cos(ga)*0.4;for(let yy=-3;yy<=3;yy++)for(let xx=-3;xx<=3;xx++){const x=Math.round(gx)+xx,y=Math.round(gy)+yy;if(Math.hypot((x-cx)/(RX*0.86),(y-cy)/(RY*0.86))>=1)continue;
-          const u=x+.5-gx,v=y+.5-gy,b=Math.hypot(u-ca*0.5,(v-0.6))<1.5,h2=Math.hypot(u+ca,(v+1.0))<1.15,ear=Math.hypot(Math.abs(u)-0.9,v+1.9)<0.6;if(!(b||h2||ear))continue;
-          P(x,y,mixc(u+v<-1?C[3]:u+v>1.2?C[1]:C[2],hex('#5a3a48'),0.12));}}
-      // thick glass rim catching the light
-      box(cx,cy,RX,RY,(x,y,e,i)=>{if(e<0.86)return;const a=Math.atan2(y-cy,x-cx);let c=mixc(bg[i],hex('#dff4ff'),0.55);if(e>0.95)c=hex('#5a7a8a');else if(a<-1.2&&a>-2.8&&e<0.92)c=hex('#ffffff');P(x,y,c);hs(x,y,5.5);});
-      // the lid: a red-and-white checked cloth cap on a metal ring, in the corner
-      dome(53,7,6.5,5,2.4,0.4);box(53,7,6.5,5,(x,y,e)=>{const ch=((Math.floor(x/2)+Math.floor(y/2))&1);P(x,y,e>0.82?(x+y<60?hex('#e8eef2'):hex('#8a949c')):ch?hex('#e83a48'):hex('#fff4f4'));});}
+    else if(f==='mould'){// a pink silicone gummy-bear mould on a marble counter: set gummies to pop out, empty bear-shaped hollows, a juice dropper
+      fill((x,y)=>{const v=Math.abs(Math.sin(x*0.13+y*0.05+fbm(x*0.06+sd,y*0.06,2)*4));let c=hex('#efece8');if(v<0.05)c=hex('#cfcac6');else if(v<0.12)c=hex('#e2deda');return c;});
+      const x0=3,y0=6,x1=50,y1=38,rr=4;for(let y=y0-1;y<=y1+3;y++)for(let x=x0-1;x<=x1+3;x++){const cx2=clamp(x-2,x0+rr,x1-rr),cy2=clamp(y-2,y0+rr,y1-rr);if(Math.hypot(x-2-cx2,y-2-cy2)<=rr)M(x,y,hex('#000000'),0.18);}
+      for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const cx2=clamp(x,x0+rr,x1-rr),cy2=clamp(y,y0+rr,y1-rr),d=Math.hypot(x-cx2,y-cy2);if(d>rr)continue;
+        P(x,y,d>rr-1?hex('#b84a7a'):d>rr-2?hex('#ff9ec4'):hex('#f27aa8'));HG[y*TKW+x]=2.6;}
+      // bear-shaped hollows: body, head and two ears pressed into the silicone
+      const bear=(u,v)=>Math.hypot(u,v-1.2)<2.6||Math.hypot(u,v+2.2)<2.1||Math.hypot(Math.abs(u)-1.7,v+3.8)<0.95||Math.hypot(Math.abs(u)-2.4,v+0.6)<0.9||Math.hypot(Math.abs(u)-1.4,v+3.6)<0.9;
+      for(const[bx,by]of[[11,15],[21,15],[31,15],[41,15],[11,29],[21,29],[31,29],[41,29]])for(let y=by-6;y<=by+5;y++)for(let x=bx-4;x<=bx+4;x++){const u=x+.5-bx,v=y+.5-by;if(!bear(u,v))continue;
+        const edge=!bear(u-0.9,v-0.9);P(x,y,edge?hex('#a83a6a'):!bear(u+0.9,v+0.9)?hex('#ffb0d0'):hex('#d8588e'));HG[y*TKW+x]=0.8;}
+      // a squeeze dropper of red gummy juice and a sprinkle of sugar
+      cyl(54,13,55,33,1.1,0.6);for(let k=0;k<=20;k++){const x=54+k/20,y=13+k,tip=k>17;P(x,y,tip?hex('#d0e4ec'):hex('#eef8fc'));if(!tip)P(x+1,y,hex('#a8c0cc'));if(k>12){P(x,y,hex('#ff5a68'));if(!tip)P(x+1,y,hex('#c82838'));}}dome(55,35,1.2,1.2,1);P(55,34,hex('#ff7080'));P(55,35,hex('#e83040'));P(54,34,hex('#ffd0d4'));dome(54,10,3,3.2,2.6);disc(54,10,3,(x,y,d)=>P(x,y,d>0.72?hex('#8a1a22'):x+y<62?hex('#f04a58'):hex('#c82a36')));for(let x=51;x<=57;x++){P(x,13,hex('#5a1218'));}
+      for(let k=0;k<20;k++){const x=50+hash(k,61)*3,y=8+hash(k,62)*30;P(x,y,hash(k,63)>0.5?hex('#ffffff'):hex('#dedcd8'));}}
     else if(f==='dusk'){// a twilight garden: a lush clump of tall grass, white moonflowers, a glowing mushroom, moonlit dew
       fill((x,y)=>{const n=fbm(x*0.14+sd,y*0.14,3),h=hash(x*3,y*5+sd);let c=mixc(hex('#141e30'),hex('#22343a'),n);if(h>0.95)c=hex('#3a4a5a');return c;});bump(0.8);
       const cx=28,cy=24;for(let y=0;y<TKH;y++)for(let x=0;x<TKW;x++){const e=Math.hypot((x-cx-2)/22,(y-cy-2)/15);if(e<1)M(x,y,hex('#000000'),0.4*(1-e));}
