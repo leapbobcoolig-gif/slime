@@ -201,6 +201,9 @@ body.fun-tools #dock{padding:4px;background:#1a0f06;border-color:#060a07;box-sha
 .sheet-h .x{margin-left:auto}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
 .gsub{color:var(--mute);font-size:15px;margin:0 0 10px}
+.mtip{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:8px 10px 8px 12px;border-radius:9px;background:rgba(255,216,112,.14);box-shadow:inset 0 0 0 2px rgba(255,216,112,.55);color:#fff2d4;font-size:17px;line-height:1.2;overflow:hidden;animation:tipin .45s cubic-bezier(.2,1.4,.4,1);transition:height .4s,opacity .3s,margin .4s,padding .4s}
+.mtip img{width:18px;height:18px;flex:none}.mtip span{flex:1}.mtip button{flex:none;font-family:var(--display);font-size:10px;padding:6px 9px 5px;border:0;border-radius:6px;background:linear-gradient(#ffd870,#e0a83a);color:#3a2006;cursor:pointer;box-shadow:0 2px 0 #1a0c04}
+.mtip.out{height:0!important;opacity:0;margin:0;padding-top:0;padding-bottom:0}@keyframes tipin{from{opacity:0;transform:translateY(-8px) scale(.97)}}
 .ghd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
 .gpill{display:flex;align-items:center;gap:7px;font-family:var(--display);font-size:11px;color:#e8dcc0;background:rgba(0,0,0,.3);padding:6px 11px 5px;border-radius:20px}.gpill img{width:16px;height:16px}
 .gpips{display:flex;align-items:center;gap:5px;margin-left:auto;font-family:var(--display);font-size:11px;color:#ffe7a0}.gpips i{width:14px;height:14px;border-radius:4px;background:rgba(0,0,0,.4);box-shadow:inset 0 0 0 2px rgba(255,255,255,.12)}
@@ -254,7 +257,17 @@ body.fun-tools #dock{padding:4px;background:#1a0f06;border-color:#060a07;box-sha
 .empty .btn{flex:none;padding:9px 14px}
 
 /* gacha */
-.gwrap{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start}
+.gwrap{display:grid;grid-template-columns:272px 1fr;gap:20px;align-items:start}
+.gleft{display:flex;flex-direction:column;gap:12px}.gleft .machine{align-self:center}.gleft #gcv{width:256px;height:352px}
+.gleft .pull{font-size:14px;padding:12px 12px 10px}
+.gfilt{margin:0 0 10px}.gfilt .tab{display:inline-flex;align-items:center;gap:5px}.rdot{width:9px;height:9px;border-radius:2px;background:var(--c);box-shadow:0 0 0 2px rgba(0,0,0,.4)}
+.coll .cgrid{grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:10px 8px}
+.cgi{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;outline:none;cursor:default}.cgi .cg{width:100%}.cgi .cg canvas{width:52px;height:52px}
+.cn{font-family:var(--display);font-size:8px;line-height:1.3;color:#e8d4b0;text-align:center;min-height:21px}.cgi .cg.unk~.cn{color:var(--mute)}
+.ctip{position:absolute;z-index:6;left:50%;bottom:calc(100% - 18px);transform:translate(-50%,6px);width:210px;padding:10px 11px;border-radius:9px;background:#2a1608;box-shadow:inset 0 0 0 2px var(--rc),0 8px 16px rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s}
+.cgi:hover .ctip,.cgi:focus .ctip{opacity:1;transform:translate(-50%,0)}.cgi:hover .cg,.cgi:focus .cg{box-shadow:inset 0 0 0 2px #ffd870,0 0 0 2px #ffd870}
+.ctip b{display:block;font-family:var(--display);font-size:12px;color:#fff2d4}.ctip em{font-style:normal;font-family:var(--display);font-size:9px;color:var(--rc)}.ctip p{margin:4px 0 0;font-size:16px;line-height:1.15;color:#e8dcc0}.ctip small{display:block;margin-top:4px;font-size:14px;color:var(--mute)}
+.cnone{grid-column:1/-1;color:var(--mute);font-size:18px;padding:12px}
 .machine{position:relative}
 #gcv{width:384px;height:528px;display:block;cursor:pointer}
 .ginfo{display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -311,7 +324,24 @@ body.fun-tools #dock{padding:4px;background:#1a0f06;border-color:#060a07;box-sha
 .rcard .btn{flex:none;padding:9px 14px}
 
 /* roster */
-.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.roster{display:block}
+.pfilt{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.pwrap{display:grid;grid-template-columns:290px 1fr;gap:16px;height:min(600px,calc(100vh - 230px));min-height:360px}
+.plist{overflow:auto;padding-right:6px;display:flex;flex-direction:column;gap:2px}.plist .rgroup{margin-top:4px}.pnone{color:var(--mute);font-size:18px;padding:10px}
+.prow{display:flex;align-items:center;gap:10px;padding:5px 7px;border-radius:8px;background:none;border:0;text-align:left;cursor:pointer;color:inherit;font:inherit;flex:none}
+.prow:hover{background:rgba(255,220,160,.08)}.prow.on{background:#3a2412;box-shadow:inset 0 0 0 2px #ffd870}
+.prow img{width:72px;height:48px;border-radius:5px;box-shadow:0 0 0 2px #1a0c04;flex:none}.prow.lk img{filter:saturate(.45) brightness(.75)}
+.pt{display:flex;flex-direction:column;min-width:0}.pt b{font-family:var(--display);font-size:11px;color:#fff2d4;font-weight:normal}.pt small{font-size:15px;color:var(--mute)}.prow.here .pt small{color:#ffd870}
+.pdet{display:flex;flex-direction:column;gap:9px;padding:12px;border-radius:10px;background:var(--panel-2);box-shadow:inset 0 0 0 2px var(--line);overflow:auto}
+body.fun-hud .modal .pdet{background:#3a2412;box-shadow:inset 0 0 0 2px #6a4826,0 3px 0 rgba(0,0,0,.3)}
+.pbig{position:relative;flex:none}.pbig canvas{display:block;width:100%;aspect-ratio:96/56;border-radius:8px;box-shadow:0 0 0 2px #060a07}
+.pdh h3{margin:0;font-family:var(--display);font-size:20px;color:#fff2d4}.pdh .sub{color:var(--mute);font-size:17px}.pdh .sub i{font-style:normal}.pdh .temper{color:#ffd88a;font-weight:normal}
+.pdh .rn{font:inherit;font-size:13px;margin-left:8px;padding:0 6px;background:#2a1608;color:#f4e2bc;border:2px solid #060a07;border-radius:5px;cursor:pointer;vertical-align:middle}
+.pdet .rnin{font:inherit;font-size:20px;padding:3px 6px;background:#10160e;color:#fff;border:2px solid var(--amber);border-radius:6px;width:100%}
+.pbl{margin:0;font-size:19px;line-height:1.2;color:#e8dcc0}
+.chip.hab{background:#173a44;color:#bdeef0}.chip.tog{border:0;cursor:pointer;font-family:var(--display)}.chip.tog:hover{filter:brightness(1.2)}
+.pgo{margin-top:auto;padding:12px;font-size:14px}.pgo.buy{background:linear-gradient(#f4c64a,#c8901e)!important;color:#2a1a04!important;text-shadow:none!important}
+@media (max-width:760px){.pwrap{grid-template-columns:1fr;height:auto}.pdet{order:-1}.plist{max-height:260px}}
 .rnav{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:-2px}
 .rnav button{font-family:var(--display);font-size:11px;padding:6px 10px 5px;border-radius:20px;background:rgba(0,0,0,.3);color:#f4e2bc;border:0;box-shadow:inset 0 0 0 2px rgba(255,220,160,.15);cursor:pointer}
 .rnav button:hover{background:rgba(255,220,160,.15)}.rnav button span{margin-left:6px;color:var(--mute);font-size:9px}
@@ -371,7 +401,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
   #tray .tcats{flex-direction:row;flex-basis:100%;justify-content:center;margin:0 0 2px}#tray .tcat{flex:1;min-width:0;text-align:center;padding:5px 4px;font-size:11px}
   #tray .ti{width:44px;height:44px}#tray .ti canvas{width:36px;height:26px}#tray .tsep{display:none}#tray .ti .tl{font-size:7px;bottom:2px}#tray .ti canvas{margin-top:-6px}
   .tray-note{white-space:normal;flex-basis:100%;font-size:16px}
-  .gwrap{grid-template-columns:1fr}.machine{justify-self:center}
+  .gwrap{grid-template-columns:1fr}.machine{justify-self:center}.ctip{width:170px}
   #gcv{width:256px;height:352px}
       }
 @media (max-width:760px){#peg{height:84px}body.fun-tools #dock{padding:3px}#gauges canvas{height:36px}body.fun-needs #gauges{gap:5px;margin-left:auto}}
@@ -514,32 +544,28 @@ body.fun-hud .gtoast.out{transform:none;translate:-50% -10px;opacity:0}
 </div>
 
 <div class="modal" id="mGoals" hidden><div class="sheet chunk" style="width:min(800px,100%)">
-  <div class="sheet-h"><h2>Goals</h2><p>Daily tasks and achievements. Everything pays coins!</p><button class="ibtn x" data-close aria-label="Close"><img class="px icX" alt=""></button></div>
+  <div class="sheet-h"><h2>Goals</h2><button class="ibtn x" data-close aria-label="Close"><img class="px icX" alt=""></button></div>
   <div class="tabs" id="goalTabs"></div><div id="goalBody"></div>
 </div></div>
 <div class="modal" id="mBag" hidden><div class="sheet chunk">
-  <div class="sheet-h"><h2>Bag</h2><p id="bagSub"></p><button class="ibtn x" data-close aria-label="Close"><img class="px icX" alt=""></button></div>
+  <div class="sheet-h"><h2>Bag</h2><button class="ibtn x" data-close aria-label="Close"><img class="px icX" alt=""></button></div>
   <div class="tabs" id="bagTabs"></div><div id="bagBody"></div>
 </div></div>
 
 <div class="modal" id="mGacha" hidden><div class="sheet chunk">
-  <div class="sheet-h"><h2>Gachapon</h2><p>Turn the crank, pop the capsule.</p><button class="ibtn x" data-close aria-label="Close"><img class="px icX" alt=""></button></div>
+  <div class="sheet-h"><h2>Gachapon</h2><button class="ibtn x" data-close aria-label="Close"><img class="px icX" alt=""></button></div>
   <div class="tabs" id="gTabs"></div>
   <div class="gwrap">
-    <div class="machine"><canvas id="gcv" class="px" width="128" height="176"></canvas></div>
-    <div class="ginfo">
-      <div class="ghead"><div class="gtitle" id="gTitle"></div><span class="gprice" id="gPrice"></span></div>
-      <p class="gdesc" id="gDesc"></p>
+    <div class="gleft"><div class="machine"><canvas id="gcv" class="px" width="128" height="176"></canvas></div>
       <button class="pull" id="gPull"></button>
-      <div class="odds" id="gOdds"></div>
-      <div class="coll"><div class="collh"><h4 id="gCollH"></h4><div class="cbar"><i id="gCollBar"></i></div></div><div class="cgrid" id="gColl"></div></div>
-    </div>
+      <div class="odds" id="gOdds"></div></div>
+    <div class="coll"><div class="collh"><h4 id="gCollH"></h4><div class="cbar"><i id="gCollBar"></i></div></div><div class="tabs gfilt" id="gFilt"></div><div class="cgrid" id="gColl"></div></div>
   </div>
   <div class="reveal" id="gReveal" hidden><div class="rays"></div><div class="rcard chunk" id="gCard"></div></div>
 </div></div>
 
 <div class="modal" id="mPets" hidden><div class="sheet chunk">
-  <div class="sheet-h"><h2 id="petsTitle">Your critters</h2><p id="petsSub">Visit anyone. Everyone keeps their name, bond and hat.</p><button class="ibtn x" data-close aria-label="Close" id="petsX"><img class="px icX" alt=""></button></div>
+  <div class="sheet-h"><h2 id="petsTitle">Your critters</h2><button class="ibtn x" data-close aria-label="Close" id="petsX"><img class="px icX" alt=""></button></div>
   <div class="roster" id="roster"></div>
 </div></div>
 
@@ -7253,6 +7279,13 @@ const SPR={
   speech:['.kkkkkkkkkk.','kwwwwwwwwwwk','kwkkwkkwkkwk','kwwwwwwwwwwk','kwkkkkwkkkwk','kwwwwwwwwwwk','.kkkwwkkkkk.','...kwk......','...kk.......','............','............','............'],
 };
 // which little icon goes with each task / achievement (by the stat it counts)
+const PET_GROUPS=[['Amphibians',['frog','dart','salamander','axolotl']],['Reptiles',['lizard','gecko','chameleon','dragon','snake','turtle']],['Bugs',['tarantula','scorpion','crab','millipede','bee']],['Molluscs',['gsnail','cuttle','nudi']],['Birds',['chick']],['Fish',['puffer','shark']],['Fantasy',['slime','golem','mush','kraken','bun','wisp','fuzzworm']]];
+const MENU_TIPS={
+  firstPets:`Frog, lizard and salamander are free. Pick one to start, the rest can be adopted with coins later.`,
+  mPets:'Visiting another critter is free. Everyone keeps their name, bond and hat while you are away.',
+  mGacha:'Each turn pops one capsule. Things you do not have yet are more likely, and repeats give some coins back.',
+  mBag:'Hats go on your critter with Wear. Decor and toys get placed in the tank, and Store puts them back.',
+  mGoals:'Three new daily tasks every day, plus achievements that pay out once. Everything earns coins.'};
 const GOAL_ICON={handfeeds:'feed',meals:'fed',hearts:'heart',bursts:'heart','@lvl':'heart',mistS:'mist',cleans:'scoop',visits:'pets','@pets':'pets','@tanks':'pets',favmeals:'star',requests:'speech',treats:'coin',
   toyplays:'play',laser:'play',bubbles:'play',thriveS:'sun',thriveBest:'sun','@hats':'gacha','@decor':'gacha',capsules:'gacha',dances:'note',nightT:'moon',dailyAll:'goals'};
 const goalIcon=k=>iconURL(GOAL_ICON[k]||(String(k).startsWith('seen_')?'star':'goals'));
@@ -7494,10 +7527,17 @@ const ui={
     if(HUDSKIN.on){const sh=m.querySelector('.sheet');if(sh){sh._skin='plate';if(HUDSKIN.ro)HUDSKIN.ro.observe(sh);requestAnimationFrame(()=>HUDSKIN.paint(sh,'plate'));}}
     if(game.held)dropHeld();
     if(id==='mGoals'){this.renderGoals();save.achNew=0;this.syncDock();}else if(id==='mBag')this.renderBag();else if(id==='mGacha')this.renderGacha();else if(id==='mPets')this.renderPets();
+    if(id!=='mPets')this.tipOnce(id);
   },
+  // a one-time tip under a menu's title: shows the first time you open that menu, then never again
+  tipOnce(id,key=id){const text=MENU_TIPS[key];save.set.tips=save.set.tips||{};if(!text||save.set.tips[key])return;save.set.tips[key]=1;markDirty();
+    const sh=$(id)?.querySelector('.sheet');if(!sh)return;sh.querySelector('.mtip')?.remove();const t=document.createElement('div');t.className='mtip';
+    t.innerHTML=`<img class="px" src="${iconURL('star')}" alt=""><span>${text}</span><button>Got it</button>`;sh.querySelector('.sheet-h').after(t);
+    const go=()=>{if(t.classList.contains('out'))return;t.style.height=t.offsetHeight+'px';void t.offsetHeight;t.classList.add('out');setTimeout(()=>t.remove(),450);};
+    t.querySelector('button').addEventListener('click',()=>{SFX.play('tick');go();});setTimeout(go,12000);},
   close(silent){
     if(!this.open)return;if(this.open==='mGacha'&&this.revealShown)this.hideReveal();
-    $(this.open).hidden=true;this.open=null;this.previews=[];if(!silent)SFX.play('close');
+    $(this.open).querySelector('.mtip')?.remove();$(this.open).hidden=true;this.open=null;this.previews=[];if(!silent)SFX.play('close');
   },
   // ---------- bag ----------
   goalTab:'today',
@@ -7524,7 +7564,7 @@ const ui={
     tabs.innerHTML='';for(const k of Object.keys(cats)){const n=Object.keys(inv).filter(id=>inv[id]>0&&cats[k].includes(ITEMS[id]?.cat)).length;
       const b=document.createElement('button');b.className='tab'+(this.bagTab===k?' on':'');b.innerHTML=`<img class="px ti2" src="${iconURL(tic[k])}" alt="">${lbl[k]}<span class="n">${n}</span>`;b.addEventListener('click',()=>{this.bagTab=k;SFX.play('tick');this.renderBag();});tabs.appendChild(b);}
     const ids=Object.keys(ITEMS).filter(id=>inv[id]>0&&cats[this.bagTab].includes(ITEMS[id].cat));
-    const ps=game.kind?petSave():null;$('bagSub').textContent='Everything you have collected from the capsule machines.';
+    const ps=game.kind?petSave():null;
     body.innerHTML='';
     // hats tab: a little wardrobe mirror with your critter wearing whatever it has on right now
     if(this.bagTab==='hat'&&ps){const wr=document.createElement('div');wr.className='wardrobe';const nh=NO_HAT.includes(game.kind);
@@ -7551,17 +7591,22 @@ const ui={
     for(const k of Object.keys(MACHINES)){const b=document.createElement('button');b.className='tab'+(G.m===k?' on':'');b.textContent=MACHINES[k].name;
       b.addEventListener('click',()=>{if(G.state!=='idle')return;G.m=k;SFX.play('tick');this.renderGacha();});tabs.appendChild(b);}
     if(G.ballsFor!==G.m||!G.balls.length)gBalls();
-    const M2=MACHINES[G.m];$('gTitle').textContent=M2.name;$('gDesc').textContent=M2.desc;
-    $('gPrice').innerHTML=`<img class="px" src="${iconURL('coin')}" alt="">${M2.price} a turn`;
+    const M2=MACHINES[G.m];
     const p=$('gPull');p.style.setProperty('--pc',M2.col);p.innerHTML=`<span class="pl">Turn the crank</span><span class="pp"><img class="px" src="${iconURL('coin')}" alt="">${M2.price}</span>`;p.disabled=G.state!=='idle';
     const nc=newChance(G.m);
     // odds as one segmented bar with a legend, the new-item boost as a pill
     $('gOdds').innerHTML=`<div class="rbar">${RAR.map(r=>`<i style="--c:${r.c};flex:${r.w}"></i>`).join('')}</div><div class="rleg">${RAR.map(r=>`<span style="--c:${r.c}"><b></b>${r.n} <em>${r.w}%</em></span>`).join('')}</div>`+
       `<div class="gnotes"><span class="boost">✦ ${nc>0?`${Math.round(nc*100)}% chance of something new <small>(new-item boost ×${NEW_BOOST})</small>`:'Collection complete!'}</span><span class="ref">Repeats refund ${Math.round(MACHINES[G.m].price*DUP_REFUND)} coins</span></div>`;
     const own=M2.pool.filter(id=>save.inv[id]>0).length;$('gCollH').innerHTML=`Collection <b>${own}</b>/${M2.pool.length}`;const bar=$('gCollBar');bar.style.width=(own/M2.pool.length*100).toFixed(1)+'%';bar.style.background=M2.col;
-    // every slot shows its rarity colour (so you know what you're hunting); owned ones glow and show how many you have
-    const cg=$('gColl');cg.innerHTML='';for(const id of M2.pool){const d=document.createElement('div'),n=save.inv[id]||0,has=n>0,r=ITEMS[id].r;d.className='cg'+(has?' has':' unk')+(r===3?' leg':'');d.style.setProperty('--rc',RAR[r].c);
-      d.title=has?`${ITEMS[id].name} · ${RAR[r].n}`:`??? · ${RAR[r].n}`;d.appendChild(itemCanvas(id));if(n>1){const c=document.createElement('span');c.className='ct';c.textContent='×'+n;d.appendChild(c);}cg.appendChild(d);}
+    // filter the collection by rarity (or just what's still missing)
+    const F=this.gFilter||'All',fil=$('gFilt');fil.innerHTML='';const pass=id=>F==='All'||(F==='Missing'?!(save.inv[id]>0):RAR[ITEMS[id].r].n===F);
+    for(const f of['All',...RAR.map(r=>r.n),'Missing']){const n=M2.pool.filter(id=>f==='All'||(f==='Missing'?!(save.inv[id]>0):RAR[ITEMS[id].r].n===f)).length;if(!n&&f!=='Missing')continue;
+      const b=document.createElement('button');b.className='tab'+(F===f?' on':'');const rc=RAR.find(r=>r.n===f)?.c;b.innerHTML=(rc?`<i class="rdot" style="--c:${rc}"></i>`:'')+`${f}<span class="n">${n}</span>`;b.addEventListener('click',()=>{this.gFilter=f;SFX.play('tick');this.renderGacha();});fil.appendChild(b);}
+    // every slot shows its rarity colour (so you know what you're hunting); owned ones glow and show how many you have; hover or tap for its card
+    const cg=$('gColl');cg.innerHTML='';const L=M2.pool.filter(pass);if(!L.length)cg.innerHTML='<div class="cnone">Nothing missing. You have them all!</div>';
+    for(const id of L){const it=ITEMS[id],n=save.inv[id]||0,has=n>0,r=it.r,w=document.createElement('div');w.className='cgi';w.tabIndex=0;
+      const d=document.createElement('div');d.className='cg'+(has?' has':' unk')+(r===3?' leg':'');d.style.setProperty('--rc',RAR[r].c);d.appendChild(itemCanvas(id));if(n>1){const c=document.createElement('span');c.className='ct';c.textContent='×'+n;d.appendChild(c);}
+      w.appendChild(d);w.insertAdjacentHTML('beforeend',`<span class="cn">${has?it.name:'???'}</span><div class="ctip" style="--rc:${RAR[r].c}"><b>${has?it.name:'Not found yet'}</b><em>${RAR[r].n}</em><p>${has?it.desc:'Keep turning the crank!'}</p>${has?`<small>You have ${n}</small>`:''}</div>`);cg.appendChild(w);}
     gDraw();
   },
   pull(){
@@ -7588,46 +7633,71 @@ const ui={
   hideReveal(){$('gReveal').hidden=true;this.revealShown=false;G.state='idle';G.halves=[];G.cap=null;if(this.open==='mGacha')this.renderGacha();},
   // ---------- pets ----------
   renderPets(first){
-    const first2=first===true||game.firstRun;$('petsTitle').textContent=first2?'Choose your first critter':'Your critters';
-    $('petsSub').textContent=first2?`Frog, lizard and salamander are free. The others cost ${PET_PRICE}+ coins each.`:`Visit anyone you've adopted; they keep their name, bond and hat. Free critters are always here.`;
+    const first2=first===true||game.firstRun;this.petFirst=first2;$('petsTitle').textContent=first2?'Choose your first critter':'Your critters';
+    this.tipOnce('mPets',first2?'firstPets':'mPets');
     $('petsX').hidden=first2;
     const ro=$('roster');ro.innerHTML='';this.previews=[];
-    const PET_GROUPS=[['Amphibians',['frog','dart','salamander','axolotl']],['Reptiles',['lizard','gecko','chameleon','dragon','snake','turtle']],['Arthropods',['tarantula','scorpion','crab','millipede','bee']],['Molluscs',['gsnail','cuttle','nudi']],['Birds',['chick']],['Fish',['puffer','shark']],['Fantasy',['slime','golem','mush','kraken','bun','wisp','fuzzworm']]];
     const order=[];for(const[g,ks]of PET_GROUPS)for(const k of ks)if(ROSTER.includes(k))order.push([g,k]);for(const k of ROSTER)if(!order.some(o=>o[1]===k))order.push(['Other',k]);
-    // jump-to chips for each group, with how many of that group you've adopted
-    const gk=g=>order.filter(o=>o[0]===g).map(o=>o[1]),gn=g=>gk(g).filter(k=>save.pets[k]).length,groups=[...new Set(order.map(o=>o[0]))];
-    const nav=document.createElement('div');nav.className='rnav';groups.forEach(g=>{const b=document.createElement('button');b.innerHTML=`${g}<span>${gn(g)}/${gk(g).length}</span>`;b.addEventListener('click',()=>{const h=ro.querySelector(`[data-g="${g}"]`);if(h)h.scrollIntoView({behavior:'smooth',block:'start'});SFX.play('tick');});nav.appendChild(b);});ro.appendChild(nav);
+    if(!this.petSel||!ROSTER.includes(this.petSel))this.petSel=first2?'frog':game.kind||order[0][1];
+    const F=this.petFilter||'All',show=order.filter(([g,k])=>F==='All'||(F==='Adopted'?!!save.pets[k]:g===F));
+    // quick filters: everyone, the ones you have, or one group at a time
+    const fl=document.createElement('div');fl.className='pfilt';
+    for(const f of['All','Adopted',...PET_GROUPS.map(g=>g[0])]){const n=f==='All'?order.length:f==='Adopted'?order.filter(o=>save.pets[o[1]]).length:order.filter(o=>o[0]===f).length;if(f==='Adopted'&&first2)continue;
+      const b=document.createElement('button');b.className='tab'+(F===f?' on':'');b.innerHTML=`${f}<span class="n">${n}</span>`;b.addEventListener('click',()=>{this.petFilter=f;SFX.play('tick');this.renderPets(first);});fl.appendChild(b);}
+    ro.appendChild(fl);
+    const wrap=document.createElement('div');wrap.className='pwrap';ro.appendChild(wrap);
+    const list=document.createElement('div');list.className='plist';wrap.appendChild(list);
+    const det=document.createElement('div');det.className='pdet';wrap.appendChild(det);
     let lastG='';
-    for(const[grp,kind]of order){if(grp!==lastG){lastG=grp;const hd=document.createElement('div');hd.className='rgroup';hd.dataset.g=grp;hd.innerHTML=`${grp}<span>${gn(grp)}/${gk(grp).length} adopted</span>`;ro.appendChild(hd);}
-      const sp=SPECIES[kind],ps=save.pets[kind],here=kind===game.kind,own=petOwned(kind),c=document.createElement('div');c.className='pcard'+(here?' here':'')+(own?'':' locked');
-      const pr=petPrice(kind),pv=document.createElement('div');pv.className='pv';const cv=document.createElement('canvas');cv.width=84;cv.height=54;cv.className='px';pv.appendChild(cv);
-      pv.insertAdjacentHTML('beforeend',here?'<span class="ptag here">Here now</span>':ps?'':own?'<span class="ptag free">Free</span>':`<span class="ptag price"><img class="px" src="${iconURL('coin')}" alt="">${pr}</span>`);c.appendChild(pv);
-      c.insertAdjacentHTML('beforeend',`<h3>${ps?ps.name:sp.label}</h3><div class="sub">${ps?sp.label+' · <b class="temper" title="Personality comes from the name. Same name, same personality!">'+mindFor(kind,ps.name).temper+'</b>':'<i>'+sp.latin+'</i>'}</div><p title="${sp.blurb.replace(/"/g,'&quot;')}">${sp.blurb}</p><div class="sp"></div>
-        <div class="chips">${ps?`<span class="chip bond"><img class="px" src="${iconURL('heart')}" alt="">Bond ${ps.lvl}</span>`:''}${ps&&ps.hat?`<span class="chip"><img class="px" src="${iconURL('gacha')}" alt="">${ITEMS[ps.hat].name}</span>`:''}</div>`);
-      const b=document.createElement('button');b.className='btn'+(own?'':' buy');b.textContent=here?'Here now':ps?'Visit':own?'Adopt':`Adopt · ${pr}`;b.disabled=here;
-      b.addEventListener('click',()=>{
-        if(!petOwned(kind)){if(save.coins<pr){SFX.play('nope');b.textContent=`Need ${pr-save.coins} more`;setTimeout(()=>{b.textContent=`Adopt · ${pr}`;},1600);return;}
-          save.coins-=pr;save.owned.push(kind);markDirty();this.bumpCoins();SFX.play('coin');}
-        const was=game.firstRun;game.firstRun=false;this.close(true);startGame(kind);
-        if(was)setTimeout(()=>flash(`Welcome! You have ${save.coins} coins. Try the Gacha machines!`),2900);});
-      if(kind==='kraken')c.insertAdjacentHTML('beforeend','<div class="hab on" title="Lives in the water tank">~ Paludarium only</div>');
-      else if(SEA_PETS.includes(kind))c.insertAdjacentHTML('beforeend','<div class="hab on" title="Lives in the all-water aquarium">≈ Aquarium only</div>');
-      else if(AMPHI.includes(kind)){const hb=document.createElement('button');hb.className='hab';const lab=()=>{const aq=habitatOf(kind)==='aqua';hb.textContent=aq?'~ Lives in: Paludarium':'* Lives in: Terrarium';hb.classList.toggle('on',aq);};lab();
-        hb.title='Switch which tank this critter lives in';hb.addEventListener('click',()=>{const ps2=petSave(kind);ps2.tank=habitatOf(kind)==='aqua'?'terra':'aqua';markDirty();SFX.play('tick');lab();if(kind===game.kind){this.close(true);startGame(kind);}});c.appendChild(hb);}
-      if(ps){const h3=c.querySelector('h3'),rb=document.createElement('button');rb.className='rn';rb.title='Rename';rb.textContent='✎';h3.appendChild(rb);
-        rb.addEventListener('click',e=>{e.stopPropagation();const inp=document.createElement('input');inp.className='rnin';inp.maxLength=14;inp.value=ps.name;h3.replaceWith(inp);inp.focus();inp.select();
-          const done=ok=>{if(done.d)return;done.d=true;const nm=inp.value.trim().slice(0,14);if(ok&&nm){ps.name=nm;if(kind===game.kind){game.name=nm;if(game.world.pet)game.world.pet.mind=mindFor(kind,nm);this.refreshPet();}markDirty();writeSave();SFX.play('tick');}this.renderPets();};
-          inp.addEventListener('keydown',e=>{if(e.key==='Enter')done(true);else if(e.key==='Escape')done(false);e.stopPropagation();});inp.addEventListener('blur',()=>done(true));});}
-      c.appendChild(b);ro.appendChild(c);
-      this.previews.push(petPreview(kind,cv));}
+    if(!show.length)list.innerHTML='<div class="pnone">No critters here yet.</div>';
+    for(const[grp,kind]of show){if(grp!==lastG&&(F==='All'||F==='Adopted')){lastG=grp;const hd=document.createElement('div');hd.className='rgroup';hd.textContent=grp;list.appendChild(hd);}
+      const sp=SPECIES[kind],ps=save.pets[kind],r=document.createElement('button');r.className='prow'+(kind===this.petSel?' on':'')+(kind===game.kind?' here':'')+(petOwned(kind)||ps?'':' lk');
+      r.appendChild(petSnap(kind));r.insertAdjacentHTML('beforeend',`<span class="pt"><b>${ps?ps.name:sp.label}</b><small>${kind===game.kind?'Here now':ps?'Bond '+ps.lvl:petOwned(kind)?'Free':petPrice(kind)+' coins'}</small></span>`);
+      r.addEventListener('click',()=>{if(this.petSel===kind)return;this.petSel=kind;SFX.play('tick');list.querySelectorAll('.prow').forEach(x=>x.classList.toggle('on',x===r));this.petDetail(det);});list.appendChild(r);}
+    this.petDetail(det);
+    const on=list.querySelector('.prow.on');if(on)on.scrollIntoView({block:'nearest'});
+  },
+  // the big panel on the right: a live window onto the selected critter and everything about it
+  petDetail(det){const kind=this.petSel,sp=SPECIES[kind],ps=save.pets[kind],here=kind===game.kind,own=petOwned(kind),pr=petPrice(kind),first2=this.petFirst;
+    det.innerHTML='';this.previews=[];
+    const pv=document.createElement('div');pv.className='pbig';const cv=document.createElement('canvas');cv.width=96;cv.height=56;cv.className='px';pv.appendChild(cv);
+    pv.insertAdjacentHTML('beforeend',here?'<span class="ptag here">Here now</span>':ps?'':own?'<span class="ptag free">Free</span>':`<span class="ptag price"><img class="px" src="${iconURL('coin')}" alt="">${pr}</span>`);det.appendChild(pv);
+    const hd=document.createElement('div');hd.className='pdh';hd.innerHTML=`<h3>${ps?ps.name:sp.label}</h3><div class="sub">${ps?sp.label+' · <b class="temper" title="Personality comes from the name. Same name, same personality!">'+mindFor(kind,ps.name).temper+'</b>':'<i>'+sp.latin+'</i>'}</div>`;det.appendChild(hd);
+    det.insertAdjacentHTML('beforeend',`<p class="pbl">${sp.blurb}</p>`);
+    const ch=document.createElement('div');ch.className='chips';det.appendChild(ch);
+    if(ps)ch.insertAdjacentHTML('beforeend',`<span class="chip bond"><img class="px" src="${iconURL('heart')}" alt="">Bond ${ps.lvl}</span>`+(ps.hat?`<span class="chip"><img class="px" src="${iconURL('gacha')}" alt="">${ITEMS[ps.hat].name}</span>`:''));
+    if(kind==='kraken')ch.insertAdjacentHTML('beforeend','<span class="chip hab">~ Paludarium only</span>');
+    else if(SEA_PETS.includes(kind))ch.insertAdjacentHTML('beforeend','<span class="chip hab">≈ Aquarium only</span>');
+    else if(AMPHI.includes(kind)){const hb=document.createElement('button');hb.className='chip hab tog';const lab=()=>{const aq=habitatOf(kind)==='aqua';hb.textContent=aq?'~ Lives in: Paludarium ⇄':'* Lives in: Terrarium ⇄';};lab();
+      hb.title='Switch which tank this critter lives in';hb.addEventListener('click',()=>{const ps2=petSave(kind);ps2.tank=habitatOf(kind)==='aqua'?'terra':'aqua';markDirty();SFX.play('tick');lab();if(kind===game.kind){this.close(true);startGame(kind);}});ch.appendChild(hb);}
+    if(ps){const h3=hd.querySelector('h3'),rb=document.createElement('button');rb.className='rn';rb.title='Rename';rb.textContent='✎';h3.appendChild(rb);
+      rb.addEventListener('click',e=>{e.stopPropagation();const inp=document.createElement('input');inp.className='rnin';inp.maxLength=14;inp.value=ps.name;h3.replaceWith(inp);inp.focus();inp.select();
+        const done=ok=>{if(done.d)return;done.d=true;const nm=inp.value.trim().slice(0,14);if(ok&&nm){ps.name=nm;if(kind===game.kind){game.name=nm;if(game.world.pet)game.world.pet.mind=mindFor(kind,nm);this.refreshPet();}markDirty();writeSave();SFX.play('tick');}this.renderPets(first2);};
+        inp.addEventListener('keydown',e=>{if(e.key==='Enter')done(true);else if(e.key==='Escape')done(false);e.stopPropagation();});inp.addEventListener('blur',()=>done(true));});}
+    const b=document.createElement('button');b.className='btn pgo'+(own?'':' buy');b.textContent=here?'Here now':ps?`Visit ${ps.name}`:own?'Adopt':`Adopt · ${pr} coins`;b.disabled=here;
+    b.addEventListener('click',()=>{
+      if(!petOwned(kind)){if(save.coins<pr){SFX.play('nope');b.textContent=`Need ${pr-save.coins} more coins`;setTimeout(()=>{b.textContent=`Adopt · ${pr} coins`;},1600);return;}
+        save.coins-=pr;save.owned.push(kind);markDirty();this.bumpCoins();SFX.play('coin');}
+      const was=game.firstRun;game.firstRun=false;this.close(true);startGame(kind);
+      if(was)setTimeout(()=>flash(`Welcome! You have ${save.coins} coins. Try the Gacha machines!`),2900);});
+    det.appendChild(b);
+    this.previews.push(petPreview(kind,cv));
   },
   tickPreviews(dt){
-    for(const p of this.previews){p.pw.t+=dt;p.pet.update(dt);p.pw.parts.length=0;p.pw.ripples.length=0;
+    for(const p of this.previews){p.pw.t+=dt;p.pet.update(dt);drawPreview(p);}
+  },
+};
+// one frame of a critter preview window (live previews call this every frame, list thumbnails once)
+function drawPreview(p){{p.pw.parts.length=0;p.pw.ripples.length=0;
       p.fb.px.set(p.bg);p.fb.clearLayer();p.pet.draw(p.fb);composite(p.fb,p.pet,{sAmt:.6,sdx:1,sdy:1});if(p.pet.drawExtras)p.pet.drawExtras(p.fb);if(p.pet.selfLit)p.pet.glow(p.fb,0.5);
       const hat=NO_HAT.includes(p.kind)?null:save.pets[p.kind]?.hat;if(hat){if(hat!=='halo'){p.fb.clearLayer();drawHat(p.fb,hat,p.pet.hatAnchor(),p.pw.t);composite(p.fb,HAT_PAINTER,{sAmt:.55,sdx:1,sdy:2});}hatGlow(p.fb,hat,p.pet.hatAnchor(),p.pw.t);}
       p.ctx.putImageData(p.fb.img,0,0);}
-  },
-};
+}
+// small still thumbnails for the critter list, cached until the critter's hat changes
+const SNAP={};
+function petSnap(kind){const hat=save.pets[kind]?.hat||'',k=kind+'|'+hat;let url=SNAP[k];
+  if(!url){const cv=document.createElement('canvas');cv.width=48;cv.height=32;const p=petPreview(kind,cv);for(let i=0;i<40;i++){p.pw.t+=1/60;p.pet.update(1/60);}drawPreview(p);url=SNAP[k]=cv.toDataURL();}
+  const im=new Image();im.className='px';im.src=url;im.alt='';return im;}
 
 // =====================================================================
 //  Input
