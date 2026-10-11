@@ -341,7 +341,12 @@ body.fun-hud .modal .pdet{background:#3a2412;box-shadow:inset 0 0 0 2px #6a4826,
 .pbl{margin:0;font-size:19px;line-height:1.2;color:#e8dcc0}
 .chip.hab{background:#173a44;color:#bdeef0}.chip.tog{border:0;cursor:pointer;font-family:var(--display)}.chip.tog:hover{filter:brightness(1.2)}
 .pgo{margin-top:auto;padding:12px;font-size:14px}.pgo.buy{background:linear-gradient(#f4c64a,#c8901e)!important;color:#2a1a04!important;text-shadow:none!important}
-@media (max-width:760px){.pwrap{grid-template-columns:1fr;height:auto}.pdet{order:-1}.plist{max-height:260px}}
+@media (max-width:760px){.pfilt{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;margin-bottom:8px;scrollbar-width:none}.pfilt .tab{flex:none}
+  .pwrap{display:flex;flex-direction:column;height:auto;min-height:0;gap:10px}
+  .plist{flex-direction:row;overflow-x:auto;overflow-y:hidden;max-height:none;padding:2px 2px 6px;gap:6px;scrollbar-width:thin}.plist .rgroup{display:none}
+  .prow{flex-direction:column;gap:3px;width:78px;padding:4px;text-align:center}.prow img{width:68px;height:45px}.pt b{font-size:8px;line-height:1.2;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pt small{font-size:12px}
+  .pdet{padding:10px;gap:7px;overflow:visible}.pbig canvas{aspect-ratio:2/1;object-fit:cover}.pdh h3{font-size:16px}.pdh .sub{font-size:15px}
+  .pbl{font-size:16px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer}.pbl.open{display:block}.pgo{padding:10px}}
 .rnav{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:-2px}
 .rnav button{font-family:var(--display);font-size:11px;padding:6px 10px 5px;border-radius:20px;background:rgba(0,0,0,.3);color:#f4e2bc;border:0;box-shadow:inset 0 0 0 2px rgba(255,220,160,.15);cursor:pointer}
 .rnav button:hover{background:rgba(255,220,160,.15)}.rnav button span{margin-left:6px;color:var(--mute);font-size:9px}
@@ -776,18 +781,15 @@ const SFX=(()=>{
       src.connect(f);f.connect(g);g.connect(master);src.start();mist={src,g};}
     else if(!on&&mist){mist.g.gain.setTargetAtTime(0,now,0.06);mist.src.stop(now+0.4);mist=null;}
   }
-  // the pet bee's wings: a steady low bzzzz while it's airborne, two detuned saws beating against each other with a fast wingbeat flutter;
-  // v is loudness, p nudges the pitch up when it's zooming
+  // the pet bee's wings: one plain, low bzzzz while it's airborne (a single soft saw, rounded off by a lowpass, with a gentle wingbeat wobble);
+  // v is loudness, p lifts the pitch a little when it's zooming
   function beeBuzz(v,p=0){
     if(!ac)return;
-    if(!bee){if(v<=0)return;const o1=ac.createOscillator(),o2=ac.createOscillator(),trem=ac.createOscillator(),td=ac.createGain(),am=ac.createGain(),f=ac.createBiquadFilter(),f2=ac.createBiquadFilter(),g=ac.createGain();
-      o1.type='sawtooth';o2.type='sawtooth';o1.frequency.value=205;o2.frequency.value=209;
-      trem.frequency.value=34;td.gain.value=0.35;am.gain.value=0.65;trem.connect(td);td.connect(am.gain);
-      f.type='lowpass';f.frequency.value=1500;f.Q.value=0.8;f2.type='peaking';f2.frequency.value=480;f2.gain.value=7;f2.Q.value=1.2;
-      o1.connect(am);o2.connect(am);am.connect(f);f.connect(f2);f2.connect(g);g.gain.value=0;g.connect(master);o1.start();o2.start();trem.start();bee={g,o1,o2,f};}
-    const t=ac.currentTime,base=205+p*40+Math.sin(t*1.7)*5;
-    bee.o1.frequency.setTargetAtTime(base,t,0.12);bee.o2.frequency.setTargetAtTime(base*1.018,t,0.12);bee.f.frequency.setTargetAtTime(1300+p*700,t,0.15);
-    bee.g.gain.setTargetAtTime(muted?0:v,t,v>0?0.08:0.12);
+    if(!bee){if(v<=0)return;const o=ac.createOscillator(),lfo=ac.createOscillator(),ld=ac.createGain(),f=ac.createBiquadFilter(),g=ac.createGain();
+      o.type='sawtooth';o.frequency.value=118;lfo.frequency.value=9;ld.gain.value=4;lfo.connect(ld);ld.connect(o.frequency);
+      f.type='lowpass';f.frequency.value=480;f.Q.value=0.6;o.connect(f);f.connect(g);g.gain.value=0;g.connect(master);o.start();lfo.start();bee={g,o,f};}
+    const t=ac.currentTime;bee.o.frequency.setTargetAtTime(118+p*22,t,0.15);bee.f.frequency.setTargetAtTime(480+p*160,t,0.2);
+    bee.g.gain.setTargetAtTime(muted?0:v*1.6,t,v>0?0.08:0.12);
   }
   function buzzLevel(v){
     if(!ac)return;
@@ -1576,6 +1578,14 @@ class Pet{
     if(!this.preview&&this.kind!=='snake')SFX.play('gulp');
     this.held=null;
   }
+  // is it paying attention to your hand right now? Interest is sparked when the hand arrives or moves about nearby (or pets it),
+  // lasts a few seconds (longer for curious critters), then it gets bored and ignores the hand for a while
+  handInterest(dt,range=80){const P=game.pointer,C=this.ci||(this.ci={on:false,t:0,cd:rand(1,3),lx:P.x,ly:P.y,mv:0});
+    const near=!this.preview&&P.inside&&Math.hypot(P.x-this.x,P.y-this.y)<range;C.mv+=Math.hypot(P.x-C.lx,P.y-C.ly);C.lx=P.x;C.ly=P.y;
+    if(this.state==='petted'){C.on=true;C.t=Math.max(C.t,1.5);}
+    if(C.on){C.t-=dt;if(C.t<=0||!near){C.on=false;C.cd=rand(6,14);C.mv=0;}}
+    else{C.cd-=dt;if(!near)C.mv=0;else if(C.cd<=0&&C.mv>14){C.on=true;C.t=rand(1.5,4)*(0.6+(this.mind?.cur??0.5)*0.8);C.mv=0;}}
+    return C.on&&near;}
   petMe(){
     if(['grabbed','fall','strike','chew'].includes(this.state))return false;
     if(this.state!=='petted'&&this.state!=='sleeping'){this.state='petted';}
@@ -3347,7 +3357,10 @@ class Cuttle extends Kraken{
   mouthScreen(){const[x,y]=this.W(5.4,0);return{x,y};}
   hatAnchor(){const[x,y]=this.W(-0.8,0);return{x,y:y-2,a:this.ang,s:1.0};}
   submerge(){return 0.3;}
-  goTo(tx,ty,dt,mode,arrive=3){const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y),diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);
+  goTo(tx,ty,dt,mode,arrive=3){
+    // fleeing: keep staring at the threat and jet backwards toward safety (no turning, so it never spins)
+    if(this.state==='flee'){const dx=tx-this.x,dy=ty-this.y,d=Math.hypot(dx,dy)||1,sp=d>arrive?Math.min(36,d*2):0;this.vx+=(dx/d*sp-this.vx)*Math.min(1,dt*3);this.vy+=(dy/d*sp-this.vy)*Math.min(1,dt*3);return d<=arrive;}
+    const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y),diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);
     this.ang+=clamp(diff,-2.4*dt,2.4*dt);
     if(this.onLand()){const sp=4;this.vx+=(Math.cos(this.ang)*sp-this.vx)*Math.min(1,dt*4);this.vy+=(Math.sin(this.ang)*sp-this.vy)*Math.min(1,dt*4);return d<=arrive;}
     // fins ripple it smoothly forward (no jetting unless spooked)
@@ -3378,8 +3391,11 @@ class Cuttle extends Kraken{
   update(dt){this.finPh+=dt*(3+this.speed*0.35);this.display=Math.max(0,this.display-dt*0.5);this.reelT=Math.max(0,this.reelT-dt);if(this.reelT<=0&&this.ft&&this.ft.caught)this.ft=null;if(this.ft&&this.ft.ret!=null){this.ft.ret-=dt;if(this.ft.ret<=0)this.ft=null;}
     const hunting=this.state==='hunt'||this.state==='notice'||this.state==='strike';this.camo+=((this.state==='idle'||this.state==='sleeping'?1:0)-this.camo)*Math.min(1,dt*0.6);
     this.hunt=(this.hunt||0)+((hunting?1:0)-(this.hunt||0))*Math.min(1,dt*3);
-    this.ashore=false;this.moist=1;super.update(dt);if(this.state==='flee'&&this.speed>6){const a=Math.atan2(this.vy,this.vx);this.ang+=wrapA(a+Math.PI-this.ang)*Math.min(1,dt*6);}}
+    this.ashore=false;this.moist=1;super.update(dt);}
   updateTent(dt,dangle){if(!this.arms)return;const sc=this.sc;
+    // carry the arms along with the body first, so their smoothing only softens the waving (they never get left behind across the head when it swims)
+    const mx=this._tx==null?0:this.x-this._tx,my=this._ty==null?0:this.y-this._ty;this._tx=this.x;this._ty=this.y;
+    if(Math.abs(mx)+Math.abs(my)<20)for(const A of this.arms)for(let k=1;k<A.nodes.length;k++){A.nodes[k].x+=mx;A.nodes[k].y+=my;}
     for(const A of this.arms){const N=A.nodes,fd=A.feed,seg=(fd?0.95:1.0)*sc,[rx,ry]=this.W(5.2,A.off*1.1);N[0].x=rx;N[0].y=ry;
       const spread=fd?0.5:this.ft&&!this.ft.caught?1.35:0.95-this.hunt*0.35,base=dangle?Math.PI/2+A.off*0.4:this.ang+A.off*spread;
       for(let k=1;k<N.length;k++){const f=k/(N.length-1),p=N[k],q=N[k-1];
@@ -3780,7 +3796,7 @@ class Wisp extends Pet{
       if(this.state==='grabbed')this.faceT=Math.PI/2;
       else if(sp>5)this.faceT=Math.atan2(this.vy,this.vx);
       else if(T&&T.x!=null)this.faceT=Math.atan2(T.y-this.y,T.x-this.x);
-      else if(!this.preview&&P.inside&&Math.hypot(P.x-this.x,P.y-this.y)<80)this.faceT=Math.atan2(P.y-this.y,P.x-this.x);
+      else if(this.handInterest(dt,80))this.faceT=Math.atan2(P.y-this.y,P.x-this.x);
       else{this.lookT-=dt;if(this.lookT<=0){this.lookT=rand(1.5,4);this.faceT=Math.random()<0.5?Math.PI/2+rand(-0.5,0.5):rand(TAU);}}
       this.face+=wrapA(this.faceT-this.face)*Math.min(1,dt*(sp>5?6:3));}
     this.lickT-=dt;if(this.lickT<=0&&this.ember()<0.5&&this.wet<0.5){this.lickT=rand(0.07,0.2)/(1+this.joy*1.5+this.flare*2);const c=this.core(),H=this.flameH();
@@ -3965,7 +3981,7 @@ class Chick extends Pet{
   // birds move their heads in snaps, so the target jumps and the head darts to it
   headAim(dt){const P=game.pointer,T=(this.state==='hunt'||this.state==='notice'||this.state==='strike')?(this.prey||this.att?.t):null;let want=null;
     if(T&&T.x!=null)want=wrapA(Math.atan2(T.y-this.y,T.x-this.x)-this.ang);
-    else if(!this.preview&&P.inside&&Math.hypot(P.x-this.x,P.y-this.y)<70&&this.state!=='sleeping')want=wrapA(Math.atan2(P.y-this.y,P.x-this.x)-this.ang);
+    else if(this.state!=='sleeping'&&this.handInterest(dt,70))want=wrapA(Math.atan2(P.y-this.y,P.x-this.x)-this.ang);
     if(want!=null)this.hAT=clamp(want,-1.2,1.2);
     else if(this.speed>4||this.tuck>0.3)this.hAT=0;
     else{this.glT-=dt;if(this.glT<=0){this.glT=rand(0.35,1.6);this.hAT=Math.random()<0.3?0:rand(-1.1,1.1);}}
@@ -3977,7 +3993,7 @@ class Chick extends Pet{
   faceToward(x,y,dt){this.ang+=clamp(wrapA(Math.atan2(y-this.y,x-this.x)-this.ang),-5*dt,5*dt);}
   decide(){const P=game.pointer;
     // like a duckling, it often trots after the hand
-    if(!this.preview&&P.inside&&Math.random()<0.45){this.tx=P.x;this.ty=P.y;this.pace='walk';this.state='wander';this.timer=4;return;}
+    if(!this.preview&&P.inside&&Math.random()<0.2){this.tx=P.x;this.ty=P.y;this.pace='walk';this.state='wander';this.timer=4;return;}
     if(Math.random()<0.45){this.state='idle';this.timer=rand(2,5);return;}[this.tx,this.ty]=this.randomSpot();this.pace=Math.random()<0.25?'run':'walk';this.state='wander';this.timer=8;}
   canStrike(p){const m=this.mouthScreen(),d=Math.hypot(p.x-m.x,(p.y-p.h)-m.y);return d<7&&(p.h<3||(p.inHand&&p.h<12));}
   startStrike(p){this.tg={t:0,p};}
@@ -4402,7 +4418,8 @@ class Mush extends Pet{
     // chubby stem body with tiny arms
     const top=y+oy-stemH,bot=y+oy-0.9*sc;fb.cap(x,bot,sw,x+lean,top+sw*0.35,sw*0.92,M.BODY,2,0,0,0.6);
     for(const sd of[-1,1]){const swing=moving_?Math.sin(sp+(sd>0?0:Math.PI))*0.9:0,cheer=this.cheer>0.5?Math.sin(this.t*9+sd)*1.2:0,ay=lerp(bot,top,0.28),hx=x+sd*(sw+0.5*sc)+swing*0.4,hy=ay+1.3*sc-cheer*1.4-(this.state==='chew'?2.2*sc:0);
-      fb.cap(x+sd*sw*0.8,ay,0.55*sc,hx,hy,0.62*sc,M.LIMB,3,0,0,0.9);}
+      // same shape class as the stem so the outline wraps body and arm as one (the stubby arm still pokes out of the silhouette and is shaded a touch darker)
+      fb.cap(x+sd*sw*0.45,ay+0.2*sc,0.75*sc,hx,hy,0.7*sc,M.LIMB,2,0,0,0.85);}
     // the cap: a wide dome sitting on top (drops right over the body when hiding)
     const c=this.capC;fb.cap(c.x-c.rx+c.ry,c.y,c.ry,c.x+c.rx-c.ry,c.y,c.ry,M.CLAW2,4,0,0,1.2);fb.cap(c.x,c.y-c.ry*0.45,c.rx*0.7,c.x,c.y-c.ry*0.45,c.rx*0.7,M.CLAW2,4,0,0,1.4);
   }
@@ -4504,7 +4521,7 @@ class Golem extends Pet{
     // head turns: slow and heavy, to whatever it's after, to your hand when it's close, otherwise a ponderous look around now and then
     const P=game.pointer,tgt=(this.state==='hunt'||this.state==='strike'||this.state==='notice')?(this.prey||this.att?.t):null;let lt;
     if(tgt&&tgt.x!=null)lt=clamp(wrapA(Math.atan2(tgt.y-this.y,tgt.x-this.x)-this.ang),-1,1);
-    else if(!this.preview&&P.inside&&this.sit<0.5&&Math.hypot(P.x-this.x,P.y-this.y)<80)lt=clamp(wrapA(Math.atan2(P.y-this.y,P.x-this.x)-this.ang),-1,1);
+    else if(this.sit<0.5&&this.handInterest(dt,80))lt=clamp(wrapA(Math.atan2(P.y-this.y,P.x-this.x)-this.ang),-1,1);
     else if(this.speed>2||this.sit>0.5)lt=0;
     else{this.lookT=(this.lookT||rand(2,4))-dt;if(this.lookT<=0){this.lookT=rand(2.5,5.5);this.lookTo=Math.random()<0.35?0:rand(-0.9,0.9);}lt=this.lookTo||0;}
     this.look+=clamp((lt-this.look)*dt*2.2,-1.1*dt,1.1*dt);if(this.state!=='strike')this.reach+=(0-this.reach)*Math.min(1,dt*4);
@@ -4848,13 +4865,20 @@ class Butter extends Food{
     if(soft>0.2)fb.cap(x-1.6*k,y+1.4,0.9*soft,x+1.8*k,y+1.6,1.1*soft,M.F_BUTTER,1,0,0,0);
     fb.box(x,y,1.9*k,1.4*k,this.ang*0.3,M.F_BUTTER,1,0,0,0,0.7);}
 }
-// Honey: a golden glob with a drip, catching the light
+// Honey: a little chunk of honeycomb, hex cells brimming with honey, a glossy glint and a drip
 class Honey extends Food{
-  constructor(x,y,h=0){super();this.initFood('honey',x,y,h);}
+  constructor(x,y,h=0){super();this.initFood('honey',x,y,h);this.layered=false;}
   update(dt,w){if(this.caught||this.inHand)return;this.fall(dt);this.t+=dt;}
-  drawL(fb){const{x,y}=this.scr(),k=1-this.bites*0.25,c=Math.cos(this.ang),s=Math.sin(this.ang);
-    fb.cap(x-c*0.8,y-s*0.5,1.9*k,x+c*0.9,y+s*0.5,1.5*k,M.F_HONEY,1,0,0,0);fb.cap(x,y-0.8*k,1.1*k,x,y-0.8*k,1.1*k,M.F_HONEY,2,0,0,0.8);
-    if(this.bites<2)fb.cap(x+c*1.8,y+s*0.8,0.6,x+c*2.4,y+1.4,0.5,M.F_HONEY,1,0,0,0);}
+  drawShadow(fb){if(this.caught)return;const{x,y}=this.inHand?{x:this.sx,y:this.sy}:{x:this.x,y:this.y};const lift=this.inHand?3:this.h>0.5?2:1,k=1-this.bites*0.2;
+    for(let yy=-3;yy<=3;yy++)for(let xx=-5;xx<=5;xx++)if(Math.hypot(xx/(5*k),yy/(3.4*k))<1)pdark(fb,Math.round(x)+xx+lift,Math.round(this.inHand?y:this.y)+yy+lift,.75);}
+  draw(fb,t){const{x,y}=this.scr(),X=Math.round(x),Y=Math.round(y),k=1-this.bites*0.2,rx=5.2*k,ry=3.9*k,K=hex('#4a2204'),W1=hex('#ffe6a0'),W2=hex('#d89a3a'),H1=hex('#f4a822'),H2=hex('#c26a0c'),G=hex('#fff6cc');
+    for(let yy=-5;yy<=5;yy++)for(let xx=-6;xx<=6;xx++){const e=Math.hypot((xx+.5)/rx,(yy+.5)/ry);if(e>1)continue;
+      if(e>0.82){pset(fb,X+xx,Y+yy,e>0.93?K:(xx+yy<0?W1:W2));continue;}// wax rim, outlined
+      // pointy-top hex cells about 3px across: wax walls, honey inside, darker toward the bottom-right
+      const cy=Math.round((yy+0.5)/2.6),cx=Math.round((xx+0.5-(cy&1)*1.5)/3),ux=xx+.5-(cx*3+(cy&1)*1.5),uy=yy+.5-cy*2.6,wall=Math.abs(ux)>1.15||Math.abs(uy)+Math.abs(ux)*0.55>1.45;
+      pset(fb,X+xx,Y+yy,wall?(xx+yy<0?W1:W2):(ux+uy>0.4?H2:H1));}
+    pset(fb,X-2,Y-2,G);pset(fb,X-1,Y-2,G);pset(fb,X+1,Y-1,G);// glints
+    if(this.bites<2){pset(fb,X+2,Y+Math.ceil(ry),H1);pset(fb,X+2,Y+Math.ceil(ry)+1,H2);}}// a drip hanging off the bottom
 }
 // Geode crunch: a little purple crystal cluster in a rock shell (a golem delicacy)
 class Geode extends Food{
@@ -6068,36 +6092,36 @@ const MURK=hex('#4a6a2a');
 //  Goals: what you've done (tracking), achievements, daily tasks and critter requests
 // =====================================================================
 const ACH=[
-  {id:'firstbite',cat:'Care',t:'First Bite',d:'Feed a critter its first meal',k:'meals',n:1,rw:10},
-  {id:'hand10',cat:'Care',t:'Hand-feeder',d:'Hand-feed 10 times (tweezers or your hand)',k:'handfeeds',n:10,rw:20},
-  {id:'hand50',cat:'Care',t:'Tweezer Master',d:'Hand-feed 50 times',k:'handfeeds',n:50,rw:50},
-  {id:'clean10',cat:'Care',t:'Tidy Keeper',d:'Scoop up 10 messes',k:'cleans',n:10,rw:15},
-  {id:'clean50',cat:'Care',t:'Spotless Legend',d:'Scoop up 50 messes',k:'cleans',n:50,rw:40},
-  {id:'treats10',cat:'Care',t:'Spoilt Rotten',d:'Buy 10 fancy treats (5+ coins)',k:'treats',n:10,rw:25},
-  {id:'thrive10',cat:'Care',t:'Living Well',d:'Keep a critter thriving for 10 minutes in a row',k:'thriveBest',n:600,rw:40,sec:true},
-  {id:'lvl3',cat:'Bond',t:'Friends',d:'Reach bond level 3 with a critter',k:'@lvl',n:3,rw:20},
-  {id:'lvl5',cat:'Bond',t:'Best Friends',d:'Reach bond level 5',k:'@lvl',n:5,rw:40},
-  {id:'lvl10',cat:'Bond',t:'Soulmates',d:'Reach bond level 10',k:'@lvl',n:10,rw:100},
-  {id:'bursts25',cat:'Bond',t:'Cuddle Monster',d:'Get 25 cuddle coin bursts',k:'bursts',n:25,rw:30},
-  {id:'own3',cat:'Collection',t:'Growing Family',d:'Care for 3 different critters',k:'@pets',n:3,rw:20},
-  {id:'own6',cat:'Collection',t:'Menagerie',d:'Care for 6 different critters',k:'@pets',n:6,rw:40},
-  {id:'own10',cat:'Collection',t:'Critter Keeper',d:'Care for 10 different critters',k:'@pets',n:10,rw:80},
-  {id:'tanks',cat:'Collection',t:'Three Worlds',d:'Have a critter in the terrarium, paludarium and aquarium',k:'@tanks',n:3,rw:50},
-  {id:'hats5',cat:'Collection',t:'Hat Rack',d:'Collect 5 different hats',k:'@hats',n:5,rw:20},
-  {id:'hats10',cat:'Collection',t:'Fashionista',d:'Collect 10 different hats',k:'@hats',n:10,rw:50},
-  {id:'decor10',cat:'Collection',t:'Interior Designer',d:'Collect 10 different decor pieces',k:'@decor',n:10,rw:40},
-  {id:'caps10',cat:'Collection',t:'Capsule Fan',d:'Open 10 gacha capsules',k:'capsules',n:10,rw:30},
-  {id:'dance',cat:'Play',t:'Dance Party',d:'See a critter dance',k:'dances',n:1,rw:15},
-  {id:'bub50',cat:'Play',t:'Bubble Popper',d:'Have your critters pop 50 bubbles',k:'bubbles',n:50,rw:25},
-  {id:'laser10',cat:'Play',t:'Red Dot Hunter',d:'Let a critter catch the laser dot 10 times',k:'laser',n:10,rw:20},
-  {id:'toys50',cat:'Play',t:'Playtime',d:'50 toy and tool plays',k:'toyplays',n:50,rw:30},
-  {id:'puff',cat:'Discovery',t:'Pufferball',d:'See a pufferfish puff up',k:'seen_puff',n:1,rw:15},
-  {id:'ink',cat:'Discovery',t:'Ink Cloud',d:'See a squirt of ink',k:'seen_ink',n:1,rw:15},
-  {id:'shrooms',cat:'Discovery',t:'Fairy Ring',d:'See baby mushrooms sprout',k:'seen_shrooms',n:1,rw:15},
-  {id:'land',cat:'Discovery',t:'Land Ho!',d:'See a kraken crawl about on land',k:'seen_krakenLand',n:1,rw:15},
-  {id:'night',cat:'Discovery',t:'Night Owl',d:'Spend 2 minutes with the lights off',k:'nightT',n:120,rw:15,sec:true},
-  {id:'req10',cat:'Discovery',t:'Good Listener',d:'Grant 10 critter requests',k:'requests',n:10,rw:30},
-  {id:'daily',cat:'Discovery',t:'Daily Hero',d:'Finish all three daily tasks in one day',k:'dailyAll',n:1,rw:30}];
+  {id:'firstbite',cat:'Care',t:'First Bite',d:'Feed a critter its first meal',k:'meals',n:1,rw:25},
+  {id:'hand10',cat:'Care',t:'Hand-feeder',d:'Hand-feed 10 times (tweezers or your hand)',k:'handfeeds',n:10,rw:50},
+  {id:'hand50',cat:'Care',t:'Tweezer Master',d:'Hand-feed 50 times',k:'handfeeds',n:50,rw:125},
+  {id:'clean10',cat:'Care',t:'Tidy Keeper',d:'Scoop up 10 messes',k:'cleans',n:10,rw:40},
+  {id:'clean50',cat:'Care',t:'Spotless Legend',d:'Scoop up 50 messes',k:'cleans',n:50,rw:100},
+  {id:'treats10',cat:'Care',t:'Spoilt Rotten',d:'Buy 10 fancy treats (5+ coins)',k:'treats',n:10,rw:60},
+  {id:'thrive10',cat:'Care',t:'Living Well',d:'Keep a critter thriving for 10 minutes in a row',k:'thriveBest',n:600,rw:100,sec:true},
+  {id:'lvl3',cat:'Bond',t:'Friends',d:'Reach bond level 3 with a critter',k:'@lvl',n:3,rw:50},
+  {id:'lvl5',cat:'Bond',t:'Best Friends',d:'Reach bond level 5',k:'@lvl',n:5,rw:100},
+  {id:'lvl10',cat:'Bond',t:'Soulmates',d:'Reach bond level 10',k:'@lvl',n:10,rw:250},
+  {id:'bursts25',cat:'Bond',t:'Cuddle Monster',d:'Get 25 cuddle coin bursts',k:'bursts',n:25,rw:75},
+  {id:'own3',cat:'Collection',t:'Growing Family',d:'Care for 3 different critters',k:'@pets',n:3,rw:50},
+  {id:'own6',cat:'Collection',t:'Menagerie',d:'Care for 6 different critters',k:'@pets',n:6,rw:100},
+  {id:'own10',cat:'Collection',t:'Critter Keeper',d:'Care for 10 different critters',k:'@pets',n:10,rw:200},
+  {id:'tanks',cat:'Collection',t:'Three Worlds',d:'Have a critter in the terrarium, paludarium and aquarium',k:'@tanks',n:3,rw:125},
+  {id:'hats5',cat:'Collection',t:'Hat Rack',d:'Collect 5 different hats',k:'@hats',n:5,rw:50},
+  {id:'hats10',cat:'Collection',t:'Fashionista',d:'Collect 10 different hats',k:'@hats',n:10,rw:125},
+  {id:'decor10',cat:'Collection',t:'Interior Designer',d:'Collect 10 different decor pieces',k:'@decor',n:10,rw:100},
+  {id:'caps10',cat:'Collection',t:'Capsule Fan',d:'Open 10 gacha capsules',k:'capsules',n:10,rw:75},
+  {id:'dance',cat:'Play',t:'Dance Party',d:'See a critter dance',k:'dances',n:1,rw:40},
+  {id:'bub50',cat:'Play',t:'Bubble Popper',d:'Have your critters pop 50 bubbles',k:'bubbles',n:50,rw:60},
+  {id:'laser10',cat:'Play',t:'Red Dot Hunter',d:'Let a critter catch the laser dot 10 times',k:'laser',n:10,rw:50},
+  {id:'toys50',cat:'Play',t:'Playtime',d:'50 toy and tool plays',k:'toyplays',n:50,rw:75},
+  {id:'puff',cat:'Discovery',t:'Pufferball',d:'See a pufferfish puff up',k:'seen_puff',n:1,rw:40},
+  {id:'ink',cat:'Discovery',t:'Ink Cloud',d:'See a squirt of ink',k:'seen_ink',n:1,rw:40},
+  {id:'shrooms',cat:'Discovery',t:'Fairy Ring',d:'See baby mushrooms sprout',k:'seen_shrooms',n:1,rw:40},
+  {id:'land',cat:'Discovery',t:'Land Ho!',d:'See a kraken crawl about on land',k:'seen_krakenLand',n:1,rw:40},
+  {id:'night',cat:'Discovery',t:'Night Owl',d:'Spend 2 minutes with the lights off',k:'nightT',n:120,rw:40,sec:true},
+  {id:'req10',cat:'Discovery',t:'Good Listener',d:'Grant 10 critter requests',k:'requests',n:10,rw:75},
+  {id:'daily',cat:'Discovery',t:'Daily Hero',d:'Finish all three daily tasks in one day',k:'dailyAll',n:1,rw:75}];
 function achVal(a){const T=save.track||{};switch(a.k){
   case '@lvl':return Math.max(0,...Object.values(save.pets).map(p=>p.lvl||1));case '@pets':return Object.keys(save.pets).length;
   case '@tanks':return new Set(Object.keys(save.pets).map(habitatOf)).size;case '@hats':return Object.keys(ITEMS).filter(i=>ITEMS[i].cat==='hat'&&save.inv[i]>0).length;
@@ -6223,8 +6247,14 @@ function updatePlay(dt){
         spawn(w,'drop',P.x+Math.cos(a)*r*0.4,P.y+22+Math.sin(a)*r*0.4,{h:22,vh:-rand(0,20),vx:Math.cos(a)*r*1.6,vy:Math.sin(a)*r*1.2,life:3});
         if(Math.random()<0.5)spawn(w,'mist',P.x+rand(-3,3),P.y+rand(-3,3),{vx:rand(-20,20),vy:rand(-16,16),life:rand(.4,.8)});}
       if(Math.random()<dt*14)w.glassDrops.push({x:P.x+rand(-26,26),y:P.y+rand(-18,18),life:rand(7,14),r:Math.random()<0.25?2:1});
-      if(!honeyThirst(w))S.water=Math.min(100,S.water+3.5*dt);game.mistAcc=(game.mistAcc||0)+dt;{const hd0=pet.headPos();if(Math.hypot(hd0.x-P.x,hd0.y-P.y)<34)reqEvent('mist',null,dt);}
-      const hd=pet.headPos();if(Math.hypot(hd.x-P.x,hd.y-P.y)<26)S.happy=clamp(S.happy+({lizard:0.6,snake:0.6,chameleon:1,tarantula:0.3,scorpion:0.4,kraken:2,cuttle:1.5,golem:2.5,turtle:1.5,bee:0.2,mush:4,bun:-2.5}[pet.kind]??3)*dt,0,100);
+      // misting fills the water need quickly; while the tank still needs it, it pays out (hearts from the critter, a coin per 10 water),
+      // and once it's full there's nothing more to farm
+      const thirsty=!honeyThirst(w)&&S.water<99.5;game.mistAcc=(game.mistAcc||0)+dt;{const hd0=pet.headPos();if(Math.hypot(hd0.x-P.x,hd0.y-P.y)<34)reqEvent('mist',null,dt);}
+      if(thirsty){const b0=S.water;S.water=Math.min(100,S.water+10*dt);game.mistW=(game.mistW||0)+(S.water-b0);
+        if(game.mistW>=10){game.mistW-=10;addCoins(1,P.x+rand(-8,8),P.y+rand(-4,6));}if(S.water>=99.5){game.mistW=0;if(!game.dampNote){game.dampNote=1;flash('The tank is nice and damp now.');}}}
+      const hd=pet.headPos();if(thirsty&&Math.hypot(hd.x-P.x,hd.y-P.y)<26){const lk={lizard:0.6,snake:0.6,chameleon:1,tarantula:0.3,scorpion:0.4,kraken:2,cuttle:1.5,golem:2.5,turtle:1.5,bee:0.2,mush:4,bun:-2.5,wisp:-3,chick:-1}[pet.kind]??3;
+        S.happy=clamp(S.happy+lk*dt,0,100);game.mistFx=(game.mistFx||0)-dt;
+        if(game.mistFx<=0){game.mistFx=lk>=1?0.45:0.9;const hy=hd.y-6-(pet.h||0);if(lk>=1)spawn(w,'heart',hd.x+rand(-4,4),hy,{vy:-rand(12,18),life:1.3,ph:rand(TAU)});else if(lk<0)spawn(w,'smoke',hd.x+rand(-3,3),hy,{vx:0,life:0.9});}}
       for(const pl of w.plants)if(Math.hypot(pl.x-P.x,pl.y-P.y)<pl.reach+10)pl.dist=Math.max(pl.dist,0.8);
     }else if(tool==='pet'||(!tool&&game.hand&&game.hand.mode==='rub')){
       if(pet.hitTest(P.x,P.y)>=0&&P.moved>0.5&&pet.petMe()){P.rub=(P.rub||0)+P.moved;
@@ -6830,7 +6860,7 @@ const DR_THEME={
   greens:null,egg:{lift:1,spots:[[25,23,0.3],[35,22,2.3],[30,29,1.2]],bg:'nest'},
   flower:{lift:2,spots:[[15,15,0.2],[27,11,1.2],[42,14,2.6],[21,27,0.8],[36,27,1.9],[48,24,0.5]],bg:'daisy'},
   grape:{lift:3,spots:[[9,20,0],[19,26,0],[29,21,0],[39,27,0],[49,21,0],[27,33,0]],bg:'vine'},
-  butter:{lift:2,spots:[[31,15,0.15],[36,18,0.35],[41,21,0.55],[34,25,0.2],[40,28,0.45]],bg:'board'},honey:{lift:1,spots:[[17.5,13.8,0],[35.5,13.8,0],[22,21.6,0],[40,21.6,0],[26.5,29.4,0]],bg:'hive'},
+  butter:{lift:2,spots:[[31,15,0.15],[36,18,0.35],[41,21,0.55],[34,25,0.2],[40,28,0.45]],bg:'board'},honey:{lift:1,spots:[[37,12,0],[48,11,0],[43,21,0],[53,23,0],[46,32,0]],bg:'honeyjar',_was:'hive'},
   seeds:{lift:1,spots:[[25,17,0],[34,16,0],[29,22,0],[23,26,0],[35,26,0]],bg:'sunflower'},firefly:{n:6,live:1,bg:'dusk',fglow:1},
   gummy:{lift:1,spots:[[11,15,0],[31,15,0],[41,15,0],[21,29,0],[41,29,0]],bg:'mould'},
   stars:{n:6,float:1,lift:3,bg:'night'},moonberry:{lift:3,spots:[[17,15,0],[29,10,0],[42,14,0],[36,25,0]],glow:1,bg:'magic'},geode:{lift:2,spots:[[17,26,0.3],[31,20,1.2],[45,27,2.4]],bg:'rocks'},
@@ -6979,6 +7009,29 @@ const DRAWER={on:false,el:null,tanks:[],rowsEl:null,drag:null,velX:0,velStrip:nu
       // the knife: steel blade with a buttery smear, wooden handle with brass rivets
       cyl(22,36,44,33,1.4,0.6);for(let k=0;k<=22;k++){const x=22+k,y=36-k*3/22;P(x,y-1,hex('#f2f6fa'));P(x,y,hex('#b8c2cc'));P(x,y+1,hex('#7a848e'));}
       for(let k=0;k<5;k++)P(25+k,35.4-k*0.15,hex('#fff0a8'));cyl(44,33,55,31.5,1.6,0.8);for(let k=0;k<=11;k++){const x=44+k,y=33-k*1.5/11;P(x,y-1,hex('#8a5a30'));P(x,y,hex('#6a4022'));P(x,y+1,hex('#4a2a14'));}P(47,32.6,hex('#f0c860'));P(52,31.9,hex('#f0c860'));}
+    else if(f==='honeyjar'){// a blue gingham picnic cloth; a jar of honey seen from above with a wooden dipper resting in it; comb chunks on the cloth
+      fill((x,y)=>{const a=Math.floor(x/5)&1,b=Math.floor(y/5)&1,n=fbm(x*0.08+sd,y*0.08,2);let c=a&&b?hex('#6e8ec4'):a||b?hex('#a6bce0'):hex('#eef2f8');c=mixc(c,hex('#d8e0ee'),0.12+n*0.12);
+        if(((x+y*3)&7)===0)c=shade(c,0.96);return c;});bump(0.25);
+      // a soft fold across the cloth
+      for(let y=0;y<TKH;y++)for(let x=0;x<TKW;x++){const d=(x*0.35+y)-30;if(Math.abs(d)<2.2)M(x,y,hex('#000000'),0.08*(1-Math.abs(d)/2.2));}
+      // the jar: shadow, thick glass rim, golden honey inside with a glossy highlight
+      const jx=16,jy=20,R0=13.2,R1=10.6;
+      for(let y=0;y<TKH;y++)for(let x=0;x<TKW;x++){const d=Math.hypot(x+.5-jx-1.5,y+.5-jy-2);if(d<R0+1.2)M(x,y,hex('#1a2440'),0.35*(1-Math.max(0,d-R0+1)/2.2));}
+      for(let y=0;y<TKH;y++)for(let x=0;x<TKW;x++){const dx=x+.5-jx,dy=y+.5-jy,d=Math.hypot(dx,dy),i=y*TKW+x;if(d>R0)continue;const lit=(dx+dy)/d;
+        if(d>R1){// glass rim: bright on the top-left, cool and dark on the bottom-right, a crisp outer edge
+          let c=d>R0-0.7?hex('#3a4a5c'):lit<-0.45?hex('#f4fbff'):lit<0.2?hex('#c4dcea'):hex('#7e9cb2');if(d<R1+0.8)c=hex('#5a6e80');P(x,y,c);HG[i]=4;continue;}
+        // honey: deep amber at the edge, warm gold in the middle, a long glossy crescent of light, a few bubbles
+        const e=d/R1;let c=e>0.88?hex('#a85808'):e>0.7?hex('#d88412'):hex('#f0a424');if(e>0.62&&e<0.84&&lit<-0.55)c=hex('#ffe9a0');if(Math.hypot(dx+3.6,dy+5.2)<1.3)c=hex('#fffbe8');
+        if(hash(x*7+sd,y*3)>0.975&&e<0.8)c=hex('#ffd060');P(x,y,c);HG[i]=2.6-e*0.6;}
+      // the dipper: grooved wooden head sunk in the honey, handle resting on the rim and out over the cloth
+      // handle: a chunky outlined wooden stick (lit top-left edge, shaded underside), honey-glazed where it leaves the jar
+      cyl(14,16,32,2,1.6,0.6);const hL=Math.hypot(18,14),ux=18/hL,uy=-14/hL,nx=-uy,ny=ux;
+      for(let k=0;k<=Math.ceil(hL);k++){const cx=14+ux*k,cy=16+uy*k;for(let j=-2;j<=2;j++){const x=cx+nx*j,y=cy+ny*j;
+        P(x,y,Math.abs(j)===2?hex('#3a2010'):j===-1?hex('#e8b882'):j===1?hex('#8a5a2c'):(k<6?hex('#e89a28'):hex('#c08a50')));}}
+      // the dipper head: a stack of grooved wooden rings, glazed in honey
+      for(let j=-4;j<=4;j++)for(let k=-4;k<=4;k++){const d=Math.hypot(k,j);if(d>3.9)continue;const x=12+k,y=18+j;P(x,y,d>3.2?hex('#3a2010'):(Math.round(d)%2?hex('#a86418'):(k+j<0?hex('#ffd060'):hex('#e89a28'))));}
+      // a little honey spill trailing off the rim onto the cloth
+      for(const[x,y,r]of[[27,28,1.8],[29.5,30,1.3],[31,31.5,0.9]])for(let yy=-2;yy<=2;yy++)for(let xx=-2;xx<=2;xx++){const d=Math.hypot(xx,yy);if(d<r){P(x+xx,y+yy,d<r*0.45&&xx+yy<0?hex('#ffd878'):hex('#e09018'));}}}
     else if(f==='hive'){// a honeycomb frame with big, clean cells: golden honey glinting in the open ones, pale wax caps up top, a bee
       const R=5.2,cen=[];for(let r=-1;r<7;r++)for(let q=-1;q<8;q++)cen.push({x:4+q*9+((r&1)?4.5:0),y:6+r*7.8,r,q});
       for(const C of cen){C.cap=C.r<=0||(C.r===1&&hash(C.q,7)>0.5)||(C.r===4&&hash(C.q,3)>0.6);for(const[sx,sy]of T.th.spots)if(Math.hypot(C.x-sx,C.y-sy)<1)C.cap=false;}
@@ -7122,6 +7175,9 @@ const DRAWER={on:false,el:null,tanks:[],rowsEl:null,drag:null,velX:0,velStrip:nu
     if(th.fglow)for(const sl of T.slots){const q=sl.item;if(q&&q.glow){q.glow(fb,1,t);const p=this.pos(q),b=0.12+q.lit*0.25;for(let y=-7;y<=7;y++)for(let x=-7;x<=7;x++){const d=Math.hypot(x,y)/7.5;if(d<1)padd(fb,p.x+x,p.y+y,90*b*(1-d),130*b*(1-d),40*b*(1-d));}}}
     if(th.glow)for(const sl of T.slots){if(!sl.item)continue;const p=this.pos(sl.item),g=0.3+0.15*Math.sin(t*3+sl.ph);for(let y=-5;y<=5;y++)for(let x=-5;x<=5;x++){const d=Math.hypot(x,y);if(d>2.4&&d<5)mix(p.x+x,p.y+y,hex('#8ad8ff'),g*(1-(d-2.4)/2.6));}}
     if(th.float)for(const sl of T.slots){if(!sl.item)continue;const p=this.pos(sl.item);if(Math.sin(t*4+sl.ph)>0.55){put(p.x+3,p.y-3,WHITE);put(p.x-3,p.y+2,hex('#fff4b0'));}}
+    if(th.bg==='honeyjar'){const k=(t*0.35)%1,dx=21,dy=11;// a slow honey drop gathers under the dipper handle and falls into the jar
+      if(k<0.75){const r=0.5+k*1.1;mix(dx,dy+r,hex('#e8961a'),0.95);if(r>1)mix(dx,dy+r+1,hex('#f0a424'),0.85);mix(dx-0.6,dy+r-0.6,hex('#fff0b0'),0.7);}
+      else{const f2=(k-0.75)/0.25;mix(dx,dy+2+f2*6,hex('#e8961a'),1-f2*0.3);}}
     if(th.bg==='hive'){const a=t*0.4,bx=30+Math.cos(a)*16,by=22+Math.sin(a*1.3)*8,da=Math.atan2(Math.cos(a*1.3)*1.3*8,-Math.sin(a)*16),c=Math.cos(da),s2=Math.sin(da);for(let k=-2;k<=2;k++){put(bx+c*k,by+s2*k,(k&1)||k===2?hex('#1a1206'):hex('#f4c020'));}const fl=(Math.floor(t*30)&1)?1.4:1;for(const sd2 of[-1,1])mix(bx-s2*sd2*2*fl-c,by+c*sd2*2*fl-s2,hex('#eaf6ff'),0.7);}
     if(th.bg==='dusk'){const g=0.5+0.2*Math.sin(t*1.7);for(let y=-6;y<=6;y++)for(let x=-7;x<=7;x++){const d=Math.hypot(x/7,y/6);if(d<1)padd(fb,52+x,9+y,30*g*(1-d),110*g*(1-d),130*g*(1-d));}}
     if(th.bg==='jar'){for(let x=4;x<TKW-4;x++)for(let y=1;y<4;y++)if((x+y)%2===0)mix(x,y,hex('#8a9098'),0.8);}
@@ -7537,7 +7593,7 @@ const ui={
     t.querySelector('button').addEventListener('click',()=>{SFX.play('tick');go();});setTimeout(go,12000);},
   close(silent){
     if(!this.open)return;if(this.open==='mGacha'&&this.revealShown)this.hideReveal();
-    $(this.open).querySelector('.mtip')?.remove();$(this.open).hidden=true;this.open=null;this.previews=[];if(!silent)SFX.play('close');
+    $(this.open).querySelector('.mtip')?.remove();$(this.open).hidden=true;this.open=null;this.previews=[];this.livePv={};if(!silent)SFX.play('close');
   },
   // ---------- bag ----------
   goalTab:'today',
@@ -7569,7 +7625,7 @@ const ui={
     // hats tab: a little wardrobe mirror with your critter wearing whatever it has on right now
     if(this.bagTab==='hat'&&ps){const wr=document.createElement('div');wr.className='wardrobe';const nh=NO_HAT.includes(game.kind);
       wr.innerHTML=`<div class="mirror"><canvas class="px" width="64" height="45"></canvas></div><div class="wtxt"><b>${game.name}</b><small>${nh?`${SPECIES[game.kind]?.name||'This critter'}s can't wear hats.`:ps.hat?`Wearing the ${ITEMS[ps.hat].name.toLowerCase()}`:'Bare-headed. Pick a hat!'}</small></div>`;
-      body.appendChild(wr);this.previews.push(petPreview(game.kind,wr.querySelector('canvas')));}
+      body.appendChild(wr);this.previews.push(this.livePreview(game.kind,wr.querySelector('canvas')));}
     if(!ids.length){const e=document.createElement('div');e.className='empty';e.innerHTML=`<img class="px eico" src="${iconURL('gacha')}" alt=""><b>No ${lbl[this.bagTab].toLowerCase()} yet</b><span>The capsule machines are full of them.</span><button class="btn">Open Gacha</button>`;body.appendChild(e);
       e.querySelector('button').addEventListener('click',()=>{G.m=this.bagTab==='toy'?'toys':'style';this.openModal('mGacha');});return;}
     const g=document.createElement('div');g.className='grid';body.appendChild(g);
@@ -7663,7 +7719,7 @@ const ui={
     const pv=document.createElement('div');pv.className='pbig';const cv=document.createElement('canvas');cv.width=96;cv.height=56;cv.className='px';pv.appendChild(cv);
     pv.insertAdjacentHTML('beforeend',here?'<span class="ptag here">Here now</span>':ps?'':own?'<span class="ptag free">Free</span>':`<span class="ptag price"><img class="px" src="${iconURL('coin')}" alt="">${pr}</span>`);det.appendChild(pv);
     const hd=document.createElement('div');hd.className='pdh';hd.innerHTML=`<h3>${ps?ps.name:sp.label}</h3><div class="sub">${ps?sp.label+' · <b class="temper" title="Personality comes from the name. Same name, same personality!">'+mindFor(kind,ps.name).temper+'</b>':'<i>'+sp.latin+'</i>'}</div>`;det.appendChild(hd);
-    det.insertAdjacentHTML('beforeend',`<p class="pbl">${sp.blurb}</p>`);
+    det.insertAdjacentHTML('beforeend',`<p class="pbl">${sp.blurb}</p>`);det.querySelector('.pbl').addEventListener('click',e=>e.currentTarget.classList.toggle('open'));
     const ch=document.createElement('div');ch.className='chips';det.appendChild(ch);
     if(ps)ch.insertAdjacentHTML('beforeend',`<span class="chip bond"><img class="px" src="${iconURL('heart')}" alt="">Bond ${ps.lvl}</span>`+(ps.hat?`<span class="chip"><img class="px" src="${iconURL('gacha')}" alt="">${ITEMS[ps.hat].name}</span>`:''));
     if(kind==='kraken')ch.insertAdjacentHTML('beforeend','<span class="chip hab">~ Paludarium only</span>');
@@ -7681,8 +7737,12 @@ const ui={
       const was=game.firstRun;game.firstRun=false;this.close(true);startGame(kind);
       if(was)setTimeout(()=>flash(`Welcome! You have ${save.coins} coins. Try the Gacha machines!`),2900);});
     det.appendChild(b);
-    this.previews.push(petPreview(kind,cv));
+    this.previews.push(this.livePreview(kind,cv));
   },
+  // a critter's live preview window stays the same little world while the menu is open, so refreshing the menu
+  // (filters, renaming, putting a hat on) doesn't respawn the critter somewhere else
+  livePreview(kind,cv){this.livePv=this.livePv||{};const k=kind+'|'+cv.width+'x'+cv.height;let p=this.livePv[k];
+    if(p){p.ctx=cv.getContext('2d');drawPreview(p);}else p=this.livePv[k]=petPreview(kind,cv);return p;},
   tickPreviews(dt){
     for(const p of this.previews){p.pw.t+=dt;p.pet.update(dt);drawPreview(p);}
   },
@@ -7696,7 +7756,15 @@ function drawPreview(p){{p.pw.parts.length=0;p.pw.ripples.length=0;
 // small still thumbnails for the critter list, cached until the critter's hat changes
 const SNAP={};
 function petSnap(kind){const hat=save.pets[kind]?.hat||'',k=kind+'|'+hat;let url=SNAP[k];
-  if(!url){const cv=document.createElement('canvas');cv.width=48;cv.height=32;const p=petPreview(kind,cv);for(let i=0;i<40;i++){p.pw.t+=1/60;p.pet.update(1/60);}drawPreview(p);url=SNAP[k]=cv.toDataURL();}
+  if(!url){// render the critter standing still in a roomy window, find where its pixels are, then frame that (3:2) so long critters fit
+    const BW=128,BH=86,big=document.createElement('canvas');big.width=BW;big.height=BH;const p=petPreview(kind,big);p.pet.brain=function(dt){if(this.stop)this.stop(dt);};p.pet.speed=0;
+    for(let i=0;i<40;i++){p.pw.t+=1/60;p.pet.update(1/60);}
+    const bg=p.bg;p.bg=new Uint32Array(BW*BH);drawPreview(p);const px=p.fb.px;let x0=BW,y0=BH,x1=0,y1=0;
+    for(let y=0;y<BH;y++)for(let x=0;x<BW;x++)if(px[y*BW+x]>>>24){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
+    p.bg=bg;drawPreview(p);if(x1<x0){x0=BW/2-24;x1=BW/2+24;y0=BH/2-16;y1=BH/2+16;}
+    let w=Math.max(48,x1-x0+1+8),h=Math.max(32,y1-y0+1+8);if(w/h>1.5)h=w/1.5;else w=h*1.5;w=Math.min(w,BW);h=Math.min(h,BH);
+    const cx=(x0+x1+1)/2,cy=(y0+y1+1)/2,sx=clamp(cx-w/2,0,BW-w),sy=clamp(cy-h/2,0,BH-h);
+    const out=document.createElement('canvas');out.width=72;out.height=48;const o=out.getContext('2d');o.imageSmoothingEnabled=false;o.drawImage(big,sx,sy,w,h,0,0,72,48);url=SNAP[k]=out.toDataURL();}
   const im=new Image();im.className='px';im.src=url;im.alt='';return im;}
 
 // =====================================================================
@@ -7965,6 +8033,9 @@ function fit(){
   if(!cam.init){cam.init=true;camReset();}else camApply();
 }
 window.addEventListener('resize',fit);
+// the page can start out 0px wide (e.g. inside an embed that sizes itself after loading): once it has a real size,
+// make sure the food tray is the right kind (the Fun drawer vs the basic tray)
+window.addEventListener('resize',()=>{clearTimeout(game.trayRz);game.trayRz=setTimeout(()=>{const tr=$('tray');if(!tr||tr.hidden)return;const want=game.tool==='feed'&&FUN('food')&&innerWidth>=300;if(want!==tr.classList.contains('drawer'))ui.renderTray();},120);});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&game.kind)writeSave();});
 window.addEventListener('pagehide',()=>{if(game.kind)writeSave();});
 
