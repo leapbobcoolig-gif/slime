@@ -78,6 +78,7 @@ img.px,canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 /* newest message on top; the previous one slides under it, smaller and faded */
 .tmsg{padding:7px 14px 6px;font-size:21px;text-align:center;opacity:.93;transform-origin:50% 0;transition:transform .65s cubic-bezier(.25,.8,.3,1),opacity .65s ease,filter .65s;animation:tmsgin .6s cubic-bezier(.25,.8,.3,1)}
 .tmsg.old{transform:scale(.82);opacity:.5;filter:saturate(.6)}
+.tmsg.swap{animation:tmsgswap .45s ease}@keyframes tmsgswap{0%{opacity:.35}100%{opacity:.93}}
 .tmsg.gone{opacity:0;transform:scale(.75) translateY(-4px)}
 .tmsg.event{background:#3a2e10;box-shadow:inset 0 0 0 2px var(--amber-d),0 4px 0 #040604;color:#ffe7a6}
 .tmsg.event:not(.old){animation:toastpop .55s cubic-bezier(.25,.8,.3,1)}
@@ -501,7 +502,7 @@ body.fun-hud .gtoast.out{transform:none;translate:-50% -10px;opacity:0}
   <div class="srow"><label>Ambient music<small>Soft generative marimba, moodier at night.</small></label><button class="sw" id="setMusic" aria-label="Music"></button></div>
   <div class="srow"><label>Screen shake</label><button class="sw" id="setShake" aria-label="Screen shake"></button></div>
   <div class="srow"><label>Thought bubbles<small>Little icons when your pet wants something.</small></label><button class="sw" id="setBubbles" aria-label="Thought bubbles"></button></div>
-  <div class="srow"><label>Slime face<small>Eyes and a smile on the jelly slime.</small></label><button class="sw" id="setSlimeFace" aria-label="Slime face"></button></div>
+  <div class="srow"><label>Cute faces<small>Eyes and smiles on the slime, bun, mushroom and wisp.</small></label><button class="sw" id="setSlimeFace" aria-label="Cute faces"></button></div>
   <div class="srow"><label>Tuck food tray<small>The food tray tucks away while you carry or pick a food. Tap the little tab to bring it back.</small></label><button class="sw" id="setTrayTuck" aria-label="Tuck food tray"></button></div>
   <div class="srow"><label>Thought marks<small>Little ? ! and ... above critters while they think.</small></label><button class="sw" id="setThoughts" aria-label="Thought marks"></button></div>
   <div class="srow"><label>Graphics<small id="gfxNote">Low makes the food tanks animate more lightly.</small></label><div class="seg" id="setGfx"><button class="btn alt" data-v="auto">Auto</button><button class="btn alt" data-v="high">High</button><button class="btn alt" data-v="low">Low</button></div></div>
@@ -542,7 +543,7 @@ const mixc=(a,b,t)=>rgb(lerp(a&255,b&255,t),lerp(a>>8&255,b>>8&255,t),lerp(a>>>1
 //  Sound: everything synthesized with Web Audio (no files)
 // =====================================================================
 const SFX=(()=>{
-  let ac=null,master=null,musicBus=null,nbuf=null,muted=false,vol=0.8,musicOn=true,mist=null,buzz=null,slit=null,eng=null;const last={};
+  let ac=null,master=null,musicBus=null,nbuf=null,muted=false,vol=0.8,musicOn=true,mist=null,buzz=null,bee=null,slit=null,eng=null;const last={};
   function init(){
     if(ac){if(ac.state==='suspended')ac.resume();return;}
     const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
@@ -695,6 +696,19 @@ const SFX=(()=>{
       src.connect(f);f.connect(g);g.connect(master);src.start();mist={src,g};}
     else if(!on&&mist){mist.g.gain.setTargetAtTime(0,now,0.06);mist.src.stop(now+0.4);mist=null;}
   }
+  // the pet bee's wings: a steady low bzzzz while it's airborne, two detuned saws beating against each other with a fast wingbeat flutter;
+  // v is loudness, p nudges the pitch up when it's zooming
+  function beeBuzz(v,p=0){
+    if(!ac)return;
+    if(!bee){if(v<=0)return;const o1=ac.createOscillator(),o2=ac.createOscillator(),trem=ac.createOscillator(),td=ac.createGain(),am=ac.createGain(),f=ac.createBiquadFilter(),f2=ac.createBiquadFilter(),g=ac.createGain();
+      o1.type='sawtooth';o2.type='sawtooth';o1.frequency.value=205;o2.frequency.value=209;
+      trem.frequency.value=34;td.gain.value=0.35;am.gain.value=0.65;trem.connect(td);td.connect(am.gain);
+      f.type='lowpass';f.frequency.value=1500;f.Q.value=0.8;f2.type='peaking';f2.frequency.value=480;f2.gain.value=7;f2.Q.value=1.2;
+      o1.connect(am);o2.connect(am);am.connect(f);f.connect(f2);f2.connect(g);g.gain.value=0;g.connect(master);o1.start();o2.start();trem.start();bee={g,o1,o2,f};}
+    const t=ac.currentTime,base=205+p*40+Math.sin(t*1.7)*5;
+    bee.o1.frequency.setTargetAtTime(base,t,0.12);bee.o2.frequency.setTargetAtTime(base*1.018,t,0.12);bee.f.frequency.setTargetAtTime(1300+p*700,t,0.15);
+    bee.g.gain.setTargetAtTime(muted?0:v,t,v>0?0.08:0.12);
+  }
   function buzzLevel(v){
     if(!ac)return;
     if(!buzz){if(v<=0)return;const o=ac.createOscillator(),lfo=ac.createOscillator(),ld=ac.createGain(),f=ac.createBiquadFilter(),g=ac.createGain();
@@ -734,7 +748,7 @@ const SFX=(()=>{
   function setMuted(m){muted=m;if(m){mistOn(false);}}
   function setVolume(v){vol=v;if(master)master.gain.setTargetAtTime(v*0.6,ac.currentTime,0.03);}
   function setMusic(on){musicOn=on;if(musicBus)musicBus.gain.setTargetAtTime(on?0.55:0,ac.currentTime,0.3);}
-  return{init,play,mistOn,buzzLevel,slither,engine,music,setMuted,setVolume,setMusic,get muted(){return muted;},get ready(){return!!ac;}};
+  return{init,play,mistOn,buzzLevel,beeBuzz,slither,engine,music,setMuted,setVolume,setMusic,get muted(){return muted;},get ready(){return!!ac;}};
 })();
 window.addEventListener('pointerdown',()=>SFX.init(),true);
 window.addEventListener('keydown',()=>SFX.init(),true);
@@ -842,6 +856,13 @@ function composite(fb,painter,o={}){
 // small direct pixel ops
 function pset(fb,x,y,c){x=Math.floor(x);y=Math.floor(y);if(x<0||y<0||x>=fb.w||y>=fb.h)return;fb.px[y*fb.w+x]=c;}
 function pdark(fb,x,y,f){x=Math.floor(x);y=Math.floor(y);if(x<0||y<0||x>=fb.w||y>=fb.h)return;const i=y*fb.w+x;fb.px[i]=shade(fb.px[i],f);}
+// rising steam off something warm: a couple of soft ribbons that sway, carry little puffs upward and thin out at the top.
+// k is how much (0..1), seed keeps each owner's ribbons their own
+function drawSteam(fb,x,y,k,t,seed=0){if(k<=0.02)return;const S=hex('#fbf6ee'),n=k>0.55?3:2;
+  for(let r=0;r<n;r++){const ph=seed*1.7+r*2.3,bx=x+(r-(n-1)/2)*2.6+Math.sin(t*0.7+ph)*0.6,L=7+k*7+Math.sin(t*0.9+ph)*1.5,drift=Math.sin(t*0.4+ph*0.5)*0.12;
+    for(let j=0.5;j<L;j+=0.5){const u=j/L,amp=0.35+j*0.14,xx=bx+Math.sin(j*0.42-t*2.4+ph)*amp+j*drift,yy=y-j,
+      puff=0.5+0.5*Math.sin(j*0.6-t*4.2+ph),al=k*0.5*Math.pow(1-u,1.3)*Math.min(1,j/1.5)*(0.35+0.65*puff);
+      if(al<0.03)continue;pmix(fb,xx,yy,S,al);if(j>3)pmix(fb,xx+(Math.sin(j*0.42-t*2.4+ph)>0?-1:1),yy,S,al*0.4);}}}
 function pmix(fb,x,y,c,t){x=Math.floor(x);y=Math.floor(y);if(x<0||y<0||x>=fb.w||y>=fb.h)return;const i=y*fb.w+x;fb.px[i]=mixc(fb.px[i],c,t);}
 function padd(fb,x,y,r,g,b){x=Math.floor(x);y=Math.floor(y);if(x<0||y<0||x>=fb.w||y>=fb.h)return;const i=y*fb.w+x,c=fb.px[i];
   fb.px[i]=rgb((c&255)+r,(c>>8&255)+g,(c>>>16&255)+b);}
@@ -892,7 +913,7 @@ const PAL={
   spider:{body:ramp('#0c0a0a','#1a1616','#2c2624','#463c36'),leg:ramp('#0e0c0b','#221c18','#3a302a','#584a40'),rim:ramp('#3a2a16','#6e5230','#a4804a','#d4b070'),
           cara:ramp('#5a3a14','#9a6a2a','#d09a48','#f4cc80'),band:ramp('#7a1e06','#c8420e','#f06a1a','#ffa452'),hair:ramp('#2a2019','#4a3c30','#6e5c4a','#98846c'),outline:'#050403'},
   dragon:{base:ramp('#4e3218','#8a5c2e','#bb8a4c','#e6bd7c'),dark:ramp('#2a180a','#50321a','#744c28','#96683c'),light:ramp('#8c6c40','#caa66a','#eed29c','#fff2cc'),
-          orange:ramp('#6a300c','#b0561c','#e08c3c','#ffc674'),beard:ramp('#1c1a1c','#3c3a40','#6a6670','#a8a4ae'),eye:ramp('#241406','#6a4416','#b88a36','#f0cc6a'),
+          orange:ramp('#6a300c','#b0561c','#e08c3c','#ffc674'),beard:ramp('#141010','#2a201c','#4a3a30','#7a6048'),eye:ramp('#241406','#6a4416','#b88a36','#f0cc6a'),
           dull:ramp('#3a2c20','#5e4a36','#7e6850','#9c8670'),outline:'#120a04'},
   cuttle:{body:ramp('#3a2a20','#6a4c38','#a07a5a','#d4b28a'),dark:ramp('#1a100c','#34221a','#523826','#6e5036'),pale:ramp('#8a8070','#c2b6a2','#e6dccc','#fff8ee'),
           fin:ramp('#5e5652','#9a908a','#d2cac2','#f6f2ec'),irid:ramp('#1e4a58','#2e7a8a','#4ab0b8','#9ae8e0'),eye:ramp('#6a6040','#a89a68','#d8cc98','#fbf4d0'),outline:'#120c08'},
@@ -1365,7 +1386,8 @@ class Pet{
       case 'hunt':{const p=this.prey;
         if(!p||p.dead||p.caught||this.timer<=0||(p.type&&!p.play&&!w.prey.includes(p))){this.state='idle';this.timer=rand(.3,1);this.prey=null;break;}
         if(!p.inHand&&!this.preview&&this.mind.focus<0.5&&p!==this.wantTarget()&&Math.random()<dt*(0.5-this.mind.focus)*0.12){think(this,'?');this.ignoreIt(p,rand(1.5,3));this.state='idle';this.timer=rand(0.8,1.6);this.prey=null;break;}
-        if(this.canStrike(p)&&!((this.dive||0)>0.4&&Math.max(p.sink||0,p.sunk||0)<0.5)){this.startStrike(p);this.state='strike';break;}
+        if(this.strikeCD>0)this.strikeCD-=dt;
+        if(!(this.strikeCD>0)&&this.canStrike(p)&&!((this.dive||0)>0.4&&Math.max(p.sink||0,p.sunk||0)<0.5)){this.startStrike(p);this.state='strike';break;}
         const hd=this.headPos(),d=Math.hypot(p.x-hd.x,p.y-hd.y);
         if(p.play||p.inHand){this.goTo(p.x,p.y,dt,p.play?(d>22?'run':'walk'):'walk',1);}
         else{
@@ -1388,7 +1410,11 @@ class Pet{
           if(t.onCatch)t.onCatch(this);if(w.onPlay)w.onPlay(this,t);this.state='idle';this.timer=rand(.3,.9);if(this.onToyCatch)this.onToyCatch(t);break;}
         if(r==='caught'){this.state='chew';this.timer=this.frogish?0.7:this.kind==='snake'?1.8:BITER[this.kind]?BITER[this.kind].t:1.3;this.fxT=0.3;
           if(this.kind==='snake'&&!this.preview)SFX.play('swallow');}
-        else if(r==='miss'){this.state='idle';this.timer=rand(.4,1);}
+        else if(r==='miss'){const p=this.prey,ok=p&&!p.dead&&!p.caught&&!p.carriedBy&&(p.play||!p.type||w.prey.includes(p));
+          // a miss is just a miss: keep after it unless patience runs out (each whiff in a row makes giving up a bit likelier)
+          this.missN=this.missP===p?(this.missN||0)+1:1;this.missP=p;
+          if(ok&&Math.random()>(1-this.mind.patience)*0.18*this.missN){this.state='hunt';this.strikeCD=rand(0.25,0.6)*(1.3-this.mind.energy*0.6);this.timer=Math.max(this.timer,2+this.mind.patience*5);if(this.hp)this.hp.rush=false;}
+          else{if(ok){this.ignoreIt(p,rand(3,6));if(!this.preview)think(this,'...');}this.state='idle';this.timer=rand(.4,1);this.prey=null;this.missP=null;}}
         break;}
       case 'chew':
         this.stop(dt);if(this.frogish)this.eyesClosed=true;
@@ -1466,7 +1492,6 @@ class Pet{
     if(this.bulges&&this.kind==='snake')this.bulges.push({s:2.5,size:p.type==='egg'?1.6:0.9});
     const m=this.mouthScreen();
     for(let i=0;i<2;i++)spawn(w,'heart',m.x+rand(-3,3),m.y-4,{vy:-rand(12,18),life:1.3,ph:rand(TAU)});
-    w.onEvent&&w.onEvent(`${this.kind==='snake'?'swallowed':this.kind==='crab'?'polished off':'gulped down'} ${PREY_NAME[p.type]}`);
     w.onEat&&w.onEat(this,p);
     if(!this.preview&&this.kind!=='snake')SFX.play('gulp');
     this.held=null;
@@ -2550,7 +2575,7 @@ const cls=fb.cls;let overLegs=false;
     const nFlank=spikes.length;
     {const e=this.pointAt(4.8),ha=Math.atan2(e.fy,e.fx),n=17;
       for(let j=0;j<n;j++){const u=j/(n-1)*2-1,d=ha+(u>0?1:-1)*(0.95+Math.abs(u)*1.15),len=(1.1+pf*3.6)*((j&1)?1:0.72),r=e.r-0.5;
-        spikes.push([e.x+Math.cos(d)*r,e.y+Math.sin(d)*r+oy,Math.cos(d)-e.fx*0.3,Math.sin(d)-e.fy*0.3,len+0.6,1.0+pf*0.7,pf>0.4?C.beard[1]:C.base[1],pf>0.4?C.beard[3]:C.tip[3]]);}
+        spikes.push([e.x+Math.cos(d)*r,e.y+Math.sin(d)*r+oy,Math.cos(d)-e.fx*0.3,Math.sin(d)-e.fy*0.3,len+0.6,1.0+pf*0.7,pf>0.4?C.beard[1]:C.base[1],pf>0.4?C.beard[2]:C.tip[3]]);}
       if(pf>0.15){overLegs=true;const ext=pf*2.8;for(let a=-2.2;a<=2.2;a+=0.07){if(Math.abs(a)<0.9)continue;const d=ha+a;for(let t=0;t<=ext;t+=0.5){const rr=e.r-0.3+t;put(e.x+Math.cos(d)*rr,e.y+Math.sin(d)*rr+oy,C.beard[t>ext*0.6?2:1]);}}overLegs=false;}}
     spikes.forEach(([x,y,dx,dy,len,w,fill,tip],si)=>{overLegs=si>=nFlank&&pf>0.15;const px=-dy,py=dx;
       for(let t=0;t<=len;t+=0.35){const ww=w*(1-t/len);for(let o=-ww;o<=ww;o+=0.5)put(x+dx*t+px*o,y+dy*t+py*o,t>len*0.55?tip:fill);}});overLegs=false;
@@ -3260,8 +3285,8 @@ class Cuttle extends Kraken{
     if(p.dead||(p.caught&&!this.ft.caught)){this.tg=null;this.ft=null;return 'miss';}
     this.faceToward(p.x,p.y,dt*0.6);const tip=this.ftTip();
     if(T.t>0.14&&Math.hypot(tip.x-p.x,tip.y-(p.y-p.h))<4.5){p.caught=true;this.held=p;this.tg=null;this.reelT=0.3;this.ft.caught=true;catchFx(this,p);return 'caught';}
-    if(T.t>0.42){this.tg=null;this.ft=null;return 'miss';}return null;}
-  ftTip(){const F=this.ft,[rx,ry]=this.W(5.4,0);if(!F)return{x:rx,y:ry};const p=F.p,k=F.caught?clamp(this.reelT/0.3,0,1):Math.min(1,F.t/0.14);
+    if(T.t>0.42){this.tg=null;this.ft.ret=0.16;return 'miss';}return null;}// a whiff: the tentacles snap back in rather than vanishing
+  ftTip(){const F=this.ft,[rx,ry]=this.W(5.4,0);if(!F)return{x:rx,y:ry};const p=F.p,k=F.ret!=null?clamp(F.ret/0.16,0,1):F.caught?clamp(this.reelT/0.3,0,1):Math.min(1,F.t/0.14);
     return{x:lerp(rx,p.x,k),y:lerp(ry,p.y-p.h,k)};}
   syncHeld(){if(!this.held)return;if(this.reelT>0){const t=this.ftTip();this.held.sx=t.x;this.held.sy=t.y;}else{const m=this.mouthScreen();this.held.sx=m.x;this.held.sy=m.y;}}
   startle(x,y){if(this.state==='grabbed'||this.state==='fall')return;if(this.held)this.finishEating();this.tg=null;this.ft=null;this.prey=null;
@@ -3270,7 +3295,7 @@ class Cuttle extends Kraken{
     this.ang=a+Math.PI;this.vx+=Math.cos(a)*42;this.vy+=Math.sin(a)*42;this.pulse=1;this.flush=1;
     const tx=this.x+Math.cos(a)*45,ty=this.y+Math.sin(a)*45;[this.tx,this.ty]=w.tank==='aqua'?waterSnap(w,tx,ty,0.3):[tx,ty];this.state='flee';this.timer=1.6;}
   petMe(){const r=Pet.prototype.petMe.call(this);if(r)this.display=Math.min(2,(this.display||0)+0.2);return r;}
-  update(dt){this.finPh+=dt*(3+this.speed*0.35);this.display=Math.max(0,this.display-dt*0.5);this.reelT=Math.max(0,this.reelT-dt);if(this.reelT<=0&&this.ft&&this.ft.caught)this.ft=null;
+  update(dt){this.finPh+=dt*(3+this.speed*0.35);this.display=Math.max(0,this.display-dt*0.5);this.reelT=Math.max(0,this.reelT-dt);if(this.reelT<=0&&this.ft&&this.ft.caught)this.ft=null;if(this.ft&&this.ft.ret!=null){this.ft.ret-=dt;if(this.ft.ret<=0)this.ft=null;}
     const hunting=this.state==='hunt'||this.state==='notice'||this.state==='strike';this.camo+=((this.state==='idle'||this.state==='sleeping'?1:0)-this.camo)*Math.min(1,dt*0.6);
     this.hunt=(this.hunt||0)+((hunting?1:0)-(this.hunt||0))*Math.min(1,dt*3);
     this.ashore=false;this.moist=1;super.update(dt);if(this.state==='flee'&&this.speed>6){const a=Math.atan2(this.vy,this.vx);this.ang+=wrapA(a+Math.PI-this.ang)*Math.min(1,dt*6);}}
@@ -3284,17 +3309,20 @@ class Cuttle extends Kraken{
         const lx=p.x-q.x,ly=p.y-q.y,l=Math.hypot(lx,ly)||1;p.x=q.x+lx/l*seg;p.y=q.y+ly/l*seg;}}}
   color(m,q,s,l,x,y){const P=PAL.cuttle,F=this.frame,dx=x+.5-F.x,dy=y+.5-F.y,u=(dx*F.c+dy*F.s)/this.sc,v=(-dx*F.s+dy*F.c)/this.sc;
     switch(m){
-      case M.BODY:case M.CLAW2:{// passing-cloud stripes when hunting, zebra display when petted or spooked, sandy camouflage at rest
-        const wave=Math.sin(u*1.3-this.t*7);if(this.hunt>0.4&&wave>0.45)return P.dark[q];
-        if(this.display>0.2||this.flush>0.5){if(Math.sin(v*2.2+u*0.4)>0.35)return P.dark[q];return P.pale[q];}
-        if(m===M.BODY&&Math.abs(v)>2.3)return P.pale[Math.min(3,q+1)];
-        const mo=vnoise(u*0.9+7,v*0.9+3);if(mo>0.68-this.camo*0.1)return P.dark[Math.max(0,q-1)];if(hash(x*3,y*7)>0.95)return P.pale[q];return P.body[q];}
+      case M.BODY:case M.CLAW2:{// sandy camouflage at rest, passing-cloud stripes when hunting, zebra display when petted or spooked;
+        // each pattern fades in and out over the others (chromatophores open gradually) instead of switching
+        const mo=vnoise(u*0.9+7,v*0.9+3);let c=m===M.BODY&&Math.abs(v)>2.3?P.pale[Math.min(3,q+1)]:mo>0.68-this.camo*0.1?P.dark[Math.max(0,q-1)]:hash(x*3,y*7)>0.95?P.pale[q]:P.body[q];
+        const kd=Math.max(clamp((this.display-0.05)/0.45,0,1),clamp((this.flush-0.15)/0.6,0,1));
+        if(kd>0){const z=Math.sin(v*2.2+u*0.4);c=mixc(c,z>0.35?P.dark[q]:z>0.1?P.body[q]:P.pale[q],kd*kd*(3-2*kd));}
+        const kh=clamp((this.hunt-0.1)/0.7,0,1);if(kh>0){const wave=Math.sin(u*1.3-this.t*7);if(wave>0.2)c=mixc(c,P.dark[q],kh*clamp((wave-0.2)/0.35,0,1));}
+        return c;}
       case M.LIMB:return P.fin[q];
       case M.TOE:{if(s>=20)return P.pale[Math.min(3,q+1)];if(s>=10)return P.pale[q];if(hash(x*5,y*3)>0.88)return P.irid[q];return((s|0)%2?P.pale:P.body)[q];}
       case M.EYE:return P.eye[q];case M.PUPIL:return INK;case M.LID:return P.body[q];
     }return INK;}
   draw(fb0){
-    const sc=this.sc,fb={cap:(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r)};
+    // arms and tentacles never go thinner than a pixel, or their tips blink in and out as they sway across pixel centres
+    const sc=this.sc,fb={cap:(ax,ay,ar,bx,by,br,m,...r)=>m===M.TOE?fb0.cap(ax,ay,Math.max(0.56,ar*sc),bx,by,Math.max(0.56,br*sc),m,...r):fb0.cap(ax,ay,ar*sc,bx,by,br*sc,m,...r)};
     // fin skirt: a thin rippling fringe all along both sides of the mantle
     const hw=u=>u<-1?lerp(2.0,3.3,(u+5.6)/4.6):lerp(3.3,2.8,(u+1)/3.8);
     for(const sd of[-1,1])for(let u=-5.4;u<=2.0;u+=0.55){const wv=Math.sin(this.finPh-u*1.3+(sd>0?0.6:0))*0.5,[fx,fy]=this.W(u,sd*(hw(u)+0.75+wv));fb.cap(fx,fy,0.9,fx,fy,0.9,M.LIMB,1);}
@@ -3335,7 +3363,7 @@ const BUNC={top:ramp('#4a1e04','#78380a','#a85816','#d48a34'),crust:ramp('#5e2e0
 class Bun extends Slime{
   get translucent(){return 0;}
   constructor(world,x,y){super(world,x,y);this.kind='bun';this.mind=mindFor('bun','');this.outline=hex(SPECIES.bun.outline);this.R=8;this.seam=0.8;
-    this.warm=0.7;this.butter=0;this.honey=0;this.toast=0;this.soggy=0;this.proof=0;this.puff=0;this.steamT=0;this.miniCD=1e9;this.sndHop='bunhop';this.sndLand='bunland';this.frame={x,y,rx:7,H:5};}
+    this.warm=0.7;this.butter=0;this.honey=0;this.toast=0;this.soggy=0;this.proof=0;this.puff=0;this.steamT=0;this.steamK=0;this.miniCD=1e9;this.sndHop='bunhop';this.sndLand='bunland';this.frame={x,y,rx:7,H:5};}
   bodyH(){return(10+this.proof*1.4)*(1-this.sq*0.26-this.puff*0.2);}
   bodyW(){return(7.4+this.proof*0.9)*(1+this.sq*0.2+this.puff*0.14);}
   faceX(){return this.x+Math.cos(this.ang)*this.bodyW()*0.14;}
@@ -3363,8 +3391,7 @@ class Bun extends Slime{
     else this.soggy=Math.max(0,this.soggy-dt*0.06);
     this.proof+=((st==='sleeping'?1:0)-this.proof)*Math.min(1,dt*0.35);
     // steam: more when it's warm and freshly buttered, a slow sleepy puff while it naps
-    if(!this.preview&&this.warm>0.12&&this.soggy<0.5){this.steamT-=dt;if(this.steamT<=0){this.steamT=lerp(1.4,0.22,this.warm)*(st==='sleeping'?1.8:1);
-      spawn(w,'steam',this.x+rand(-3.5,3.5),this.y-this.h-this.bodyH()-0.5,{vx:rand(-2,2),vy:-rand(7,11),life:rand(1.3,2),ph:rand(TAU)});}}
+    this.steamK+=((this.warm>0.12&&this.soggy<0.5?clamp((this.warm-0.12)/0.6,0,1)*(st==='sleeping'?0.55:1):0)-(this.steamK||0))*Math.min(1,dt*1.5);
     if(this.soggy>0.3&&!this.preview&&Math.random()<dt*this.soggy*3)spawn(w,'fdrop',this.x+rand(-5,5),this.y,{h:rand(2,6),vh:0,life:0.6});
   }
   color(m,q,s,l,x,y){const F=this.frame,v=clamp((F.y-(y+.5))/Math.max(1,F.H),0,1.2),u=(x+.5-F.x)/F.rx;
@@ -3385,7 +3412,8 @@ class Bun extends Slime{
   drawExtras(fb){const x=this.x,y=this.y-this.h,H=this.bodyH(),rx=this.bodyW(),K=hex('#2a1206'),W1=hex('#ffffff'),c=Math.cos(this.ang),fwd=Math.sin(this.ang)>-0.6;
     // glossy glaze glint that slides a touch as it turns
     const gx=x-rx*0.42-c*0.8,gy=y-H*0.82;pset(fb,gx,gy,BUNC.glaze);pset(fb,gx+1,gy-1,W1);pset(fb,gx+2,gy-1,BUNC.glaze);if(this.butter>0.3){pset(fb,gx+4,gy-1.5,W1);pset(fb,gx+1,gy+1,BUNC.glaze);}
-    if(!fwd)return;// walking away: no face
+    drawSteam(fb,x,y-H-0.5,this.steamK,this.t,3);
+    if(!fwd||save.set.slimeFace===false)return;// walking away (or faces switched off): no face
     const fx=Math.round(this.faceX()),fy=Math.round(y-H*0.48),asleep=this.state==='sleeping'||this.eyesClosed,happy=this.state==='petted'||this.world.stats.happy>80||this.honey>0.3,sad=this.soggy>0.3,shut=asleep||this.blink>0;
     const P2=hex('#ff8a9a'),T=hex('#e0566a');
     for(const sd of[-1,1]){const ex=fx+(sd<0?-3:2),ey=fy;// round eyes, both lit from the top-left
@@ -3620,7 +3648,8 @@ const WISPA=[hex('#3a1a8a'),hex('#5a3cf0'),hex('#38c8ff'),hex('#bafcff'),hex('#f
 class Wisp extends Pet{
   constructor(world,x,y){super();this.initCommon(world,'wisp');
     this.x=x;this.y=y;this.ang=0;this.h=8;this.vx=0;this.vy=0;this.speed=0;this.sc=1;this.outline=hex('#0a1240');this.n=1;this.pts=[{x,y}];this.gt=0;
-    this.joy=0;this.dim=0;this.flare=0;this.snuff=0;this.wet=0;this.hue=rand(TAU);this.motes=[];this.embT=0;this.embers=[];this.trail=[];this.seed=rand(50);}
+    this.joy=0;this.dim=0;this.flare=0;this.snuff=0;this.wet=0;this.hue=rand(TAU);this.motes=[];this.embT=0;this.embers=[];this.trail=[];this.seed=rand(50);
+    this.face=Math.PI/2;this.faceT=Math.PI/2;this.lookT=0;this.licks=[];this.lickT=0;this.selfLit=true;}
   isActive(){return true;}
   ember(){return this.state==='sleeping'?1:0;}
   core(){return{x:this.x,y:this.y-this.h};}
@@ -3629,7 +3658,7 @@ class Wisp extends Pet{
   mouthScreen(){const c=this.core();return{x:c.x,y:c.y+0.5};}
   hatAnchor(){const c=this.core();return{x:c.x,y:c.y-this.flameH()*0.55,a:0,s:0.95};}
   noise(){return 0.05;}
-  flameH(){return(14+this.joy*4+this.flare*5)*(1-this.snuff*0.55)*(1-this.wet*0.4)*(1-this.dimK()*0.55);}
+  flameH(){return(16+this.joy*4+this.flare*5)*(1-this.snuff*0.55)*(1-this.wet*0.4)*(1-this.dimK()*0.55);}
   flameR(){return(5.4+this.joy*0.6+this.flare*1.2)*(1-this.snuff*0.4)*(1-this.wet*0.3)*(1-this.dimK()*0.35);}
   dimK(){return Math.max(this.ember()*0.9,this.dim);}
   goTo(tx,ty,dt,mode,arrive=3){const d=Math.hypot(tx-this.x,ty-this.y),max=mode==='run'||mode==='lunge'?42:mode==='slow'||mode==='stalk'?9:18,want=d>arrive?max*clamp(d/14,0.3,1):0,a=Math.atan2(ty-this.y,tx-this.x),k=Math.min(1,dt*3);
@@ -3666,33 +3695,63 @@ class Wisp extends Pet{
     const sleeping=this.state==='sleeping',hT=sleeping?2.5:this.state==='strike'?this.h:8+Math.sin(this.t*2+this.seed)*1.6;this.h+=(hT-this.h)*Math.min(1,dt*2);
     const B=w.bounds,m=8;this.x+=this.vx*dt;this.y+=this.vy*dt;if(this.x<B.x0+m||this.x>B.x1-m)this.vx*=-0.5;if(this.y<B.y0+m||this.y>B.y1-m)this.vy*=-0.5;this.x=clamp(this.x,B.x0+m,B.x1-m);this.y=clamp(this.y,B.y0+m,B.y1-m);
     this.speed=Math.hypot(this.vx,this.vy);this.pts[0].x=this.x;this.pts[0].y=this.y;this.syncHeld();this.tick(dt);}
-  tick(dt){// embers rising off the tip and a short trail of afterimages
+  tick(dt){// which way it's facing, flame tongues peeling off, embers rising off the tip and a short trail of afterimages
+    {const P=game.pointer,T=(this.state==='hunt'||this.state==='notice'||this.state==='strike')?(this.prey||this.att?.t):null,sp=Math.hypot(this.vx,this.vy);
+      if(this.state==='grabbed')this.faceT=Math.PI/2;
+      else if(sp>5)this.faceT=Math.atan2(this.vy,this.vx);
+      else if(T&&T.x!=null)this.faceT=Math.atan2(T.y-this.y,T.x-this.x);
+      else if(!this.preview&&P.inside&&Math.hypot(P.x-this.x,P.y-this.y)<80)this.faceT=Math.atan2(P.y-this.y,P.x-this.x);
+      else{this.lookT-=dt;if(this.lookT<=0){this.lookT=rand(1.5,4);this.faceT=Math.random()<0.5?Math.PI/2+rand(-0.5,0.5):rand(TAU);}}
+      this.face+=wrapA(this.faceT-this.face)*Math.min(1,dt*(sp>5?6:3));}
+    this.lickT-=dt;if(this.lickT<=0&&this.ember()<0.5&&this.wet<0.5){this.lickT=rand(0.07,0.2)/(1+this.joy*1.5+this.flare*2);const c=this.core(),H=this.flameH();
+      this.licks.push({x:c.x+rand(-1.5,1.5),y:c.y-H*rand(0.45,0.85),vx:-this.vx*0.25+rand(-3,3),vy:rand(-20,-11)-Math.hypot(this.vx,this.vy)*0.1,life:rand(0.3,0.6),max:0.6,r:rand(1.1,2)*(1+this.flare*0.4),ph:rand(TAU)});}
+    for(const L of this.licks){L.x+=(L.vx+Math.sin(L.ph+L.life*14)*4)*dt;L.y+=L.vy*dt;L.life-=dt;}this.licks=this.licks.filter(L=>L.life>0);
     this.embT-=dt;if(this.embT<=0&&this.ember()<1){this.embT=rand(0.15,0.35)/(1+this.joy+this.flare);const c=this.core();this.embers.push({x:c.x+rand(-1.5,1.5),y:c.y-this.flameH()*0.8,vx:rand(-3,3),vy:rand(-14,-8),life:rand(0.6,1.1)});}
-    for(const e of this.embers){e.x+=e.vx*dt;e.y+=e.vy*dt;e.vx*=1-dt;e.life-=dt;}this.embers=this.embers.filter(e=>e.life>0);
-    const c=this.core();this.trail.unshift({x:c.x,y:c.y});if(this.trail.length>14)this.trail.pop();}
+    for(const e of this.embers){e.px=e.x;e.py=e.y;e.x+=e.vx*dt;e.y+=e.vy*dt;e.vx*=1-dt;e.life-=dt;}this.embers=this.embers.filter(e=>e.life>0);
+    const c=this.core();this.trail.unshift({x:c.x,y:c.y});if(this.trail.length>16)this.trail.pop();}
   color(){return INK;}
   draw(fb){}// it's all light: drawn in glow(), after the night falls
   pal(){const k=0.5+0.5*Math.sin(this.hue);return WISPA.map((a,i)=>mixc(a,WISPB[i],k));}
-  glow(fb,night){const pal=this.pal(),c=this.core(),cx=c.x,cy=c.y,x=this.x,y=this.y,t=this.t,H=this.flameH()+Math.sin(t*11)*0.8,r0=this.flameR(),vx=this.vx,e=this.ember(),bright=(1-this.dimK()*0.5);
-    const add=(px,py,col,f)=>padd(fb,px,py,((col)&255)*f,((col>>8)&255)*f,((col>>16)&255)*f);
-    // a pool of light on the ground and a soft halo, much stronger at night
-    const gk=(0.35+night*0.65)*bright;for(let yy=-6;yy<=6;yy++)for(let xx=-16;xx<=16;xx++){const d=Math.hypot(xx/16,yy/6);if(d<1)add(x+xx,y+yy,pal[2],(1-d)*(1-d)*0.55*gk);}
-    for(let yy=-22;yy<=12;yy++)for(let xx=-16;xx<=16;xx++){const d=Math.hypot(xx/16,(yy+4)/17);if(d<1)add(cx+xx,cy+yy,pal[2],(1-d)*(1-d)*(0.85+0.15*Math.sin(t*9))*0.45*gk);}
-    // afterimages when it moves
-    const sp=Math.hypot(vx,this.vy);if(sp>8)for(let k=3;k<this.trail.length;k+=3){const T=this.trail[k],rr=r0*(1-k/18);for(let yy=-5;yy<=5;yy++)for(let xx=-5;xx<=5;xx++){const d=Math.hypot(xx,yy)/rr;if(d<1)pmix(fb,T.x+xx,T.y+yy,pal[1],(1-d)*0.25*Math.min(1,sp/30));}}
-    // the flame: a turbulent field mapped onto a glowing ramp, swaying and leaning gently away from where it's going
-    const lean=clamp(vx*0.1,-4,4);
-    const field=(px,py)=>{const dx0=px-cx,dy=py-cy;if(dy>0)return 1-Math.hypot(dx0,dy*1.1)/r0;const up=Math.min(1,-dy/H),dx=dx0+(vnoise(py*0.33,t*3.5+this.seed)-0.5)*4*up+lean*up*up,wdt=r0*Math.pow(Math.max(0,1-up),0.6);if(wdt<=0.05)return -1;
-      let I=1-Math.abs(dx)/wdt;I-=vnoise(px*0.5+3,py*0.42+t*8)*0.42*up;I-=up*0.12;return I;};
+  glow(fb,night){const pal=this.pal(),c=this.core(),cx=c.x,cy=c.y,x=this.x,y=this.y,t=this.t,H=this.flameH()+Math.sin(t*11)*0.8,r0=this.flameR()*(1+Math.sin(t*5.3)*0.05),vx=this.vx,vy=this.vy,e=this.ember(),bright=(1-this.dimK()*0.5),W=fb.w;
+    const add=(px,py,col,f)=>padd(fb,px,py,((col)&255)*f,((col>>8)&255)*f,((col>>16)&255)*f),flick=0.88+0.08*Math.sin(t*13)+0.05*Math.sin(t*31+1);
+    // a flickering pool of light on the ground, rippling a little, and a soft halo; both much stronger at night
+    const gk=(0.32+night*0.68)*bright*flick;for(let yy=-7;yy<=7;yy++)for(let xx=-18;xx<=18;xx++){const d=Math.hypot(xx/18,yy/7);if(d<1)add(x+xx,y+yy,pal[2],(1-d)*(1-d)*0.6*gk*(0.8+0.4*vnoise((x+xx)*0.25+t*1.5,(y+yy)*0.4)));}
+    for(let yy=-24;yy<=12;yy++)for(let xx=-17;xx<=17;xx++){const d=Math.hypot(xx/17,(yy+5)/18);if(d<1)add(cx+xx,cy+yy,pal[2],(1-d)*(1-d)*0.45*gk);}
+    // heat shimmer: the scene just above the flame wobbles sideways
+    if(e<0.5&&this.wet<0.5){const y0=Math.floor(cy-H-9),y1=Math.floor(cy-H*0.35),x0=Math.floor(cx-7),x1=Math.ceil(cx+7);
+      for(let py=y0;py<=y1;py++){if(py<0||py>=fb.h)continue;const k=1-Math.abs((py-(y0+y1)/2)/((y1-y0)/2+0.01)),sh=Math.round(Math.sin(py*0.9+t*11)*k*1.2);if(!sh)continue;
+        const o=py*W,row=[];for(let px=x0-2;px<=x1+2;px++)row.push(px>=0&&px<W?fb.px[o+px]:0);for(let px=x0;px<=x1;px++){if(px<0||px>=W)continue;const v=row[px-sh-(x0-2)];if(v)fb.px[o+px]=v;}}}
+    // moving: ghost flames stream behind it like a comet
+    const sp=Math.hypot(vx,vy);if(sp>6)for(let k=2;k<this.trail.length;k+=2){const T=this.trail[k],rr=r0*(1-k/18)*0.9,al=(1-k/16)*0.32*Math.min(1,sp/28);if(rr<0.5)continue;
+      for(let yy=-6;yy<=6;yy++)for(let xx=-6;xx<=6;xx++){const d=Math.hypot(xx,yy*0.9)/rr;if(d<1)pmix(fb,T.x+xx,T.y+yy-k*0.4,d<0.45?pal[3]:pal[2],(1-d)*al);}}
+    // the flame: a turbulent field on a glowing ramp, leaning away from where it's going; see-through at the edges, solid in the heart
+    const lean=clamp(vx*0.1,-4,4),field=(px,py)=>{const dx0=px-cx,dy=py-cy;if(dy>0)return 1-Math.hypot(dx0,dy*1.1)/r0;const up=Math.min(1,-dy/H),dx=dx0+(vnoise(py*0.33,t*3.5+this.seed)-0.5)*4*up+lean*up*up,wdt=r0*Math.pow(Math.max(0,1-up),0.6);if(wdt<=0.05)return -1;
+      let I=1-Math.abs(dx)/wdt;I-=vnoise(px*0.5+3,py*0.42+t*8)*0.42*up;I-=up*0.12;
+      // the upper half forks into a few flickering ghost-fire tips that drift across it
+      I-=Math.max(0,up-0.4)*1.1*(0.5+0.5*Math.sin(dx*1.5+t*4.5+this.seed+Math.sin(t*1.7)*1.5));return I;};
     for(let py=Math.floor(cy-H-3);py<=cy+r0+1;py++)for(let px=Math.floor(cx-r0-5);px<=cx+r0+5;px++){const I=field(px+.5,py+.5)*bright;if(I<=0)continue;const d=hash(px*13,py*7)*0.12;
-      if(I>0.72-d)pset(fb,px,py,pal[4]);else if(I>0.5-d)pset(fb,px,py,pal[3]);else if(I>0.3-d)pset(fb,px,py,pal[2]);else if(I>0.12-d)pset(fb,px,py,pal[1]);else pmix(fb,px,py,pal[0],0.7);}
-    // eyes: glance where it's going, happy arcs when it's delighted, sleepy lines as an ember
-    const K=mixc(pal[0],hex('#05061a'),0.6),ex=Math.round(cx-0.5),ey=Math.round(cy+0.2),lk=Math.round(clamp(vx*0.05,-1,1)),happy=this.joy>0.4||this.flare>0.5;
-    for(const sd of[-2,2]){if(e>0.5){pset(fb,ex+sd-1,ey,K);pset(fb,ex+sd,ey,K);}else if(happy){pset(fb,ex+sd-1,ey+1,K);pset(fb,ex+sd,ey,K);pset(fb,ex+sd+1,ey+1,K);}
-      else if(this.wet>0.4||this.snuff>0.5){pset(fb,ex+sd,ey,K);pset(fb,ex+sd+(sd<0?1:-1),ey-1,K);}else{pset(fb,ex+sd+lk,ey-1,K);pset(fb,ex+sd+lk,ey,K);pset(fb,ex+sd+lk,ey+1,K);}}
-    // motes circling it, embers rising off the tip
-    if(e<0.5)for(let i=0;i<3;i++){const a=t*2.2+i*TAU/3,px=cx+Math.cos(a)*(9+this.joy*2),py=cy-3+Math.sin(a)*3,front=Math.sin(a)>0;pset(fb,px,py,front?pal[4]:pal[2]);if(front){pmix(fb,px+1,py,pal[3],0.6);pmix(fb,px-1,py,pal[3],0.6);}}
-    for(const m of this.embers)pmix(fb,m.x,m.y,pal[3],Math.min(1,m.life*1.4));}
+      // a slow swirl runs through the bands so the colour visibly churns
+      const J=I+(vnoise(px*0.35-t*1.6,py*0.3+t*2.2+this.seed)-0.5)*0.22;
+      if(J>0.86-d)pmix(fb,px,py,pal[4],0.95);else if(J>0.64-d)pmix(fb,px,py,pal[3],0.8);else if(J>0.4-d)pmix(fb,px,py,pal[2],0.6);else if(J>0.18-d)pmix(fb,px,py,pal[1],0.42);else pmix(fb,px,py,pal[0],0.26);}
+    // tongues of flame that break off the top and drift up, shrinking
+    for(const L of this.licks){const k=L.life/L.max,rr=L.r*k;if(rr<0.35){pmix(fb,L.x,L.y,pal[3],k);continue;}const R2=Math.ceil(rr+1);
+      for(let yy=-R2-1;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++){const d=Math.hypot(xx,yy*(yy<0?0.65:1.1))/rr;if(d<1)pmix(fb,L.x+xx,L.y+yy,d<0.45?pal[4]:d<0.75?pal[3]:pal[2],(1-d*0.6)*Math.min(1,k*1.6)*0.85);}}
+    // the heart: a bright pulsing kernel, nudged toward the side it faces so you can see it turn
+    if(e<0.9){const fx=Math.cos(this.face),fy=Math.sin(this.face),hr=r0*0.32*(1+Math.sin(t*4.2)*0.2+this.flare*0.3),hx=cx+fx*0.9,hy=cy-0.6+fy*0.4,HC=mixc(pal[4],hex('#ffffff'),0.6);
+      for(let yy=-3;yy<=3;yy++)for(let xx=-3;xx<=3;xx++){const d=Math.hypot(xx,yy)/hr;if(d<1)pmix(fb,hx+xx,hy+yy,HC,(1-d)*0.65*bright);}}
+    // eyes sit on the front of a little sphere: they slide round as it turns and disappear when it faces away
+    if(save.set.slimeFace!==false){const K=mixc(pal[0],hex('#05061a'),0.6),happy=this.joy>0.4||this.flare>0.5;
+      for(const sd of[-1,1]){const a=this.face+sd*0.62,fy=Math.sin(a),fx=Math.cos(a);if(fy<-0.05)continue;// on the back of the head
+        const ex=Math.round(cx-0.5+fx*2.7),ey=Math.round(cy+0.3+fy*0.8-(1-fy)*0.6),w2=fy>0.45;
+        if(e>0.5){pset(fb,ex,ey,K);if(w2)pset(fb,ex-sd,ey,K);}
+        else if(happy){pset(fb,ex-1,ey+1,K);pset(fb,ex,ey,K);pset(fb,ex+1,ey+1,K);}
+        else if(this.wet>0.4||this.snuff>0.5){pset(fb,ex,ey,K);pset(fb,ex+(sd<0?1:-1),ey-1,K);}
+        else{pset(fb,ex,ey-1,K);pset(fb,ex,ey,K);pset(fb,ex,ey+1,K);if(fy<0.25){pmix(fb,ex,ey-1,pal[3],0.4);}}}}
+    // motes circling it with little light trails; the ones behind it are dimmer
+    if(e<0.5)for(let i=0;i<3;i++){const R=9+this.joy*2+Math.sin(t*1.3+i)*1.2;for(let j=5;j>=0;j--){const a=t*2.2+i*TAU/3-j*0.09,px=cx+Math.cos(a)*R,py=cy-3+Math.sin(a)*3.2+Math.sin(t*3+i)*0.8,front=Math.sin(a)>0,al=(1-j/6)*(front?1:0.45);
+      if(j===0){pmix(fb,px,py,front?pal[4]:pal[3],al);if(front){pmix(fb,px+1,py,pal[3],0.55);pmix(fb,px-1,py,pal[3],0.55);pmix(fb,px,py-1,pal[2],0.4);}}else pmix(fb,px,py,pal[2],al*0.5);}}
+    // embers with a short streak behind them
+    for(const m of this.embers){const k=Math.min(1,m.life*1.4)*(0.75+0.25*Math.sin(t*25+m.x));pmix(fb,m.x,m.y,pal[3],k);if(m.px!=null)pmix(fb,(m.x+m.px)/2,(m.y+m.py)/2+0.6,pal[2],k*0.5);}}
   statusText(){if(this.state==='grabbed')return 'is fizzing in your hand';if(this.ember()>0.5)return 'is dozing as a little ember';if(this.wet>0.3)return 'is hissing and steaming. It does NOT like water!';
     if(this.state==='chew')return `is absorbing ${PREY_NAME[this.held?.type]||'something'} into its flame`;if(this.joy>0.5||this.flare>0.4)return 'is flaring up, all bright and happy';if(this.state==='wander')return 'is drifting about the tank';return 'is flickering quietly';}
 }
@@ -3813,13 +3872,24 @@ const CHICKC={down:ramp('#a87a08','#e2b420','#ffe050','#fff6b4'),beak:ramp('#a04
 class Chick extends Pet{
   constructor(world,x,y){super();this.initCommon(world,'chick');
     this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.sc=1;this.outline=hex(CHICKC.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.seam=3;
-    this.step=0;this.peck=0;this.peckT=rand(1,3);this.peep=0;this.peepT=rand(2,5);this.flap=0;this.scratch=0;this.scratchT=rand(6,12);this.shake=0;this.wet=0;this.tuck=0;this.bob=0;this.fl=rand(TAU);}
+    this.step=0;this.peck=0;this.peckT=rand(1,3);this.peep=0;this.peepT=rand(2,5);this.flap=0;this.scratch=0;this.scratchT=rand(6,12);this.shake=0;this.wet=0;this.tuck=0;this.bob=0;this.fl=rand(TAU);this.hA=0;this.hAT=0;this.glT=rand(0.5,2);}
   isActive(){return this.preview||this.world.dayness>0.3;}
   W(u,v){const c=Math.cos(this.ang),s=Math.sin(this.ang);return[this.x+c*u-s*v,this.y-this.h+s*u+c*v];}
+  // the head swivels on its neck: head-space points rotate about a pivot just in front of the body's centre
+  HW(u,v){const[nx,ny]=this.W(1.6,0),a=this.ang+this.hA,c=Math.cos(a),s=Math.sin(a),uu=u-1.6;return[nx+c*uu-s*v,ny+s*uu+c*v];}
   hu(){return 3.6+this.peck*1.8+this.bob*0.5-this.tuck*1.5;}
-  headPos(){const[x,y]=this.W(this.hu()+1,0);return{x,y:y+this.h};}
-  mouthScreen(){const[x,y]=this.W(this.hu()+3.8,0);return{x,y};}
-  hatAnchor(){const[x,y]=this.W(this.hu()-0.3,0);return{x,y:y-2.6,a:this.ang,s:0.95};}
+  headPos(){const[x,y]=this.HW(this.hu()+1,0);return{x,y:y+this.h};}
+  mouthScreen(){const[x,y]=this.HW(this.hu()+3.8,0);return{x,y};}
+  hatAnchor(){const[x,y]=this.HW(this.hu()-0.3,0);return{x,y:y-2.6,a:this.ang+this.hA,s:0.95};}
+  // where the head wants to point (relative to the body): whatever it's after, your hand if it's close, otherwise quick curious glances;
+  // birds move their heads in snaps, so the target jumps and the head darts to it
+  headAim(dt){const P=game.pointer,T=(this.state==='hunt'||this.state==='notice'||this.state==='strike')?(this.prey||this.att?.t):null;let want=null;
+    if(T&&T.x!=null)want=wrapA(Math.atan2(T.y-this.y,T.x-this.x)-this.ang);
+    else if(!this.preview&&P.inside&&Math.hypot(P.x-this.x,P.y-this.y)<70&&this.state!=='sleeping')want=wrapA(Math.atan2(P.y-this.y,P.x-this.x)-this.ang);
+    if(want!=null)this.hAT=clamp(want,-1.2,1.2);
+    else if(this.speed>4||this.tuck>0.3)this.hAT=0;
+    else{this.glT-=dt;if(this.glT<=0){this.glT=rand(0.35,1.6);this.hAT=Math.random()<0.3?0:rand(-1.1,1.1);}}
+    this.hA+=(this.hAT-this.hA)*Math.min(1,dt*16);}
   noise(){return clamp(this.speed/20,0,0.6);}
   goTo(tx,ty,dt,mode,arrive=3){const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y),diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);this.ang+=clamp(diff,-5*dt,5*dt);
     const max=mode==='run'||mode==='lunge'?32:mode==='slow'||mode==='stalk'?9:19,want=d>arrive?max*(Math.abs(diff)>1.1?0.25:1):0;this.speed+=(want-this.speed)*Math.min(1,dt*7);return d<=arrive;}
@@ -3853,7 +3923,7 @@ class Chick extends Pet{
     if(this.state==='grabbed'){this.gt+=dt;this.h+=(10-this.h)*Math.min(1,dt*8);this.x=this.grabX;this.y=this.grabY+this.h;this.flap=Math.max(this.flap,0.8);this.step+=dt*20;this.peepT-=dt*3;if(this.peepT<=0){this.peepT=rand(0.5,1);if(!this.preview)SFX.play('peep');this.peep=1;}this.pts[0].x=this.x;this.pts[0].y=this.y;return;}
     if(this.state==='fall'){this.vh-=240*dt;this.h+=this.vh*dt;this.flap=1;if(this.h<=0){this.h=0;this.vh=0;this.state='idle';this.timer=1;if(!this.preview){SFX.play('land');dust(w,this.x,this.y,4);this.fluff(2);}}this.pts[0].x=this.x;this.pts[0].y=this.y;return;}
     if(this.h>0||this.vh>0){this.vh-=200*dt;this.h+=this.vh*dt;if(this.h<=0){this.h=0;this.vh=0;}}
-    this.brain(dt);
+    this.brain(dt);this.headAim(dt);
     // a little trotting gait: feet step, the head bobs back and forth like a real chick
     this.step+=this.speed*dt*0.9;this.bob=this.speed>1?Math.max(0,Math.sin(this.step*2)):this.bob*(1-Math.min(1,dt*6));
     if(this.state!=='strike'&&this.state!=='chew')this.peck*=1-Math.min(1,dt*10);
@@ -3878,10 +3948,10 @@ class Chick extends Pet{
     {const[a0,a1]=W(-6.4,sh*0.6);fb.cap(a0,a1,1.3,a0,a1,1.3,M.BODY,2,0,0,0.2);}
     const fl=Math.sin(t*34)*this.flap;for(const sd of[-1,1]){const[w0,w1]=W(-0.8,sd*4.6+sh*0.4),[w2,w3]=W(-3.4-this.flap*0.4,sd*(5.4+Math.max(0,fl)*1.1+this.flap*0.5)+sh*0.4);fb.cap(w0,w1,1.6,w2,w3,1.2+this.flap*0.2,M.BODY,2,0,0,0.9);}
     // head (bobs while walking, dips to peck, tucks back to sleep), fuzzy tuft on top, beak
-    const hu=this.hu(),[hx,hy]=W(hu,sh);fb.cap(hx,hy,3.6-this.tuck*0.4,hx,hy,3.6-this.tuck*0.4,M.BODY,2,0,0,1.2);
-    for(let i=0;i<3;i++){const[px,py]=W(hu-0.6+i*0.6,(i-1)*0.9+sh);fb.cap(px,py-2.6+Math.abs(i-1)*0.6,0.7,px,py-3.4,0.5,M.BODY,2,0,0,1.4);}
-    const op=this.peep*0.7;if(this.tuck<0.7)for(const sd of(op>0.1?[-1,1]:[0])){const[b0,b1]=W(hu+2.8,sd*op+sh),[b2,b3]=W(hu+5.0,sd*op*1.6+sh);fb.cap(b0,b1,1.1,b2,b3,0.3,M.CLAW,3,0,0,1.4);}
-    this.eyes=[-1,1].map(sd=>W(hu+0.9,sd*2.0+sh));}
+    const HW=(u,v)=>this.HW(u,v),hu=this.hu(),[hx,hy]=HW(hu,sh);fb.cap(hx,hy,3.6-this.tuck*0.4,hx,hy,3.6-this.tuck*0.4,M.BODY,2,0,0,1.2);
+    for(let i=0;i<3;i++){const[px,py]=HW(hu-0.6+i*0.6,(i-1)*0.9+sh);fb.cap(px,py-2.6+Math.abs(i-1)*0.6,0.7,px,py-3.4,0.5,M.BODY,2,0,0,1.4);}
+    const op=this.peep*0.7;if(this.tuck<0.7)for(const sd of(op>0.1?[-1,1]:[0])){const[b0,b1]=HW(hu+2.8,sd*op+sh),[b2,b3]=HW(hu+5.0,sd*op*1.6+sh);fb.cap(b0,b1,1.1,b2,b3,0.3,M.CLAW,3,0,0,1.4);}
+    this.eyes=[-1,1].map(sd=>HW(hu+0.9,sd*2.0+sh));}
   drawExtras(fb){const K=hex('#100a06');if(!this.eyes)return;const shut=this.blink>0||this.tuck>0.5||this.state==='petted'&&Math.sin(this.t*3)>0.3;
     for(const[ex,ey]of this.eyes){const ix=Math.round(ex-0.5),iy=Math.round(ey-0.5);if(shut){pset(fb,ix,iy+1,K);pset(fb,ix+1,iy+1,K);continue;}pset(fb,ix,iy,K);pset(fb,ix+1,iy,K);pset(fb,ix,iy+1,K);pset(fb,ix+1,iy+1,K);pset(fb,ix,iy,hex('#ffffff'));}}
   statusText(){if(this.shake>0.3)return 'is shaking itself dry. Hmph!';if(this.state==='grabbed')return 'is peeping and flapping its little wings';if(this.tuck>0.5)return 'is napping with its head tucked into its fluff';
@@ -3967,8 +4037,9 @@ class Bee extends Pet{
     // height: climb and settle smoothly; wings fold once it has landed
     const tH=this.targetH();this.h+=clamp((tH-this.h)*dt*2.4,-12*dt,14*dt);if(tH===0&&this.h<0.08)this.h=0;
     const air=this.h>0.3||tH>0.3;this.fly+=((air?1:0)-this.fly)*Math.min(1,dt*7);
-    if(air&&!this.wasAir&&!this.preview)SFX.play('buzz');this.wasAir=air;
-    if(air&&!this.preview){this.buzzT-=dt;if(this.buzzT<=0){this.buzzT=0.36;SFX.play('hum',this.state==='flee'?0.032:0.018);}}
+    this.wasAir=air;
+    // wing buzz level for the continuous bzzzz (the game loop feeds it to the sound engine): louder and higher when it's zipping or fleeing
+    const sp=Math.min(1,Math.hypot(this.vx||0,this.vy||0)/40);this.buzzV=this.preview?0:this.fly*(this.state==='flee'?0.06:0.028+sp*0.02);this.buzzP=this.state==='flee'?1:sp*0.6;
     // hovering is never perfectly still: a lazy bumbling drift
     if(this.fly>0.5){this.vx+=Math.sin(this.t*1.9+this.seed)*dt*7;this.vy+=Math.cos(this.t*1.4+this.seed*2)*dt*5;}
     else if(!this.walking){const k=Math.min(1,dt*10);this.vx-=this.vx*k;this.vy-=this.vy*k;}
@@ -4260,7 +4331,7 @@ class Mush extends Pet{
     for(const[sx,sy,r]of MUSH_SPOTS)if(r>0.7)g.push([c.x+sx*sc,c.y+sy*sc,r]);
     if(this.wet>0.3){pset(fb,c.x-c.rx*0.45,c.y-c.ry*0.55,W1);pset(fb,c.x-c.rx*0.35,c.y-c.ry*0.6,hex('#ffd8d0'));}
     // face on the front of the stem, peeking out under the cap when hiding
-    if(f<0.3)return;const fx=x+Math.cos(this.ang)*1.3*sc*f+Math.cos(this.ang)*this.lean*1.2,fy=d>0.5?c.y+c.ry+0.6:this.y-this.h-lerp(2.4,1.2,d)*sc;
+    if(f<0.3||save.set.slimeFace===false)return;const fx=x+Math.cos(this.ang)*1.3*sc*f+Math.cos(this.ang)*this.lean*1.2,fy=d>0.5?c.y+c.ry+0.6:this.y-this.h-lerp(2.4,1.2,d)*sc;
     const asleep=this.state==='sleeping',happy=this.cheer>0.5||this.state==='petted',shut=asleep||this.blink>0;
     if(d<0.5){const FC=hex('#f6e8cc');for(let yy=-3;yy<=2;yy++)for(let xx=-4;xx<=4;xx++){const X=Math.round(fx)+xx,Y=Math.round(fy)+yy;if(X<0||Y<0||X>=fb.w||Y>=fb.h)continue;const i=Y*fb.w+X;if(fb.mat[i]===M.BODY)fb.px[i]=mixc(fb.px[i],FC,Math.abs(xx)>=4?0.4:0.88);}}
     for(const sd of[-1,1]){const ex=Math.round(fx)+(sd<0?-2:1),ey=Math.round(fy);
@@ -4310,8 +4381,10 @@ class Golem extends Pet{
   Wg(lx,ly){const c=Math.cos(this.ang)*this.sc,s=Math.sin(this.ang)*this.sc;return[this.x+c*lx-s*ly,this.y+s*lx+c*ly];}
   footRest(F){return this.Wg(lerp(-0.8,3.6,this.sit),F.side*lerp(3.1,3.6,this.sit));}
   headPos(){const[x,y]=this.Wg(7.5,0);return{x,y};}
-  hatAnchor(){const[x,y]=this.W(4.2-this.sit*1.2,0);return{x,y:y-2.5,a:this.ang,s:1.05};}
-  mouthScreen(){const[x,y]=this.W(6.6,0);return{x,y};}
+  // head-space point: the block swivels on a neck pivot just behind its centre
+  HW(u,v){const hu=4.7-this.sit*0.9+(this.reach||0)*0.5,pu=hu-1.4,[px,py]=this.W(pu,0),a=this.ang+(this.look||0),c=Math.cos(a)*this.sc,s=Math.sin(a)*this.sc;return[px+c*(u-pu)-s*v,py+s*(u-pu)+c*v];}
+  hatAnchor(){const[x,y]=this.HW(4.2-this.sit*1.2,0);return{x,y:y-2.5,a:this.ang+(this.look||0),s:1.05};}
+  mouthScreen(){const[x,y]=this.HW(6.6,0);return{x,y};}
   noise(){return clamp(this.speed/5,0,1.5);}
   goTo(tx,ty,dt,mode,arrive=3){
     const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y),dc=Math.hypot(tx-this.x,ty-this.y),done=d<=arrive||dc<=arrive+5;
@@ -4348,8 +4421,13 @@ class Golem extends Pet{
     const bump=this.x<B.x0+7||this.x>B.x1-7||this.y<B.y0+7||this.y>B.y1-7;this.x=clamp(this.x,B.x0+7,B.x1-7);this.y=clamp(this.y,B.y0+7,B.y1-7);
     if(bump&&this.state==='wander')[this.tx,this.ty]=this.randomSpot();
     this.pts[0].x=this.x;this.pts[0].y=this.y;
-    const lt=this.prey&&(this.state==='hunt'||this.state==='strike')?clamp(wrapA(Math.atan2(this.prey.y-this.y,this.prey.x-this.x)-this.ang),-0.4,0.4):Math.sin(this.t*0.35)*0.3;
-    this.look+=(lt-this.look)*Math.min(1,dt*2.5);if(this.state!=='strike')this.reach+=(0-this.reach)*Math.min(1,dt*4);
+    // head turns: slow and heavy, to whatever it's after, to your hand when it's close, otherwise a ponderous look around now and then
+    const P=game.pointer,tgt=(this.state==='hunt'||this.state==='strike'||this.state==='notice')?(this.prey||this.att?.t):null;let lt;
+    if(tgt&&tgt.x!=null)lt=clamp(wrapA(Math.atan2(tgt.y-this.y,tgt.x-this.x)-this.ang),-1,1);
+    else if(!this.preview&&P.inside&&this.sit<0.5&&Math.hypot(P.x-this.x,P.y-this.y)<80)lt=clamp(wrapA(Math.atan2(P.y-this.y,P.x-this.x)-this.ang),-1,1);
+    else if(this.speed>2||this.sit>0.5)lt=0;
+    else{this.lookT=(this.lookT||rand(2,4))-dt;if(this.lookT<=0){this.lookT=rand(2.5,5.5);this.lookTo=Math.random()<0.35?0:rand(-0.9,0.9);}lt=this.lookTo||0;}
+    this.look+=clamp((lt-this.look)*dt*2.2,-1.1*dt,1.1*dt);if(this.state!=='strike')this.reach+=(0-this.reach)*Math.min(1,dt*4);
     this.chewPh=this.state==='chew'?this.chewPh+dt/0.7:0;
     this.updateFeet(dt);this.syncHeld();
   }
@@ -4403,7 +4481,7 @@ class Golem extends Pet{
       fb.box(f0,f1-fz*sc,2.0,2.0,A,M.CLAW,ac,0,0,1.1,1.1);
       fb.box(s0,s1,1.9,1.9,A,M.SLATE,3,0,0,0.95,1.2);}
     // head: a square block with a heavy brow, hunched in front of the torso
-    const hu=4.7-sit*0.9+this.reach*0.5,[h0,h1]=L(hu,Math.sin(this.look)*0.6),ha=A+this.look*0.5;
+    const hu=4.7-sit*0.9+this.reach*0.5,pu=hu-1.4,ha=A+this.look,[p0,p1]=L(pu,0),h0=p0+Math.cos(ha)*1.4*sc,h1=p1+Math.sin(ha)*1.4*sc;
     fb.box(h0,h1,2.6,2.8,ha,M.CLAW2,4,0,0,0.3,1.1);this.hf={x:h0,y:h1,c:Math.cos(ha),s:Math.sin(ha)};this._head=[h0,h1,ha];
   }
   drawExtras(fb){const P=PAL.golem,W=fb.w,g=this.glowPx,sc=this.sc;g.length=0;
@@ -4788,7 +4866,7 @@ function updateParts(w,dt){
       case 'fdrop':p.vh-=120*dt;p.h+=p.vh*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.h<=1.8)p.life=0;break;
       case 'smoke':p.y-=7*dt;p.x+=p.vx*dt;p.vx*=1-dt;break;
       case 'down':p.ph+=dt*4;p.h=Math.max(0,p.h-dt*3);p.x+=(p.vx+Math.sin(p.ph)*4)*dt;p.y+=p.vy*dt;p.vx*=1-dt*1.5;p.vy*=1-dt*1.5;break;
-      case 'steam':p.y+=p.vy*dt;p.vy*=1-dt*0.6;p.x+=p.vx*dt+Math.sin(p.life*5+p.ph)*0.12;break;
+      case 'steam':p.y+=p.vy*dt;p.vy*=1-dt*0.6;p.vx*=1-dt*1.5;p.x+=p.vx*dt+Math.sin(p.life*4+p.ph)*0.08;break;
       case 'lava':p.vh-=140*dt;p.h+=p.vh*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.h<0){p.h=0;p.vh=0;p.vx*=0.4;p.vy*=0.4;}break;
       case 'num':p.y-=(p.life>0.9?14:2)*dt;break;
       case 'dust':p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=1-dt*5;p.vy*=1-dt*5;break;
@@ -6100,7 +6178,8 @@ function updatePlay(dt){
   if(hq&&(hq.caught||hq.dead)){game.held=null;hq.inHand=false;
     if(hq.caught){S.happy=Math.min(100,S.happy+6);SFX.play('sparkle');addCoins(3,P.x,P.y);addXP(6);track('handfeeds');reqEvent('hand');
       for(let i=0;i<8;i++){const a=rand(TAU),v=rand(14,30);spawn(w,'spark2',P.x,P.y,{vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.35,.6)});}
-      flash(game.heldBy==='hand'?`${game.name} ate ${PREY_NAME[hq.type]} right out of your hand!`:`${game.name} took ${PREY_NAME[hq.type]} right from the tweezers!`);}}
+      const fav=((DIET[pet.kind]||{})[hq.type]||0)>=8;if(fav)game.favT=w.t;
+      if(!game.handNote||w.t-game.handNote>45){game.handNote=w.t;flash((game.heldBy==='hand'?`${game.name} ate ${PREY_NAME[hq.type]} right out of your hand!`:`${game.name} took ${PREY_NAME[hq.type]} right from the tweezers!`)+(fav?' A favourite!':''));}}}
   for(const p of w.prey){p.update(dt,w);floatPrey(p,w,dt);if(!p.caught&&!p.inHand&&!p.stale&&!LIVE_FOOD.includes(p.type)&&p.h<=0.5){p.age=(p.age||0)+dt;if(p.age>180)p.stale=true;}}
   // how fast things are moving (critters notice motion from much further away)
   const trackMv=o=>{if(!o)return;const x=o.x,y=o.y,v=o._px===undefined?0:Math.hypot(x-o._px,y-o._py)/Math.max(dt,1e-3);o._mv=(o._mv||0)+(v-(o._mv||0))*Math.min(1,dt*6);o._px=x;o._py=y;};
@@ -6172,7 +6251,7 @@ function updatePlay(dt){
     if(ic&&pet.state!=='sleeping'&&pet.state!=='grabbed')game.thought={icon:ic,t:0};}
   // ambience
   let nf=0,nc=0;for(const q of w.prey){if(q.caught)continue;if(q.type==='fly'&&(q.landT<=0||q.inHand))nf++;if(q.type==='cricket')nc++;}
-  SFX.buzzLevel(Math.min(0.05,nf*0.018));
+  SFX.buzzLevel(Math.min(0.05,nf*0.018));SFX.beeBuzz(pet.kind==='bee'&&pet.state!=='grabbed'?pet.buzzV||0:pet.kind==='bee'?0.05:0,pet.kind==='bee'?(pet.state==='grabbed'?1.2:pet.buzzP||0):0);
   SFX.slither(pet.kind==='snake'&&pet.state!=='grabbed'?Math.min(0.07,Math.abs(pet.speed||0)/46*0.08):0);
   SFX.music(w.dayness);
   game.chirpT-=dt;if(game.chirpT<=0){game.chirpT=rand(3,7);if(nc)SFX.play('chirp');}
@@ -6427,7 +6506,9 @@ function renderPlay(){
   for(const p of w.parts){if(p.type==='drop')pset(fb,p.x,p.y-p.h,drop);else if(p.type==='mist')pmix(fb,p.x,p.y,mistc,clamp(p.life,0,1)*0.6);
     else if(p.type==='fdrop')pmix(fb,p.x,p.y-p.h,hex('#bfefff'),0.85);
     else if(p.type==='down'){const f=clamp(p.life,0,1);pmix(fb,p.x,p.y-p.h,hex('#fff2a0'),0.9*f);pmix(fb,p.x+1,p.y-p.h,hex('#ffe060'),0.5*f);}
-    else if(p.type==='steam'){const k=clamp(p.life/p.max,0,1),f=Math.min(0.9,Math.sin(k*Math.PI)*0.85);for(let j=0;j<4;j++){const yy=p.y-j,xx=p.x+Math.sin(p.ph+j*0.9+p.life*3)*(0.6+j*0.35);pmix(fb,xx,yy,hex('#fbf6ee'),f*(1-j*0.18));if(j<2)pmix(fb,xx+1,yy,hex('#fbf6ee'),f*0.35);}}
+    else if(p.type==='steam'){// a soft vapour puff: swells as it rises, ragged at the edge, brightest on its upper side, fading away
+      const k=clamp(p.life/p.max,0,1),a=1-k,r=0.9+a*2.8,f=Math.pow(Math.sin(Math.min(1,k*1.15)*Math.PI),0.7)*0.62,S=hex('#fbf6ee'),R2=Math.ceil(r);
+      for(let yy=-R2;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++){const d=Math.hypot(xx,yy*1.1)/r;if(d>=1)continue;const n=vnoise((p.x+xx)*0.7+p.ph*3,(p.y+yy)*0.7-p.life*2);const al=f*(1-d*d)*(0.55+0.6*n)*(yy<0?1:0.75);if(al>0.04)pmix(fb,p.x+xx,p.y+yy,S,Math.min(0.85,al));}}
     else if(p.type==='smoke'){const f=clamp(p.life/2,0,1)*0.45,r=1+(1-f)*2;for(const[dx,dy]of[[0,0],[1,0],[0,1],[-1,0],[0,-1]])pmix(fb,p.x+dx*r*0.6,p.y+dy*r*0.6,hex('#b8b0a8'),f);}}
   for(let k=0;k<R.frameIdx.length;k++){const i=R.frameIdx[k];px[i]=R.frame[i];}
   const GE=hex('#bfe6d6');for(let k=0;k<R.glassIdx.length;k++){const i=R.glassIdx[k];px[i]=mixc(px[i],GE,R.glassT[k]);}
@@ -7268,6 +7349,8 @@ const ui={
   showMsg(text,ev){const box=$('toast');
     if(text===this.curMsg){if(ev){const top=box.querySelector('.tmsg:not(.old):not(.gone)');if(top){top.classList.add('event');if(HUDSKIN.on)HUDSKIN.paint(top,'signGold');top.style.animation='none';void top.offsetWidth;top.style.animation='';}}return;}
     this.curMsg=text;this.msgAt=performance.now();
+    // plain status updates (what the critter is up to) just change the words on the current sign; only real events stack a new one
+    if(!ev){const top=box.querySelector('.tmsg:not(.old):not(.gone)');if(top&&!top.classList.contains('event')){top.textContent=text;top.classList.remove('swap');void top.offsetWidth;top.classList.add('swap');if(HUDSKIN.on)HUDSKIN.paint(top,'sign');return;}}
     [...box.querySelectorAll('.tmsg:not(.gone)')].forEach((e,i)=>{if(i===0){e.classList.add('old');clearTimeout(e._fade);e._fade=setTimeout(()=>{if(e.isConnected&&!e.classList.contains('gone')){e.classList.add('gone');setTimeout(()=>e.remove(),700);}},3000);}else{e.classList.add('gone');setTimeout(()=>e.remove(),700);}});
     const n=document.createElement('div');n.className='tmsg chunk'+(ev?' event':'');n.textContent=text;box.prepend(n);if(HUDSKIN.on)HUDSKIN.paint(n,ev?'signGold':'sign');},
   toast(msg,ev){this.showMsg(msg,ev);if(ev)this.evT=2.8;},
@@ -7284,7 +7367,7 @@ const ui={
       else{now=false;let extra='';if(S.fed<25)extra=' It looks hungry.';else if(S.water<25)extra=honeyThirst(w)?' It is craving some honey.':' The tank feels dry.';else if(S.clean<30)extra=' The tank needs a scoop.';const st=game.thought&&THINK_SAY[game.thought.icon]?THINK_SAY[game.thought.icon]:w.pet.statusText();msg=`${game.name} ${st}${/[!.?]$/.test(st)?'':'.'}${extra}`;}
       // status text has to settle for a moment before it replaces what's shown, so quick state flips don't flicker
       const t=performance.now();if(msg!==this.candMsg){this.candMsg=msg;this.candAt=t;}
-      if(now||!this.curMsg||(msg!==this.curMsg&&t-this.candAt>600&&t-(this.msgAt||0)>1200))this.showMsg(msg,false);}
+      if(now||!this.curMsg||(msg!==this.curMsg&&t-this.candAt>1500&&t-(this.msgAt||0)>4000))this.showMsg(msg,false);}
     this.syncDock();
   },
   tick(dt){
@@ -7443,7 +7526,7 @@ const ui={
   },
   tickPreviews(dt){
     for(const p of this.previews){p.pw.t+=dt;p.pet.update(dt);p.pw.parts.length=0;p.pw.ripples.length=0;
-      p.fb.px.set(p.bg);p.fb.clearLayer();p.pet.draw(p.fb);composite(p.fb,p.pet,{sAmt:.6,sdx:1,sdy:1});if(p.pet.drawExtras)p.pet.drawExtras(p.fb);
+      p.fb.px.set(p.bg);p.fb.clearLayer();p.pet.draw(p.fb);composite(p.fb,p.pet,{sAmt:.6,sdx:1,sdy:1});if(p.pet.drawExtras)p.pet.drawExtras(p.fb);if(p.pet.selfLit)p.pet.glow(p.fb,0.5);
       const hat=NO_HAT.includes(p.kind)?null:save.pets[p.kind]?.hat;if(hat){if(hat!=='halo'){p.fb.clearLayer();drawHat(p.fb,hat,p.pet.hatAnchor(),p.pw.t);composite(p.fb,HAT_PAINTER,{sAmt:.55,sdx:1,sdy:2});}hatGlow(p.fb,hat,p.pet.hatAnchor(),p.pw.t);}
       p.ctx.putImageData(p.fb.img,0,0);}
   },
