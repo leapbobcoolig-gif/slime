@@ -7837,7 +7837,7 @@ function heldTool(w,t,x,y,P){const k=t==="mist"?1:0.75;let ang,wu,wv,o={t:w.t};
       pmix(fb,xx,yy,e>0.78?(h>0?hex('#bff4ff'):hex('#ffc8f0')):hex('#eafcff'),e>0.78?0.55:0.12+0.1*st);}
     if(M.drips.length<4&&Math.random()<dt*0.9)M.drips.push({x:x+rand(-2,2),y:y+2,vy:0,life:0.8});
     for(const d of M.drips){d.vy+=60*dt;d.y+=d.vy*dt;d.life-=dt;pmix(fb,d.x,d.y,hex('#d8f6ff'),0.7*Math.max(0,d.life/0.8));}M.drips=M.drips.filter(d=>d.life>0);}}
-const SEATINT=hex('#144a66'),PREPET=new Uint32Array(N),GRUMPBUF=new Uint32Array(N),PLOPBUF=new Uint32Array(N),PLOPB2=new Uint32Array(N),PLOPM=new Uint8Array(N);let grumpRect=null,plopRect=null;
+const SEATINT=hex('#144a66'),PREPET=new Uint32Array(N),GRUMPBUF=new Uint32Array(N),PLOPBUF=new Uint32Array(N),PLOPB2=new Uint32Array(N),PLOPM=new Uint8Array(N),OCCPRE=new Uint32Array(N),OCCPOST=new Uint32Array(N);let grumpRect=null,plopRect=null;
 function renderObjects(list){
   if(!list.length)return;const w=game.world;
   if(w.sea){const dec=list.filter(o=>o instanceof Decor),toys=list.filter(o=>!(o instanceof Decor));
@@ -7901,15 +7901,18 @@ function renderPlay(){
         if(inR&&PLOPM[j])px[i]=SUBTMP[j];else if(PLOPM[i])px[i]=PLOPM[i-W-1]&&!aq?shade(PLOPBUF[i],.6):PLOPBUF[i];}}
     if(grumpRect){const[x0,y0,x1,y1]=grumpRect;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x,c=px[i];if(c===GRUMPBUF[i])continue;const r=c&255,g=c>>8&255,b=c>>>16&255,l=(r*0.3+g*0.5+b*0.2)*0.86,bl=l*1.04;
       px[i]=(255<<24)|(Math.round(lerp(b,bl,0.6))<<16)|(Math.round(lerp(g,l,0.6))<<8)|Math.round(lerp(r,l*0.95,0.6));}}});
+  // remember the critter's pixels as drawn, so its glow pass later can't paint over whatever ends up in front of it (logs, plants)
+  const pc=pet.headPos(),ocx=Math.round(pet.x??pc.x),ocy=Math.round(pet.y??pc.y),ox0=Math.max(0,ocx-56),ox1=Math.min(W-1,ocx+56),oy0=Math.max(0,ocy-64),oy1=Math.min(H-1,ocy+36);
+  const drawPetO=()=>{for(let y=oy0;y<=oy1;y++){const o=y*W;OCCPRE.set(px.subarray(o+ox0,o+ox1+1),o+ox0);}drawPet();for(let y=oy0;y<=oy1;y++){const o=y*W;OCCPOST.set(px.subarray(o+ox0,o+ox1+1),o+ox0);}};
   // in the aquarium the branch only hides a critter swimming down by the bottom: where the critter's pixels fall on the branch, keep what was there before it
   const seaUnder=w.sea&&(pet.dive||0)>0.62&&pet.h<=3;if(seaUnder)PREPET.set(px);
-  if(pet.h<=3)drawPet();
+  if(pet.h<=3)drawPetO();
   if(seaUnder)for(let k=0;k<R.ovIdx.length;k++){const i=R.ovIdx[k];if(px[i]!==PREPET[i])px[i]=PREPET[i];}
   renderObjects(front);
   if(!w.sea)for(let k=0;k<R.ovIdx.length;k++){const i=R.ovIdx[k];px[i]=R.ov[i];}
   for(const q of w.prey)if(!q.caught&&q.flier&&q.landT<=0&&!q.inHand)q.draw(fb,w.t);
   fb.clearLayer();for(const pl of w.plants)drawPlant(fb,pl,w.t);composite(fb,PLANT_PAINTER,{sAmt:.7,sdx:5,sdy:7});
-  if(pet.h>3)drawPet();
+  if(pet.h>3)drawPetO();
   const drag=objs.filter(o=>o.dragged);if(drag.length){fb.clearLayer();for(const o of drag)(o instanceof Decor?drawDecor:drawToy)(fb,o);composite(fb,OBJ_PAINTER,{sAmt:.5,sdx:4,sdy:6,outline:hex('#e9f3c4')});}
   if(game.placing&&P.inside){const it=ITEMS[game.placing],g=it.cat==='decor'?new Decor(game.placing,P.x,P.y):new Toy(game.placing,P.x,P.y);
     fb.clearLayer();(g instanceof Decor?drawDecor:drawToy)(fb,g);composite(fb,OBJ_PAINTER,{outline:(Math.floor(w.t*4)&1)?hex('#fff3b0'):hex('#9cd35e')});}
@@ -7923,6 +7926,7 @@ function renderPlay(){
     else if(p.type==='smoke'){const f=clamp(p.life/2,0,1)*0.45,r=1+(1-f)*2;for(const[dx,dy]of[[0,0],[1,0],[0,1],[-1,0],[0,-1]])pmix(fb,p.x+dx*r*0.6,p.y+dy*r*0.6,hex('#b8b0a8'),f);}}
   for(let k=0;k<R.frameIdx.length;k++){const i=R.frameIdx[k];px[i]=R.frame[i];}
   const GE=hex('#bfe6d6');for(let k=0;k<R.glassIdx.length;k++){const i=R.glassIdx[k];px[i]=mixc(px[i],GE,R.glassT[k]);}
+  const occ=[];for(let y=oy0;y<=oy1;y++)for(let x=ox0;x<=ox1;x++){const i=y*W+x;if(OCCPOST[i]!==OCCPRE[i]&&px[i]!==OCCPOST[i])occ.push(i);}// critter pixels something was drawn over
   applyLight(w.dayness);
   // ---- emissive / glass layer ----
   const night=1-w.dayness;
@@ -7934,7 +7938,7 @@ function renderPlay(){
   for(const q of w.prey)if(q.type==='stars'&&!q.dead&&!(q.sink>0.5)){const p=q.scr();for(let i=0;i<q.pts2.length-q.bites;i++){const tw=Math.max(0,Math.sin(w.t*3+i*2.1+q.x)),b=(0.35+night*0.9)*tw*tw;if(b>0.05){const[u,v]=q.pts2[i];padd(fb,p.x+u,p.y+v,160*b,140*b,60*b);if(b>0.5){padd(fb,p.x+u+1,p.y+v,50*b,45*b,20*b);padd(fb,p.x+u-1,p.y+v,50*b,45*b,20*b);padd(fb,p.x+u,p.y+v-1,50*b,45*b,20*b);padd(fb,p.x+u,p.y+v+1,50*b,45*b,20*b);}}}}
   if(night>0.2)for(const q of w.prey)if(q.type==='moonberry'&&!q.dead){const p=q.scr(),b=night*(0.7+0.3*Math.sin(w.t*2+q.x))*(1-(q.sink||0)*0.5);for(let yy=-4;yy<=4;yy++)for(let xx=-4;xx<=4;xx++){const k=1-Math.hypot(xx,yy)/4.5;if(k>0)padd(fb,p.x+xx,p.y+yy,30*k*b,80*k*b,160*k*b);}}
   for(const q of w.prey)if(q.glow&&!q.dead&&!(q.sink>0.5))q.glow(fb,night,w.t);
-  if(pet.glow)withSkin(pet,()=>pet.glow(fb,night));
+  if(pet.glow){const keep=occ.map(i=>px[i]);withSkin(pet,()=>pet.glow(fb,night));for(let k=0;k<occ.length;k++)px[occ[k]]=keep[k];}
   for(const o of w.toys)toyGlow(fb,o,night,w.t);
   for(const q of w.fireflies){const b=(0.5+0.5*Math.sin(w.t*3+q.ph))*night*Math.min(1,q.life);
     if(w.sea){padd(fb,q.x,q.y,40*b,170*b,255*b);for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]])padd(fb,q.x+dx,q.y+dy,10*b,50*b,90*b);continue;}// glowing plankton
