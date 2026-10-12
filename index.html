@@ -2402,8 +2402,8 @@ SWATCHES.axolotl.push(
     R:{a:ramp('#9a0a24','#e0203e','#ff4a62','#ffa0b0'),b:ramp('#b06a06','#f0a010','#ffd23a','#fff2a0'),sug:ramp('#e8dcd0','#f6eee6','#ffffff','#ffffff')},
     paint(s,l,q,t,len){const r=this.R;if(hash(Math.floor(s*2.1)*3+1,Math.floor((l+1)*5)*7)>0.9)return r.sug[q];// sugar crystals
       const k=clamp((s/len-0.42)/0.16,0,1);let o=k<=0?r.a[q]:k>=1?r.b[q]:mixc(r.a[q],r.b[q],k);if(l<-0.25&&l>-0.55)o=mixc(o,hex('#ffffff'),0.28);return o;}},// glossy streak
-  {id:'gfp',name:'GFP glow',tier:'special',fx:'gfp',dot:['#e8f0b4','#5aff7a'],outline:'#2a3010',
-    pal:{axo:{skin:ramp('#9a9a6a','#c8c890','#ecf0b8','#fcffe4'),belly:ramp('#a8a878','#d4d6a4','#f2f6cc','#ffffee'),gill:ramp('#7a8a3a','#a8c050','#d0ec70','#f0ffb0'),fin:ramp('#a8ac80','#d0d6a8','#eef2d0','#fffff4'),eye:ramp('#2a3a10','#46601a','#68902a','#94c040')}}},
+  {id:'gfp',name:'GFP glow',tier:'special',fx:'gfp',dot:['#e4fff0','#3aff7a'],outline:'#0e3a1e',
+    pal:{axo:{skin:ramp('#8ab8a0','#b8e4cc','#e0fff0','#ffffff'),belly:ramp('#a0ccb4','#cceedc','#ecfff4','#ffffff'),gill:ramp('#0a8a3a','#1ed05a','#5aff8a','#c8ffd8'),fin:ramp('#9ad4b4','#c4f0d8','#e6fff0','#ffffff'),eye:ramp('#063a1a','#0c6a2e','#1aa04a','#5af08a')}}},
   {id:'spirit',name:'Water spirit',tier:'mythic',fx:'spirit',dot:['#bfeff6','#5a7aff'],outline:'#0a1e34',
     pal:{axo:{skin:ramp('#5a8ca8','#8ac0d6','#bfeff6','#f0ffff'),belly:ramp('#7aa8c0','#a8d4e4','#d8f6fc','#ffffff'),gill:ramp('#1a2a8a','#3a4ad0','#5a7aff','#a8c0ff'),fin:ramp('#6a9cc0','#9acce4','#c8f0fc','#f4ffff'),eye:ramp('#0a1a3a','#142e5a','#24488a','#4a74c0')}}});
 for(const list of Object.values(SWATCHES))for(const w of list){w.tier??='natural';w.price??=TIER_PRICE[w.tier];}
@@ -3149,7 +3149,7 @@ class Axolotl extends Walker{
   drawExtras(fb){// feathery gills + smile, crisp pixels outside the body mask
     const oy=-this.h,W=fb.w,mat=fb.mat,P=PAL.axo,ol=hex(P.outline),own=new Set(),fx=this.sw&&this.sw.fx;
     const put=(x,y,c)=>{x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=W||y>=fb.h||mat[y*W+x])return;fb.px[y*W+x]=c;own.add(y*W+x);};
-    if(fx){const g=this.gp||(this.gp=[]);g.length=0;for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++)if(mat[y*W+x])g.push(y*W+x);}// body pixels, for the glow
+    this.gillPx=own;if(fx){const g=this.gp||(this.gp=[]);g.length=0;for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++)if(mat[y*W+x])g.push(y*W+x);}// body pixels, for the glow
     const e=this.pointAt(4.6),ha=Math.atan2(e.fy,e.fx),fl=1+this.ex*0.4;
     if(fx==='spirit'){const t=this.t;// long ribbon gills that fan out, sweep back and ripple, plus two streamers off the tail
       for(const sd of[-1,1])for(let g=0;g<3;g++){let a=ha+sd*(1.05+g*0.5),x=e.x+Math.cos(a)*(e.r-0.8),y=e.y+Math.sin(a)*(e.r-0.8)+oy;const len=(7.5+(g===1?2:0))*(1+this.ex*0.25);
@@ -3165,11 +3165,20 @@ class Axolotl extends Walker{
     const h=this.pts[0],c=Math.cos(this.headAng),sn=Math.sin(this.headAng),mx=h.x+c*1.1,my=h.y+sn*1.1+oy,px=-sn,py=c,k=hex('#7a2a3a');
     for(let o=-1.4;o<=1.4;o+=0.7)pset(fb,mx+px*o-c*Math.abs(o)*0.35,my+py*o-sn*Math.abs(o)*0.35,k);
     if(this.orbs)for(const o of this.orbs)pmix(fb,o.x,o.y,hex('#e8f8ff'),0.8*Math.sin(Math.min(1,o.t/o.life)*Math.PI));}
-  get selfLit(){return!!(this.sw&&this.sw.fx==='spirit');}// so menu previews show its orbs glowing too
+  get selfLit(){return!!(this.sw&&this.sw.fx);}// so menu previews show its orbs glowing too
   glow(fb,night){const fx=this.sw&&this.sw.fx;if(!fx)return;const W=fb.w;
-    if(fx==='gfp'){if(night<0.2)return;const k=(night-0.2)/0.8,p=0.85+0.15*Math.sin(this.t*1.5);// fluorescent green after dark, lighting the water around it
-      for(const i of this.gp||[])padd(fb,i%W,(i/W)|0,30*k*p,150*k*p,50*k*p);
-      const c=this.pointAt(this.len*0.35),cx=c.x,cy=c.y-this.h;for(let y=-12;y<=12;y++)for(let x=-14;x<=14;x++){const d=Math.hypot(x/14,y/12);if(d>=1)continue;const f=k*p*(1-d)*(1-d)*0.55;padd(fb,cx+x,cy+y,12*f,70*f,24*f);}}
+    if(fx==='gfp'){// glows like the wisp: a pool of green light on the ground, a soft bloom around it, glowing gills and drifting sparks.
+      // faint in daylight, strong after dark; breathes slowly and flares up when it's excited
+      const t=this.t,k=(0.3+night*0.7)*(0.85+0.15*Math.sin(t*1.6))*(1+this.ex*0.35),G=hex('#3aff7a'),Gl=hex('#c8ffd8'),oy=-this.h;
+      const add=(px,py,col,f)=>padd(fb,px,py,(col&255)*f,((col>>8)&255)*f,((col>>16)&255)*f);
+      const m=this.pointAt(this.len*0.32);for(let yy=-10;yy<=10;yy++)for(let xx=-22;xx<=22;xx++){const d=Math.hypot(xx/22,yy/10);if(d<1)add(m.x+xx,m.y+yy,G,(1-d)*(1-d)*0.6*k*(0.8+0.4*vnoise((m.x+xx)*0.22+t*0.8,(m.y+yy)*0.35)));}
+      for(const f of[0.08,0.3,0.55,0.8]){const c=this.pointAt(this.len*f),r=f<0.2?9:f>0.7?5:7.5;// bloom hugging the body, widest at the head
+        for(let yy=-r;yy<=r;yy++)for(let xx=-r;xx<=r;xx++){const d=Math.hypot(xx,yy)/r;if(d<1)add(c.x+xx,c.y+yy+oy,G,(1-d)*(1-d)*0.32*k);}}
+      const Gm=hex('#6aff7a');for(const i of this.gp||[])pmix(fb,i%W,(i/W)|0,Gm,Math.min(0.85,(0.15+night*0.5)*k));// the body itself lights up
+      for(const i of this.gillPx||[])pmix(fb,i%W,(i/W)|0,Gl,Math.min(0.95,(0.35+night*0.55)*k));// gills glow brightest
+      const sp=this.sparks||(this.sparks=[]);if(sp.length<10&&Math.random()<0.12*(0.4+night)){const c=this.pointAt(this.len*rand(0,0.6));sp.push({x:c.x+rand(-3,3),y:c.y+oy+rand(-3,3),vy:rand(-5,-2),ph:rand(TAU),t:0,life:rand(1.4,2.6)});}
+      for(const q of sp){q.t+=1/60;q.y+=q.vy/60;q.x+=Math.sin(q.t*3+q.ph)*0.08;const b=Math.sin(Math.min(1,q.t/q.life)*Math.PI)*k;add(q.x,q.y,Gl,0.9*b);for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]])add(q.x+dx,q.y+dy,G,0.3*b);}
+      this.sparks=sp.filter(q=>q.t<q.life);}
     else if(fx==='spirit'){const k=0.6+night*0.4;for(const i of this.gp||[])if(hash(i%W,(i/W)|0)>0.6)padd(fb,i%W,(i/W)|0,10*k,30*k,60*k);
       for(const o of this.orbs||[]){const b=k*Math.sin(Math.min(1,o.t/o.life)*Math.PI);padd(fb,o.x,o.y,200*b,230*b,255*b);
         for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]])padd(fb,o.x+dx,o.y+dy,40*b,70*b,130*b);for(const[dx,dy]of[[-2,0],[2,0],[0,-2],[0,2],[-1,-1],[1,1],[-1,1],[1,-1]])padd(fb,o.x+dx,o.y+dy,10*b,20*b,45*b);}}}
