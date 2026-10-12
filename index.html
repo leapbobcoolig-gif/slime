@@ -2464,7 +2464,7 @@ function withSkin(pet,fn){const sw=swatchOf(pet);if(pet.baseOutline===undefined)
   if(pet.updateColors)pet.updateColors();
   try{return fn();}finally{for(let i=saved.length-1;i>=0;i--){const[P,kk,v]=saved[i];if(v===undefined)delete P[kk];else P[kk]=v;}if(pet.updateColors)pet.updateColors();}}
 // skin light for critters that glow: a soft halo hugging the drawn body (gp = its pixels), a wide glow over the ground around it,
-// and an optional per-pixel pass to light the body itself. o: {k strength, hi colour near the skin, lo colour further out, body(i,v,add)}
+// and an optional per-pixel pass to light the body itself. o: {k strength, hi colour near the skin, lo colour further out, body(i,v,add), skip: pixels to leave unlit}
 function bodyLight(fb,f,gp,o){const W=fb.w,k=o.k;if(!gp.length||k<0.02)return;
   const add=(i,col,a)=>{const c=fb.px[i];fb.px[i]=rgb((c&255)+(col&255)*a,(c>>8&255)+((col>>8)&255)*a,(c>>>16&255)+((col>>16)&255)*a);};
   let x0=1e9,y0=1e9,x1=-1,y1=-1;for(const i of gp){const x=i%W,y=(i/W)|0;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
@@ -2476,7 +2476,7 @@ function bodyLight(fb,f,gp,o){const W=fb.w,k=o.k;if(!gp.length||k<0.02)return;
   blur(a,b,3);blur(a,b,2);
   const cx=(x0+x1)/2,cy=(y0+y1)/2,gy=f.y,rx=Math.max(x1-x0,y1-y0)/2+30,ry=rx*0.75;
   for(let yy=-Math.ceil(ry);yy<=Math.ceil(ry)+(f.h||0);yy++)for(let xx=-Math.ceil(rx);xx<=Math.ceil(rx);xx++){const X=Math.round(cx+xx),Y=Math.round(cy+yy);if(X<0||Y<0||X>=W||Y>=fb.h)continue;
-    const jx=X-bx,jy=Y-by,inb=jx>=0&&jy>=0&&jx<bw&&jy<bh,j=jy*bw+jx;if(inb&&m[j])continue;
+    const jx=X-bx,jy=Y-by,inb=jx>=0&&jy>=0&&jx<bw&&jy<bh,j=jy*bw+jx;if(inb&&m[j]||o.skip&&o.skip.has(Y*W+X))continue;
     const d1=Math.hypot(xx/rx,yy/ry);let ff=d1<1?(1-d1)*(1-d1)*0.5:0;const d2=Math.hypot((X-cx)/(rx*0.55),(Y-gy)/(ry*0.35));if(d2<1)ff+=(1-d2)*(1-d2)*0.6;
     if(inb){const v=a[j];if(v>0.01)ff+=Math.pow(Math.min(1,v*1.6),1.15)*0.7;}
     if(ff>0.004)add(Y*W+X,inb&&a[j]>0.35?o.hi:o.lo,ff*k);}
@@ -2559,7 +2559,8 @@ class DartFrog extends Frog{
     if(fx){const W=fb.w,g=this.gp||(this.gp=[]);g.length=0;for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++){const v=fb.mat[y*W+x];if(v&&v!==M.EYE&&v!==M.LID)g.push(y*W+x);}}// body pixels, for the glow
     if(fx==='toxic'){const G=hex('#a8ff4a'),T=hex('#7ad80a');// fumes seeping off its glands, and glowing three-toed tracks where it lands
       for(const g of this.gas||[]){const a=Math.sin(Math.min(1,g.t/g.life)*Math.PI)*0.35,R2=Math.ceil(g.r);for(let yy=-R2;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++){const d=Math.hypot(xx,yy)/g.r;if(d<1)pmix(fb,g.x+xx,g.y+yy,G,a*(1-d)*(0.6+0.6*vnoise((g.x+xx)*0.5,(g.y+yy)*0.5+g.t)));}}
-      for(const p of this.prints||[]){const a=0.75*Math.min(1,p.life/2),pc=Math.cos(p.a),ps=Math.sin(p.a);pmix(fb,p.x,p.y,T,a);for(const o of[-0.8,0,0.8])pmix(fb,p.x+pc*2-ps*o*1.6,p.y+ps*2+pc*o*1.6,T,a);}}
+      const under=(x,y)=>{x=Math.round(x);y=Math.round(y);return x>=0&&y>=0&&x<fb.w&&y<fb.h&&fb.mat[y*fb.w+x];};// tracks stay on the ground, under the frog
+      for(const p of this.prints||[]){const a=0.75*Math.min(1,p.life/2),pc=Math.cos(p.a),ps=Math.sin(p.a);for(const[x,y]of[[p.x,p.y],...[-0.8,0,0.8].map(o=>[p.x+pc*2-ps*o*1.6,p.y+ps*2+pc*o*1.6])])if(!under(x,y))pmix(fb,x,y,T,a);}}
     // wet, glossy skin: bright little highlights on the back and head, toward the light
     const gl=(lx,ly,a)=>{const[x,y]=this.L(lx,ly);pmix(fb,x,y,Wt,a);};
     gl(-2.4,-1.6,0.85);gl(-1.6,-2.2,0.55);gl(2.6,-1.4,0.7);if(this.glint>0.2||this.warn>0.3){gl(-3.4,1.4,0.6);gl(0.6,-2.8,0.6);}
@@ -2582,9 +2583,10 @@ class DartFrog extends Frog{
         if(h>0.965&&tw>0.6)for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]])padd(fb,x+dx,y+dy,90*b,80*b,140*b);}}
     if(fx==='toxic'){const k=0.15+night*0.85,L=hex('#7ae01a');
       // the light comes only from its stripes and glands: the black stays black
-      const lit=(this.gp||[]).filter(i=>((fb.px[i]>>8)&255)>90);bodyLight(fb,this,lit,{k:k*0.6,hi:hex('#9aff3a'),lo:hex('#2a9a0a'),body:(i,v,add)=>add(i,L,0.3*k)});
+      const lit=(this.gp||[]).filter(i=>((fb.px[i]>>8)&255)>90);bodyLight(fb,this,lit,{skip:new Set(this.gp),k:k*0.6,hi:hex('#9aff3a'),lo:hex('#2a9a0a'),body:(i,v,add)=>add(i,L,0.3*k)});
       for(const g of this.gas||[]){const a=Math.sin(Math.min(1,g.t/g.life)*Math.PI)*0.14*(0.4+night*0.6),R2=Math.ceil(g.r);for(let yy=-R2;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++){const d=Math.hypot(xx,yy)/g.r;if(d<1){const f=a*(1-d)*(0.7+0.6*vnoise((g.x+xx)*0.5,(g.y+yy)*0.5+g.t));padd(fb,g.x+xx,g.y+yy,60*f,200*f,20*f);}}}
-      for(const p of this.prints||[]){const a=Math.min(1,p.life/2)*(0.4+night*0.6),pc=Math.cos(p.a),ps=Math.sin(p.a);padd(fb,p.x,p.y,90*a,220*a,30*a);for(const o of[-0.8,0,0.8])padd(fb,p.x+pc*2-ps*o*1.6,p.y+ps*2+pc*o*1.6,70*a,180*a,20*a);}}}
+      const body=new Set(this.gp||[]),on=(x,y)=>body.has(Math.round(y)*W+Math.round(x));
+      for(const p of this.prints||[]){const a=Math.min(1,p.life/2)*(0.4+night*0.6),pc=Math.cos(p.a),ps=Math.sin(p.a);if(!on(p.x,p.y))padd(fb,p.x,p.y,90*a,220*a,30*a);for(const o of[-0.8,0,0.8]){const x=p.x+pc*2-ps*o*1.6,y=p.y+ps*2+pc*o*1.6;if(!on(x,y))padd(fb,x,y,70*a,180*a,20*a);}}}}
   statusText(){if(this.state==='grabbed')return 'is flashing its warning colours at you';if(this.sac()>0.05||this.call>0.2)return 'is singing a buzzy little trill';
     if(this.state==='hunt'&&this.tap>0.5)return `is tapping its toes at ${PREY_NAME[this.prey?.type]||'something'}`;
     if(!this.isActive()&&this.state!=='sleeping')return 'is tucked in for the night';
