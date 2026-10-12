@@ -2311,11 +2311,28 @@ const SWATCHES={
   {id:'sky',name:'Sky blue',price:40,dot:['#4ab4ff','#b8e4ff'],outline:'#06121e',pal:{fuzz:{pink:ramp('#0e4a9a','#2a80e4','#4ab4ff','#b8e4ff')}}},
   {id:'lime',name:'Lime',price:40,dot:['#8ae83a','#d8ffa8'],outline:'#0a1606',pal:{fuzz:{pink:ramp('#3a7a0e','#5eb41e','#8ae83a','#d8ffa8')}}},
   {id:'tangerine',name:'Tangerine',price:40,dot:['#ff8a2a','#ffd0a0'],outline:'#1e0a04',pal:{fuzz:{pink:ramp('#9a3a06','#e4600e','#ff8a2a','#ffd0a0')}}},
-  {id:'lilac',name:'Lilac',price:40,dot:['#b48aff','#e8d8ff'],outline:'#100a1e',pal:{fuzz:{pink:ramp('#4a2a9a','#7a54d4','#b48aff','#e8d8ff')}}}]};
+  {id:'lilac',name:'Lilac',price:40,dot:['#b48aff','#e8d8ff'],outline:'#100a1e',pal:{fuzz:{pink:ramp('#4a2a9a','#7a54d4','#b48aff','#e8d8ff')}}}],
+
+ chick:[
+  {id:'cinnamon',name:'Cinnamon',price:40,dot:['#d08a4a','#ffa83a'],outline:'#3a1a06',pal:{chick:{down:ramp('#7a3e14','#b06a2e','#d8965a','#f6cc9a')}}},
+  {id:'black',name:'Black',price:40,dot:['#2a2a30','#f0e6c0'],outline:'#060608',pal:{chick:{down:ramp('#0e0e12','#1c1c22','#2e2e36','#4a4a54'),beak:ramp('#5a4a2a','#8a7448','#bca46e','#e4d4a8')}}},
+  {id:'lavender',name:'Lavender',price:40,dot:['#b4aac4','#ffa83a'],outline:'#2a2434',pal:{chick:{down:ramp('#6e6480','#958aa8','#bcb2cc','#e6e0f0')}}},
+  {id:'silkie',name:'Silkie white',price:60,dot:['#f6f2ea','#4a4a5a'],outline:'#3a3630',pal:{chick:{down:ramp('#b4aea2','#dcd6ca','#f6f2ea','#ffffff'),beak:ramp('#3a3a4a','#5a5a6e','#7e7e94','#a8a8bc')}}}],
+ puffer:[
+  {id:'golden',name:'Golden',price:40,dot:['#e8c030','#3a2a0a'],outline:'#1a1204',pal:{puffer:{body:ramp('#6a4a06','#b08410','#e8c030','#fff07a'),spot:ramp('#1e1404','#30220a','#463210','#5a4418'),fin:ramp('#8a7a3a','#c4b064','#ecdc98','#fff8d0')}}},
+  {id:'pea',name:'Pea puffer',price:40,dot:['#c8d04a','#5a5a1a'],pal:{puffer:{body:ramp('#5a6014','#94a02a','#c8d04a','#f0f494'),spot:ramp('#2a2a0a','#46440e','#646014','#82801e'),belly:ramp('#9a9a6a','#d0d0a0','#f0f0cc','#fffff0')}}},
+  {id:'twilight',name:'Twilight',price:40,dot:['#2a8a9a','#0a1a20'],outline:'#04121a',pal:{puffer:{body:ramp('#0a3a4a','#146272','#2a8a9a','#62c4cc'),spot:ramp('#020a0e','#061418','#0c1e24','#14282e'),fin:ramp('#3a5a62','#6a8e96','#9ec0c6','#d4eef0')}}},
+  {id:'albino',name:'Albino',price:60,dot:['#f2e6c8','#e04050'],outline:'#3a2a1a',pal:{puffer:{body:ramp('#a89670','#d4c49c','#f2e6c8','#fffbf0'),spot:ramp('#b89a6a','#d4b88a','#e8d0a4','#f6e4c0'),fin:ramp('#b8a88a','#dcceb2','#f2e8d6','#ffffff'),eye:ramp('#6a0a14','#b01a28','#ea4050','#ff9aa4')}}}],
+ shark:[
+  {id:'whitetip',name:'Whitetip',price:40,dot:['#6a7a84','#ffffff'],pal:{shark:{body:ramp('#2e3a42','#48585e','#6a7a84','#94a4ac'),tip:ramp('#a8b4ba','#d4dce0','#f2f6f8','#ffffff')}}},
+  {id:'lemon',name:'Lemon',price:40,dot:['#c8a858','#f4f0dc'],outline:'#1a1408',pal:{shark:{body:ramp('#5a4618','#8a7030','#bca050','#e0c880'),tip:ramp('#4a3a14','#6e5824','#94783a','#b49a56'),belly:ramp('#b4aa88','#dcd4b4','#f4f0dc','#fffef6')}}},
+  {id:'dusky',name:'Dusky',price:40,dot:['#2a3038','#0a0c10'],outline:'#030406',pal:{shark:{body:ramp('#0e1216','#1a2026','#2a3038','#40484e'),tip:ramp('#020304','#06080a','#0c0e12','#14181c'),belly:ramp('#8a9098','#b8bec4','#dce0e4','#f4f6f8')}}},
+  {id:'albino',name:'Albino',price:60,dot:['#f0e8ec','#e05a6a'],outline:'#3a2a2e',pal:{shark:{body:ramp('#a8969c','#d0c0c6','#f0e4e8','#fff8fa'),tip:ramp('#b8a4ac','#dccad0','#f4e8ec','#ffffff'),belly:ramp('#c8bcc0','#ece4e6','#fcf8f8','#ffffff'),eye:ramp('#5a0a14','#a01a28','#e04050','#ff9aa4')}}}]};
 // the critter's own colours, for its 'Original' button
 const SWATCH_BASE={frog:['#56c23b','#ea3b2b'],dart:['#509cff','#0e1636'],salamander:['#2e2b38','#f1b81f'],axolotl:['#f6a8b6','#ff5c84'],
   lizard:['#46a049','#35a37f'],snake:['#3e4d2b','#e0d072'],turtle:['#664222','#dcae3c'],chameleon:['#4ea03a','#34a07a'],dragon:['#bb8a4c','#e08c3c'],gecko:['#e8c246','#2c2620'],
-  slime:['#5fe08a','#c8f8d8'],bun:['#a85816','#f0dcb6'],golem:['#6e675d','#44802e'],mush:['#dc3a2e','#f6eedc'],kraken:['#7a3c80','#bc80ac'],wisp:['#38c8ff','#56f0c0'],fuzzworm:['#ff6eae','#ffb6d8']};
+  slime:['#5fe08a','#c8f8d8'],bun:['#a85816','#f0dcb6'],golem:['#6e675d','#44802e'],mush:['#dc3a2e','#f6eedc'],kraken:['#7a3c80','#bc80ac'],wisp:['#38c8ff','#56f0c0'],fuzzworm:['#ff6eae','#ffb6d8'],
+  chick:['#ffe050','#ffa83a'],puffer:['#8cb832','#243616'],shark:['#6088a6','#f4f8fa']};
 const swatchById=(kind,id)=>id&&(SWATCHES[kind]||[]).find(s=>s.id===id)||null;
 // which swatch a critter wears: the one being tried on in the menu preview, else the one saved for it
 const swatchOf=pet=>swatchById(pet.kind,pet.skinTry!==undefined?pet.skinTry:save.pets[pet.kind]?.skin);
