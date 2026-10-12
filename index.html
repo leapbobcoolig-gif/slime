@@ -2270,10 +2270,52 @@ const SWATCHES={
     {id:'tangerine',name:'Tangerine',price:40,dot:['#ee8424','#2c2620'],pal:{gecko:{base:ramp('#6a2a06','#b8540e','#ee8424','#ffbc6a'),band:ramp('#5a2004','#984010','#c86420','#e8944a')}}},
     {id:'macksnow',name:'Mack snow',price:40,dot:['#dcdcd0','#4a4a5a'],pal:{gecko:{base:ramp('#6a6a62','#a8a89c','#dcdcd0','#fbfbf4'),cream:ramp('#8a8a80','#c4c4b8','#ececE2','#ffffff'),lav:ramp('#2a2a34','#4a4a5a','#6e6e82','#9a9aae'),band:ramp('#4a4a50','#76767e','#a2a2aa','#cacad0')}}},
     {id:'blizzard',name:'Blizzard',price:60,dot:['#ece4cc','#c4bca4'],outline:'#2a2418',pal:{gecko:{base:ramp('#8a8270','#c4bca4','#ece4cc','#fffcf0'),cream:ramp('#8a8270','#c4bca4','#ece4cc','#fffcf0'),spot:ramp('#8a8270','#c4bca4','#ece4cc','#fffcf0'),lav:ramp('#8a8270','#c4bca4','#e6dec6','#fffcf0'),band:ramp('#8a8270','#c4bca4','#ece4cc','#fffcf0'),eye:ramp('#3a1a10','#6a2a1a','#9a3a24','#c8584a')}}},
-    {id:'blacknight',name:'Black night',price:60,dot:['#2a2424','#0a0808'],outline:'#020202',pal:{gecko:{base:ramp('#0c0a0a','#1a1616','#2a2424','#3e3636'),cream:ramp('#1a1616','#2e2828','#463e3c','#625856'),spot:ramp('#040303','#0a0808','#120e0e','#1c1616'),lav:ramp('#0c0a0a','#1a1616','#2a2424','#3e3636'),band:ramp('#141010','#241e1e','#383030','#504646')}}}]};
+    {id:'blacknight',name:'Black night',price:60,dot:['#2a2424','#0a0808'],outline:'#020202',pal:{gecko:{base:ramp('#0c0a0a','#1a1616','#2a2424','#3e3636'),cream:ramp('#1a1616','#2e2828','#463e3c','#625856'),spot:ramp('#040303','#0a0808','#120e0e','#1c1616'),lav:ramp('#0c0a0a','#1a1616','#2a2424','#3e3636'),band:ramp('#141010','#241e1e','#383030','#504646')}}}],
+
+ slime:[
+  {id:'blueberry',name:'Blue raspberry',price:40,slime:'#4aa8ff',dot:['#4aa8ff','#c8e6ff'],outline:'#06142a'},
+  {id:'grape',name:'Grape',price:40,slime:'#a070f0',dot:['#a070f0','#e0d0ff'],outline:'#140a2a'},
+  {id:'lemon',name:'Lemon',price:40,slime:'#f4e04a',dot:['#f4e04a','#fff8c8'],outline:'#1e1a06'},
+  {id:'bubblegum',name:'Bubblegum',price:40,slime:'#ff8ac8',dot:['#ff8ac8','#ffe0f0'],outline:'#2a0a1c'},
+  {id:'lava',name:'Lava',price:60,slime:'#ff5a2a',dot:['#ff5a2a','#ffd06a'],outline:'#2a0802'},
+  {id:'midnight',name:'Midnight',price:60,slime:'#3a4ab0',dot:['#3a4ab0','#0a0e2a'],outline:'#04061a'}],
+ bun:[
+  {id:'rye',name:'Rye',price:40,dot:['#5a3418','#c8a07a'],pal:{bun:{top:ramp('#1e1008','#3a2010','#5a3418','#7e4e28'),crust:ramp('#2a160a','#4a2a14','#6e4220','#946032'),crumb:ramp('#7a5a3e','#a8845e','#c8a07a','#e4c49e')}}},
+  {id:'matcha',name:'Matcha',price:40,dot:['#7aa83a','#f0e6c0'],pal:{bun:{top:ramp('#2a4210','#4a6e1e','#7aa83a','#b4d86a'),crust:ramp('#5e2e0a','#934c14','#c47828','#e8a84c')}}},
+  {id:'ube',name:'Ube',price:40,dot:['#8a4ac8','#d8b4f0'],pal:{bun:{top:ramp('#2a0e48','#4e1e7a','#8a4ac8','#c08ef0'),crust:ramp('#3a1a52','#64307e','#9050b0','#bc80d8'),crumb:ramp('#8a70a4','#b89ad4','#d8b4f0','#f6e8ff')}}},
+  {id:'melonpan',name:'Melon pan',price:60,dot:['#e8d870','#a8c850'],pal:{bun:{top:ramp('#7a6a1a','#b8a43a','#e8d870','#fff6b8'),crust:ramp('#6a7a1e','#94ac34','#bcd458','#e0f094')}}},
+  {id:'burnt',name:'Extra toasty',price:40,dot:['#2a1a12','#8a6a4a'],outline:'#060302',pal:{bun:{top:ramp('#0a0604','#160e08','#24180e','#3a2818'),crust:ramp('#160c06','#2a1a0e','#402a18','#5e3e24')}}}],
+ golem:[
+  {id:'sandstone',name:'Sandstone',price:40,dot:['#c8a46a','#6a7a30'],pal:{golem:{stone:ramp('#5a4428','#8a6c44','#b8925e','#dcbc88'),stoneD:ramp('#3a2a18','#5a4428','#8a6c44','#b0905e'),head:ramp('#5e482a','#8e7048','#bc9a64','#e0c490'),moss:ramp('#2e3a10','#4a5a1a','#6a7a30','#90a048'),mossL:ramp('#4a5a1a','#6e8228','#98ac40','#c4d464')}}},
+  {id:'snowcap',name:'Snowcap',price:40,dot:['#6e7a8a','#f0f6ff'],eye:'#7ad8ff',pal:{golem:{stone:ramp('#2a3038','#46505c','#6a7684','#96a2b0'),stoneD:ramp('#1a1e24','#2e343c','#46505c','#66707c'),head:ramp('#2e343c','#4a5460','#6e7a88','#9aa6b4'),moss:ramp('#9aa8b8','#c8d4e0','#e8f0f8','#ffffff'),mossL:ramp('#b0bcc8','#d8e2ec','#f2f8ff','#ffffff'),eye:'#7ad8ff',eyeC:'#f0fcff'}}},
+  {id:'autumn',name:'Autumn',price:40,dot:['#6e675d','#e07a28'],pal:{golem:{moss:ramp('#5a1e0a','#9a3a10','#d0601c','#f09038'),mossL:ramp('#7a4a0a','#b8780e','#e8a824','#ffd060'),eye:'#ffc860',eyeC:'#fff6e0'}}},
+  {id:'basalt',name:'Basalt',price:60,dot:['#24222a','#ff8a3a'],outline:'#020202',pal:{golem:{stone:ramp('#0e0e12','#1a1a20','#2a2a32','#40404a'),stoneD:ramp('#08080a','#121216','#1e1e24','#2e2e36'),head:ramp('#101014','#1e1e24','#30303a','#484852'),moss:ramp('#4a1406','#8a2a0a','#d04a14','#ff8a3a'),mossL:ramp('#6a2a06','#b04a0e','#f07a20','#ffb860'),eye:'#ff9a3a',eyeC:'#fff0d0'}}}],
+ mush:[
+  {id:'golden',name:'Golden cap',price:40,dot:['#f0b828','#f6eedc'],pal:{mush:{cap:ramp('#6a3a06','#b0700e','#f0b828','#ffe070')}}},
+  {id:'porcini',name:'Porcini',price:40,dot:['#8a5428','#e2d6be'],pal:{mush:{cap:ramp('#3a1e0a','#5e3416','#8a5428','#b8804a'),spot:ramp('#8a6a48','#b89470','#d8b890','#f0d8b4')}}},
+  {id:'pinkgill',name:'Blue pinkgill',price:40,dot:['#3a6ae0','#e8a8b8'],pal:{mush:{cap:ramp('#0e1e5a','#1a3aa0','#3a6ae0','#80a8ff'),gill:ramp('#8a4a5a','#b8707e','#e0a0ae','#f8ccd6')}}},
+  {id:'amethyst',name:'Amethyst',price:60,dot:['#9a4ad8','#c8a0e8'],outline:'#12061e',pal:{mush:{cap:ramp('#2e0e4a','#56207e','#9a4ad8','#cc8cff'),stem:ramp('#5a4070','#8a6aa8','#b496d4','#dcc4f0'),gill:ramp('#3e2a58','#62468a','#8a68b8','#b496d8'),spot:ramp('#9a86b4','#c4b2dc','#e2d6f4','#ffffff')}}}],
+ kraken:[
+  {id:'crimson',name:'Deep-sea red',price:40,dot:['#c82a2a','#f0a0a0'],outline:'#1a0404',pal:{kraken:{body:ramp('#3a0808','#6e1414','#a82424','#e05a4a'),belly:ramp('#6a2a2a','#a04a46','#d07a70','#f4b4a8'),spot:ramp('#4a0a0a','#7a1616','#a82020','#d04a40')}}},
+  {id:'abyss',name:'Abyss blue',price:40,dot:['#2a5aa8','#8ad0f0'],outline:'#040c1a',pal:{kraken:{body:ramp('#0a1a3a','#163464','#2a5aa8','#5a90d8'),belly:ramp('#2a4a6a','#4a7aa0','#7ab0d0','#b4e0f4'),spot:ramp('#0a2a5a','#14468a','#2a6ac0','#5aa0f0'),flush:ramp('#0a4a5a','#1a8a9a','#38c8d0','#9af0f0')}}},
+  {id:'coral',name:'Coral',price:40,dot:['#f07a3a','#ffd0a0'],pal:{kraken:{body:ramp('#5a2008','#9a4214','#d8702a','#f8a860'),belly:ramp('#8a5a3a','#c08a5e','#ecb88a','#fde2c4'),spot:ramp('#7a2a0a','#b84a14','#e87a30','#ffb070')}}},
+  {id:'ghost',name:'Ghost',price:60,dot:['#e8dce8','#b8a0c0'],outline:'#2a1e2e',pal:{kraken:{body:ramp('#7a6a80','#aa98b0','#d8c8dc','#f8f0fa'),belly:ramp('#9a8aa0','#c8b8cc','#ece0ee','#ffffff'),spot:ramp('#8a6a92','#b090b8','#d4b8dc','#f0e0f4'),eye:ramp('#2a1a3a','#4a2e66','#7a50a0','#b48ad8')}}}],
+ wisp:[
+  {id:'ember',name:'Ember',price:40,dot:['#ff7a2a','#ffd060'],pal:{wisp:{a:ramp('#6a1a0a','#c83a12','#ff7a2a','#ffd0a0','#ffffff'),b:ramp('#7a3a06','#d0700e','#ffc040','#fff0b0','#ffffff')}}},
+  {id:'spirit',name:'Spirit green',price:40,dot:['#5af07a','#c0ff5a'],pal:{wisp:{a:ramp('#0a4a1a','#18a03a','#5af07a','#c8ffd4','#ffffff'),b:ramp('#3a5a0a','#78b018','#c0ff5a','#f0ffc8','#ffffff')}}},
+  {id:'rose',name:'Rose',price:40,dot:['#ff6ab4','#c070ff'],pal:{wisp:{a:ramp('#6a0a3a','#d0287a','#ff6ab4','#ffd0ea','#ffffff'),b:ramp('#3a0a6a','#8030d0','#c070ff','#ecd4ff','#ffffff')}}},
+  {id:'gold',name:'Gold',price:60,dot:['#ffd84a','#fff4c0'],pal:{wisp:{a:ramp('#6a4a06','#c0900e','#ffd84a','#fff4c0','#ffffff'),b:ramp('#5a3a0a','#a87018','#f0b040','#ffe8a8','#ffffff')}}},
+  {id:'void',name:'Void',price:60,dot:['#5a1aa0','#0a0418'],pal:{wisp:{a:ramp('#06020e','#1a0a3a','#5a1aa0','#b070ff','#f0e0ff'),b:ramp('#020208','#0e0a2a','#3a2a8a','#8a7ae0','#e4e0ff')}}}],
+ fuzzworm:[
+  {id:'sunny',name:'Sunny yellow',price:40,dot:['#ffd83a','#fff4a8'],pal:{fuzz:{pink:ramp('#9a7006','#e4b414','#ffd83a','#fff4a8')}}},
+  {id:'sky',name:'Sky blue',price:40,dot:['#4ab4ff','#b8e4ff'],outline:'#06121e',pal:{fuzz:{pink:ramp('#0e4a9a','#2a80e4','#4ab4ff','#b8e4ff')}}},
+  {id:'lime',name:'Lime',price:40,dot:['#8ae83a','#d8ffa8'],outline:'#0a1606',pal:{fuzz:{pink:ramp('#3a7a0e','#5eb41e','#8ae83a','#d8ffa8')}}},
+  {id:'tangerine',name:'Tangerine',price:40,dot:['#ff8a2a','#ffd0a0'],outline:'#1e0a04',pal:{fuzz:{pink:ramp('#9a3a06','#e4600e','#ff8a2a','#ffd0a0')}}},
+  {id:'lilac',name:'Lilac',price:40,dot:['#b48aff','#e8d8ff'],outline:'#100a1e',pal:{fuzz:{pink:ramp('#4a2a9a','#7a54d4','#b48aff','#e8d8ff')}}}]};
 // the critter's own colours, for its 'Original' button
 const SWATCH_BASE={frog:['#56c23b','#ea3b2b'],dart:['#509cff','#0e1636'],salamander:['#2e2b38','#f1b81f'],axolotl:['#f6a8b6','#ff5c84'],
-  lizard:['#46a049','#35a37f'],snake:['#3e4d2b','#e0d072'],turtle:['#664222','#dcae3c'],chameleon:['#4ea03a','#34a07a'],dragon:['#bb8a4c','#e08c3c'],gecko:['#e8c246','#2c2620']};
+  lizard:['#46a049','#35a37f'],snake:['#3e4d2b','#e0d072'],turtle:['#664222','#dcae3c'],chameleon:['#4ea03a','#34a07a'],dragon:['#bb8a4c','#e08c3c'],gecko:['#e8c246','#2c2620'],
+  slime:['#5fe08a','#c8f8d8'],bun:['#a85816','#f0dcb6'],golem:['#6e675d','#44802e'],mush:['#dc3a2e','#f6eedc'],kraken:['#7a3c80','#bc80ac'],wisp:['#38c8ff','#56f0c0'],fuzzworm:['#ff6eae','#ffb6d8']};
 const swatchById=(kind,id)=>id&&(SWATCHES[kind]||[]).find(s=>s.id===id)||null;
 // which swatch a critter wears: the one being tried on in the menu preview, else the one saved for it
 const swatchOf=pet=>swatchById(pet.kind,pet.skinTry!==undefined?pet.skinTry:save.pets[pet.kind]?.skin);
@@ -2925,9 +2967,9 @@ const cls=fb.cls;let overLegs=false;
       for(let j=0;j<n;j++){const u=j/(n-1)*2-1,d=ha+(u>0?1:-1)*(0.95+Math.abs(u)*1.15),len=(1.1+pf*3.6)*((j&1)?1:0.72),r=e.r-0.5;
         spikes.push([e.x+Math.cos(d)*r,e.y+Math.sin(d)*r+oy,Math.cos(d)-e.fx*0.3,Math.sin(d)-e.fy*0.3,len+0.6,1.0+pf*0.7,pf>0.4?C.beard[1]:C.base[1],pf>0.4?C.beard[2]:C.tip[3]]);}
       if(pf>0.15){overLegs=true;const ext=pf*2.8;for(let a=-2.2;a<=2.2;a+=0.07){if(Math.abs(a)<0.9)continue;const d=ha+a;for(let t=0;t<=ext;t+=0.5){const rr=e.r-0.3+t;put(e.x+Math.cos(d)*rr,e.y+Math.sin(d)*rr+oy,C.beard[t>ext*0.6?2:1]);}}overLegs=false;}}
-    spikes.forEach(([x,y,dx,dy,len,w,fill,tip],si)=>{overLegs=si>=nFlank&&pf>0.15;const px=-dy,py=dx;
-      for(let t=0;t<=len;t+=0.35){const ww=w*(1-t/len);for(let o=-ww;o<=ww;o+=0.5)put(x+dx*t+px*o,y+dy*t+py*o,t>len*0.55?tip:fill);}});overLegs=false;
-    for(const i of own){const x=i%W,y=(i/W)|0;for(const[ddx,ddy]of[[1,0],[-1,0],[0,1],[0,-1]]){const j=(y+ddy)*W+x+ddx;if(free(x+ddx,y+ddy)&&!own.has(j))fb.px[j]=ol;}}
+    spikes.forEach(([x,y,dx,dy,len,w,fill,tip],si)=>{overLegs=si<nFlank||pf>0.15;const px=-dy,py=dx;// the side fringe sits over the legs, which come out from underneath it
+      for(let t=0;t<=len;t+=0.35){const ww=w*(1-t/len);for(let o=-ww;o<=ww;o+=0.5)put(x+dx*t+px*o,y+dy*t+py*o,t>len*0.55?tip:fill);}});overLegs=true;
+    for(const i of own){const x=i%W,y=(i/W)|0;for(const[ddx,ddy]of[[1,0],[-1,0],[0,1],[0,-1]]){const j=(y+ddy)*W+x+ddx;if(free(x+ddx,y+ddy)&&!own.has(j))fb.px[j]=ol;}}overLegs=false;
     const e2=this.pointAt(4.9),qx=-e2.fy,qy=e2.fx,k=hex('#1a1008');for(const sd of[-1,1])pset(fb,e2.x+qx*sd*e2.r*0.78,e2.y+qy*sd*e2.r*0.78+oy,k);
   }
 }
