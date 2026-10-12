@@ -7837,19 +7837,29 @@ function petPreview(kind,cv){const PW=cv.width,PH=cv.height,pfb=new FB(PW,PH),bg
     bg[i]=mixc(mixc(SAND[clamp(Math.floor(fbm(x*0.08,y*0.08,3)*4),0,4)],TW,0.62),CA,c*c*0.3);}}
   const pw={stats:{fed:60,happy:80,water:80},prey:[],parts:[],ripples:[],bounds:{x0:16,y0:14,x1:PW-16,y1:PH-14},dayness:1,t:0,dish:null,hide:null,lampRock:null,toys:[],bubbles:[],allWater:sea};
   const pet=makePet(pw,kind,PW/2,PH/2);pet.preview=true;pw.pet=pet;return{ctx:cv.getContext('2d'),fb:pfb,bg,pet,pw,kind};}
-// menu previews: the critter mostly poses, then strolls slowly straight across to the other side, so long bodies stretch out where you can see them
-function showBrain(p){const pet=p.pet,PW=p.fb.w,PH=p.fb.h;p.pw.bounds={x0:6,y0:8,x1:PW-6,y1:PH-8};let side=Math.random()<0.5?0:1,T=rand(1.5,3),walking=false;
-  // body chains (lizards, snakes, the shark's spine) start out laid straight, side-on
-  const chains=()=>[pet.pts,pet.spine].filter(C=>C&&C.length>2),settle=(k)=>{const c=Math.cos(pet.ang),sn=Math.sin(pet.ang);if(pet.headAng!==undefined)pet.headAng+=wrapA(pet.ang-pet.headAng)*k;for(const C of chains()){let L=0;for(let j=1;j<C.length;j++)L+=Math.hypot(C[j].x-C[j-1].x,C[j].y-C[j-1].y);L/=C.length-1;
-    for(let j=1;j<C.length;j++){C[j].x+=(C[0].x-c*L*j-C[j].x)*k;C[j].y+=(C[0].y-sn*L*j-C[j].y)*k;}}};
-  if(chains().length&&pet.ang!==undefined){pet.ang=side?Math.PI:0;settle(1);}
+// menu previews: the critter idles and potters about the little window. It picks spots roughly ahead of itself, so it wanders in easy curves
+// instead of turning tight circles in the small space.
+function showBrain(p){const pet=p.pet,PW=p.fb.w,PH=p.fb.h;p.pw.bounds={x0:6,y0:8,x1:PW-6,y1:PH-8};let T=rand(0.8,2),walking=false,pace='slow',tx=0,ty=0,glance=null;
+  // body chains (lizards, the shark's spine) start out lying side-on; a snake rests in a loose S rather than ruler-straight
+  const chains=[pet.pts,pet.spine].filter(C=>C&&C.length>2);
+  if(chains.length&&pet.ang!==undefined){pet.ang=Math.random()<0.5?Math.PI:0;if(pet.headAng!==undefined)pet.headAng=pet.ang;const c=Math.cos(pet.ang),sn=Math.sin(pet.ang),snake=pet.kind==='snake';
+    for(const C of chains){let L=0;for(let j=1;j<C.length;j++)L+=Math.hypot(C[j].x-C[j-1].x,C[j].y-C[j-1].y);L/=C.length-1;const ph=rand(TAU);
+      for(let j=1;j<C.length;j++){const w=snake?Math.sin(j*0.55+ph)*Math.min(1,j/3)*L*0.9:0;C[j].x=C[0].x-c*L*j*(snake?0.9:1)-sn*w;C[j].y=C[0].y-sn*L*j*(snake?0.9:1)+c*w;if('px' in C[j]){C[j].px=C[j].x;C[j].py=C[j].y;}}}}
   // plant every foot where it rests from the first frame, so legs don't start bunched up and scramble into place
   pet.update(1/600);for(const L of pet.legs||[])if(L.rx!==undefined){L.fx=L.rx;L.fy=L.ry;L.stepping=false;L.lift=0;}
   if(pet.feet&&pet.footRest)for(const F of pet.feet){[F.fx,F.fy]=pet.footRest(F);F.stepping=false;}
-  pet.brain=function(dt){
-    // while it poses, the body slowly settles out straight behind the head so it's easy to see
-    if(!walking){if(this.stop)this.stop(dt);settle(Math.min(1,dt*1.2));T-=dt;if(T<=0){walking=true;side^=1;T=10;}return;}
-    const tx=PW*(side?0.8:0.2),ty=PH*0.52;T-=dt;if(this.goTo(tx,ty,dt,'slow',4)||T<=0){walking=false;T=rand(2.5,5);}};}
+  // never pick a spot behind it (turning on the spot is what coils a long body up): try headings within ~70 degrees of where it faces
+  // and take the one that stays furthest inside the window
+  const pick=()=>{const hd=pet.headPos?pet.headPos():{x:pet.x,y:pet.y},a0=pet.ang||0,mx=PW*0.16,my=PH*0.2;let best=null,bs=-1e9;
+    for(let k=0;k<20;k++){const a=a0+rand(-1.2,1.2),d=rand(0.25,0.45)*PW,x=hd.x+Math.cos(a)*d,y=hd.y+Math.sin(a)*d*0.8,
+      sc=-Math.max(0,mx-x)-Math.max(0,x-(PW-mx))-Math.max(0,my-y)-Math.max(0,y-(PH-my))+rand(0,2);if(sc>bs){bs=sc;best=[clamp(x,mx*0.6,PW-mx*0.6),clamp(y,my*0.6,PH-my*0.6)];}}
+    return best;};
+  pet.brain=function(dt){T-=dt;
+    if(!walking){if(this.stop)this.stop(dt);
+      // now and then it glances to one side while it sits
+      if(glance!==null&&this.faceToward){const hd=this.headPos();this.faceToward(hd.x+Math.cos(glance)*20,hd.y+Math.sin(glance)*20,dt*0.5);}
+      if(T<=0){if(Math.random()<0.3&&glance===null){glance=(this.ang||0)+rand(-0.7,0.7);T=rand(0.8,1.6);return;}glance=null;walking=true;[tx,ty]=pick();pace=Math.random()<0.7?'slow':'walk';T=8;}return;}
+    if(this.goTo(tx,ty,dt,pace,5)||T<=0){walking=false;T=rand(1.5,4.5);}};}
 function setTool(t){
   if(game.held)dropHeld();if(game.tool==='remote'&&t!=='remote'&&placedCount('rc')>0){const rc=game.world.toys.find(o=>o.id==='rc');if(rc)dust(game.world,rc.x,rc.y,6);storeObject('rc');game.world.rcTarget=null;SFX.engine(0);}game.placing=null;if(FUN('tools')&&PEG.fb)PEG.swap(game.tool,t);game.tool=t;document.body.classList.toggle('tool-feed',t==='feed');game.hand=null;canvas.style.cursor=t||FUN('tools')?'none':'grab';
   if(!t&&!save.set.panTip&&!FUN('tools')){save.set.panTip=true;ui.toast('No tool selected: drag to look around. Tap a tool to pick it up again.',true);}if(TOY_TOOLS.includes(t))game.toyTool=t;if(t==='remote'&&placedCount('rc')===0&&(save.inv.rc||0)>0){placeObject('rc',160,100);markDirty();}game.trayOpen=true;ui.renderTray();
