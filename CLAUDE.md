@@ -19,26 +19,26 @@ Skins are bought from the swatch row in the Critters menu. Each critter gets one
 | Tier | Price | What it may change |
 |---|---|---|
 | **Natural** | 40–60 | Real-world colour morphs of the actual species. Palette only. |
-| **Vivid** (×4) | 120 | A **skin change only**: a themed pattern on the same shape, face and behaviour. |
-| **Special** (×1) | 350 | An effect on the same body shape. |
-| **Mythic** (×1) | 800 | The **only** tier allowed to change the body's shape. Still just a skin. |
+| **Vivid** (×4) | 120 | Unique, cool skins: above Natural, below Special. **Only restyles what the critter already has. Adds nothing.** |
+| **Special** (×1) | 350 | The **only** tier that adds an epic new effect. Same body shape. |
+| **Mythic** (×1) | 800 | Completely changes how the critter looks: shape changes, cool extras, all of it. |
 
 ### Vivid
 - Themed and imaginative (Ballerina, Kimono, Tuxedo, Toy bricks…). Not natural-looking materials (wood, stone, marble), not real-world breads, not plain recolours.
 - Don't reuse a theme another critter already has.
 - **No shape changes.**
-- **No unique effects or new glows.** Small accessories are fine; an accessory may have a tiny effect when it makes sense (the Party bun's candle flame glows).
-- **Never remove anything the critter already has.** Restyle its existing features instead:
-  - If it has babies, flowers, runes or gills, the skin gives them a themed replacement.
-  - If it already glows, the skin glows in its own colours.
+- **Adds no effects of any kind**: no new glows, particles, puffs, animations, sounds or behaviours. Before proposing a vivid, check each idea: "does the base critter already do this?" If not, it doesn't belong in a vivid.
+- **Only restyles what the critter already has.** If the base critter has an effect (glow, spore puffs, babies, flowers, runes, gills, tongue, swallow lump), the skin gives that existing thing a themed look. It never adds one the base doesn't have.
+- Small static costume pieces that are part of the look are fine (a bow, a plume). They don't move or do anything on their own.
+- **Never remove anything the critter already has.**
 
 ### Special
-- One effect that suits the critter, for example the Amethyst golem's crystals or the Mochi bun's starch puff.
+- The only tier that adds new effects. One epic effect that suits the critter, for example the Amethyst golem's crystals or the Mochi bun's starch puff.
 - Not a generic glow.
 - **No shape change.**
 
 ### Mythic
-- May change the body's shape and look all the way.
+- Completely changes how the critter looks: new shape, new parts, cool extras.
 - Should still feel like a **skin**, not a new game mechanic. Keep its behaviour close to the critter's own.
 - Gets its own sound effects (add each to the SFX table and give it a `GAP` entry).
 
