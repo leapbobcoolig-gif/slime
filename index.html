@@ -361,6 +361,7 @@ body.fun-hud .modal .pdet{background:#3a2412;box-shadow:inset 0 0 0 2px #6a4826,
 .ptag{position:absolute;top:6px;right:6px;display:flex;align-items:center;gap:4px;font-family:var(--display);font-size:10px;padding:4px 7px 3px;border-radius:6px;box-shadow:0 2px 0 rgba(0,0,0,.45)}
 .ptag img{width:13px;height:13px}.ptag.price{background:#2a1608;color:#ffe08a;box-shadow:inset 0 0 0 2px #c8901e,0 2px 0 rgba(0,0,0,.45)}.ptag.free{background:#8fcf5a;color:#14200c}.ptag.here{left:6px;right:auto;background:#ffd870;color:#3a2006}
 .chips{display:flex;gap:5px;flex-wrap:wrap;min-height:0}.chips:empty{display:none}
+.swrow{display:flex;flex-direction:column;gap:6px}.swdots{display:flex;gap:6px;flex-wrap:wrap}.swdot{width:24px;height:24px;border-radius:50%;border:2px solid #060a07;box-shadow:inset 0 0 0 2px rgba(255,255,255,.18);cursor:pointer;padding:0;position:relative}.swdot.on{outline:3px solid #ffd27a;outline-offset:1px}.swdot.lock::after{content:'';position:absolute;right:-3px;bottom:-3px;width:9px;height:9px;border-radius:50%;background:#f4c64a;border:2px solid #060a07}.swact{display:flex;align-items:center;gap:8px}.swnm{flex:1;font-family:var(--display);font-size:11px;color:#f4e2bc}.pdet>*{flex-shrink:0}.swbtn{flex:none;min-width:64px;justify-content:center;padding:5px 10px;font-size:12px;display:flex;align-items:center;gap:4px}.swbtn img{width:12px;height:12px}.swbtn.buy{background:linear-gradient(#f4c64a,#c8901e)!important;color:#2a1a04!important;text-shadow:none!important}
 .chip{display:flex;align-items:center;gap:4px;font-family:var(--display);font-size:9px;color:#f4e2bc;background:rgba(0,0,0,.3);padding:4px 7px 3px;border-radius:6px}.chip img{width:12px;height:12px}.chip.bond{color:#ffb8cc}
 .rgroup{grid-column:1/-1;display:flex;align-items:baseline;gap:10px;font-family:var(--display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);border-bottom:2px solid var(--line);padding:8px 2px 5px;margin-top:6px;scroll-margin-top:90px}
 .rgroup span{font-size:9px;letter-spacing:.04em;color:var(--mute);text-transform:none}
@@ -2194,10 +2195,45 @@ const DART_MORPHS=[
    spots:[[9.4,-0.32,0.42],[11.8,0.36,0.42],[12.6,-0.5,0.38],[10.4,0.62,0.36]]},
   {name:'green',body:ramp('#0c8a5e','#1cb67e','#48e2aa','#b4ffe2'),spot:ramp('#06140e','#0c2218','#143424','#204a36'),leg:ramp('#06402c','#0c6a48','#169a68','#3cc890'),throat:ramp('#3a9a74','#6ccaa2','#a6eccc','#e4fff4'),pat:3,
    spots:[[10.9,0.05,1.6],[8.3,-0.62,0.85],[8.5,0.64,0.8],[13.1,-0.7,0.85]]}];
+// =====================================================================
+//  Swatches: colour morphs for critters, bought with coins in the Critters menu.
+//  A swatch swaps some of the critter's colour ramps (and its outline) only while it's being drawn,
+//  so the critter's own drawing code stays the same. dot = the two colours on its menu button.
+// =====================================================================
+const AXO_EYE=ramp('#050506','#0e0e12','#1a1a20','#2e2e38');
+const SWATCHES={
+  frog:[
+    {id:'purple',name:'Purple-sided',price:40,dot:['#7438c0','#56c23b'],outline:'#160828',pal:{frog:{flank:ramp('#240a42','#45197c','#7438c0','#b088f0'),bar:ramp('#3a1a5a','#6a3aa0','#a874e0','#e2c8ff'),toe:ramp('#5a1a4a','#9a2a7a','#d84aa8','#ff9ad8')}}},
+    {id:'axanthic',name:'Axanthic blue',price:60,dot:['#2f9ab2','#c8347e'],outline:'#06141c',pal:{frog:{body:ramp('#0c3442','#17647a','#2f9ab2','#80d4e6'),bar:ramp('#5a7a82','#9ab8bc','#cfe2e0','#f4fbfa'),eye:ramp('#4a0a2a','#8a1a52','#c8347e','#f07ab4')}}},
+    {id:'lime',name:'Lime',price:40,dot:['#a6d83a','#ee8a1e'],pal:{frog:{body:ramp('#3a5210','#6e9a1e','#a6d83a','#e2f98a'),eye:ramp('#5a2a04','#b05a0a','#ee8a1e','#ffc46a')}}}],
+  dart:[
+    {id:'bumblebee',name:'Bumblebee',price:40,dot:['#ffd828','#1c180e'],morph:DART_MORPHS[1]},
+    {id:'strawberry',name:'Strawberry',price:40,dot:['#ff5038','#2c54c0'],morph:DART_MORPHS[2]},
+    {id:'green',name:'Green & black',price:40,dot:['#48e2aa','#0c2218'],morph:DART_MORPHS[3]},
+    {id:'citronella',name:'Citronella',price:60,dot:['#fad83a','#1f42a4'],morph:{name:'citronella',body:ramp('#a07c00','#dcae10','#fad83a','#fff3a6'),spot:ramp('#06060a','#0e0e14','#18181f','#26262e'),leg:ramp('#0c1a52','#142c7a','#1f42a4','#3e66c8'),throat:ramp('#b09030','#e0c060','#f8e498','#fffbe6'),pat:3,spots:[[10.9,0.05,1.6],[8.3,-0.62,0.85],[8.5,0.64,0.8],[13.1,-0.7,0.85]]}},
+    {id:'powder',name:'Powder blue',price:60,dot:['#b4d8f4','#22346a'],outline:'#14203a',morph:{name:'powder',body:ramp('#5a86b0','#86b4dc','#b4d8f4','#eaf8ff'),spot:ramp('#0c1430','#16224a','#22346a','#34488a'),leg:ramp('#3a5a88','#5a80b0','#86aad6','#c0daf4'),throat:ramp('#8aa8c8','#b8d0e8','#dcecf8','#ffffff'),pat:0,spots:[[11.4,0,1.4],[8.9,-0.56,0.85],[9.1,0.58,0.85]]}}],
+  salamander:[
+    {id:'orange',name:'Orange',price:40,dot:['#f07a1c','#2e2b38'],pal:{sal:{spot:ramp('#5e2406','#b04a0c','#f07a1c','#ffb870')}}},
+    {id:'red',name:'Red',price:40,dot:['#d8302a','#2e2b38'],pal:{sal:{spot:ramp('#4a0606','#981414','#d8302a','#ff7a62')}}},
+    {id:'aberrant',name:'Aberrant gold',price:60,dot:['#f1b81f','#2e2b38'],outline:'#1a1004',pal:{sal:{body:ramp('#5e3c06','#b97a0c','#f1b81f','#ffe883'),spot:ramp('#0d0c11','#1b1a22','#2e2b38','#4d4a5e')}}}],
+  axolotl:[
+    {id:'wild',name:'Wild',price:40,dot:['#6a6640','#26261a'],outline:'#0e0e08',pal:{axo:{skin:ramp('#26261a','#45452c','#6a6640','#948e62'),belly:ramp('#3a3a26','#5e5c3e','#8a865c','#b8b28a'),gill:ramp('#2e1424','#4e2440','#74385e','#9e5a84'),fin:ramp('#3a3a2a','#5e5e44','#8a8864','#b6b490'),speck:ramp('#0e0e08','#1a1a10','#26261a','#34342a'),eye:ramp('#3a3008','#7a6414','#b8962a','#e8c860')}}},
+    {id:'golden',name:'Golden albino',price:60,dot:['#f4c65a','#ff9476'],outline:'#4a2408',pal:{axo:{skin:ramp('#8a5a14','#d0982a','#f4c65a','#fff0b4'),belly:ramp('#9a6a24','#dcaa48','#f8d684','#fff6d4'),gill:ramp('#9a3424','#dc6448','#ff9476','#ffcab4'),fin:ramp('#a07a3a','#dcb470','#f6dca4','#fff6e0'),eye:ramp('#4a2228','#7a3e46','#b06a74','#e4a8b0')}}},
+    {id:'melanoid',name:'Melanoid',price:40,dot:['#30303c','#463052'],outline:'#050508',pal:{axo:{skin:ramp('#101014','#1e1e26','#30303c','#4a4a58'),belly:ramp('#16161c','#262630','#3a3a48','#565666'),gill:ramp('#1a1020','#2e1e38','#463052','#664a74'),fin:ramp('#18181e','#2a2a34','#40404c','#5e5e6c')}}},
+    {id:'copper',name:'Copper',price:60,dot:['#d07a34','#e65424'],outline:'#2a1006',pal:{axo:{skin:ramp('#5a260c','#9a4a1a','#d07a34','#f4ae6a'),belly:ramp('#7a3e18','#b8682e','#e49a56','#fcca92'),gill:ramp('#6a1408','#b02a10','#e65424','#ff9a6a'),fin:ramp('#8a5428','#c88a50','#eebc84','#fde4c4'),speck:ramp('#3a1406','#5a200a','#78300e','#984014'),eye:ramp('#4a2228','#7a3e46','#b06a74','#e4a8b0')}}}]};
+// the critter's own colours, for its 'Original' button
+const SWATCH_BASE={frog:['#56c23b','#ea3b2b'],dart:['#509cff','#0e1636'],salamander:['#2e2b38','#f1b81f'],axolotl:['#f6a8b6','#ff5c84']};
+const swatchById=(kind,id)=>id&&(SWATCHES[kind]||[]).find(s=>s.id===id)||null;
+// which swatch a critter wears: the one being tried on in the menu preview, else the one saved for it
+const swatchOf=pet=>swatchById(pet.kind,pet.skinTry!==undefined?pet.skinTry:save.pets[pet.kind]?.skin);
+function withSkin(pet,fn){const sw=swatchOf(pet);if(pet.baseOutline===undefined)pet.baseOutline=pet.outline;
+  pet.outline=sw&&sw.outline?(sw.ol??=hex(sw.outline)):pet.baseOutline;pet.skinMorph=sw&&sw.morph||null;if(!sw||!sw.pal)return fn();
+  const saved=[];for(const k in sw.pal){const P=PAL[k];for(const kk in sw.pal[k]){saved.push([P,kk,P[kk]]);P[kk]=sw.pal[k][kk];}if(sw.outline){saved.push([P,'outline',P.outline]);P.outline=sw.outline;}}
+  try{return fn();}finally{for(let i=saved.length-1;i>=0;i--){const[P,kk,v]=saved[i];if(v===undefined)delete P[kk];else P[kk]=v;}}}
 class DartFrog extends Frog{
   constructor(world,x,y){super(world,x,y,'dart');this.sc=0.96;this.call=0;this.callT=rand(6,14);this.warn=0;this.tap=0;this.glint=0;
     this.morph=0;const ps=save.pets&&save.pets.dart;if(ps)delete ps.morph;this.seed=rand(40);}// always the classic blue (other morphs wait for a swatch feature)
-  get pal(){return DART_MORPHS[this.morph%DART_MORPHS.length];}
+  get pal(){return this.skinMorph||DART_MORPHS[this.morph%DART_MORPHS.length];}
   isActive(){return this.preview||this.world.dayness>0.4;}// out and about in daylight, unlike the night-owl tree frog
   canStrike(p){if(this.mode!=='sit')return false;const m=this.mouthScreen(),py=p.y-p.h,d=Math.hypot(p.x-m.x,py-m.y);
     return d<20&&p.h<16&&Math.abs(wrapA(Math.atan2(p.y-this.y,p.x-this.x)-this.ang))<0.4;}
@@ -2893,9 +2929,9 @@ class Axolotl extends Walker{
   constructor(world,x,y){super(world,'axolotl',x,y);this.sp=Object.assign({},SPECIES.axolotl);this.swim=0;this.breath=rand(TAU);this.ex=0;this.swT=0;}
   color(m,q,s,l,x,y){const P=PAL.axo,al=Math.abs(l),t=s/this.len;
     switch(m){
-      case M.BODY:{if(t>0.5&&al>0.62)return P.fin[q];if(al>0.84)return P.belly[q];if(hash(x*3,y*5)>0.94)return P.belly[Math.min(3,q+1)];return P.skin[q];}
+      case M.BODY:{if(t>0.5&&al>0.62)return P.fin[q];if(al>0.84)return P.belly[q];if(P.speck&&hash(x*7+3,y*11+1)>0.84)return P.speck[q];if(hash(x*3,y*5)>0.94)return P.belly[Math.min(3,q+1)];return P.skin[q];}
       case M.LIMB:return P.skin[q];case M.TOE:return P.belly[q];
-      case M.EYE:return ramp('#050506','#0e0e12','#1a1a20','#2e2e38')[q];case M.PUPIL:return INK;case M.LID:return P.skin[q];
+      case M.EYE:return(P.eye||AXO_EYE)[q];case M.PUPIL:return INK;case M.LID:return P.skin[q];
       case M.TONGUE:return P.gill[q];
     }return INK;}
   inWater(){const h=this.pts[0];return waterAt(this.world,h.x,h.y)>0.04;}
@@ -6764,7 +6800,7 @@ function renderPlay(){
   renderObjects(back);
   const hover=(game.tool==='pet'||game.tool==='grab'||funHand())&&P.inside&&!P.touch&&pet.hitTest(P.x,P.y)>=0;
   const hat=NO_HAT.includes(game.kind)?null:petSave().hat;
-  const drawPet=()=>{subBegin(w,pet);grumpRect=null;plopRect=null;if(pet.plop>0){const h=pet.headPos(),cx=pet.x??h.x,cy=pet.y??h.y,x0=Math.max(1,Math.floor(cx-34)),x1=Math.min(W-2,Math.ceil(cx+34)),y0=Math.max(1,Math.floor(cy-42-(pet.h||0))),y1=Math.min(H-1,Math.ceil(cy+28));
+  const drawPet=()=>withSkin(pet,()=>{subBegin(w,pet);grumpRect=null;plopRect=null;if(pet.plop>0){const h=pet.headPos(),cx=pet.x??h.x,cy=pet.y??h.y,x0=Math.max(1,Math.floor(cx-34)),x1=Math.min(W-2,Math.ceil(cx+34)),y0=Math.max(1,Math.floor(cy-42-(pet.h||0))),y1=Math.min(H-1,Math.ceil(cy+28));
       for(let y=y0;y<=y1;y++){const o=y*W;PLOPBUF.set(px.subarray(o+x0,o+x1+1),o+x0);}plopRect=[x0,y0,x1,y1];}
     if(w.mood==='grumpy'){const h=pet.headPos(),cx=pet.x??h.x,cy=pet.y??h.y,x0=Math.max(0,Math.floor(cx-32)),x1=Math.min(W-1,Math.ceil(cx+32)),y0=Math.max(0,Math.floor(cy-40-(pet.h||0))),y1=Math.min(H-1,Math.ceil(cy+26));
       for(let y=y0;y<=y1;y++){const o=y*W;GRUMPBUF.set(px.subarray(o+x0,o+x1+1),o+x0);}grumpRect=[x0,y0,x1,y1];}
@@ -6787,7 +6823,7 @@ function renderPlay(){
       if(dx||sq)for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x,sx=x-dx,sy=y-sq,j=sy*W+sx,inR=sx>=x0&&sx<=x1&&sy>=y0;
         if(inR&&PLOPM[j])px[i]=SUBTMP[j];else if(PLOPM[i])px[i]=PLOPM[i-W-1]&&!aq?shade(PLOPBUF[i],.6):PLOPBUF[i];}}
     if(grumpRect){const[x0,y0,x1,y1]=grumpRect;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x,c=px[i];if(c===GRUMPBUF[i])continue;const r=c&255,g=c>>8&255,b=c>>>16&255,l=(r*0.3+g*0.5+b*0.2)*0.86,bl=l*1.04;
-      px[i]=(255<<24)|(Math.round(lerp(b,bl,0.6))<<16)|(Math.round(lerp(g,l,0.6))<<8)|Math.round(lerp(r,l*0.95,0.6));}}};
+      px[i]=(255<<24)|(Math.round(lerp(b,bl,0.6))<<16)|(Math.round(lerp(g,l,0.6))<<8)|Math.round(lerp(r,l*0.95,0.6));}}});
   // in the aquarium the branch only hides a critter swimming down by the bottom: where the critter's pixels fall on the branch, keep what was there before it
   const seaUnder=w.sea&&(pet.dive||0)>0.62&&pet.h<=3;if(seaUnder)PREPET.set(px);
   if(pet.h<=3)drawPet();
@@ -6821,7 +6857,7 @@ function renderPlay(){
   for(const q of w.prey)if(q.type==='stars'&&!q.dead&&!(q.sink>0.5)){const p=q.scr();for(let i=0;i<q.pts2.length-q.bites;i++){const tw=Math.max(0,Math.sin(w.t*3+i*2.1+q.x)),b=(0.35+night*0.9)*tw*tw;if(b>0.05){const[u,v]=q.pts2[i];padd(fb,p.x+u,p.y+v,160*b,140*b,60*b);if(b>0.5){padd(fb,p.x+u+1,p.y+v,50*b,45*b,20*b);padd(fb,p.x+u-1,p.y+v,50*b,45*b,20*b);padd(fb,p.x+u,p.y+v-1,50*b,45*b,20*b);padd(fb,p.x+u,p.y+v+1,50*b,45*b,20*b);}}}}
   if(night>0.2)for(const q of w.prey)if(q.type==='moonberry'&&!q.dead){const p=q.scr(),b=night*(0.7+0.3*Math.sin(w.t*2+q.x))*(1-(q.sink||0)*0.5);for(let yy=-4;yy<=4;yy++)for(let xx=-4;xx<=4;xx++){const k=1-Math.hypot(xx,yy)/4.5;if(k>0)padd(fb,p.x+xx,p.y+yy,30*k*b,80*k*b,160*k*b);}}
   for(const q of w.prey)if(q.glow&&!q.dead&&!(q.sink>0.5))q.glow(fb,night,w.t);
-  if(pet.glow)pet.glow(fb,night);
+  if(pet.glow)withSkin(pet,()=>pet.glow(fb,night));
   for(const o of w.toys)toyGlow(fb,o,night,w.t);
   for(const q of w.fireflies){const b=(0.5+0.5*Math.sin(w.t*3+q.ph))*night*Math.min(1,q.life);
     if(w.sea){padd(fb,q.x,q.y,40*b,170*b,255*b);for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]])padd(fb,q.x+dx,q.y+dy,10*b,50*b,90*b);continue;}// glowing plankton
@@ -7933,6 +7969,27 @@ const ui={
       rb.addEventListener('click',e=>{e.stopPropagation();const inp=document.createElement('input');inp.className='rnin';inp.maxLength=14;inp.value=ps.name;h3.replaceWith(inp);inp.focus();inp.select();
         const done=ok=>{if(done.d)return;done.d=true;const nm=inp.value.trim().slice(0,14);if(ok&&nm){ps.name=nm;if(kind===game.kind){game.name=nm;if(game.world.pet)game.world.pet.mind=mindFor(kind,nm);this.refreshPet();}markDirty();writeSave();SFX.play('tick');}this.renderPets(first2);};
         inp.addEventListener('keydown',e=>{if(e.key==='Enter')done(true);else if(e.key==='Escape')done(false);e.stopPropagation();});inp.addEventListener('blur',()=>done(true));});}
+    // colour swatches: tap one to try it on the live preview, then buy or wear it
+    const SW=SWATCHES[kind];
+    if(SW){const box=document.createElement('div');box.className='swrow';hd.after(box);let tryId=ps?.skin||'';
+      const paint=()=>{const owned=id=>!id||(ps?.skins||[]).includes(id),o=swatchById(kind,tryId),nm=o?o.name:'Original';box.innerHTML='';
+        const dots=document.createElement('div');dots.className='swdots';box.appendChild(dots);
+        [{id:'',name:'Original',dot:SWATCH_BASE[kind]},...SW].forEach(w=>{const d=document.createElement('button');d.className='swdot'+(w.id===tryId?' on':'')+(owned(w.id)?'':' lock');
+          d.title=w.name+(owned(w.id)?'':` · ${w.price} coins`);d.setAttribute('aria-label',d.title);d.style.background=`linear-gradient(135deg,${w.dot[0]} 58%,${w.dot[1]} 58%)`;
+          d.addEventListener('click',()=>{tryId=w.id;const p=this.previews[0];if(p)p.pet.skinTry=tryId;SFX.play('tick');paint();});dots.appendChild(d);});
+        const row=document.createElement('div');row.className='swact';box.appendChild(row);
+        row.insertAdjacentHTML('beforeend',`<span class="swnm">${nm}</span>`);
+        const a=document.createElement('button');a.className='btn alt swbtn';row.appendChild(a);
+        if(tryId===(ps?.skin||'')){a.textContent='Wearing';a.disabled=true;}
+        else if(owned(tryId)){a.textContent='Wear';a.disabled=!ps;}
+        else if(!ps){a.textContent=`Adopt first · ${o.price}`;a.disabled=true;}
+        else{a.classList.add('buy');a.innerHTML=`<img class="px" src="${iconURL('coin')}" alt="">${o.price}`;}
+        a.addEventListener('click',()=>{if(!ps)return;
+          if(!owned(tryId)){if(save.coins<o.price){SFX.play('nope');a.textContent=`Need ${o.price-save.coins} more`;setTimeout(paint,1600);return;}
+            save.coins-=o.price;(ps.skins||(ps.skins=[])).push(tryId);this.bumpCoins();SFX.play('coin');}else SFX.play('ui');
+          ps.skin=tryId||undefined;if(!tryId)delete ps.skin;markDirty();writeSave();
+          if(here&&game.world.pet)game.world.pet.skinTry=undefined;this.renderPets(first2);});};
+      paint();}
     const b=document.createElement('button');b.className='btn pgo'+(own?'':' buy');b.textContent=here?'Here now':ps?`Visit ${ps.name}`:own?'Adopt':`Adopt · ${pr} coins`;b.disabled=here;
     b.addEventListener('click',()=>{
       if(!petOwned(kind)){if(save.coins<pr){SFX.play('nope');b.textContent=`Need ${pr-save.coins} more coins`;setTimeout(()=>{b.textContent=`Adopt · ${pr} coins`;},1600);return;}
@@ -7940,7 +7997,7 @@ const ui={
       const was=game.firstRun;game.firstRun=false;this.close(true);startGame(kind);
       if(was)setTimeout(()=>flash(`Welcome! You have ${save.coins} coins. Try the Gacha machines!`),2900);});
     det.appendChild(b);
-    this.previews.push(this.livePreview(kind,cv));
+    {const p=this.livePreview(kind,cv);p.pet.skinTry=undefined;drawPreview(p);this.previews.push(p);}
   },
   // a critter's live preview window stays the same little world while the menu is open, so refreshing the menu
   // (filters, renaming, putting a hat on) doesn't respawn the critter somewhere else
@@ -7954,13 +8011,13 @@ const ui={
 };
 // one frame of a critter preview window (live previews call this every frame, list thumbnails once)
 function drawPreview(p){{p.pw.parts.length=0;p.pw.ripples.length=0;
-      p.fb.px.set(p.bg);p.fb.clearLayer();p.pet.draw(p.fb);composite(p.fb,p.pet,{sAmt:.6,sdx:1,sdy:1});if(p.pet.drawExtras)p.pet.drawExtras(p.fb);if(p.pet.selfLit)p.pet.glow(p.fb,0.5);
+      p.fb.px.set(p.bg);withSkin(p.pet,()=>{p.fb.clearLayer();p.pet.draw(p.fb);composite(p.fb,p.pet,{sAmt:.6,sdx:1,sdy:1});if(p.pet.drawExtras)p.pet.drawExtras(p.fb);if(p.pet.selfLit)p.pet.glow(p.fb,0.5);});
       const hat=NO_HAT.includes(p.kind)?null:save.pets[p.kind]?.hat;if(hat){if(hat!=='halo'){p.fb.clearLayer();drawHat(p.fb,hat,p.pet.hatAnchor(),p.pw.t);composite(p.fb,HAT_PAINTER,{sAmt:.55,sdx:1,sdy:2});}hatGlow(p.fb,hat,p.pet.hatAnchor(),p.pw.t);}
       p.ctx.putImageData(p.fb.img,0,0);}
 }
 // small still thumbnails for the critter list, cached until the critter's hat changes
 const SNAP={};
-function petSnap(kind){const hat=save.pets[kind]?.hat||'',k=kind+'|'+hat;let url=SNAP[k];
+function petSnap(kind){const hat=save.pets[kind]?.hat||'',k=kind+'|'+hat+'|'+(save.pets[kind]?.skin||'');let url=SNAP[k];
   if(!url){// render the critter standing still in a roomy window, find where its pixels are, then frame that (3:2) so long critters fit
     const BW=128,BH=86,big=document.createElement('canvas');big.width=BW;big.height=BH;const p=petPreview(kind,big);p.pet.brain=function(dt){if(this.stop)this.stop(dt);};p.pet.speed=0;
     for(let i=0;i<40;i++){p.pw.t+=1/60;p.pet.update(1/60);}
