@@ -2052,6 +2052,82 @@ class Walker extends Pet{
 }
 
 // =====================================================================
+//  Fire salamander: a Walker, plus the effects its fancier skins need
+//  (glass: see-through with its skeleton; opal: a sweeping shine; inferno: living flame that goes out in water)
+// =====================================================================
+class Salamander extends Walker{
+  constructor(world,x,y){super(world,'salamander',x,y);this.cool=0;this.flare=0;this.fp=[];this.st=[];this.scorch=[];}
+  get fx(){return this.sw&&this.sw.fx;}
+  color(m,q,s,l,x,y){const V=this.sw&&this.sw.body?this.sw:null;
+    if(V){if(m===M.BODY)return V.body(s,l,q,x,y,this);if(m===M.LIMB)return V.limb(s,l,q,x,y,this);if(m===M.LID)return V.body(2,0,q,x,y,this);if(m===M.TOE&&V.toe)return V.toe[Math.min(3,q+1)];}
+    return super.color(m,q,s,l,x,y);}
+  radiusAt(t){const r=super.radiusAt(t);return this.sw&&this.sw.sc?r*this.sw.sc:r;}// inferno is a size up
+  get selfLit(){return this.fx==='inferno';}
+  update(dt){super.update(dt);if(this.fx==='inferno')this.burn(dt);}
+  burn(dt){const wet=(this.swim||0)>0.3?1:0;this.cool+=(wet-this.cool)*Math.min(1,dt*(wet?3:0.8));
+    if(this.wasWet&&!wet)this.flare=1;if(!this.wasWet&&wet){this.burst=1;if(!this.preview)SFX.play('sss');}this.wasWet=wet;this.flare=Math.max(0,this.flare-dt*0.8);
+    const fp=this.fp,st=this.st,hot=1-this.cool,oy=this.h||0;
+    // flames lick back off both flanks and stream from the tail tip; sparks drift up
+    const emit=(s,sd,big)=>{const p=this.pointAt(s),nx=-p.fy*sd,ny=p.fx*sd,r=p.r*(sd?0.85:0);
+      fp.push({x:p.x+nx*r,y:p.y+ny*r-oy,vx:-p.fx*rand(6,12)+nx*rand(2,6),vy:-p.fy*rand(6,12)+ny*rand(2,6)-rand(4,9),t:0,life:rand(0.3,0.55)*(big?1.4:1),big});};
+    this.eT=(this.eT||0)+dt*70*hot*(1+this.flare*2);
+    while(this.eT>1&&fp.length<160){this.eT--;const r=Math.random();if(r<0.62)emit(rand(4,21),Math.random()<0.5?-1:1,0);else if(r<0.88)emit(this.len-rand(0,2),0,1);else emit(rand(21,33),Math.random()<0.5?-1:1,0);}
+    if(Math.random()<dt*4*hot){const p=this.pointAt(rand(4,30));fp.push({x:p.x+rand(-2,2),y:p.y-oy,vx:rand(-4,4),vy:-rand(10,16),t:0,life:rand(1.2,2),spark:1});}
+    for(const p of fp){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.spark)p.vx+=Math.sin(p.t*9+p.life*20)*dt*20;else{p.vx*=1-dt*2;p.vy*=1-dt*1.5;}}
+    this.fp=fp.filter(p=>p.t<p.life);
+    // in water it goes out: black and steaming, with a big hiss of steam as it goes in
+    if(this.cool>0.2){this.sT=(this.sT||0)+dt*(6*this.cool+(this.burst||0)*60);while(this.sT>1){this.sT--;const p=this.pointAt(rand(0,this.len*0.8));st.push({x:p.x+rand(-2,2),y:p.y-oy+rand(-2,2),vx:rand(-3,3),vy:-rand(5,10),t:0,life:rand(0.9,1.6),r:rand(1.2,2)});}}
+    this.burst=Math.max(0,(this.burst||0)-dt*2);
+    for(const p of st){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.r+=dt*2.2;}this.st=st.filter(p=>p.t<p.life);
+    // scorched footprints wherever a foot comes down on land
+    for(const L of this.legs){if(L.wasStep&&!L.stepping&&hot>0.5&&!this.preview&&this.h<1)this.scorch.push({x:L.fx,y:L.fy,a:Math.atan2(L.fy-L.ay,L.fx-L.ax),life:7});L.wasStep=L.stepping;}
+    for(const p of this.scorch)p.life-=dt;this.scorch=this.scorch.filter(p=>p.life>0);}
+  draw(fb){if(this.fx==='xray'){if(!this.bgs||this.bgs.length!==fb.px.length)this.bgs=new Uint32Array(fb.px.length);this.bgs.set(fb.px);}// glass: remember what's behind it
+    super.draw(fb);}
+  drawExtras(fb){const fx=this.fx;if(!fx)return;const W=fb.w,mat=fb.mat;
+    if(fx!=='xray'){const g=this.gp||(this.gp=[]);g.length=0;for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++){const m=mat[y*W+x];if(m&&m!==M.EYE&&m!==M.PUPIL)g.push(y*W+x);}}
+    if(fx==='xray')this.drawGlass(fb);else if(fx==='opal')this.drawShine(fb);else if(fx==='inferno')this.drawFire(fb);}
+  drawShine(fb){const W=fb.w,mat=fb.mat,Wt=hex('#ffffff'),t=this.t,g=this.gp;if(!g.length)return;
+    let x0=1e9,x1=-1e9;for(const i of g){const x=i%W-((i/W)|0)*0.6;if(x<x0)x0=x;if(x>x1)x1=x;}
+    const ph=(t%3.2)/3.2,band=x0-6+(x1-x0+12)*ph*1.6;// a glossy streak sweeps across it every few seconds
+    for(const i of g){const x=i%W,y=(i/W)|0,ad=Math.abs(x-y*0.6-band);if(ad<0.9)fb.px[i]=mixc(fb.px[i],Wt,0.92);else if(ad<2.4)fb.px[i]=mixc(fb.px[i],Wt,0.35*(2.4-ad)/1.5);
+      if(!mat[i-W-1]&&mat[i+W+1])fb.px[i]=mixc(fb.px[i],Wt,0.45);}// polished rim toward the light
+    for(let k=0;k<3;k++){const T=t*0.9+k*1.7,j=Math.floor(T),a=Math.sin((T-j)*Math.PI),i=g[Math.floor(hash(j,k*31)*g.length)],x=i%W,y=(i/W)|0;// little star glints
+      pmix(fb,x,y,Wt,a);if(a>0.55)for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]])pmix(fb,x+dx,y+dy,Wt,(a-0.55)*1.6);}}
+  drawGlass(fb){const bg=this.bgs;if(!bg)return;const W=fb.w,mat=fb.mat,oy=-(this.h||0),Wt=hex('#ffffff'),BONE=hex('#f4f0e6'),BONE2=hex('#c8c0b0');
+    const isB=i=>{const m=mat[i];return m&&m!==M.EYE&&m!==M.PUPIL&&m!==M.LID&&m!==M.TONGUE;};
+    for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++){const i=y*W+x;if(!isB(i))continue;// the tank shows through; only the rim catches the light
+      const rim=!mat[i-1]||!mat[i+1]||!mat[i-W]||!mat[i+W];fb.px[i]=mixc(bg[i],fb.px[i],rim?0.5:0.14);
+      if(rim&&!mat[i-W-1]&&mat[i+W+1]&&hash(x,y*3)>0.35)fb.px[i]=mixc(fb.px[i],Wt,0.6);}
+    const P=this.pts,n=this.n,sp=this.sp,bone=(x,y,c,a)=>{const i=Math.round(y)*W+Math.round(x);if(mat[i]&&mat[i]!==M.EYE&&mat[i]!==M.PUPIL)pmix(fb,x,y,c,a);};
+    const seg=(ax,ay,bx,by,c,a)=>{const L=Math.max(1,Math.ceil(Math.hypot(bx-ax,by-ay)*1.5));for(let k=0;k<=L;k++)bone(lerp(ax,bx,k/L),lerp(ay,by,k/L),c,a);};
+    for(const sd of[-1,1]){let q=null;for(let s=0.6;s<=5;s+=0.5){const p=this.pointAt(s),k=Math.sin(Math.min(1,(s-0.3)/2.2)*Math.PI/2),x=p.x-p.fy*sd*p.r*0.62*k,y=p.y+p.fx*sd*p.r*0.62*k+oy;if(q)seg(q[0],q[1],x,y,BONE,0.75);q=[x,y];}}// skull
+    for(let i=3;i<n-1;i++){const a=P[i-1],b=P[i];seg(a.x,a.y+oy,b.x,b.y+oy,BONE,1);// spine, with ribs along the chest
+      const fx=(a.x-b.x)/this.seg,fy=(a.y-b.y)/this.seg,r=this.rad(i);
+      if(i>=4&&i<=13&&i%2===0)for(const sd of[-1,1])seg(b.x,b.y+oy,b.x-fy*sd*r*0.62-fx*0.9,b.y+fx*sd*r*0.62-fy*0.9+oy,BONE,0.7);
+      else if(i%2===0)for(const sd of[-1,1])bone(b.x-fy*sd,b.y+fx*sd+oy,BONE2,0.6);}
+    for(const L of this.legs){const bend=L.side*(L.front?1:-1),lift=L.lift||0,[kx,ky,ex,ey]=ik2(L.ax,L.ay+oy,L.fx,L.fy-lift*1.2+oy,sp.l1,sp.l2,bend);// leg and toe bones
+      seg(L.ax,L.ay+oy,kx,ky,BONE,0.65);seg(kx,ky,ex,ey,BONE,0.65);const ba=Math.atan2(ey-ky,ex-kx);for(let j=0;j<sp.toes;j++){const a=ba+(j-(sp.toes-1)/2)*0.5;seg(ex,ey,ex+Math.cos(a)*1.4,ey+Math.sin(a)*1.4,BONE2,0.7);}}
+    {const p=this.pointAt(7.2),r=0.9+Math.pow(Math.max(0,Math.sin(this.t*6)),8)*0.6,H=hex('#e8304a');for(let yy=-2;yy<=2;yy++)for(let xx=-2;xx<=2;xx++)if(Math.hypot(xx,yy)<=r+0.3)bone(p.x+xx,p.y+yy+oy,H,0.75);}// a beating heart
+    for(let s=11;s<18;s+=0.4){const p=this.pointAt(s),w=Math.sin(s*1.3)*1.1;bone(p.x-p.fy*w,p.y+p.fx*w+oy,hex('#b87838'),0.5);}// the gut
+    for(const b of this.bulges){const p=this.pointAt(Math.min(b.s,this.len-2));for(let yy=-1;yy<=1;yy++)for(let xx=-1;xx<=1;xx++)bone(p.x+xx,p.y+yy+oy,hex('#4a2a14'),0.7);}}// dinner, on its way down
+  drawFire(fb){const W=fb.w,mat=fb.mat,under=(x,y)=>{x=Math.round(x);y=Math.round(y);return x>=0&&y>=0&&x<W&&y<fb.h&&mat[y*W+x];},CH=hex('#140806'),EM=hex('#ff7a18'),ST=hex('#f4f0ec');
+    for(const p of this.scorch){const a=Math.min(1,p.life/3),c=mixc(CH,EM,Math.max(0,(p.life-5.5)/1.5)),pc=Math.cos(p.a),ps=Math.sin(p.a);// glowing at first, then charred; under the salamander, not over it
+      for(const[dx,dy]of[[0,0],[1,0],[0,1],[1,1]])if(!under(p.x+dx,p.y+dy))pmix(fb,p.x+dx,p.y+dy,c,0.55*a);
+      for(const o of[-0.6,0,0.6]){const x=p.x+pc*2-ps*o*2,y=p.y+ps*2+pc*o*2;if(!under(x,y))pmix(fb,x,y,c,0.5*a);}}
+    for(const p of this.st){const a=Math.sin(Math.min(1,p.t/p.life)*Math.PI)*0.45,R2=Math.ceil(p.r);for(let yy=-R2;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++){const d=Math.hypot(xx,yy)/p.r;if(d<1)pmix(fb,p.x+xx,p.y+yy,ST,a*(1-d*d));}}
+    this.emi=this.gp.map(i=>fb.px[i]);this.flames(fb);}
+  flames(fb){for(const p of this.fp){const u=p.t/p.life;if(p.spark){pmix(fb,p.x,p.y,hex('#ffc040'),1-u);continue;}
+    const c=SAL_FIRE[u<0.15?5:u<0.35?4:u<0.6?3:u<0.82?2:1],a=u<0.7?0.95:(1-u)/0.3*0.95;pmix(fb,p.x,p.y,c,a);if(p.big&&u<0.5){pmix(fb,p.x+1,p.y,c,a*0.8);pmix(fb,p.x,p.y-1,c,a*0.8);}}}
+  glow(fb,night){if(this.fx!=='inferno')return;const hot=1-this.cool,gp=this.gp||[];
+    const k=(0.25+night*0.8)*(0.15+0.85*hot)*(0.88+0.12*vnoise(this.t*5,3)+this.flare*0.4);
+    bodyLight(fb,{x:this.pts[6].x,y:this.pts[6].y,h:this.h||0},gp,{k,hi:hex('#ff9a30'),lo:hex('#c04a10'),skip:new Set(gp)});
+    // it's the light source: its flames keep their own colour at night (doused obsidian stays dark, its cracks still glow)
+    const E=this.emi||[];gp.forEach((i,j)=>{const c=E[j];if(c===undefined)return;const a=Math.min(1,Math.max(0,Math.max(c&255,c>>8&255,c>>>16&255)/255*1.5-0.25));if(a>0)fb.px[i]=mixc(fb.px[i],c,a);});
+    this.flames(fb);for(const p of this.fp){if(p.spark)continue;const a=(1-p.t/p.life)*0.35*(0.4+night*0.6)*hot;padd(fb,p.x,p.y,255*a,140*a,40*a);}}
+}
+
+// =====================================================================
 //  Frog: hop state machine with squash & stretch, IK legs, tongue.
 // =====================================================================
 class Frog extends Pet{
@@ -2227,6 +2303,13 @@ const dartLegSide=(f,x,y)=>{const c=Math.cos(f.ang),s=Math.sin(f.ang),dx=x-f.x,d
 //  so the critter's own drawing code stays the same. dot = the two colours on its menu button.
 // =====================================================================
 const AXO_EYE=ramp('#050506','#0e0e12','#1a1a20','#2e2e38');
+// salamander skins. body coords: s 0 (snout) .. ~37 (tail tip), l -1..1 across; salW gives the half-width there in px
+const salW=(f,s)=>f.radiusAt(clamp(s/f.len,0,1));
+const salVoro=(u,v,sz,seed)=>{const cu=Math.floor(u/sz),cv=Math.floor(v/sz);let d1=1e9,d2=1e9,id=0;
+  for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const X=cu+a,Y=cv+b,px=(X+0.15+hash(X*7+seed,Y*13)*0.7)*sz,py=(Y+0.15+hash(X*5,Y*11+seed)*0.7)*sz,d=Math.hypot(u-px,v-py);
+    if(d<d1){d2=d1;d1=d;id=X*131+Y*71;}else if(d<d2)d2=d;}return[d2-d1,id];};// [distance to the cell edge, cell id]
+const SAL_FIRE=['#4a0804','#a01a08','#e84a0c','#ff8a14','#ffc840','#fff4c0'].map(hex);
+const salFire=h=>SAL_FIRE[h>0.9?5:h>0.74?4:h>0.56?3:h>0.38?2:h>0.2?1:0];
 const SWATCHES={
   frog:[
     {id:'purple',name:'Purple-sided',price:40,dot:['#7438c0','#56c23b'],outline:'#160828',pal:{frog:{flank:ramp('#240a42','#45197c','#7438c0','#b088f0'),bar:ramp('#3a1a5a','#6a3aa0','#a874e0','#e2c8ff'),toe:ramp('#5a1a4a','#9a2a7a','#d84aa8','#ff9ad8')}}},
@@ -2283,7 +2366,69 @@ const SWATCHES={
   salamander:[
     {id:'orange',name:'Orange',price:40,dot:['#f07a1c','#2e2b38'],pal:{sal:{spot:ramp('#5e2406','#b04a0c','#f07a1c','#ffb870')}}},
     {id:'red',name:'Red',price:40,dot:['#d8302a','#2e2b38'],pal:{sal:{spot:ramp('#4a0606','#981414','#d8302a','#ff7a62')}}},
-    {id:'aberrant',name:'Aberrant gold',price:60,dot:['#f1b81f','#2e2b38'],outline:'#1a1004',pal:{sal:{body:ramp('#5e3c06','#b97a0c','#f1b81f','#ffe883'),spot:ramp('#0d0c11','#1b1a22','#2e2b38','#4d4a5e')}}}],
+    {id:'aberrant',name:'Aberrant gold',price:60,dot:['#f1b81f','#2e2b38'],outline:'#1a1004',pal:{sal:{body:ramp('#5e3c06','#b97a0c','#f1b81f','#ffe883'),spot:ramp('#0d0c11','#1b1a22','#2e2b38','#4d4a5e')}}},
+    {id:'koi',name:'Koi',tier:'vivid',dot:['#f8f6f0','#f05a28'],outline:'#2a1408',
+     pal:{sal:{eye:ramp('#040405','#121217','#26262e','#77778a')}},
+     Wt:ramp('#c8c0b4','#e4ded4','#f8f6f0','#ffffff'),Rd:ramp('#8a1a08','#c83a14','#f05a28','#ff9a6a'),K:ramp('#08080a','#141418','#24242a','#3a3a44'),
+     body(s,l,q,x,y,f){const v=l*salW(f,s);// kohaku: a red cap on the head, red saddles on the back, a few ink-black sumi spots
+       if(s>1.2&&s<4.6&&Math.hypot(s-3,v*1.1)<2.2)return this.Rd[q];
+       const n=vnoise(s*0.2+3,v*0.32+7);if(s>5.5&&s<30&&n>0.55)return this.Rd[q];
+       const cs=3.2,cu=Math.floor(s/cs),cv=Math.floor((v+8)/cs),h=hash(cu*3+1,cv*7+2);if(s>6&&h>0.8&&Math.hypot(s-(cu+0.5)*cs,v+8-(cv+0.5)*cs)<0.95)return this.K[Math.max(1,q)];
+       return this.Wt[q];},
+     limb(s,l,q){return this.Wt[q];},toe:ramp('#c83a14','#f05a28','#ff8a50','#ffb890')},
+    {id:'tiger',name:'Tiger',tier:'vivid',dot:['#f08a1a','#14100c'],outline:'#140a04',
+     pal:{sal:{eye:ramp('#3a2a04','#8a6a0a','#e8c020','#fff0a0')}},
+     O:ramp('#8a3a06','#c8600e','#f08a1a','#ffbe6a'),Pa:ramp('#a8601a','#e09a48','#ffc880','#fff0d0'),Wt:ramp('#c8bca8','#e4dccc','#f8f2e6','#ffffff'),K:ramp('#0a0806','#14100c','#201a14','#2e261e'),
+     body(s,l,q,x,y,f){const al=Math.abs(l),sd=l>0?1:0;
+       if(s<5.2){// the face: white muzzle and cheeks, thin black brow lines on an orange forehead
+         if(s<1.6||al>0.62&&s<4.4)return this.Wt[q];if(al>0.5&&s>2&&s<4.6&&Math.abs(s-3.3)<0.45)return this.K[1];
+         if(al<0.42&&s>2.4&&((Math.abs(s-2.9)<0.3&&al>0.12)||(Math.abs(s-4)<0.3&&al>0.05)))return this.K[1];return this.O[q];}
+       if(s>29){const k=s*0.42;return(k-Math.floor(k)<0.36?this.K[0]:this.O[q]);}// ringed tail
+       // stripes ~3px apart, swept back into a chevron; each one is different: full, split at the spine, or from one flank only, some forked
+       const k=(s-al*2.2)/3.1,j=Math.floor(k),fr=(k-j)*3.1,h=hash(j,41),h2=hash(j,57),sg=l>0;
+       const kind=h<0.45?0:h<0.75?1:2,thick=1.0+h2*0.5+(1-al)*0.1;
+       let on=fr<thick;if(on){if(kind===1&&al<0.22)on=false;if(kind===2&&(sg!==(h2>0.5)||al<0.3))on=false;if(h2>0.75&&al>0.55&&fr>0.4&&fr<0.8)on=false;}
+       if(on)return this.K[Math.max(0,q-1)];
+       if(al>0.8)return this.Pa[q];return this.O[q];},
+     limb(s,l,q,x,y){return((x*3+y*5)%7===0?this.K:this.O)[q];},toe:ramp('#c8bca8','#e4dccc','#f8f2e6','#ffffff')},
+    {id:'glass',name:'Stained glass',tier:'vivid',dot:['#2a6ae8','#e8a020'],outline:'#0a0608',
+     pal:{sal:{eye:ramp('#0a0608','#2a2028','#4a3a48','#ffffff')}},
+     L:ramp('#0a0608','#141014','#1e181e','#2a222a'),
+     J:[ramp('#6a0a14','#b8142a','#e83a4a','#ff9aa0'),ramp('#0a2a7a','#1a4ac0','#2a6ae8','#90b8ff'),ramp('#0a4a1e','#148a3a','#2ac060','#a0f0b8'),ramp('#7a4a04','#c07a0a','#e8a020','#ffe080'),ramp('#3a0a5a','#6a1a9a','#9a3ad0','#d8a8ff')],
+     body(s,l,q,x,y,f){const v=l*salW(f,s),[e,id]=salVoro(s*1.1,v*1.25,2.7,5);if(e<0.6)return this.L[q];// jewel-coloured panes held in black lead
+       return this.J[((id%5)+5+Math.floor(hash(id,9)*2))%5][Math.min(3,q+(e>1.6&&q>=2?1:0))];},
+     limb(s,l,q){return this.L[Math.min(3,q+1)];},toe:ramp('#7a4a04','#c07a0a','#e8a020','#ffe080')},
+    {id:'circuit',name:'Circuit board',tier:'vivid',dot:['#1a7a3a','#e8b830'],outline:'#021008',
+     pal:{sal:{eye:ramp('#5a0404','#b80a0a','#ff2a2a','#ffc0c0')}},
+     B:ramp('#0a3a1e','#11552a','#1a7a3a','#2a9a4a'),Au:ramp('#7a5a10','#b88a1a','#e8b830','#fff090'),Ch:ramp('#08080a','#121216','#1c1c22','#2a2a32'),Ag:ramp('#8a8a90','#b8b8c0','#e0e0e8','#ffffff'),
+     body(s,l,q,x,y,f){const v=l*salW(f,s);
+       if(s>8.5&&s<15.5){if(Math.abs(v)<1.9)return this.Ch[q];if(Math.abs(v)<2.7&&((Math.round(s)&1)===0))return this.Ag[q];}// a chip on its back, legs and all
+       for(let k=0;k<4;k++){const base=(k-1.5)*2.3,cs=4.2,cu=Math.floor((s+k*1.7)/cs),jog=(hash(cu,k*17)>0.5?1.2:-1.2)*(Math.abs(base)>3?-Math.sign(base):1),lv=base+(hash(cu,k*17)>0.3?jog:0);
+         const fs=(s+k*1.7)-cu*cs;// gold traces with right-angle jogs and solder pads where they turn
+         if(Math.abs(v-lv)<0.5&&fs>0.5)return this.Au[Math.max(1,q)];
+         if(fs<0.5){const pv=base+(hash(cu-1,k*17)>0.3?(hash(cu-1,k*17)>0.5?1.2:-1.2)*(Math.abs(base)>3?-Math.sign(base):1):0);if(v>Math.min(pv,lv)-0.5&&v<Math.max(pv,lv)+0.5)return this.Au[Math.max(1,q)];}}
+       return this.B[q];},
+     limb(s,l,q){return this.B[q];},toe:ramp('#8a8a90','#b8b8c0','#e0e0e8','#ffffff')},
+    {id:'xray',name:'Glass',tier:'special',fx:'xray',dot:['#d0f0f0','#f4f0e6'],outline:'#3a5a64',
+     pal:{sal:{eye:ramp('#040405','#121217','#26262e','#c8e8f0')}},
+     G:ramp('#7ab0b8','#a8d8dc','#d0f0f0','#f4ffff'),
+     body(s,l,q){return this.G[q];},limb(s,l,q){return this.G[q];},toe:ramp('#7ab0b8','#a8d8dc','#d0f0f0','#f4ffff')},
+    {id:'opal',dk:0.47,name:'Black opal',tier:'special',fx:'opal',dot:['#1a2238','#4ae0a0'],outline:'#04060c',
+     pal:{sal:{eye:ramp('#040405','#121217','#26262e','#77778a')}},
+     B:ramp('#0a0e1c','#141c32','#202a48','#34406a'),
+     F:[ramp('#0a7a5a','#1ab888','#4ae0a0','#b0ffe0'),ramp('#1a3ab8','#2a6aff','#5aa8ff','#c0e0ff'),ramp('#a01a6a','#e03a9a','#ff7ac8','#ffd0ec'),ramp('#b84a0a','#f07a1a','#ffb040','#ffe8b0'),ramp('#5a1aa8','#8a3ae8','#b87aff','#e8d0ff')],
+     body(s,l,q,x,y,f){const v=l*salW(f,s),n=vnoise(s*0.34+11,v*0.5+3);// play-of-colour: flashes of colour that slide and swap as it turns and moves
+       if(n<(this.dk||0.36))return this.B[q];const ph=n*7+f.headAng*1.6+vnoise(s*0.12,v*0.2+f.t*0.25)*3+s*0.05;return this.F[((Math.floor(ph)%5)+5)%5][Math.min(3,q+(n>0.62?1:0))];},
+     limb(s,l,q){return this.B[q];},toe:ramp('#141c32','#202a48','#34406a','#5a6a9a')},
+    {id:'opalw',dk:0.36,name:'White opal',tier:'special',fx:'opal',dot:['#e8f0f8','#4ae0a0'],outline:'#2a3040',like:'opal',// black opal's colour play on a milky white body
+     B:ramp('#a8b0c4','#ccd4e2','#e8eef6','#ffffff'),toe:ramp('#a8b0c4','#ccd4e2','#e8eef6','#ffffff')},
+    {id:'inferno',name:'Inferno',tier:'mythic',fx:'inferno',sc:1.15,dot:['#ff8a14','#fff4c0'],outline:'#1a0402',
+     pal:{sal:{eye:ramp('#0a0200','#1a0402','#2a0804','#ffd060')}},
+     O:ramp('#08060a','#141018','#221c26','#342c3a'),
+     body(s,l,q,x,y,f){const al=Math.abs(l),t=f.t,n=vnoise(s*0.35-t*3.2,l*2.2+t*0.6),cool=f.cool||0;
+       if(cool>0.02&&hash(x*3+1,y*7+2)<cool){const cr=Math.abs(vnoise(s*0.5+4,l*2.4)-0.5);return cr<0.05?SAL_FIRE[1+Math.round((1-cool)*2)]:this.O[q];}// doused: black obsidian, cracks still smouldering
+       return salFire(1-al*0.8+(n-0.5)*0.75-(s/f.len)*0.3+(q-1.5)*0.07);},// a body of living flame, licking backward
+     limb(s,l,q,x,y,f){const cool=f.cool||0;if(cool>0.02&&hash(x*3+1,y*7+2)<cool)return this.O[q];return SAL_FIRE[2+Math.min(2,q)];},toe:ramp('#a01a08','#e84a0c','#ff8a14','#ffc840')}],
   axolotl:[
     {id:'wild',name:'Wild',price:40,dot:['#6a6640','#26261a'],outline:'#0e0e08',pal:{axo:{skin:ramp('#26261a','#45452c','#6a6640','#948e62'),belly:ramp('#3a3a26','#5e5c3e','#8a865c','#b8b28a'),gill:ramp('#2e1424','#4e2440','#74385e','#9e5a84'),fin:ramp('#3a3a2a','#5e5e44','#8a8864','#b6b490'),speck:ramp('#0e0e08','#1a1a10','#26261a','#34342a'),eye:ramp('#3a3008','#7a6414','#b8962a','#e8c860')}}},
     {id:'golden',name:'Golden albino',price:60,dot:['#f4c65a','#ff9476'],outline:'#4a2408',pal:{axo:{skin:ramp('#8a5a14','#d0982a','#f4c65a','#fff0b4'),belly:ramp('#9a6a24','#dcaa48','#f8d684','#fff6d4'),gill:ramp('#9a3424','#dc6448','#ff9476','#ffcab4'),fin:ramp('#a07a3a','#dcb470','#f6dca4','#fff6e0'),eye:ramp('#4a2228','#7a3e46','#b06a74','#e4a8b0')}}},
@@ -2485,6 +2630,7 @@ SWATCHES.axolotl.push(
   {id:'spirit',name:'Water spirit',tier:'mythic',fx:'spirit',dot:['#bfeff6','#5a7aff'],outline:'#0a1e34',
     pal:{axo:{skin:ramp('#5a8ca8','#8ac0d6','#bfeff6','#f0ffff'),belly:ramp('#7aa8c0','#a8d4e4','#d8f6fc','#ffffff'),gill:ramp('#1a2a8a','#3a4ad0','#5a7aff','#a8c0ff'),fin:ramp('#6a9cc0','#9acce4','#c8f0fc','#f4ffff'),eye:ramp('#0a1a3a','#142e5a','#24488a','#4a74c0')}}});
 for(const list of Object.values(SWATCHES))for(const w of list){w.tier??='natural';w.price??=TIER_PRICE[w.tier];}
+for(const list of Object.values(SWATCHES))for(const w of list)if(w.like){const o=list.find(s=>s.id===w.like);for(const k in o)if(!(k in w))w[k]=o[k];}
 const swatchById=(kind,id)=>id&&(SWATCHES[kind]||[]).find(s=>s.id===id)||null;
 // which swatch a critter wears: the one being tried on in the menu preview, else the one saved for it
 const swatchOf=pet=>swatchById(pet.kind,pet.skinTry!==undefined?pet.skinTry:save.pets[pet.kind]?.skin);
@@ -6472,7 +6618,7 @@ const game={mode:'boot',tool:'feed',food:'cricket',toyTool:null,world:null,point
   shake:0,flashT:0,flashMsg:'',name:'',kind:'',uiT:0,grabbing:false,chirpT:4,croakT:6,held:null,placing:null,dragObj:null,
   coinT:rand(15,30),thinkT:6,thought:null,hearts:0,bubbleT:0,trayOpen:true,firstRun:false};
 const makePet=(w,kind,x,y)=>kind==='frog'?new Frog(w,x,y):kind==='dart'?new DartFrog(w,x,y):kind==='chick'?new Chick(w,x,y):kind==='wisp'?new Wisp(w,x,y):kind==='fuzzworm'?new FuzzWorm(w,x,y):kind==='crab'?new Crab(w,x,y):kind==='turtle'?new Turtle(w,x,y):kind==='gsnail'?new GSnail(w,x,y):
-  kind==='tarantula'?new Spider(w,x,y):kind==='scorpion'?new Scorpion(w,x,y):kind==='kraken'?new Kraken(w,x,y):kind==='cuttle'?new Cuttle(w,x,y):kind==='bun'?new Bun(w,x,y):kind==='shark'?new Shark(w,x,y):kind==='nudi'?new Nudi(w,x,y):kind==='golem'?new Golem(w,x,y):kind==='bee'?new Bee(w,x,y):kind==='mush'?new Mush(w,x,y):kind==='puffer'?new Puffer(w,x,y):kind==='chameleon'?new Chameleon(w,x,y):kind==='dragon'?new Dragon(w,x,y):kind==='gecko'?new Gecko(w,x,y):kind==='axolotl'?new Axolotl(w,x,y):kind==='millipede'?new Millipede(w,x,y):kind==='slime'?new Slime(w,x,y):new Walker(w,kind,x,y);
+  kind==='tarantula'?new Spider(w,x,y):kind==='scorpion'?new Scorpion(w,x,y):kind==='kraken'?new Kraken(w,x,y):kind==='cuttle'?new Cuttle(w,x,y):kind==='bun'?new Bun(w,x,y):kind==='shark'?new Shark(w,x,y):kind==='nudi'?new Nudi(w,x,y):kind==='golem'?new Golem(w,x,y):kind==='bee'?new Bee(w,x,y):kind==='mush'?new Mush(w,x,y):kind==='puffer'?new Puffer(w,x,y):kind==='chameleon'?new Chameleon(w,x,y):kind==='dragon'?new Dragon(w,x,y):kind==='gecko'?new Gecko(w,x,y):kind==='axolotl'?new Axolotl(w,x,y):kind==='millipede'?new Millipede(w,x,y):kind==='slime'?new Slime(w,x,y):kind==='salamander'?new Salamander(w,x,y):new Walker(w,kind,x,y);
 function createWorld(){
   const w={stats:{fed:72,happy:70,water:68},prey:[],parts:[],ripples:[],glassDrops:[],glassRings:[],fireflies:[],motes:[],
     bounds:{x0:TANK.x0+6,y0:TANK.y0+6,x1:TANK.x1-6,y1:TANK.y1-6},tank:null,pads:[],weeds:[],
