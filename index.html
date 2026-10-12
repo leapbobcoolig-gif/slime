@@ -862,6 +862,9 @@ const SFX=(()=>{
     windRatchet:()=>{for(let k=0;k<3;k++)noise(0.012,{delay:k*0.05,filter:'bandpass',freq:3800,q:6,gain:0.08});},
     windDown:()=>tone(620,1.3,{type:'sawtooth',to:70,gain:0.022,vib:[14,30]}),
     windBell:()=>{tone(1760,0.9,{gain:0.05});tone(2637,0.6,{delay:0.01,gain:0.022});},
+    reefBloom:()=>{[880,1109,1319,1760].forEach((f,i)=>tone(f,0.5,{delay:i*0.07,type:'sine',gain:0.03}));for(let k=0;k<4;k++)tone(rand(500,900),0.07,{delay:0.05+k*0.06,type:'sine',to:rand(1200,1800),gain:0.025});},// coral opening: bubbly arpeggio
+    fishScatter:()=>{for(let k=0;k<3;k++)tone(rand(1400,2000),0.05,{delay:k*0.04,type:'triangle',to:rand(2600,3200),gain:0.03});noise(0.12,{filter:'highpass',freq:2500,gain:0.03});},// three little fish darting into cover
+    fishNibble:()=>{tone(rand(1900,2400),0.03,{type:'sine',to:1500,gain:0.03});noise(0.015,{filter:'bandpass',freq:3000,q:4,gain:0.04});},
     gingerHop:()=>{for(let k=0;k<5;k++)tone(rand(2300,3300),0.12,{delay:k*0.022,type:'triangle',gain:0.022});noise(0.05,{filter:'highpass',freq:6000,gain:0.03});},// sleigh bells
     gingerLand:()=>{tone(120,0.1,{to:70,gain:0.12});for(let k=0;k<4;k++)noise(0.035,{delay:k*0.028+rand(0,0.012),filter:'bandpass',freq:rand(1600,3200),q:2,gain:0.1});},// cookie crunch
     doorCreak:()=>{tone(170,0.45,{type:'sawtooth',to:250,gain:0.022,vib:[22,25],attack:0.05});tone(340,0.3,{delay:0.1,type:'triangle',to:300,gain:0.012,vib:[17,20]});},
@@ -994,7 +997,7 @@ const SFX=(()=>{
   const BUS_OF={};
   'tick ui tap sparkle levelup coin coinburst whoosh close beep nope bloop achieve yay reveal0 reveal1 reveal2 reveal3 insert ratchet clunk pop rattle chest ask place scoop unhook hang clack pluck tink2'.split(' ').forEach(n=>BUS_OF[n]='ui');
   'plip bpop drip splash ocean burble rumble wind whirr toot tune musicbox flutter boing bell boop blow zap squeak2 lightsOn lightsOff tink'.split(' ').forEach(n=>BUS_OF[n]='world');
-  const GAP={clockTick:0.2,clockTock:0.2,gearStep:0.15,steamPuff:1,windRatchet:0.16,windDown:3,windBell:3,gingerLand:0.25,chimneyPuff:2,musicBox:5,shutterClack:1,doorCreak:1.5,cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
+  const GAP={clockTick:0.2,clockTock:0.2,gearStep:0.15,steamPuff:1,windRatchet:0.16,windDown:3,windBell:3,reefBloom:3,fishScatter:1,fishNibble:0.25,gingerLand:0.25,chimneyPuff:2,musicBox:5,shutterClack:1,doorCreak:1.5,cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
   function play(name,arg){
     if(!ac||muted||!S[name])return;const now=ac.currentTime;
     if(last[name]!==undefined&&now-last[name]<(GAP[name]??0.03))return;last[name]=now;
@@ -2678,7 +2681,51 @@ const SWATCHES={
   {id:'lilac',name:'Lilac',price:40,dot:['#9a5ae0','#ffd23a'],pal:{nudi:{body:ramp('#2e1462','#5a2aa8','#9a5ae0','#d0a8ff'),rim:ramp('#8a6a06','#d4aa10','#ffd23a','#fff4a0'),rimD:ramp('#5a4404','#9a780a','#caa018','#eccc4a')}}},
   {id:'pinkfrill',name:'Pink frill',price:40,dot:['#ff7ab4','#ffffff'],outline:'#22081a',pal:{nudi:{body:ramp('#6a1a44','#b8387a','#ff7ab4','#ffc4e0'),rim:ramp('#a0a0b0','#d8d8e4','#f6f6fc','#ffffff'),rimD:ramp('#7a7a8a','#a8a8b8','#d0d0dc','#ececf4'),black:ramp('#2a0a1c','#46122e','#621c42','#7e2a56')}}},
   {id:'sunset',name:'Sunset',price:40,dot:['#ff9a2a','#8a3ad0'],pal:{nudi:{body:ramp('#6a2a06','#c05a0e','#ff9a2a','#ffd090'),rim:ramp('#2a0a4a','#5a1a8a','#8a3ad0','#c08aff'),rimD:ramp('#1a0630','#3a1260','#5e2496','#8a52c4'),white:ramp('#a89a6a','#d8cc9a','#f6eecc','#fffcf0')}}},
-  {id:'glacier',name:'Glacier',price:60,dot:['#bce4f4','#ffffff'],outline:'#0a1a24',pal:{nudi:{body:ramp('#4a7a92','#7eb2ca','#bce4f4','#eefaff'),black:ramp('#2a4a5e','#40667c','#5a8298','#7aa0b4'),rim:ramp('#a8b4bc','#d8e2e8','#f6fbfd','#ffffff'),rimD:ramp('#7a8a94','#a8b8c2','#ccdae2','#e8f2f6')}}}],
+  {id:'glacier',name:'Glacier',price:60,dot:['#bce4f4','#ffffff'],outline:'#0a1a24',pal:{nudi:{body:ramp('#4a7a92','#7eb2ca','#bce4f4','#eefaff'),black:ramp('#2a4a5e','#40667c','#5a8298','#7aa0b4'),rim:ramp('#a8b4bc','#d8e2e8','#f6fbfd','#ffffff'),rimD:ramp('#7a8a94','#a8b8c2','#ccdae2','#e8f2f6')}}},
+  // paint(m,u,v,side,q,s,x,y): u along the body (-5.4 tail..5.4 head), v across, side 0 spine..1 edge. gill: what replaces the gill flower
+  {id:'ballet',name:'Ballerina',tier:'vivid',dot:['#ffb4cc','#ffffff'],outline:'#3a1424',gill:'bow',
+   P:ramp('#b86a86','#e898b4','#ffc4d8','#fff0f6'),Pk:ramp('#7a1a3a','#b8305a','#e85a88','#ff9ab8'),Wt:ramp('#c8bcc8','#ece4ee','#fffaff','#ffffff'),
+   paint(m,u,v,side,q,s,x,y){if(m===M.BODY){// satin leotard: a deep rose bodice laced up the front, sequins on the rest
+       if(side>0.84)return this.Wt[q];if(u>0.4&&u<3.6){const a=Math.abs(v);if(a<0.22||(a<1.1&&Math.abs(fract((u+a)/1.2)-0.5)<0.12))return this.Wt[q];return this.Pk[q];}
+       if(hash(x*3,y*7)>0.9)return this.Wt[3];return this.P[q];}
+     if(m===M.LIMB)return(((x+y)%3)===0?this.P:this.Wt)[q];// a white tulle tutu
+     if(m===M.CLAW)return((s*4|0)%2?this.Wt:this.Pk)[q];// ribbons laced round the horns
+     if(m===M.TOE)return(s>0.7?this.P:this.Pk)[q];return this.Pk[q];}},
+  {id:'kimono',name:'Kimono',tier:'vivid',dot:['#1a2a7a','#e0302a'],outline:'#0a0c22',gill:'parasol',
+   I:ramp('#0a1240','#18266a','#26409a','#4a66c8'),Wt:ramp('#9aa4c8','#d0d8f0','#f2f4ff','#ffffff'),Rd:ramp('#6a0a10','#a81a20','#e0302a','#ff7a6a'),Gd:ramp('#7a5a10','#b88a1a','#e8c040','#fff0a0'),Sk:ramp('#b05a7a','#e08aa8','#ffb8cc','#ffe8f0'),
+   paint(m,u,v,side,q,s,x,y){if(m===M.BODY){if(Math.abs(u-0.3)<1.0)return Math.abs(u-0.3)<0.28?this.Gd[q]:this.Rd[q];// a red obi sash with a gold cord
+       if(side>0.84)return this.Rd[q];
+       for(const[fu,fv]of[[3.2,-0.9],[2.4,1.1],[-1.9,0.9],[-3.0,-0.8],[-4.3,0.4]]){const du=u-fu,dv=v-fv,d=Math.hypot(du,dv);// big sakura blossoms on indigo silk
+         if(d<1.05){if(d<0.32)return this.Gd[3];const pf=Math.abs(fract(Math.atan2(dv,du)*5/TAU)-0.5);return d<0.75+pf*0.5?this.Sk[q]:this.I[q];}}
+       if(hash(Math.floor(x/2),Math.floor(y/2))>0.9)return this.I[Math.min(3,q+1)];return this.I[q];}
+     if(m===M.LIMB)return(((x+y)&3)===0?this.Gd:this.Rd)[q];// red hem flecked with gold
+     if(m===M.CLAW)return s>0.75?this.Gd[3]:this.I[Math.max(0,q-1)];// lacquer hairpins with gold tips
+     return(m===M.TOE?(s>0.85?this.Wt:this.Rd):this.Gd)[q];}},
+  {id:'jester',name:'Jester',tier:'vivid',dot:['#7a2ab8','#ffd23a'],outline:'#14081e',gill:'bells',
+   Pu:ramp('#2a0a4a','#4a1a80','#7a2ab8','#b07ae8'),Gd:ramp('#8a6a06','#c89a10','#ffd23a','#fff2a0'),Rd:ramp('#6a0a14','#a81a2a','#e0304a','#ff8a9a'),Bk:ramp('#06060a','#14121c','#24202e','#3a3444'),
+   paint(m,u,v,side,q,s,x,y){if(m===M.BODY){if(side>0.84)return this.Bk[q];// big harlequin diamonds, two across
+       const a=Math.floor((u*0.55+v)/2.4+50),b=Math.floor((u*0.55-v)/2.4+50);return((a+b)&1?this.Pu:this.Gd)[q];}
+     if(m===M.LIMB)return(Math.floor(u/1.4+(v>0?0.5:0))&1?this.Rd:this.Gd)[q];// zigzag points
+     if(m===M.CLAW)return s>0.75?this.Gd[Math.min(3,q+1)]:((s*3|0)%2?this.Pu:this.Rd)[q];// striped horns tipped with gold balls
+     if(m===M.TOE)return(s>0.5?this.Rd:this.Pu)[q];return this.Gd[q];}},// collar flaps, gold jingle bells
+  {id:'mermaid',name:'Mermaid',tier:'vivid',dot:['#2ac8b8','#b07ae8'],outline:'#08202a',gill:'shell',
+   Tq:ramp('#0a4a5a','#1a8a8a','#2ac8b8','#9af4e4'),Vi:ramp('#2a1a5a','#5a3a9a','#9a6ae0','#d4b8ff'),Pl:ramp('#a49cb0','#d8d0e4','#f6f0fa','#ffffff'),Sh:ramp('#a04a5a','#e0809a','#ffb4c0','#fff0f0'),
+   paint(m,u,v,side,q,s,x,y){if(m===M.BODY){if(Math.abs(v)<0.42&&Math.abs(u)<4.3){const b=fract(u/0.9);return b<0.15?this.Vi[0]:this.Pl[b<0.4?3:q];}// a string of pearls down the spine
+       const r=Math.floor(v/1.1),su=fract(u/1.2+(r&1)*0.5)-0.5,sv=fract(v/1.1),edge=Math.hypot(su*1.2,sv-0.15)>0.62;// sequin scales fading teal to violet
+       const C=(-u+3)/7>0.5?this.Vi:this.Tq,o=C[edge?Math.max(0,q-1):q];return(!edge&&sv<0.3&&hash(x,y)>0.6)?mixc(o,hex('#ffffff'),0.4):o;}
+     if(m===M.LIMB)return(s>0.5?this.Pl:this.Tq)[q];// seafoam fins
+     if(m===M.CLAW)return((s*3|0)%2?this.Pl:this.Vi)[q];
+     return(m===M.TOE?this.Sh:this.Pl)[q];}},// a scallop shell
+  {id:'chroma',name:'Chroma wave',tier:'special',fx:'chroma',dot:['#ff4a8a','#3ad0ff'],outline:'#0a0a1a',
+   paint(m,u,v,side,q,s,x,y){const w=this.wave||0,h=fract(u*0.07-w*0.3+(m===M.LIMB?0.05:0)),L=[0.22,0.42,0.62,0.82][q],c=nudiHsl(h,0.75,L);// bands of colour rolling head to tail, like real chromatophore waves
+     if(m===M.BODY){if(side>0.85)return nudiHsl(fract(h+0.5),0.9,Math.min(0.92,L+0.1));return Math.abs(fract(u*0.33-w*1.05)-0.5)<0.05?nudiHsl(h,0.6,0.9):c;}
+     if(m===M.CLAW||m===M.TOE)return nudiHsl(fract(h+0.5+s*0.2),0.9,L+0.05);return c;}},
+  {id:'reef',name:'Reef keeper',tier:'mythic',fx:'reef',dot:['#ff7a5a','#2ac8b8'],outline:'#1a0a12',gill:'anemone',
+   B:ramp('#2a1430','#4a2a4a','#6e4466','#94667e'),Po:ramp('#8a2a3a','#d84a6a','#ff7a9a','#ffc4d4'),Yl:ramp('#8a6a06','#d0a010','#ffd23a','#fff4a0'),An:ramp('#0a5a5a','#1a9a8a','#3ad8b8','#b0fff0'),
+   paint(m,u,v,side,q,s,x,y){if(m===M.BODY){// living rock, pitted with little cup polyps that open when it's happy
+       const[e,id]=salVoro(u*0.75,v*0.75,1,3);if(e<0.1)return this.B[0];
+       if(hash(id*7,3)>0.55&&e>0.3){if(this.bloom>0.4){if(this.pp)this.pp.push(x,y);return this.An[q];}return this.B[Math.min(3,q+1)];}return this.B[q];}
+     if(m===M.LIMB)return(((x*3+y)%4)?this.B:this.An)[q];if(m===M.CLAW)return(s>0.85?this.Yl:this.Po)[q];if(m===M.TOE)return(s>0.6?this.Po:this.An)[q];return this.B[q];}}],
 
  tarantula:[
   {id:'greenbottle',name:'Greenbottle blue',price:60,dot:['#2a7ad0','#f07a1a'],outline:'#02060c',pal:{spider:{leg:ramp('#06142a','#0e2a52','#1a4a8a','#3a7ad0'),body:ramp('#2a0e04','#5a1e06','#a03a0a','#e06a1a'),cara:ramp('#0e3a3a','#186a62','#2aa08a','#6ad0b4'),band:ramp('#0e2a52','#1a4a8a','#3a7ad0','#8ab8ff'),hair:ramp('#5a2a0a','#9a4a14','#e07a2a','#ffb070')}}},
@@ -4764,12 +4811,14 @@ class Shark extends Pet{
 //  horns (rhinophores) up front and a little flower of gills at the back. Glides slowly, grazes the
 //  reef, tucks its horns and gills in when startled, shimmers when petted and glows along its rim at night.
 // =====================================================================
+function nudiHsl(h,s,l){const f=n=>{const k=(n+h*12)%12,a=s*Math.min(l,1-l);return l-a*Math.max(-1,Math.min(k-3,9-k,1));};return rgb(Math.round(f(0)*255),Math.round(f(8)*255),Math.round(f(4)*255));}
 class Nudi extends Pet{
   constructor(world,x,y){super();this.initCommon(world,'nudi');
-    this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vx=0;this.vy=0;this.speed=0;this.sc=1.5;
+    this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vx=0;this.vy=0;this.speed=0;this.sc=1.75;
     this.outline=hex(PAL.nudi.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.seam=0.6;this.frame={x,y,c:1,s:0};
     this.ph=rand(TAU);this.gill=1;this.rhino=1;this.shy=0;this.shim=0;this.curl=0;this.nibT=0;this.rim=[];}
   isActive(){return true;}
+  size(){this.sc=(swatchOf(this)||{}).fx==='reef'?2.1:1.75;}// the reef keeper is a size up
   W(lx,ly){const c=Math.cos(this.ang)*this.sc,s=Math.sin(this.ang)*this.sc;return[this.x+c*lx-s*ly,this.y-this.h+s*lx+c*ly];}
   len(){return 1-this.curl*0.32;}
   headPos(){const[x,y]=this.W(5.4*this.len(),0);return{x,y:y+this.h};}
@@ -4792,15 +4841,17 @@ class Nudi extends Pet{
     if(T.t>2.5){this.tg=null;return 'miss';}return null;}
   syncHeld(){if(this.held){const m=this.mouthScreen();this.held.sx=m.x;this.held.sy=m.y;}}
   startle(x,y){if(this.state==='grabbed')return;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.shy=1;this.shim=1;
-    const a=Math.atan2(this.y-y,this.x-x);this.vx+=Math.cos(a)*5;this.vy+=Math.sin(a)*5;this.state='idle';this.timer=2.5;if(!this.preview){SFX.play('bpop');think(this,'!');}}
+    const a=Math.atan2(this.y-y,this.x-x);this.vx+=Math.cos(a)*5;this.vy+=Math.sin(a)*5;this.state='idle';this.timer=2.5;if(!this.preview){SFX.play('bpop');think(this,'!');if((swatchOf(this)||{}).fx==='reef')SFX.play('fishScatter');}}
   petMe(){if(this.shy>0.7)return false;const r=super.petMe();if(r&&!this.preview){this.shim=Math.min(1,this.shim+0.04);this.pT=(this.pT||0)-1/60;
-      if(this.pT<=0){this.pT=0.9;SFX.play('shimmer');const w=this.world,[gx,gy]=this.W(-4.2*this.len(),0);if(w.airb)for(let i=0;i<3;i++)w.airb.push({x:gx+rand(-1,1),y:gy+rand(-1,1),h:rand(0,2),vh:rand(6,12),r:Math.random()<0.4?1.2:0.8,ph:rand(TAU)});}}
+      if(this.pT<=0){this.pT=0.9;SFX.play((swatchOf(this)||{}).fx==='reef'?'fishNibble':'shimmer');const w=this.world,[gx,gy]=this.W(-4.2*this.len(),0);if(w.airb)for(let i=0;i<3;i++)w.airb.push({x:gx+rand(-1,1),y:gy+rand(-1,1),h:rand(0,2),vh:rand(6,12),r:Math.random()<0.4?1.2:0.8,ph:rand(TAU)});}}
     return r;}
   hitTest(x,y){for(const u of[-3,0,3]){const[cx,cy]=this.W(u,0);if(Math.hypot(x-cx,y-cy)<3.6*this.sc)return 0;}return -1;}
   tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;this.shy=1;if(!this.preview)SFX.play('bpop');return true;}
   dragTo(x,y){this.grabX=x;this.grabY=y;}
   release(){if(this.state!=='grabbed')return;this.state='idle';this.timer=2;w_splash(this);}
-  update(dt){const w=this.world;this.t+=dt;
+  update(dt){const w=this.world;this.t+=dt;this.size();const S=swatchOf(this)||{};
+    if(S.fx==='chroma')this.wave=(this.wave||0)+dt*(0.5+this.speed*0.25+(this.state==='petted'?1.6:0))*(this.shy>0.5?-1:1);// startled: the wave runs backwards
+    if(S.fx==='reef')this.reef(dt);
     this.shy=Math.max(0,this.shy-dt*(this.state==='grabbed'?0:0.35));this.shim=Math.max(0,this.shim-dt*0.25);
     const pet=this.state==='petted';this.gill+=((this.shy>0.3?0.25:pet?1.35:1)-this.gill)*Math.min(1,dt*4);this.rhino+=((this.shy>0.3?0.3:1)-this.rhino)*Math.min(1,dt*4);
     this.curl+=((this.state==='grabbed'||this.shy>0.6?1:0)-this.curl)*Math.min(1,dt*3);
@@ -4814,8 +4865,18 @@ class Nudi extends Pet{
     const bump=this.x<B.x0+m||this.x>B.x1-m||this.y<B.y0+m||this.y>B.y1-m;this.x=clamp(this.x,B.x0+m,B.x1-m);this.y=clamp(this.y,B.y0+m,B.y1-m);
     if(bump&&this.state==='wander')[this.tx,this.ty]=randomWaterSpot(w,0.3)||this.randomSpot();
     this.speed=Math.hypot(this.vx,this.vy);this.pts[0].x=this.x;this.pts[0].y=this.y;this.syncHeld();}
+  // reef keeper: the coral blooms when petted and pulls in when startled; three clownfish circle it, hide in the coral, and dart in to share its food
+  reef(dt){const pet=this.state==='petted',b0=this.bloom??0.6;this.bloom=this.shy>0.4?Math.max(0,b0-dt*3):clamp(b0+dt*(pet?1.5:(0.6-b0)*0.5),0,1);
+    if(!this.preview&&b0<0.85&&this.bloom>=0.85)SFX.play('reefBloom');
+    if(!this.fish)this.fish=[0,1,2].map(i=>({a:i/3*TAU,x:this.x,y:this.y,vx:1,hide:0}));const[cx,cy]=this.W(-0.5,0),m=this.mouthScreen(),eat=this.held||this.state==='hunt'&&this.prey;
+    this.fish.forEach((f,i)=>{f.hide+=((this.shy>0.4?1:0)-f.hide)*Math.min(1,dt*6);f.a+=dt*(pet?2.6:1.1)*(i&1?-1:1);
+      const rr=(pet?10:8.5+Math.sin(this.t*0.7+i*2))*(1-f.hide*0.9)*this.sc/1.5;let tx=cx+Math.cos(f.a)*rr*1.15,ty=cy+Math.sin(f.a)*rr*0.75-3*(1-f.hide);
+      if(eat&&i<2&&f.hide<0.5){tx=m.x+Math.cos(this.t*5+i*3)*2.5;ty=m.y+Math.sin(this.t*4+i)*2;}// two of them nip in for a share
+      const nx=f.x+(tx-f.x)*Math.min(1,dt*5);f.vx=nx-f.x||f.vx;f.x=nx;f.y+=(ty-f.y)*Math.min(1,dt*5);});
+    if(this.held&&this.state==='chew'&&!this.preview){this.nibF=(this.nibF||0)-dt;if(this.nibF<=0){this.nibF=rand(0.4,0.8);SFX.play('fishNibble');}}}
   hw(u){const L=this.len();return Math.max(0.7,2.4*Math.pow(Math.max(0,1-((u-0.2)/(5.8*L))**2),0.35));}
-  color(m,q,s,l,x,y){const P=PAL.nudi,F=this.frame,dx=x+.5-F.x,dy=y+.5-F.y,u=(dx*F.c+dy*F.s)/this.sc,v=(-dx*F.s+dy*F.c)/this.sc,qq=Math.min(3,q+(this.shim>0.4?1:0));
+  color(m,q,s,l,x,y){const P=PAL.nudi,F=this.frame,dx=x+.5-F.x,dy=y+.5-F.y,u=(dx*F.c+dy*F.s)/this.sc,v=(-dx*F.s+dy*F.c)/this.sc,qq=Math.min(3,q+(this.shim>0.4?1:0)),S=this.sw;
+    if(S&&S.paint){S.wave=this.wave;S.bloom=this.bloom||0;S.pp=this.polyp;return S.paint(m,u,v,Math.abs(v)/this.hw(u),q,s,x,y);}
     switch(m){
       case M.BODY:{const side=Math.abs(v)/this.hw(u);
         if(side>0.92)return P.rim[qq];if(side>0.82)return P.white[qq];if(side>0.76)return P.black[q];
@@ -4825,7 +4886,7 @@ class Nudi extends Pet{
       case M.CLAW:return((s*3|0)%2?P.rim:P.rimD)[qq];// ringed rhinophores
       case M.TOE:return(s>0.6?P.rim:P.white)[qq];// gill plumes, white with orange tips
     }return INK;}
-  draw(fb0){const sc=this.sc,fb={cap:(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r)},W=(u,v)=>this.W(u,v),L=this.len();
+  draw(fb0){this.size();const sc=this.sc,S=this.sw||{};this.polyp=S.fx==='reef'?[]:null;const fb={cap:(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r)},W=(u,v)=>this.W(u,v),L=this.len();
     // frilly mantle skirt rippling all the way round
     this.rim.length=0;
     for(const sd of[-1,1])for(let u=-5.4*L;u<=5.4*L;u+=0.45){const wv=Math.sin(this.ph*2-u*1.6+(sd>0?0.8:0))*0.3,[fx,fy]=W(u,sd*(this.hw(u)+0.1+wv));fb.cap(fx,fy,0.5,fx,fy,0.5,M.LIMB,1,0,1,0.2);this.rim.push([fx,fy]);}
@@ -4835,10 +4896,28 @@ class Nudi extends Pet{
     // two ringed horns up front
     for(const sd of[-1,1]){const r=this.rhino,[h0,h1]=W(4.4*L,sd*1.0),[h2,h3]=W(4.4*L+1.6*r,sd*(1.0+1.0*r));fb.cap(h0,h1,0.6,h2,h3,0.45,M.CLAW,3,0,1,1.4);}
     // a little flower of gill plumes at the back that sways
-    const g=this.gill,[g0,g1]=W(-4.2*L,0);for(let k=0;k<8;k++){const a=k/8*TAU+Math.sin(this.ph+k)*0.2,[e0,e1]=[g0+Math.cos(a)*1.6*g*sc,g1+Math.sin(a)*1.6*g*sc];fb0.cap(g0,g1,0.3*sc,e0,e1,0.42*sc,M.TOE,3,0,1,1.6);}}
-  drawExtras(fb){if(this.shim>0.2){const n=3;for(let i=0;i<n;i++){const u=((this.t*2.2+i*3)%10.4)-5.2,[x,y]=this.W(u*this.len(),Math.sin(this.t*3+i)*0.8);pmix(fb,x,y,hex('#ffffff'),0.6*this.shim);}}}
-  glow(fb,night){const k=night*(0.55+this.shim*0.6);if(k<0.05)return;for(let i=0;i<this.rim.length;i+=2){const[x,y]=this.rim[i],b=k*(0.7+0.3*Math.sin(this.t*2+i*0.4));padd(fb,x,y,40*b,150*b,255*b);}const[cx,cy]=this.W(0,0);for(let yy=-5;yy<=5;yy++)for(let xx=-7;xx<=7;xx++){const d=Math.hypot(xx/7,yy/5);if(d<1){const f=k*0.35*(1-d);padd(fb,cx+xx,cy+yy,10*f,40*f,90*f);}}}
-  statusText(){if(this.shy>0.5)return 'tucked its horns and gills in. Shy!';switch(this.state){
+    const g=this.gill,[g0,g1]=W(-4.2*L,0);if(S.gill){this.drawGill(fb0,S.gill,g0,g1);return;}
+    for(let k=0;k<8;k++){const a=k/8*TAU+Math.sin(this.ph+k)*0.2,[e0,e1]=[g0+Math.cos(a)*1.6*g*sc,g1+Math.sin(a)*1.6*g*sc];fb0.cap(g0,g1,0.3*sc,e0,e1,0.42*sc,M.TOE,3,0,1,1.6);}}
+  // skins swap the gill flower for their own thing (still swaying and tucking in with the gills)
+  drawGill(fb0,kind,gx,gy){const sc=this.sc,g=this.gill,c=Math.cos(this.ang),s=Math.sin(this.ang),C=(ax,ay,ar,bx,by,br,m,sa=0,sb=0)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,m,3,sa,sb,1.6),
+      P=(du,dv)=>[gx+(c*du-s*dv)*sc,gy+(s*du+c*dv)*sc],sw=Math.sin(this.ph)*0.25;
+    if(kind==='bow'){for(const sd of[-1,1]){const[lx,ly]=P(-0.4*g,sd*1.5*g),[tx,ty]=P(-1.6*g,sd*(0.7+sw*sd)*g);C(gx,gy,0.35,lx,ly,0.75,M.TOE,0.2,0.6);C(gx,gy,0.3,tx,ty,0.35,M.TOE,0.6,1);}C(gx,gy,0.5,gx,gy,0.5,M.TOE,1,1);}
+    if(kind==='parasol'){for(let k=0;k<10;k++){const t=k/10*TAU+this.ph*0.15,[ex,ey]=P(Math.cos(t)*1.8*g,Math.sin(t)*1.8*g);C(gx,gy,0.35,ex,ey,0.55,M.TOE,0.3,(k&1)?0.5:0.95);}C(gx,gy,0.4,gx,gy,0.4,M.TOE,0.9,0.9);}
+    if(kind==='bells')for(let k=0;k<5;k++){const t=Math.PI+(k-2)*0.6+Math.sin(this.ph+k)*0.1,[ex,ey]=P(Math.cos(t)*2.2*g,Math.sin(t)*2.2*g);C(gx,gy,0.35,ex,ey,0.4,M.TOE,0.1,(k&1)?0.9:0.3);C(ex,ey,0.62,ex,ey,0.62,M.CLAW2,0,0);}
+    if(kind==='shell'){for(let k=0;k<7;k++){const t=Math.PI+(k-3)*0.32,[ex,ey]=P(Math.cos(t)*2.0*g,Math.sin(t)*2.0*g);C(gx,gy,0.3,ex,ey,0.62,M.TOE,0.2,(k&1)?0.5:0.9);}const[hx,hy]=P(0.3,0);C(hx,hy,0.45,hx,hy,0.45,M.CLAW2,0,0);}
+    if(kind==='anemone'){for(let k=0;k<9;k++){const t=k/9*TAU,w=Math.sin(this.t*2+k)*0.4,[ex,ey]=P(Math.cos(t)*1.8*g+w,Math.sin(t)*1.8*g);C(gx,gy,0.3,ex,ey,0.4,M.TOE,0.2,1);}
+      const bl=this.bloom??0.6;for(const[u0,v0,a0,h]of[[1.4,-0.6,-2.4,1],[0.2,0.8,2.2,0.9],[-1.6,-0.4,-2.0,0.8],[2.6,0.6,2.0,0.7]]){// branching coral along its back
+        const[bx,by]=this.W(u0*this.len(),v0),Lc=(2.0+bl*1.2)*h*sc,tx=bx+Math.cos(a0+this.ang)*Lc*0.4,ty=by-Lc;
+        fb0.cap(bx,by,0.6*sc,tx,ty,0.45*sc,M.CLAW,4,0,0.7,1.8);for(const sd of[-1,1])fb0.cap(tx,ty,0.42*sc,tx+sd*Lc*0.45,ty-Lc*0.5,0.4*sc,M.CLAW,4,0.6,1,1.9);}}}
+  drawExtras(fb){const S=this.sw||{};
+    if(S.fx==='reef'&&this.fish){const O=hex('#1a0a08'),Or=hex('#ff8a1a'),Wt=hex('#ffffff');for(const f of this.fish){if(f.hide>0.8)continue;const d=f.vx<0?-1:1,X=Math.round(f.x),Y=Math.round(f.y);// tiny clownfish
+      for(const[a,b,c]of[[-3,-1,O],[-3,0,Or],[-3,1,O],[-2,0,Or],[-1,0,Wt],[-1,-1,Wt],[-1,1,O],[0,0,Or],[0,-1,Or],[1,0,Or],[1,-1,Wt],[1,1,Or],[2,0,Wt],[2,-1,Or],[3,0,O]])pset(fb,X+a*d,Y+b,c);pset(fb,X+2*d,Y-1,O);}}
+    if(S.fx==='chroma'&&this.shy>0.6){const[cx,cy]=this.W(0,0);for(let i=0;i<6;i++)pmix(fb,cx+rand(-6,6),cy+rand(-4,4),hex('#ffffff'),0.5*this.shy);}// startled flicker
+    if(this.shim>0.2){const n=3;for(let i=0;i<n;i++){const u=((this.t*2.2+i*3)%10.4)-5.2,[x,y]=this.W(u*this.len(),Math.sin(this.t*3+i)*0.8);pmix(fb,x,y,hex('#ffffff'),0.6*this.shim);}}}
+  glow(fb,night){const S=this.sw;if(S&&S.tier!=='natural'){// skins drop the blue rim glow; the reef keeper's open polyps fluoresce instead
+      const P=this.polyp,k=night*(this.bloom||0);if(S.fx!=='reef'||!P||k<0.05)return;for(let i=0;i<P.length;i+=2){const x=P[i],y=P[i+1];padd(fb,x,y,40*k,200*k,170*k);for(const[a,b]of[[1,0],[-1,0],[0,1],[0,-1]])padd(fb,x+a,y+b,8*k,50*k,44*k);}return;}
+    const k=night*(0.55+this.shim*0.6);if(k<0.05)return;for(let i=0;i<this.rim.length;i+=2){const[x,y]=this.rim[i],b=k*(0.7+0.3*Math.sin(this.t*2+i*0.4));padd(fb,x,y,40*b,150*b,255*b);}const[cx,cy]=this.W(0,0);for(let yy=-5;yy<=5;yy++)for(let xx=-7;xx<=7;xx++){const d=Math.hypot(xx/7,yy/5);if(d<1){const f=k*0.35*(1-d);padd(fb,cx+xx,cy+yy,10*f,40*f,90*f);}}}
+  statusText(){const R=(swatchOf(this)||{}).fx==='reef';if(this.shy>0.5)return R?'pulled its coral in. The clownfish are hiding!':'tucked its horns and gills in. Shy!';if(R&&this.state==='petted')return 'is blooming. The clownfish are doing laps!';switch(this.state){
     case 'idle':return 'is grazing on the reef';case 'wander':return 'is gliding along on its frilly skirt';case 'petted':return 'is shimmering and fluffing its gills';
     case 'hunt':return 'is slowly heading for a snack';case 'chew':return `is nibbling ${PREY_NAME[this.held?.type]||'something'}`;case 'grabbed':return 'curled up into a little ball';}
     return Pet.prototype.statusText.call(this);}
