@@ -827,7 +827,10 @@ const SFX=(()=>{
     const t=(o.at||ac.currentTime)+(o.delay||0),osc=ac.createOscillator(),g=ac.createGain(),j=o.nojit?1:J(),v=o.gain||0.3,a=o.attack||0.005;
     osc.type=o.type||'sine';osc.frequency.setValueAtTime(f*j,t);if(o.to)osc.frequency.exponentialRampToValueAtTime(Math.max(20,o.to*j),t+dur);
     g.gain.value=0;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+a);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    osc.connect(g);g.connect(o.dest||cur||bus.crit);osc.start(t);osc.stop(t+dur+0.03);
+    let out=g;// o.vib=[rate,depth Hz] wobbles the pitch, o.trem=rate wobbles the loudness
+    if(o.vib){const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=o.vib[0];lg.gain.value=o.vib[1];l.connect(lg);lg.connect(osc.frequency);l.start(t);l.stop(t+dur+0.03);}
+    if(o.trem){const l=ac.createOscillator(),lg=ac.createGain(),tg=ac.createGain();tg.gain.value=0.5;l.frequency.value=o.trem;lg.gain.value=0.5;l.connect(lg);lg.connect(tg.gain);g.connect(tg);out=tg;l.start(t);l.stop(t+dur+0.03);}
+    osc.connect(g);out.connect(o.dest||cur||bus.crit);osc.start(t);osc.stop(t+dur+0.03);
   }
   function noise(dur,o={}){
     const t=ac.currentTime+(o.delay||0),src=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain(),v=o.gain||0.3;
@@ -884,6 +887,29 @@ const SFX=(()=>{
     suck:()=>noise(0.035,{filter:'lowpass',freq:rand(600,900),gain:0.05}),
     squish:()=>{noise(0.08,{filter:'lowpass',freq:900,to:300,gain:0.18});tone(260,0.06,{to:180,gain:0.06});},
     swallow:()=>{tone(210,0.45,{to:95,gain:0.18,attack:0.05});tone(150,0.4,{delay:0.35,to:70,gain:0.13,attack:0.05});},
+    // ---- mythic skins each have their own sounds
+    cubeHop:()=>{noise(0.18,{filter:'lowpass',freq:380,to:1700,q:3,gain:0.16});tone(140,0.16,{to:260,gain:0.12});},
+    cubeLand:()=>{tone(95,0.42,{to:58,gain:0.26,trem:13});noise(0.1,{filter:'lowpass',freq:420,gain:0.2});tone(190,0.3,{delay:0.03,to:120,gain:0.05,trem:13});
+      for(let k=0;k<4;k++)tone(rand(2800,4400),0.07,{delay:0.12+k*rand(0.045,0.08),type:'triangle',gain:0.035});tone(900,0.02,{delay:0.3,type:'square',gain:0.02});},// a wobbling blorb, then the treasure inside rattles
+    cubeGulp:()=>{tone(230,0.32,{to:85,gain:0.22,attack:0.03});noise(0.9,{delay:0.2,filter:'highpass',freq:5200,gain:0.05,attack:0.12});for(let k=0;k<5;k++)tone(rand(900,1500),0.04,{delay:0.3+k*0.12,to:1800,gain:0.025});},
+    skullPop:()=>{tone(520,0.07,{to:1300,gain:0.12});noise(0.03,{freq:2600,q:2,gain:0.1});for(let k=0;k<4;k++)tone(1150,0.016,{delay:0.12+k*0.07,type:'square',gain:0.035});},
+    fireCrackle:()=>{for(let k=0;k<10;k++)noise(0.012,{delay:rand(0,0.8),filter:'highpass',freq:rand(3000,6000),gain:rand(0.03,0.07)});noise(0.8,{filter:'lowpass',freq:500,gain:0.025,attack:0.1});},
+    fireStep:()=>{noise(0.16,{filter:'highpass',freq:4200,gain:0.04,attack:0.01});noise(0.03,{freq:1800,q:2,gain:0.04});},
+    fireDouse:()=>{noise(1.1,{filter:'highpass',freq:2600,to:6500,gain:0.12,attack:0.03});tone(160,0.25,{to:70,gain:0.1});},
+    fireRelight:()=>{noise(0.55,{filter:'lowpass',freq:220,to:2400,q:1.2,gain:0.18,attack:0.12});tone(80,0.5,{to:140,gain:0.12,attack:0.1});},
+    emberPop:()=>{tone(1900,0.03,{to:900,type:'triangle',gain:0.04});noise(0.02,{freq:5000,gain:0.05});},
+    eyesOpen:()=>{noise(0.07,{filter:'lowpass',freq:900,to:300,gain:0.16});for(let k=0;k<5;k++)tone(rand(1400,2200),0.025,{delay:0.03+k*0.035,type:'triangle',gain:0.04});tone(70,0.4,{delay:0.05,to:55,gain:0.12});},
+    whispers:()=>{for(let k=0;k<4;k++)noise(0.45,{delay:k*0.32,freq:rand(600,1300),to:rand(500,1500),q:7,gain:0.05,attack:0.15});tone(55,1.6,{gain:0.07,attack:0.4,vib:[0.6,2]});},
+    phantomEye:()=>{tone(880,0.5,{to:660,type:'triangle',gain:0.05,attack:0.35});tone(1320,0.5,{to:990,gain:0.02,attack:0.35});},
+    eyeBlink:()=>{noise(0.03,{filter:'lowpass',freq:700,gain:0.08});tone(300,0.03,{to:220,gain:0.03});},
+    gasPuff:()=>noise(0.45,{filter:'lowpass',freq:900,to:300,gain:0.12,attack:0.05}),
+    venomCroak:()=>{for(let k=0;k<2;k++){tone(92,0.16,{delay:k*0.2,type:'sawtooth',to:72,gain:0.06});tone(184,0.16,{delay:k*0.2,type:'square',to:150,gain:0.02});noise(0.14,{delay:k*0.2,filter:'lowpass',freq:380,gain:0.07});}},
+    toxBubble:()=>{for(let k=0;k<6;k++)tone(rand(300,700),0.05,{delay:k*rand(0.08,0.15),to:rand(800,1200),gain:0.04});},
+    toxRattle:()=>{for(let k=0;k<10;k++)tone(240+(k%2)*30,0.03,{delay:k*0.04,type:'square',gain:0.03});},
+    spiritSwirl:()=>{noise(0.6,{freq:500,to:1800,q:1.5,gain:0.06,attack:0.2});tone(440,0.6,{to:660,gain:0.025,attack:0.2});},
+    orbChime:()=>{const N=[1568,1760,2093,2349,2637];for(let k=0;k<3;k++){const f=N[Math.floor(Math.random()*N.length)];tone(f,0.7,{delay:k*0.16,gain:0.035,nojit:true});tone(f*2.76,0.35,{delay:k*0.16,gain:0.008,nojit:true});}},
+    spiritHum:()=>{tone(330,1.4,{gain:0.03,attack:0.5});tone(332.5,1.4,{gain:0.03,attack:0.5});tone(495,1.4,{gain:0.012,attack:0.6});},
+    spiritSplash:()=>{noise(0.18,{freq:1800,to:600,q:1,gain:0.12});for(let k=0;k<4;k++)tone(rand(1500,2600),0.05,{delay:0.06+k*0.05,to:3000,gain:0.03});},
     squelch:()=>noise(0.1,{freq:700,q:3,gain:0.09}),
     sss:()=>noise(0.24,{freq:6800,q:1.3,gain:0.045,attack:0.04}),
     chomp:()=>{noise(0.05,{filter:'lowpass',freq:1400,gain:0.16});tone(180,0.05,{to:120,gain:0.08});},
@@ -955,7 +981,7 @@ const SFX=(()=>{
   const BUS_OF={};
   'tick ui tap sparkle levelup coin coinburst whoosh close beep nope bloop achieve yay reveal0 reveal1 reveal2 reveal3 insert ratchet clunk pop rattle chest ask place scoop unhook hang clack pluck tink2'.split(' ').forEach(n=>BUS_OF[n]='ui');
   'plip bpop drip splash ocean burble rumble wind whirr toot tune musicbox flutter boing bell boop blow zap squeak2 lightsOn lightsOff tink'.split(' ').forEach(n=>BUS_OF[n]='world');
-  const GAP={step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
+  const GAP={cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
   function play(name,arg){
     if(!ac||muted||!S[name])return;const now=ac.currentTime;
     if(last[name]!==undefined&&now-last[name]<(GAP[name]??0.03))return;last[name]=now;
@@ -2065,14 +2091,15 @@ class Salamander extends Walker{
   get selfLit(){return this.fx==='inferno';}
   update(dt){super.update(dt);if(this.fx==='inferno')this.burn(dt);}
   burn(dt){const wet=(this.swim||0)>0.3?1:0;this.cool+=(wet-this.cool)*Math.min(1,dt*(wet?3:0.8));
-    if(this.wasWet&&!wet)this.flare=1;if(!this.wasWet&&wet){this.burst=1;if(!this.preview)SFX.play('sss');}this.wasWet=wet;this.flare=Math.max(0,this.flare-dt*0.8);
+    if(this.wasWet&&!wet)this.flare=1;if(!this.wasWet&&wet){this.burst=1;if(!this.preview)SFX.play('fireDouse');}if(this.wasWet===1&&!wet&&!this.preview)SFX.play('fireRelight');this.wasWet=wet;this.flare=Math.max(0,this.flare-dt*0.8);
     const fp=this.fp,st=this.st,hot=1-this.cool,oy=this.h||0;
     // flames lick back off both flanks and stream from the tail tip; sparks drift up
     const emit=(s,sd,big)=>{const p=this.pointAt(s),nx=-p.fy*sd,ny=p.fx*sd,r=p.r*(sd?0.85:0);
       fp.push({x:p.x+nx*r,y:p.y+ny*r-oy,vx:-p.fx*rand(6,12)+nx*rand(2,6),vy:-p.fy*rand(6,12)+ny*rand(2,6)-rand(4,9),t:0,life:rand(0.3,0.55)*(big?1.4:1),big});};
     this.eT=(this.eT||0)+dt*70*hot*(1+this.flare*2);
     while(this.eT>1&&fp.length<160){this.eT--;const r=Math.random();if(r<0.62)emit(rand(4,21),Math.random()<0.5?-1:1,0);else if(r<0.88)emit(this.len-rand(0,2),0,1);else emit(rand(21,33),Math.random()<0.5?-1:1,0);}
-    if(Math.random()<dt*4*hot){const p=this.pointAt(rand(4,30));fp.push({x:p.x+rand(-2,2),y:p.y-oy,vx:rand(-4,4),vy:-rand(10,16),t:0,life:rand(1.2,2),spark:1});}
+    if(!this.preview&&hot>0.5&&Math.random()<dt*(this.speed>2?1.2:0.35))SFX.play('fireCrackle');
+    if(Math.random()<dt*4*hot){if(!this.preview&&Math.random()<0.15)SFX.play('emberPop');const p=this.pointAt(rand(4,30));fp.push({x:p.x+rand(-2,2),y:p.y-oy,vx:rand(-4,4),vy:-rand(10,16),t:0,life:rand(1.2,2),spark:1});}
     for(const p of fp){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.spark)p.vx+=Math.sin(p.t*9+p.life*20)*dt*20;else{p.vx*=1-dt*2;p.vy*=1-dt*1.5;}}
     this.fp=fp.filter(p=>p.t<p.life);
     // in water it goes out: black and steaming, with a big hiss of steam as it goes in
@@ -2080,7 +2107,7 @@ class Salamander extends Walker{
     this.burst=Math.max(0,(this.burst||0)-dt*2);
     for(const p of st){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.r+=dt*2.2;}this.st=st.filter(p=>p.t<p.life);
     // scorched footprints wherever a foot comes down on land
-    for(const L of this.legs){if(L.wasStep&&!L.stepping&&hot>0.5&&!this.preview&&this.h<1)this.scorch.push({x:L.fx,y:L.fy,a:Math.atan2(L.fy-L.ay,L.fx-L.ax),life:7});L.wasStep=L.stepping;}
+    for(const L of this.legs){if(L.wasStep&&!L.stepping&&hot>0.5&&!this.preview&&this.h<1){this.scorch.push({x:L.fx,y:L.fy,a:Math.atan2(L.fy-L.ay,L.fx-L.ax),life:7});SFX.play('fireStep');}L.wasStep=L.stepping;}
     for(const p of this.scorch)p.life-=dt;this.scorch=this.scorch.filter(p=>p.life>0);}
   draw(fb){if(this.fx==='xray'){if(!this.bgs||this.bgs.length!==fb.px.length)this.bgs=new Uint32Array(fb.px.length);this.bgs.set(fb.px);}// glass: remember what's behind it
     super.draw(fb);}
@@ -2468,7 +2495,16 @@ const SWATCHES={
   {id:'lemon',name:'Lemon',price:40,slime:'#f4e04a',dot:['#f4e04a','#fff8c8'],outline:'#1e1a06'},
   {id:'bubblegum',name:'Bubblegum',price:40,slime:'#ff8ac8',dot:['#ff8ac8','#ffe0f0'],outline:'#2a0a1c'},
   {id:'lava',name:'Lava',price:60,slime:'#ff5a2a',dot:['#ff5a2a','#ffd06a'],outline:'#2a0802'},
-  {id:'midnight',name:'Midnight',price:60,slime:'#3a4ab0',dot:['#3a4ab0','#0a0e2a'],outline:'#04061a'}],
+  {id:'midnight',name:'Midnight',price:60,slime:'#3a4ab0',dot:['#3a4ab0','#0a0e2a'],outline:'#04061a'},
+  {id:'boba',name:'Boba tea',tier:'vivid',slime:'#d8a878',dot:['#d8a878','#2a160c'],outline:'#2a1408',inside:'boba'},// milk tea with tapioca pearls; its baby is a pearl that pops out
+  {id:'fishbowl',name:'Fishbowl',tier:'vivid',slime:'#6ab8e8',dot:['#6ab8e8','#ff8a1a'],outline:'#06223a',inside:'fish'},// a goldfish swims laps inside, and flops out as its baby
+  {id:'snowglobe',name:'Snow globe',tier:'vivid',slime:'#8ac0e8',dot:['#e8f4fc','#2a7a3a'],outline:'#3a2412',inside:'snow'},// a snowman inside; every hop shakes up a flurry
+  {id:'sherbet',name:'Rainbow sherbet',tier:'vivid',slime:'#ffb0a0',dot:['#ffa070','#a8e878'],outline:'#3a1a10',
+   C:[ramp('#c8603a','#f08a5a','#ffb088','#ffe0cc'),ramp('#c84a7a','#f07aa8','#ffa8c8','#ffe0ec'),ramp('#6aa83a','#90d060','#b8ec90','#e8ffd8'),ramp('#d0a030','#f0c860','#ffe490','#fff8dc')],
+   body(rn,q,u,v,x,y,f){const a=Math.atan2(v,u)+rn*3.4-f.t*0.25,k=((Math.floor(a/(TAU/4))%4)+4)%4;return this.C[k][Math.min(3,q+(hash(x,y)>0.9?1:0))];}},// swirled scoops, slowly turning
+  {id:'chrome',name:'Liquid metal',tier:'special',fx:'chrome',slime:'#b0b8c4',dot:['#e8eef8','#5a606c'],outline:'#0a0c10',opaque:1},// a living mirror
+  {id:'glitter',name:'Glitter',tier:'special',fx:'glitter',slime:'#c8a8ff',dot:['#c8a8ff','#ffffff'],outline:'#1a0a3a'},
+  {id:'cube',name:'Gelatinous cube',tier:'mythic',fx:'cube',inside:'cube',slime:'#7ae8c8',dot:['#7ae8c8','#f4ecd0'],outline:'#06261c',sc:1.35}],
  bun:[
   {id:'rye',name:'Rye',price:40,dot:['#5a3418','#c8a07a'],pal:{bun:{top:ramp('#1e1008','#3a2010','#5a3418','#7e4e28'),crust:ramp('#2a160a','#4a2a14','#6e4220','#946032'),crumb:ramp('#7a5a3e','#a8845e','#c8a07a','#e4c49e')}}},
   {id:'matcha',name:'Matcha',price:40,dot:['#7aa83a','#f0e6c0'],pal:{bun:{top:ramp('#2a4210','#4a6e1e','#7aa83a','#b4d86a'),crust:ramp('#5e2e0a','#934c14','#c47828','#e8a84c')}}},
@@ -2670,7 +2706,7 @@ class DartFrog extends Frog{
   // quick, small hops: it's a tiny frog
   startHop(tx,ty,mode,d,arrive){super.startHop(tx,ty,mode,d,arrive);const H=this.hop;if(H&&this.mode==='crouch'&&!H.swim&&mode!=='turn'){const k=0.62;H.x1=H.x0+(H.x1-H.x0)*k;H.y1=H.y0+(H.y1-H.y0)*k;H.len*=k;H.dur*=0.8;H.H*=0.7;}this.hopCooldown*=0.6;}
   startle(x,y){if(this.state==='grabbed'||this.state==='fall')return;this.warn=1;super.startle?super.startle(x,y):0;}
-  tryGrab(x,y){const r=super.tryGrab(x,y);if(r){this.warn=1;if(!this.preview)SFX.play('trill');}return r;}
+  tryGrab(x,y){const r=super.tryGrab(x,y);if(r){this.warn=1;if(!this.preview)SFX.play(this.sw&&this.sw.fx==='toxic'?'toxRattle':'trill');}return r;}
   petMe(){const r=super.petMe();if(r&&!this.preview){this.glint=Math.min(1,this.glint+0.05);this.pT=(this.pT||0)-1/60;if(this.pT<=0){this.pT=rand(1.4,2.4);SFX.play('chirp');}}return r;}
   update(dt){this.sc=this.sw&&this.sw.sc||0.96;super.update(dt);const w=this.world;if(this.sw&&this.sw.fx==='toxic')this.fumes(dt);
     this.warn=Math.max(0,this.warn-dt*(this.state==='grabbed'?0.1:0.6));if(this.state==='grabbed')this.warn=Math.max(this.warn,0.6);this.glint=Math.max(0,this.glint-dt*0.3);
@@ -2678,7 +2714,7 @@ class DartFrog extends Frog{
     this.tap+=((this.state==='hunt'&&this.mode==='sit'?1:0)-this.tap)*Math.min(1,dt*8);
     // sings: a buzzy trill, throat puffing in and out. Rain (misting) gets it going
     const P=game.pointer,misted=!this.preview&&game.tool==='mist'&&P.down&&P.inside&&Math.hypot(P.x-this.x,P.y-this.y)<40;
-    if(this.call>0)this.call-=dt;else if(this.isActive()&&this.mode==='sit'&&(this.state==='idle'||this.state==='petted')){this.callT-=dt*(misted?6:1);if(this.callT<=0){this.callT=rand(10,22);this.call=1.4;if(!this.preview)SFX.play('trill');}}}
+    if(this.call>0)this.call-=dt;else if(this.isActive()&&this.mode==='sit'&&(this.state==='idle'||this.state==='petted')){this.callT-=dt*(misted?6:1);if(this.callT<=0){this.callT=rand(10,22);this.call=1.4;if(!this.preview)SFX.play(this.sw&&this.sw.fx==='toxic'?'venomCroak':'trill');}}}
   sac(){return this.call>0?Math.max(0,Math.sin((1.4-this.call)*Math.PI*4.3))*Math.min(1,this.call*3):0;}
   color(m,q,s,l,x,y){const P=this.pal;if(this.warn>0.15&&Math.sin(this.t*18)>0)q=Math.min(3,q+1);
     const V=this.sw&&this.sw.body?this.sw:null;// patterned skins paint the body and legs themselves
@@ -2748,8 +2784,10 @@ class DartFrog extends Frog{
   }
   get selfLit(){return!!(this.sw&&this.sw.fx);}// galaxy and toxic king glow in the menu previews too
   toLocal(x,y){const c=Math.cos(this.ang),s=Math.sin(this.ang),dx=x-this.x,dy=y-(this.y-(this.h||0));return[dx*c+dy*s,-dx*s+dy*c];}
-  fumes(dt){const gas=this.gas||(this.gas=[]),pr=this.prints||(this.prints=[]);
+  fumes(dt){const gas=this.gas||(this.gas=[]),pr=this.prints||(this.prints=[]),n0=gas.length;
+    this.bubT=(this.bubT??rand(6,12))-dt;if(this.bubT<=0){this.bubT=rand(8,16);if(!this.preview)SFX.play('toxBubble');}
     this.gT=(this.gT??0)-dt;if(this.gT<=0&&gas.length<7){this.gT=rand(0.35,0.8);const sd=Math.random()<0.5?-1:1,[x,y]=this.L(0.3,sd*4.6);gas.push({x,y,vx:rand(-3,3),vy:rand(-5,-2),r:rand(1.8,3),t:0,life:rand(1.6,2.6)});}
+    if(gas.length>n0&&Math.random()<0.3&&!this.preview)SFX.play('gasPuff');
     for(const g of gas){g.t+=dt;g.x+=g.vx*dt;g.y+=g.vy*dt;g.r+=dt*1.2;}this.gas=gas.filter(g=>g.t<g.life);
     const air=this.h>0.5;if(this.wasAir&&!air&&!this.preview)for(const sd of[-1,1]){const[x,y]=this.L(-3,sd*4.5);pr.push({x:Math.round(x),y:Math.round(y),a:this.ang,life:5});}this.wasAir=air;
     for(const p of pr)p.life-=dt;this.prints=pr.filter(p=>p.life>0);}
@@ -3405,13 +3443,15 @@ class Axolotl extends Walker{
     super.update(dt);const st=this.state;
     this.ex+=((st==='hunt'||st==='strike'||st==='chew'||st==='dance'||st==='petted'?1:0)-this.ex)*Math.min(1,dt*3);
     if(this.swim>0.5&&!this.preview){this.swT-=dt;if(this.swT<=0){this.swT=rand(0.5,1.2);const h=this.pts[0];w.ripples.push({x:h.x+rand(-2,2),y:h.y+rand(-2,2),age:0});
-        if(Math.random()<0.4)SFX.play('plip');}
+        if(Math.random()<0.4)SFX.play(this.sw&&this.sw.fx==='spirit'?'spiritSwirl':'plip');}
       if(st==='idle'&&this.timer>0.5){const t=randomWaterSpot(w);if(t){[this.tx,this.ty]=t;this.pace=Math.random()<0.5?'slow':'walk';this.state='wander';this.timer=6;}}
       S.water=Math.min(100,S.water+2*dt);}
     if(!this.preview&&game.tool==='mist'&&game.pointer.down&&game.pointer.inside){S.happy=Math.min(100,S.happy+3*dt);this.ex=Math.max(this.ex,0.8);}
     // water spirit: little glowing orbs wobble up off it and fade
-    const sw=swatchOf(this);if(sw&&sw.fx==='spirit'){const O=this.orbs||(this.orbs=[]);this.orbT=(this.orbT||0)-dt;
-      if(this.orbT<=0&&O.length<8){this.orbT=rand(0.5,1.1);const h=this.pointAt(3),a=rand(TAU);O.push({x:h.x+Math.cos(a)*2,y:h.y+Math.sin(a)*2-this.h,vx:rand(-2,2),vy:rand(-7,-4),t:0,life:rand(2.2,3.4),ph:rand(TAU)});}
+    const sw=swatchOf(this);if(sw&&sw.fx==='spirit'){const O=this.orbs||(this.orbs=[]),snd=!this.preview;this.orbT=(this.orbT||0)-dt;
+      const wet=this.swim>0.5;if(wet&&!this.wasWet&&snd)SFX.play('spiritSplash');this.wasWet=wet;
+      this.humT=(this.humT??rand(6,12))-dt;if(this.humT<=0){this.humT=rand(14,26);if(snd&&(st==='idle'||st==='sleeping'))SFX.play('spiritHum');}
+      if(this.orbT<=0&&O.length<8){this.orbT=rand(0.5,1.1);if(snd&&Math.random()<0.2)SFX.play('orbChime');const h=this.pointAt(3),a=rand(TAU);O.push({x:h.x+Math.cos(a)*2,y:h.y+Math.sin(a)*2-this.h,vx:rand(-2,2),vy:rand(-7,-4),t:0,life:rand(2.2,3.4),ph:rand(TAU)});}
       for(const o of O){o.t+=dt;o.x+=(o.vx+Math.sin(o.t*2+o.ph)*3)*dt;o.y+=o.vy*dt;}this.orbs=O.filter(o=>o.t<o.life);}else if(this.orbs)this.orbs=null;}
   startStrike(p){super.startStrike(p);if(!this.preview){SFX.play('bpop');const h=this.pts[0];this.world.ripples.push({x:h.x,y:h.y,age:0});}}
   statusText(){if(this.swim>0.5&&(this.state==='wander'||this.state==='idle'))return 'is swimming loops in the water';if(this.state==='strike')return 'gulps with a suck-pop!';return super.statusText();}
@@ -3524,8 +3564,28 @@ class Millipede extends Walker{
 const SLIME_COL={base:'#5fe08a',cricket:'#f0b04a',roach:'#d0783c',worm:'#f4d45a',waxworm:'#f4ecc4',fly:'#56d4e0',snail:'#b894f0',fruit:'#ff6a9a',egg:'#fff0a0',greens:'#66d858',bloodworm:'#e04040',shrimp:'#ffa890',minnow:'#b8d0e0',moonberry:'#5aa0ff',geode:'#c080ff',flower:'#ffe27a',grape:'#c070ff',stars:'#fff09a',butter:'#ffe890',honey:'#ffb040'};
 Object.assign(SLIME_COL,{seeds:'#e8c878',firefly:'#d8ff60',gummy:'#ff6a9a'});
 function slimeRamp(hexc){const c=hex(hexc);return[mixc(c,hex('#06140c'),0.62),mixc(c,hex('#06140c'),0.32),c,mixc(c,hex('#ffffff'),0.45)];}
+// ---- slime skin helpers: the little things that live inside a skin and pop out as its baby
+const slimeHsl=(h,s,l)=>{const f=n=>{const k=(n+h*12)%12,a=s*Math.min(l,1-l);return l-a*Math.max(-1,Math.min(k-3,9-k,1));};return rgb(f(0)*255,f(8)*255,f(4)*255);};
+// pixel sprites, one character per pixel ('.' = empty); OL is the outline colour (null = no outline)
+const SLIME_SPR={
+  fish:{ol:'#5a1a04',rows:['....dd...','t.hhOOOh.','ttOOOOOEO','ttOOOOOOm','t.LLLLLL.','....p....'],cx:4,cy:2,// a goldfish on its side, facing right
+    c:{O:'#ff8a1a',h:'#ffc060',L:'#ffd8a0',E:'#140804',m:'#a83a08',t:'#ffb050',d:'#ffb050',p:'#ffb050'}},
+  snow:{ol:'#3a5a7a',rows:['...k...','..kkk..','..WWW..','.WEWEW.','.WWnWW.','..RRR..','.WWWWW.','WWWWWWS','WWWKWWS','.WWWWS.'],cx:3,cy:6,// a small snowman: top hat, coal eyes, carrot nose, red scarf
+    c:{k:'#1a1a24',W:'#ffffff',S:'#c8d8ec',E:'#141414',n:'#ff7a1a',R:'#d8303a',K:'#141414'}},
+  skull:{ol:null,rows:['.HXXXX.','HXXXXXS','XKKXKKS','XKKXKKS','.XXKXS.','.TdTdT.'],jaw:['..TTT..'],cx:3,cy:3,// teeth on top, a thin jaw that chatters
+    c:{H:'#fffaf0',X:'#f0e6c8',S:'#c8bc98',K:'#1a1408',T:'#fffaf0',d:'#5a4a30'}}};
+for(const k in SLIME_SPR){const s=SLIME_SPR[k];for(const ch in s.c)s.c[ch]=hex(s.c[ch]);if(s.ol)s.ol=hex(s.ol);}
+// draw a sprite at x,y through set(fb,x,y,c); flip mirrors it, sq squashes (>0) or stretches (<0) it, dy shifts the jaw rows
+function slimeSprite(fb,kind,x,y,o={}){const S=SLIME_SPR[kind],set=o.set||pset,cells=new Map(),flip=o.flip?-1:1;
+  const add=(rows,y0)=>rows.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==='.')return;let dx=(i-S.cx)*flip,dy=j+y0-S.cy;
+    if(o.sq)dy=Math.round(dy*(1-o.sq*0.3));if(kind==='fish'&&i<2)dy+=o.tail||0;cells.set((x+dx)+','+(y+dy),S.c[ch]);}));
+  add(S.rows,0);if(S.jaw)add(S.jaw,S.rows.length+(o.jaw||0));
+  if(S.ol)for(const k of cells.keys()){const[X,Y]=k.split(',').map(Number);for(const[a,b]of[[1,0],[-1,0],[0,1],[0,-1]])if(!cells.has((X+a)+','+(Y+b)))set(fb,X+a,Y+b,S.ol);}
+  for(const[k,c]of cells){const[X,Y]=k.split(',').map(Number);set(fb,X,Y,c);}}
+// a tapioca pearl: the same 3x3 drop in the drink and out of it
+function slimePearl(fb,x,y,set=pset){const K=hex('#2a160c'),K2=hex('#4a2a1a');for(const[dx,dy]of[[0,-1],[-1,0],[0,0],[1,0],[0,1],[1,-1],[-1,1],[1,1]])set(fb,x+dx,y+dy,dy>0?K:K2);set(fb,x,y,K);set(fb,x-1,y-1,hex('#8a6a5a'));}
 class Slime extends Pet{
-  get translucent(){return 0.38;}
+  get translucent(){return this.sw&&this.sw.opaque?0:0.38;}// liquid metal is solid
   constructor(world,x,y){super();this.initCommon(world,'slime');
     this.x=x;this.y=y;this.h=0;this.vh=0;this.ang=rand(TAU);this.speed=0;this.vx=0;this.vy=0;this.R=8.5;this.N=22;this.outline=hex('#0c1a10');this.seam=1;
     this.pts=[{x,y}];this.n=1;this.ring=[];for(let i=0;i<this.N;i++){const a=i/this.N*TAU;this.ring.push({x:x+Math.cos(a)*this.R,y:y+Math.sin(a)*this.R*0.82,px:0,py:0});}
@@ -3537,7 +3597,9 @@ class Slime extends Pet{
   mouthScreen(){return{x:this.x+Math.cos(this.ang)*1.5,y:this.y-this.h-2};}
   hatAnchor(){const c=Math.cos(this.ang),s=Math.sin(this.ang);return{x:this.x,y:this.y-this.h-this.R*0.55*(1+this.sq*0.4),a:this.ang,s:1.05,eye:{x:this.x+c*this.R*0.25+0.5,y:this.y-this.h+s*this.R*0.15-1.5+1.5,sp:2.8}};}
   noise(){return clamp(this.speed/40,0,1.2);}
-  color(m,q,s,l,x,y){const C=this.cr;if(m===M.BODY){if(s>0.86)return C[Math.min(3,q+1)];if(s<0.55&&((x+y)&1)&&q>0)return C[q-1];return C[q];}return C[q];}
+  color(m,q,s,l,x,y){const C=this.cr,V=this.sw&&this.sw.body?this.sw:null;
+    if(V&&m===M.BODY){const b=this.blobOf(l);return V.body(s,q,(x+.5-b.x)/b.rx,(y+.5-b.y)/b.ry,x,y,this);}// patterned skins paint round each blob's own centre
+    if(m===M.BODY){if(s>0.86)return C[Math.min(3,q+1)];if(s<0.55&&((x+y)&1)&&q>0)return C[q-1];return C[q];}return C[q];}
   // ---- movement: squish-hops toward a target
   goTo(tx,ty,dt,mode,arrive=3){const d=Math.hypot(tx-this.x,ty-this.y);this.ang+=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang)*Math.min(1,dt*6);
     if(d>arrive&&this.phase==='rest'&&this.hopT<=0&&this.h<=0){this.phase='gather';this.pt=0;this.hopMode=mode;this.hopTo={x:tx,y:ty};}
@@ -3553,12 +3615,14 @@ class Slime extends Pet{
     for(const p of this.ring){p.px-=rand(-1.6,1.6);p.py-=rand(-1.6,1.6);}this.vh=28;this.h=Math.max(this.h,0.1);this.state='idle';this.timer=1.2;if(!this.preview)SFX.play('squelch');}
   splat(k){for(let i=0;i<this.N;i++){const p=this.ring[i],a=Math.atan2(p.y-this.y,p.x-this.x);p.px-=Math.cos(a)*0.8*k;p.py-=Math.sin(a)*0.55*k;}this.sq=Math.max(this.sq,-0.4*k);}
   syncHeld(){if(this.held){this.held.sx=-999;this.held.sy=-999;}}
-  finishEating(){const p=this.held;if(p){this.colT=SLIME_COL[p.type]||SLIME_COL.base;this.inside={type:p.type,t:0};}super.finishEating();}
+  finishEating(){const p=this.held;if(p){this.colT=SLIME_COL[p.type]||SLIME_COL.base;this.inside={type:p.type,t:0};if(this.sw&&this.sw.fx==='cube'&&!this.preview)SFX.play('cubeGulp');}super.finishEating();}
   hitTest(x,y){return Math.hypot(x-this.x,y-(this.y-this.h))<this.R+2?0:-1;}
   tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;this.phase='rest';return true;}
   dragTo(x,y){this.grabX=x;this.grabY=y;}
   release(){if(this.state!=='grabbed')return;this.state='fall';this.vh=0;}
-  update(dt){
+  update(dt){const S=swatchOf(this)||{},air0=this.phase==='air';this.R=8.5*(S.sc||1);this.sndHop=S.fx==='cube'?'cubeHop':null;this.sndLand=S.fx==='cube'?'cubeLand':null;
+    this.baseUpdate(dt);this.skinUpdate(dt,S,air0&&this.phase!=='air',!air0&&this.phase==='air');}
+  baseUpdate(dt){
     this.t+=dt;const w=this.world,B=w.bounds,st0=this.state;
     this.blinkT-=dt;if(this.blinkT<0){this.blink=0.14;this.blinkT=rand(2,5);}if(this.blink>0)this.blink-=dt;
     if(this.state==='grabbed'){this.gt+=dt;this.h+=(12-this.h)*Math.min(1,dt*10);this.x=lerp(this.x,this.grabX,Math.min(1,dt*12));this.y=lerp(this.y,this.grabY+this.h,Math.min(1,dt*12));this.sq=lerp(this.sq,-0.8+Math.sin(this.gt*9)*0.08,Math.min(1,dt*6));}
@@ -3603,9 +3667,9 @@ class Slime extends Pet{
       const rn=clamp(Math.hypot(dx,dy)/Math.max(0.5,rr),0,0.999),i2=y*W+x,nx=dx/(Math.hypot(dx,dy)||1)*rn,ny=dy/(Math.hypot(dx,dy)||1)*rn;
       fb.mat[i2]=mat;fb.cls[i2]=2;fb.key[i2]=8+Math.sqrt(1-rn*rn);fb.nx[i2]=nx;fb.ny[i2]=ny*0.9-0.12;fb.ss[i2]=rn;fb.ll[i2]=0;}
     fb.touch(x0,y0,x1,y1);}
-  draw(fb){const oy=-this.h;this.rasterBlob(fb,this.x,this.y+oy,this.ring.map(p=>[p.x,p.y+oy]),M.BODY);
+  drawBlob(fb){const oy=-this.h;this.rasterBlob(fb,this.x,this.y+oy,this.ring.map(p=>[p.x,p.y+oy]),M.BODY);
     if(this.mini){const m=this.mini,r=3.6,pts=[];for(let i=0;i<12;i++){const a=i/12*TAU,sq=m.h>0?0.2:-0.2;pts.push([m.x+Math.cos(a)*r*(1-sq*0.3),m.y-m.h+Math.sin(a)*r*0.82*(1+sq*0.3)]);}this.rasterBlob(fb,m.x,m.y-m.h,pts,M.BODY);}}
-  drawExtras(fb){const oy=-this.h,C=this.cr,k=hex('#0c1a10'),c=Math.cos(this.ang),s=Math.sin(this.ang);
+  drawFace(fb){const oy=-this.h,C=this.cr,k=hex('#0c1a10'),c=Math.cos(this.ang),s=Math.sin(this.ang);
     // food drifting around inside the gel, tinted by it
     if(this.inside||(this.held&&this.state==='chew')){const type=this.inside?this.inside.type:this.held.type,dg=this.inside?Math.min(1,this.inside.t/5):0,bx=this.x+Math.sin(this.t*1.3)*1.6,by=this.y+oy+1+Math.cos(this.t*1.1)*1;
       if(dg<0.95){// draw the food, then keep only the part inside the gel and tint it
@@ -3622,6 +3686,100 @@ class Slime extends Pet{
     else if(happy){pset(fb,mx-1,my,k);pset(fb,mx,my+1,k);pset(fb,mx+1,my+1,k);pset(fb,mx+2,my,k);}
     else{pset(fb,mx,my,k);pset(fb,mx+1,my,k);}
     if(this.mini){const m=this.mini,x=Math.round(m.x),y=Math.round(m.y-m.h);pset(fb,x-1,y-1,k);pset(fb,x+1,y-1,k);pset(fb,x-1,y-2,hex('#ffffff'));}}
+  // ================= skins =================
+  // every blob drawn this frame (the slime, and its baby when that's a mini slime); fb.ll tags which pixel belongs to which
+  blobs(){const B=[{id:0,x:this.x,y:this.y-this.h,rx:this.R*(1+this.sq*0.3),ry:this.R*0.82*(1-this.sq*0.26),sc:1}];
+    if(this.mini&&!this.mini.kind){const m=this.mini,sq=m.h>0?0.2:-0.2;B.push({id:1,x:m.x,y:m.y-m.h,rx:3.6*(1-sq*0.3),ry:3.6*0.82*(1+sq*0.3),sc:0.42});}return B;}
+  blobOf(l){const B=this.blobs();return B.find(b=>b.id===Math.round(l))||B[0];}
+  U(u,v){const sx=1+this.sq*0.3,sy=1-this.sq*0.26;return[this.x+u*this.R*sx,this.y-this.h+v*this.R*0.82*sy];}// body-local (-1..1) to screen
+  skinUpdate(dt,S,landed,jump){const ins=S.inside;
+    if(ins==='boba'){const P=this.pearls||(this.pearls=Array.from({length:6},()=>({u:rand(-0.5,0.5),v:rand(0,0.5),vu:0,vv:0})));
+      for(const p of P){if(landed||jump){p.vu+=rand(-1.2,1.2);p.vv+=rand(-1.6,0.4);}p.vv+=dt*0.9;p.vu*=1-dt*1.5;p.vv*=1-dt*1.5;p.u+=p.vu*dt;p.v+=p.vv*dt;// pearls jostle on every hop, then sink back down
+        const d=Math.hypot(p.u,p.v);if(d>0.62){p.u*=0.62/d;p.v*=0.62/d;p.vu*=-0.4;p.vv*=-0.4;}}
+      for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j],dx=b.u-a.u,dy=b.v-a.v,d=Math.hypot(dx,dy);if(d<0.36&&d>0){const k=(0.36-d)/2/d;a.u-=dx*k;a.v-=dy*k;b.u+=dx*k;b.v+=dy*k;}}}
+    if(ins==='fish'){const F=this.fish||(this.fish={a:0,r:0.4,dart:0});F.dart=Math.max(0,F.dart-dt);if(landed)F.dart=0.6;F.a+=dt*1.2*(1+F.dart*3);F.r=0.36+Math.sin(this.t*0.7)*0.08;// swims laps, darts when the bowl lands
+      const B=this.bub||(this.bub=[]);if(Math.random()<dt*1.2)B.push({u:Math.cos(F.a)*F.r,v:Math.sin(F.a)*F.r,t:0});for(const b of B){b.t+=dt;b.v-=dt*0.5;b.u+=Math.sin(b.t*6)*dt*0.1;}this.bub=B.filter(b=>b.t<1.4&&Math.hypot(b.u,b.v)<0.8);}
+    if(ins==='snow'){const N=this.flakes||(this.flakes=Array.from({length:14},()=>({u:rand(-0.7,0.7),v:rand(0.3,0.7),vu:0,vv:0})));
+      for(const p of N){if(landed||jump){const a=rand(TAU),k=rand(0.6,1.6);p.vu+=Math.cos(a)*k;p.vv+=Math.sin(a)*k-0.6;}if(this.state==='grabbed'){p.vu+=rand(-3,3)*dt;p.vv+=rand(-3,3)*dt;}// every hop shakes up a flurry
+        p.vv+=dt*0.25;p.vu+=Math.sin(this.t*1.3+p.u*5)*dt*0.08;p.vu*=1-dt*0.9;p.vv*=1-dt*0.9;p.u+=p.vu*dt;p.v+=p.vv*dt;const d=Math.hypot(p.u,p.v);if(d>0.78){p.u*=0.78/d;p.v*=0.78/d;p.vu*=-0.3;p.vv*=-0.3;}}}
+    if(S.fx==='chrome'){if(landed)this.rip={t:0};if(this.rip&&(this.rip.t+=dt)>1)this.rip=null;}
+    if(S.fx==='cube'){// it rolls: each hop tips it a quarter turn toward where it's going, and it holds a square shape
+      if(jump)this.cubeT=(this.cubeT||0)+(this.vx>=0?1:-1)*Math.PI/2;this.cubeA=(this.cubeA||0)+((this.cubeT||0)-(this.cubeA||0))*Math.min(1,dt*(this.phase==='air'?7:12));
+      const N=this.N,sx=1+this.sq*0.3,sy=(1-this.sq*0.26)*0.82,ca=this.cubeA;
+      for(let i=0;i<N;i++){const p=this.ring[i],a=i/N*TAU,c=Math.abs(Math.cos(a-ca)),s2=Math.abs(Math.sin(a-ca)),r=Math.pow(Math.pow(c,7)+Math.pow(s2,7),-1/7)*0.9;
+        const wb=(this.wob||0)*Math.sin(i*TAU/N*4+this.t*26)*1.4,tx=this.x+Math.cos(a)*(this.R*r+wb)*sx,ty=this.y+Math.sin(a)*(this.R*r+wb)*sy;p.x+=(tx-p.x)*Math.min(1,dt*18);p.y+=(ty-p.y)*Math.min(1,dt*18);}
+      if(landed){this.wob=1;const T=this.trail||(this.trail=[]);T.push({x:this.x,y:this.y,r:this.R*0.75,life:6});if(T.length>6)T.shift();}// jiggles like jelly, leaves a patch of acid
+      this.wob=Math.max(0,(this.wob||0)-dt*1.6);for(const q of this.trail||[])q.life-=dt;this.trail=(this.trail||[]).filter(q=>q.life>0);
+      const bo=this.bones||(this.bones=[]);if(this.inside&&this.inside.t<dt*1.5&&bo.length<4)bo.push({u:rand(-0.4,0.4),v:rand(-0.3,0.5),a:rand(TAU)});// each meal leaves a bone behind inside
+      const fz=this.fizz||(this.fizz=[]);if(this.inside&&this.inside.t<4&&Math.random()<dt*14)fz.push({u:rand(-0.3,0.3),v:rand(-0.1,0.4),t:0});for(const f of fz){f.t+=dt;f.v-=dt*0.5;}this.fizz=fz.filter(f=>f.t<0.8);}
+    // the baby: skins with something inside send that thing out (a pearl, the goldfish, the snowman, the skull); it jumps back in later
+    const m=this.mini;if(m&&m.kind&&m.kind!==ins)m.kind=null;
+    if(m&&ins&&!m.kind){m.kind=ins;const c=this.popFrom(ins);m.x=c[0];m.y=c[1]+this.h;m.vh=44;m.h=Math.max(m.h,this.h+2);m.fa=0;if(!this.preview)SFX.play(ins==='cube'?'skullPop':'squelch');}
+    if(m&&m.kind){const P=m.fx||(m.fx=[]);if(m.h<=0&&m.wasAir){m.fa=(m.fa||0)+1;m.sq=0.6;
+        const c=hex({boba:'#e8c8a0',fish:'#a8dcff',snow:'#ffffff',cube:'#8aff6a'}[m.kind]);for(let k=0;k<5;k++){const a=rand(TAU);P.push({x:m.x,y:m.y,h:0.5,vx:Math.cos(a)*rand(8,18),vy:Math.sin(a)*rand(4,9),vh:rand(10,24),t:0,life:rand(0.35,0.6),c});}}// a little splash or puff as it lands
+      for(const p of P){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vh-=120*dt;p.h=Math.max(0,p.h+p.vh*dt);}m.fx=P.filter(p=>p.t<p.life);m.wasAir=m.h>0;m.sq=Math.max(0,(m.sq||0)-dt*4);}}
+  popFrom(k){const P=this.pearls,F=this.fish;if(k==='boba'&&P&&P.length)return this.U(P[P.length-1].u,P[P.length-1].v);
+    if(k==='fish'&&F)return this.U(Math.cos(F.a)*F.r,Math.sin(F.a)*F.r*0.9);if(k==='snow')return this.U(-0.42,0.2);if(k==='cube')return this.U(0.2,-0.1);return[this.x,this.y-this.h];}
+  draw(fb){const S=this.sw||{};
+    if(S.fx==='chrome'){if(!this.bgs||this.bgs.length!==fb.px.length)this.bgs=new Uint32Array(fb.px.length);this.bgs.set(fb.px);}// the mirror needs what's behind it
+    const mm=this.mini;if(mm&&mm.kind)this.mini=null;try{this.drawBlob(fb);}finally{this.mini=mm;}// a pop-out baby isn't a jelly blob
+    for(const b of this.blobs()){if(!b.id)continue;const W=fb.w;for(let y=Math.floor(b.y-b.ry-1);y<=b.y+b.ry+1;y++)for(let x=Math.floor(b.x-b.rx-1);x<=b.x+b.rx+1;x++){if(x<0||y<0||x>=W||y>=fb.h)continue;const i=y*W+x;if(fb.mat[i]&&Math.hypot((x+.5-b.x)/(b.rx+0.6),(y+.5-b.y)/(b.ry+0.6))<1)fb.ll[i]=b.id;}}}
+  drawExtras(fb){const S=this.sw||{};
+    if(S.fx==='cube')this.drawAcid(fb);
+    if(S.inside)this.drawInside(fb,S.inside);
+    if(S.fx==='chrome')this.drawChrome(fb);if(S.fx==='glitter')this.drawGlitter(fb);if(S.fx==='cube')this.drawBevel(fb);
+    const mm=this.mini;if(mm&&mm.kind)this.mini=null;try{this.drawFace(fb);}finally{this.mini=mm;}
+    if(mm&&mm.kind)this.drawBaby(fb,mm);}
+  inBody(fb,x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=fb.w||y>=fb.h)return false;const i=y*fb.w+x;return fb.mat[i]&&fb.cls[i]===2;}
+  drawInside(fb,ins){const put=(fb,x,y,c,a=1)=>{if(this.inBody(fb,x,y))a>=1?pset(fb,x,y,c):pmix(fb,x,y,c,a);},out=this.mini&&this.mini.kind,t=this.t;
+    if(ins==='boba'){for(const p of(this.pearls||[]).slice(0,out?-1:undefined)){const[x,y]=this.U(p.u,p.v);slimePearl(fb,Math.round(x),Math.round(y),put);}
+      const P1=hex('#ff7aa8'),P2=hex('#c84a78'),[sx,sy]=this.U(0.25,-0.35);for(let k=0;k<6;k++){const x=sx+k*0.7,y=sy-k*1.1;pset(fb,x,y,P1);pset(fb,x+1,y,P2);}pset(fb,sx+4.2,sy-7.2,hex('#5a1a32'));pset(fb,sx+5.2,sy-7.2,P2);}// a fat straw
+    if(ins==='fish'){const F=this.fish;if(F&&!out){const[x,y]=this.U(Math.cos(F.a)*F.r,Math.sin(F.a)*F.r*0.9);slimeSprite(fb,'fish',Math.round(x),Math.round(y),{set:put,flip:Math.sin(F.a)>0,tail:Math.round(Math.sin(t*9)*0.8)});}
+      for(const b of this.bub||[]){const[x,y]=this.U(b.u,b.v);put(fb,x,y,hex('#ffffff'),0.7);}
+      const G=hex('#2a8a3a');for(let k=0;k<4;k++){const[x,y]=this.U(-0.45+Math.sin(t*1.5+k)*0.04*k,0.55-k*0.12);put(fb,x,y,G);}}// a sprig of pondweed
+    if(ins==='snow'){if(!out){const[x,y]=this.U(-0.42,0.2);slimeSprite(fb,'snow',Math.round(x),Math.round(y),{set:put});}
+      for(const p of this.flakes||[]){const[x,y]=this.U(p.u,p.v);put(fb,x,y,hex('#ffffff'),0.9);}}
+    if(ins==='cube'){const ca=this.cubeA||0,c=Math.cos(ca),sn=Math.sin(ca),L=(u,v)=>this.U(u*c-v*sn,(u*sn+v*c)*1.1);// an adventurer's leftovers, tumbling as it rolls
+      const Au=hex('#ffd040'),Au2=hex('#b08010'),Ag=hex('#e0e4ec'),Br=hex('#6a3a14'),Rd=hex('#e0203a'),Bn=hex('#f4ecd0');
+      {const[x0,y0]=L(-0.55,0.35),[x1,y1]=L(0.45,-0.45),n=Math.max(1,Math.hypot(x1-x0,y1-y0)),dx=(x1-x0)/n,dy=(y1-y0)/n;for(let k=0;k<=n;k++)put(fb,x0+dx*k,y0+dy*k,k<2?Br:Ag);// a sword
+        put(fb,x0+dx*2-dy*1.5,y0+dy*2+dx*1.5,Au2);put(fb,x0+dx*2,y0+dy*2,Au);put(fb,x0+dx*2+dy*1.5,y0+dy*2-dx*1.5,Au2);}
+      const coins=[[0.45,0.4],[0.6,0.25],[-0.2,0.6]];for(const[u,v]of coins){const[x,y]=L(u,v);put(fb,x,y,Au);put(fb,x+1,y,Au2);}
+      {const[x,y]=L(-0.5,-0.45);put(fb,x,y,Rd);put(fb,x+1,y,Rd);put(fb,x,y+1,hex('#a01020'));put(fb,x+1,y+1,Rd);put(fb,x,y-1,Br);}// a potion
+      if(!out){const[x,y]=L(0.2,-0.1);slimeSprite(fb,'skull',Math.round(x),Math.round(y),{set:put});}
+      for(const b of this.bones||[]){const[x,y]=L(b.u,b.v),c2=Math.cos(b.a+ca),s2=Math.sin(b.a+ca);for(let k=-1.5;k<=1.5;k+=0.5)put(fb,x+c2*k,y+s2*k,Bn);put(fb,x+c2*2-s2*0.7,y+s2*2+c2*0.7,Bn);put(fb,x-c2*2+s2*0.7,y-s2*2-c2*0.7,Bn);}// bones from past meals
+      for(const[u,v]of coins){const[x,y]=L(u,v);if(Math.sin(t*2.3+u*20)>0.9){put(fb,x,y,hex('#ffffff'));for(const[a,b]of[[-1,0],[1,0],[0,-1]])put(fb,x+a,y+b,hex('#fff4b0'),0.6);}}// coins glint
+      for(const f of this.fizz||[]){const[x,y]=this.U(f.u,f.v);put(fb,x,y,hex('#e0ffe8'),1-f.t/0.8);}}}// acid fizzing round its dinner
+  drawBaby(fb,m){const x=Math.round(m.x),y=Math.round(m.y-m.h),air=m.h>0.5,t=this.t,sq=(m.sq||0)-(m.h>0?Math.min(0.5,m.vh/90):0);
+    for(let yy=-2;yy<=2;yy++)for(let xx=-4;xx<=4;xx++)if(Math.hypot(xx/(3.6-m.h*0.05),yy/1.6)<=1)pdark(fb,x+xx,Math.round(m.y)+1+yy,0.7);// its shadow
+    if(m.kind==='boba')slimePearl(fb,x,y);
+    if(m.kind==='fish')slimeSprite(fb,'fish',x,y,{flip:(m.fa||0)%2===1,sq,tail:Math.round(Math.sin(t*(air?22:9))*0.8)});// flips sides with every flop
+    if(m.kind==='snow'){const wave=air?Math.round(Math.sin(t*16)):0,Br=hex('#6a4020');slimeSprite(fb,'snow',x,y-1,{sq});pset(fb,x-4,y-1-wave,Br);pset(fb,x-5,y-2-wave,Br);pset(fb,x+4,y-1+wave,Br);pset(fb,x+5,y-2+wave,Br);}// stick arms wave as it hops
+    if(m.kind==='cube')slimeSprite(fb,'skull',x,y,{jaw:air&&Math.sin(t*30)>0?1:0});// teeth chattering as it bounces
+    for(const p of m.fx||[])pmix(fb,p.x,p.y-p.h,p.c,1-p.t/p.life);}
+  drawChrome(fb){const W=fb.w,bg=this.bgs,BL=this.blobs(),C=[hex('#14161c'),hex('#4a505c'),hex('#9aa2b0'),hex('#e4eaf4')],Wt=hex('#ffffff'),Sky=hex('#e8eef8'),Sky2=hex('#7a8698');
+    for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++){const i=y*W+x;if(!fb.mat[i]||fb.cls[i]!==2)continue;// a liquid mirror: bright sky above the horizon, the tank bent round its curve below
+      const b=BL.find(b=>b.id===fb.ll[i])||BL[0],u=(x+.5-b.x)/b.rx,v=(y+.5-b.y)/b.ry,rn=Math.min(0.99,Math.hypot(u,v));let k=1+rn*rn*2.6;if(this.rip)k+=Math.sin((rn-this.rip.t*1.6)*14)*(1-this.rip.t)*0.35;
+      const sx=Math.round(b.x+u*b.rx*k*1.4),sy=Math.round(b.y+Math.abs(v)*b.ry*k*1.6+3*b.sc+2),c=bg?bg[clamp(sy,0,fb.h-1)*W+clamp(sx,0,W-1)]:fb.px[i],lum=((c&255)*0.3+((c>>8)&255)*0.55+((c>>>16)&255)*0.15)/255;
+      const hz=-0.05+(this.rip?Math.sin(this.rip.t*20+u*6)*0.06*(1-this.rip.t):0);
+      let o=v<hz?mixc(Sky,Sky2,Math.min(1,(hz-v)*1.6+rn*0.4)):mixc(c,C[Math.min(3,Math.floor(lum*3+0.6))],0.3);
+      if(Math.abs(v-hz)<0.07)o=mixc(o,C[0],0.6);if(rn>0.82)o=mixc(o,C[0],0.5);
+      const hl=Math.hypot(u+0.38,v+0.42);if(hl<0.22)o=mixc(o,Wt,0.9);else if(hl<0.36)o=mixc(o,Wt,0.35);if(Math.abs(u-v*0.2-0.25)<0.05&&v>0.1&&rn<0.8)o=mixc(o,Wt,0.4);
+      fb.px[i]=o;}}
+  drawGlitter(fb){const W=fb.w,BL=this.blobs(),t=this.t,Wt=hex('#ffffff');// clear jelly packed with rainbow flakes that catch the light as it moves
+    for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++){const i=y*W+x;if(!fb.mat[i]||fb.cls[i]!==2)continue;const b=BL.find(b=>b.id===fb.ll[i])||BL[0],h=hash(Math.round((x-b.x)*0.9)+50+b.id*13,Math.round((y-b.y)*0.9)+70);if(h<0.8)continue;
+      const tw=0.5+0.5*Math.sin(h*40+t*(1.5+h*2)+this.ang*2+(this.x+this.y)*0.15),hue=((h*977+t*0.4+this.ang)%1+1)%1;
+      fb.px[i]=mixc(fb.px[i],slimeHsl(hue,0.9,0.5+tw*0.35),0.55+tw*0.45);if(tw>0.93)for(const[a,c]of[[-1,0],[1,0],[0,-1],[0,1]])if(this.inBody(fb,x+a,y+c))pmix(fb,x+a,y+c,Wt,0.7);}}
+  drawAcid(fb){const W=fb.w,A=hex('#9affc8'),G=hex('#2a6a4a'),Wt=hex('#ffffff'),t=this.t,mat=fb.mat;
+    for(const q of this.trail||[]){const k=Math.min(1,q.life/3);// glistening acid patches on the ground, fizzing as they dry
+      for(let yy=-Math.ceil(q.r*0.6);yy<=q.r*0.6;yy++)for(let xx=-Math.ceil(q.r);xx<=q.r;xx++){const X=Math.round(q.x+xx),Y=Math.round(q.y+yy+1);if(X<0||Y<0||X>=W||Y>=fb.h||mat[Y*W+X])continue;
+        const d=Math.hypot(xx/q.r,yy/(q.r*0.6))+(vnoise(X*0.5,Y*0.5)-0.5)*0.5;if(d>1)continue;const i=Y*W+X;fb.px[i]=mixc(fb.px[i],d>0.82?G:A,(d>0.82?0.3:0.07)*k);
+        if(d<0.75&&Math.abs(xx/q.r+yy/(q.r*0.6)+0.5)<0.12)pmix(fb,X,Y,Wt,0.35*k);if(hash(X,Y)>0.985&&Math.sin(t*6+X)>0.3)pmix(fb,X,Y,hex('#e0ffe8'),0.8*k);}}
+    // light shining through the jelly throws rippling mint caustics onto the ground beside it
+    const lx=this.x+3,ly=this.y+4,R2=this.R+3,day=0.4+0.6*this.world.dayness;for(let yy=-R2*0.6;yy<=R2*0.6;yy++)for(let xx=-R2;xx<=R2;xx++){const X=Math.round(lx+xx),Y=Math.round(ly+yy);if(X<0||Y<0||X>=W||Y>=fb.h||mat[Y*W+X])continue;
+      const d=Math.hypot(xx/R2,yy/(R2*0.6));if(d>1)continue;const c=Math.abs(Math.sin(X*0.55+vnoise(X*0.3+t*0.8,Y*0.4)*5+t*1.4)*Math.sin(Y*0.7-vnoise(X*0.35,Y*0.3-t*0.7)*5));if(c>0.7)pmix(fb,X,Y,hex('#c8ffe0'),Math.min(0.7,(c-0.7)*3.5)*(1-d*d)*day);}}
+  drawBevel(fb){const W=fb.w,mat=fb.mat,Hi=hex('#ffffff'),Lo=hex('#06261c');// light catches the cube's top-left edges
+    for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++){const i=y*W+x;if(!mat[i]||fb.cls[i]!==2||fb.ll[i])continue;
+      if(!mat[i-W]||!mat[i-1])fb.px[i]=mixc(fb.px[i],Hi,0.5);else if(!mat[i+W]||!mat[i+1])fb.px[i]=mixc(fb.px[i],Lo,0.35);else if(!mat[i-2*W]||!mat[i-2])fb.px[i]=mixc(fb.px[i],Hi,0.18);}}
 }
 
 // =====================================================================
@@ -4072,10 +4230,12 @@ class Kraken extends Pet{
     if(this.tent.length!==n){const x=this.x,y=this.y,sp=n>8?2.5:1.9;this.tent=[];for(let i=0;i<n;i++){const off=-sp+i*(2*sp/(n-1)),nodes=[];for(let k=0;k<8;k++)nodes.push({x:x-Math.cos(this.ang+off)*k*1.8,y:y-Math.sin(this.ang+off)*k*1.8});this.tent.push({off,curl:(i%2?1:-1)*rand(0.9,1.5),nodes});}this.tg=null;this.reel=0;}
     if(!(sw&&sw.fx==='eldritch'))return;
     // its eyes blink on their own, and all snap open and stare when it's startled, grabbed or poked
-    const E=this.ey||(this.ey=Array.from({length:3+(n>>1)},()=>({o:1,T:rand(1,6),b:0}))),alarm=this.state==='flee'||this.state==='grabbed'||this.poke>0;
-    for(const e of E){e.T-=dt;if(e.T<=0&&!alarm){e.T=rand(2,7);e.b=0.28;}e.b=Math.max(0,e.b-dt);const tgt=this.eyesClosed||e.b>0?0:1;e.o+=(tgt-e.o)*Math.min(1,dt*(tgt?8:20));if(alarm)e.o=Math.min(1.25,e.o+dt*6);}
+    const E=this.ey||(this.ey=Array.from({length:3+(n>>1)},()=>({o:1,T:rand(1,6),b:0}))),alarm=this.state==='flee'||this.state==='grabbed'||this.poke>0,snd=!this.preview;
+    if(alarm&&!this.wasAlarm&&snd)SFX.play('eyesOpen');this.wasAlarm=alarm;
+    this.whT=(this.whT??rand(8,16))-dt;if(this.whT<=0){this.whT=rand(14,28);if(snd&&!alarm)SFX.play('whispers');}
+    for(const e of E){e.T-=dt;if(e.T<=0&&!alarm){e.T=rand(2,7);e.b=0.28;if(snd&&Math.random()<0.3)SFX.play('eyeBlink');}e.b=Math.max(0,e.b-dt);const tgt=this.eyesClosed||e.b>0?0:1;e.o+=(tgt-e.o)*Math.min(1,dt*(tgt?8:20));if(alarm)e.o=Math.min(1.25,e.o+dt*6);}
     // phantom eyes open in the water around it, glance at you, blink and fade
-    const ph=this.ph||(this.ph=[]);this.phT=(this.phT??2)-dt;if(this.phT<=0&&ph.length<3&&!this.preview){this.phT=rand(2.5,6);const a=rand(TAU),d=rand(18,30);ph.push({x:this.x+Math.cos(a)*d,y:this.y+Math.sin(a)*d*0.8,t:0,life:rand(2.4,3.6),r:rand(1.4,2.2)});}
+    const ph=this.ph||(this.ph=[]);this.phT=(this.phT??2)-dt;if(this.phT<=0&&ph.length<3&&!this.preview){this.phT=rand(2.5,6);const a=rand(TAU),d=rand(18,30);ph.push({x:this.x+Math.cos(a)*d,y:this.y+Math.sin(a)*d*0.8,t:0,life:rand(2.4,3.6),r:rand(1.4,2.2)});SFX.play('phantomEye');}
     for(const p of ph)p.t+=dt;this.ph=ph.filter(p=>p.t<p.life);}
   phOpen(p){const f=p.t/p.life;return f<0.25?f/0.25:f>0.8?(1-f)/0.2:Math.abs(f-0.55)<0.04?0:1;}
   eyeTarget(){const P=game.pointer;if(P.inside&&!this.preview)return[P.x,P.y];const q=this.prey;if(q&&q.x!=null)return[q.x,q.y-(q.h||0)];const a=this.ang+Math.sin(this.t*0.6)*0.8;return[this.x+Math.cos(a)*40,this.y+Math.sin(a)*40];}
