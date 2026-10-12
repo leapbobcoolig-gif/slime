@@ -2672,10 +2672,10 @@ const SWATCHES={
    paint(m,q,f,lat){if(f>0.46&&f<0.54)return this.Rd[q];// a red sash round its middle
      if(Math.abs(lat)<0.22&&fract(f*18)<0.45&&f<0.85)return this.Gd[Math.min(3,q+1)];// brass buttons down its coat
      if(Math.abs(Math.abs(lat)-0.75)<0.12&&f<0.85)return this.Gd[q];return this.Nv[q];}},// gold braid trim
-  {id:'zap',name:'Electric worm',tier:'special',fx:'zap',dot:['#d8ff3a','#6aff4a'],outline:'#0a1a04',
+  {id:'zap',name:'Electric worm',tier:'special',fx:'zap',dot:['#d8ff3a','#6aff4a'],outline:'#3a8a10',
    C:ramp('#2a5a06','#6ab80e','#c8ff2a','#f8ffc0'),
-   paint(m,q,f,lat,x,y,w){const a=Math.abs(lat);if(a>1.02){const k=hash(x*7+Math.floor(w.t*24),y*3);return k>0.55?this.C[3]:k>0.25?this.C[2]:this.C[0];}// fuzz of crackling filaments, flickering every frame
-     return a<0.28?mixc(this.C[3],hex('#ffffff'),0.7):a<0.5?this.C[3]:this.C[Math.min(2,q+(a<0.75?1:0))];}},// white-hot core, neon round it
+   paint(m,q,f,lat,x,y,w){const a=Math.abs(lat);if(a>1.02){const k=hash(x*7+Math.floor(w.t*24),y*3);return k>0.55?this.C[3]:k>0.2?this.C[2]:this.C[1];}// fuzz of crackling filaments, flickering every frame (never dark: it's made of light)
+     return a<0.28?mixc(this.C[3],hex('#ffffff'),0.7):a<0.5?this.C[3]:this.C[clamp(q+(a<0.75?1:0),1,2)];}},// white-hot core, neon round it (never the dark shade: it's made of light)
   {id:'gummy',name:'Gummy worm',tier:'mythic',fx:'gummy',dot:['#ff3a5a','#ffd23a'],outline:'#3a0812',
    A:ramp('#7a0a1e','#d0203e','#ff4a62','#ffb0bc'),B:ramp('#8a5a06','#e0a010','#ffd23a','#fff4b0'),
    paint(m,q,f,lat,x,y,w){const k=clamp((f-0.3)/0.16,0,1);let o=k<=0?this.A[q]:k>=1?this.B[q]:mixc(this.A[q],this.B[q],k);// two flavours melting into each other
@@ -5209,7 +5209,8 @@ class FuzzWorm extends Pet{
   glow(fb,night){const S=this.sw||{};if(S.fx!=='zap')return;const E=this.emi||[],sp=this.wet>0.4&&hash(Math.floor(this.t*20),3)>0.5,gp=[];for(let j=0;j<E.length;j+=2)gp.push(E[j]);
     const q=this.segs[14],k=(0.25+night*0.7)*(sp?0.25:1)*(0.85+0.15*hash(Math.floor(this.t*15),7));
     bodyLight(fb,{x:q.x,y:q.y,h:q.z},gp,{k,hi:hex('#c8ff3a'),lo:hex('#4ab01a'),skip:new Set(gp)});
-    if(!sp)for(let j=0;j<E.length;j+=2)fb.px[E[j]]=E[j+1];
+    if(!sp){const set=new Set(gp),W0=fb.w,rim=hex('#6ab80e');for(let j=0;j<E.length;j+=2){const i=E[j];fb.px[i]=E[j+1];// its own colours, and its outline lit too (no dark specks)
+        for(const o of[1,-1,W0,-W0]){const n=i+o;if(!set.has(n)&&n>=0&&n<fb.px.length){set.add(n);fb.px[n]=mixc(fb.px[n],rim,0.8);}}}}
     if(this.curl<0.9){const N=this.N,Sg=this.segs,W=hex('#f8ffd0'),Y=hex('#d8ff3a'),T=Math.floor(this.t*12);
       for(let n=0;n<2;n++){if(hash(n*13,T)<0.35)continue;const i=2+Math.floor(hash(n*7+1,T)*(N-8));let px=Sg[i].x,py=Sg[i].y-Sg[i].z;
         for(let k2=0;k2<6;k2++){const nq=Sg[Math.min(N-1,i+k2)],r=this.rad(i/(N-1))+1.5,an=hash(k2*5+n,Math.floor(this.t*20))*TAU,tx=nq.x+Math.cos(an)*r,ty=nq.y-nq.z+Math.sin(an)*r;
