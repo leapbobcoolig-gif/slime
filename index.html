@@ -2218,6 +2218,9 @@ const DART_MORPHS=[
    spots:[[9.4,-0.32,0.42],[11.8,0.36,0.42],[12.6,-0.5,0.38],[10.4,0.62,0.36]]},
   {name:'green',body:ramp('#0c8a5e','#1cb67e','#48e2aa','#b4ffe2'),spot:ramp('#06140e','#0c2218','#143424','#204a36'),leg:ramp('#06402c','#0c6a48','#169a68','#3cc890'),throat:ramp('#3a9a74','#6ccaa2','#a6eccc','#e4fff4'),pat:3,
    spots:[[10.9,0.05,1.6],[8.3,-0.62,0.85],[8.5,0.64,0.8],[13.1,-0.7,0.85]]}];
+const dartMorph=o=>Object.assign({pat:0,spots:[]},o);
+// which leg a pixel belongs to: [0 front / 1 back, 0 left / 1 right], from where it sits around the frog
+const dartLegSide=(f,x,y)=>{const c=Math.cos(f.ang),s=Math.sin(f.ang),dx=x-f.x,dy=y-(f.y-(f.h||0));return[(dx*c+dy*s)>0?0:1,(-dx*s+dy*c)>0?0:1];};
 // =====================================================================
 //  Swatches: colour morphs for critters, bought with coins in the Critters menu.
 //  A swatch swaps some of the critter's colour ramps (and its outline) only while it's being drawn,
@@ -2234,7 +2237,49 @@ const SWATCHES={
     {id:'strawberry',name:'Strawberry',price:40,dot:['#ff5038','#2c54c0'],morph:DART_MORPHS[2]},
     {id:'green',name:'Green & black',price:40,dot:['#48e2aa','#0c2218'],morph:DART_MORPHS[3]},
     {id:'citronella',name:'Citronella',price:60,dot:['#fad83a','#1f42a4'],morph:{name:'citronella',body:ramp('#a07c00','#dcae10','#fad83a','#fff3a6'),spot:ramp('#06060a','#0e0e14','#18181f','#26262e'),leg:ramp('#0c1a52','#142c7a','#1f42a4','#3e66c8'),throat:ramp('#b09030','#e0c060','#f8e498','#fffbe6'),pat:3,spots:[[10.9,0.05,1.6],[8.3,-0.62,0.85],[8.5,0.64,0.8],[13.1,-0.7,0.85]]}},
-    {id:'powder',name:'Powder blue',price:60,dot:['#b4d8f4','#22346a'],outline:'#14203a',morph:{name:'powder',body:ramp('#5a86b0','#86b4dc','#b4d8f4','#eaf8ff'),spot:ramp('#0c1430','#16224a','#22346a','#34488a'),leg:ramp('#3a5a88','#5a80b0','#86aad6','#c0daf4'),throat:ramp('#8aa8c8','#b8d0e8','#dcecf8','#ffffff'),pat:0,spots:[[11.4,0,1.4],[8.9,-0.56,0.85],[9.1,0.58,0.85]]}}],
+    {id:'powder',name:'Powder blue',price:60,dot:['#b4d8f4','#22346a'],outline:'#14203a',morph:{name:'powder',body:ramp('#5a86b0','#86b4dc','#b4d8f4','#eaf8ff'),spot:ramp('#0c1430','#16224a','#22346a','#34488a'),leg:ramp('#3a5a88','#5a80b0','#86aad6','#c0daf4'),throat:ramp('#8aa8c8','#b8d0e8','#dcecf8','#ffffff'),pat:0,spots:[[11.4,0,1.4],[8.9,-0.56,0.85],[9.1,0.58,0.85]]}},
+    // vivid, special and mythic: they paint the frog's body and limbs themselves (body coords: s 2.6 snout .. 13.5 rump, l -1..1 across)
+    {id:'lava',name:'Lava lamp',tier:'vivid',dot:['#ff8a1a','#5a1a7a'],outline:'#12041c',
+      morph:dartMorph({body:ramp('#2a0a3e','#46125e','#64208a','#8a3ab0'),spot:ramp('#c83a00','#ff6a00','#ffa21a','#ffe070'),leg:ramp('#4a4e5a','#7a808e','#b0b6c4','#e8ecf4'),throat:ramp('#c83a00','#ff6a00','#ffa21a','#ffe070')}),
+      body(s,l,q,x,y,f){const P=this.morph,t=f.t;let F=0;// blobs of glowing wax drifting up and down inside, merging and splitting
+        for(let i=0;i<3;i++){const bs=8.2+Math.sin(t*0.45+i*2.1)*3.6,bl=Math.sin(t*0.3+i*1.7)*0.45,r=1.5+0.35*Math.sin(t*0.7+i);F+=r*r/((s-bs)*(s-bs)+((l-bl)*4.6)*((l-bl)*4.6)+0.01);}
+        if(F>1.25)return P.spot[Math.min(3,q+(F>2.4?1:0))];if(F>0.95)return P.spot[0];return P.body[q];},
+      limb(s,l,q){return this.morph.leg[q];},toe:ramp('#4a4e5a','#7a808e','#b0b6c4','#e8ecf4')},
+    {id:'donut',name:'Sprinkle donut',tier:'vivid',dot:['#ff8ac8','#7a4422'],outline:'#2a1008',
+      morph:dartMorph({body:ramp('#c8508e','#ee70aa','#ff9acb','#ffd6ec'),spot:ramp('#3a1c0c','#5a2e16','#7a4422','#9a6038'),leg:ramp('#3a1c0c','#5a2e16','#7a4422','#a06a3c'),throat:ramp('#c89a6a','#e8bc88','#f8d8a8','#fff0d8')}),
+      SP:[ramp('#c01a2a','#e83040','#ff5a5a','#ffa0a0'),ramp('#c09a00','#f0c800','#ffe63a','#fff6a0'),ramp('#1a5ad0','#2a7aff','#5aa8ff','#a8d4ff'),ramp('#c8c8c8','#e8e8e8','#ffffff','#ffffff'),ramp('#1a9a3a','#2ac85a','#5af08a','#b0ffc8')],
+      body(s,l,q){const P=this.morph,al=Math.abs(l);if(al>0.86)return P.spot[q];// the chocolate donut showing at the rim
+        const u=s/2.3,v=(l+1)/0.5,cu=Math.floor(u),cv=Math.floor(v),h=hash(cu*7+11,cv*13+5);
+        if(h>0.12){const fu=(u-cu)*2.3,fv=(v-cv)*2.5,d=Math.floor(hash(cu+3,cv+9)*4),D=[[1,0],[0,1],[1,1],[1,-1]][d],px=Math.floor(fu),py=Math.floor(fv);
+         if((px===1&&py===1)||(px===1+D[0]&&py===1+D[1]))return this.SP[Math.floor(hash(cu*3,cv*5)*5)][Math.max(1,q)];}
+        return P.body[q];},
+      limb(s,l,q){return this.morph.leg[q];}},
+    {id:'splat',name:'Paint splat',tier:'vivid',dot:['#ffffff','#ff2a9a'],outline:'#1a1a24',
+      morph:dartMorph({body:ramp('#b8bcc8','#dcdfe8','#f4f5fa','#ffffff'),spot:ramp('#9a0a5a','#d0187a','#ff2a9a','#ff8ac8'),leg:ramp('#b8bcc8','#dcdfe8','#f4f5fa','#ffffff'),throat:ramp('#b8bcc8','#dcdfe8','#f4f5fa','#ffffff')}),
+      C:[ramp('#9a0a5a','#d0187a','#ff2a9a','#ff8ac8'),ramp('#0a7a9a','#10a8d0','#2ad8ff','#a0f0ff'),ramp('#4a9a00','#70cc0a','#a0ff2a','#d8ff9a'),ramp('#b04a00','#e8700a','#ff9a2a','#ffd09a')],
+      S:[[11.5,-0.3,2.0,0],[7.2,0.45,1.6,1],[9.4,-0.7,1.2,2],[4.5,-0.25,1.2,3],[12.8,0.65,1.1,1]],
+      body(s,l,q){for(const[ss,ll,r,c]of this.S){const ds=s-ss,dl=(l-ll)*4.6,a=Math.atan2(dl,ds),rr=r*(0.8+0.45*Math.sin(a*5+ss));
+         if(Math.hypot(ds,dl)<rr)return this.C[c][q];
+         if(Math.abs(ds)<0.5&&Math.sign(dl||1)===Math.sign(ll||1)&&Math.abs(dl)<rr+2.2&&hash(Math.round(ss*3),c)>0.3)return this.C[c][q];}// a drip running off toward the side
+        return this.morph.body[q];},
+      limb(s,l,q,x,y,f){const[fr,rt]=dartLegSide(f,x,y);return s>0.75?this.C[fr*2+rt][q]:this.morph.leg[q];},// feet dipped in a different colour each
+      toeF(x,y,f){const[fr,rt]=dartLegSide(f,x,y);return this.C[fr*2+rt];}},
+    {id:'tiedye',name:'Tie-dye',tier:'vivid',dot:['#ff5ab4','#3ad0ff'],outline:'#100a24',
+      morph:dartMorph({body:ramp('#c84a8a','#f06aa8','#ff96c4','#ffd0e6'),spot:ramp('#06081e','#0c1036','#141a4e','#202a6a'),leg:ramp('#06081e','#0c1036','#18205a','#2a3880'),throat:ramp('#c8b8e8','#e0d4f8','#f2ecff','#ffffff')}),
+      H:[ramp('#c81a4a','#f0305a','#ff5a7a','#ffa8b8'),ramp('#d06a00','#f8900a','#ffb03a','#ffd8a0'),ramp('#c8b000','#f0d80a','#fff04a','#fffaa8'),ramp('#2a9a1a','#3ac82a','#6af05a','#b8ffa8'),ramp('#0a7ab8','#1aa0e8','#4ac8ff','#a8e8ff'),ramp('#6a2ab8','#8a44e8','#b07aff','#dcc0ff')],
+      body(s,l,q,x,y,f){const ds=s-9,dl=l*4.6,r=Math.hypot(ds,dl),a=Math.atan2(dl,ds);let h=(a/TAU+r*0.16+1)*6;h=((h%6)+6)%6;// a rainbow spiral from the middle of its back
+        const i=Math.floor(h),fr=h-i,j=fr>0.78?(i+1)%6:i;return this.H[j][q];},
+      limb(s,l,q){return this.morph.leg[q];}},
+    {id:'galaxy',name:'Galaxy',tier:'special',fx:'galaxy',dot:['#2a1a6a','#c8b0ff'],outline:'#05040e',
+      morph:dartMorph({body:ramp('#0a0820','#16123a','#241c58','#3a2c7a'),spot:ramp('#e8e0ff','#f4f0ff','#ffffff','#ffffff'),leg:ramp('#06051a','#0e0c2c','#1a1646','#2a225e'),throat:ramp('#3a2a7a','#5a44a8','#8a70d8','#c8b0ff')}),
+      body(s,l,q,x,y,f){const P=this.morph,t=f.t,n=vnoise(s*0.32+t*0.25,l*1.4+3),n2=vnoise(s*0.45-t*0.18+20,l*1.8+9);
+        let c=P.body[q];if(n>0.6)c=mixc(c,hex('#8a3ac8'),Math.min(0.75,(n-0.6)*2.4));if(n2>0.62)c=mixc(c,hex('#1aa8b8'),Math.min(0.6,(n2-0.62)*2.2));return c;},
+      limb(s,l,q){return this.morph.leg[q];}},
+    {id:'toxic',name:'Toxic king',tier:'mythic',fx:'toxic',dot:['#9aff2a','#0c0e0a'],outline:'#020302',sc:1.3,
+      morph:dartMorph({body:ramp('#050605','#0b0d0a','#141812','#20261c'),spot:ramp('#5aa800','#8ae014','#b4ff40','#eaffb0'),leg:ramp('#050605','#0b0d0a','#141812','#20261c'),throat:ramp('#5aa800','#8ae014','#b4ff40','#eaffb0')}),
+      body(s,l,q){const P=this.morph,al=Math.abs(l);// glossy black with two clean glowing stripes, snout to rump
+        if(al>0.36&&al<0.7&&s>3.6)return P.spot[Math.max(2,q)];return P.body[q];},
+      limb(s,l,q){const P=this.morph;return(Math.floor(s*3.2)%2===1)?P.spot[q]:P.leg[q];},toe:ramp('#5aa800','#8ae014','#b4ff40','#eaffb0')}],
   salamander:[
     {id:'orange',name:'Orange',price:40,dot:['#f07a1c','#2e2b38'],pal:{sal:{spot:ramp('#5e2406','#b04a0c','#f07a1c','#ffb870')}}},
     {id:'red',name:'Red',price:40,dot:['#d8302a','#2e2b38'],pal:{sal:{spot:ramp('#4a0606','#981414','#d8302a','#ff7a62')}}},
@@ -2418,6 +2463,24 @@ function withSkin(pet,fn){const sw=swatchOf(pet);if(pet.baseOutline===undefined)
   // chameleon and dragon mix their colours ahead of time, so redo that with the swatch on (and back again after)
   if(pet.updateColors)pet.updateColors();
   try{return fn();}finally{for(let i=saved.length-1;i>=0;i--){const[P,kk,v]=saved[i];if(v===undefined)delete P[kk];else P[kk]=v;}if(pet.updateColors)pet.updateColors();}}
+// skin light for critters that glow: a soft halo hugging the drawn body (gp = its pixels), a wide glow over the ground around it,
+// and an optional per-pixel pass to light the body itself. o: {k strength, hi colour near the skin, lo colour further out, body(i,v,add)}
+function bodyLight(fb,f,gp,o){const W=fb.w,k=o.k;if(!gp.length||k<0.02)return;
+  const add=(i,col,a)=>{const c=fb.px[i];fb.px[i]=rgb((c&255)+(col&255)*a,(c>>8&255)+((col>>8)&255)*a,(c>>>16&255)+((col>>16)&255)*a);};
+  let x0=1e9,y0=1e9,x1=-1,y1=-1;for(const i of gp){const x=i%W,y=(i/W)|0;if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y;}
+  const R=7,bx=x0-R,by=y0-R,bw=x1-x0+1+2*R,bh=y1-y0+1+2*R,m=new Uint8Array(bw*bh),a=new Float32Array(bw*bh),b=new Float32Array(bw*bh);
+  for(const i of gp){const j=((i/W|0)-by)*bw+i%W-bx;m[j]=1;a[j]=1;}
+  // two passes of a separable box blur ≈ a gaussian halo that follows the outline evenly
+  const blur=(s,d,r)=>{for(let y=0;y<bh;y++){let acc=0;const oo=y*bw;for(let x=-r;x<bw+r;x++){if(x+r<bw)acc+=s[oo+x+r];if(x-r-1>=0)acc-=s[oo+x-r-1];if(x>=0&&x<bw)d[oo+x]=acc/(2*r+1);}}
+    for(let x=0;x<bw;x++){let acc=0;for(let y=-r;y<bh+r;y++){if(y+r<bh)acc+=d[(y+r)*bw+x];if(y-r-1>=0)acc-=d[(y-r-1)*bw+x];if(y>=0&&y<bh)s[y*bw+x]=acc/(2*r+1);}}};
+  blur(a,b,3);blur(a,b,2);
+  const cx=(x0+x1)/2,cy=(y0+y1)/2,gy=f.y,rx=Math.max(x1-x0,y1-y0)/2+30,ry=rx*0.75;
+  for(let yy=-Math.ceil(ry);yy<=Math.ceil(ry)+(f.h||0);yy++)for(let xx=-Math.ceil(rx);xx<=Math.ceil(rx);xx++){const X=Math.round(cx+xx),Y=Math.round(cy+yy);if(X<0||Y<0||X>=W||Y>=fb.h)continue;
+    const jx=X-bx,jy=Y-by,inb=jx>=0&&jy>=0&&jx<bw&&jy<bh,j=jy*bw+jx;if(inb&&m[j])continue;
+    const d1=Math.hypot(xx/rx,yy/ry);let ff=d1<1?(1-d1)*(1-d1)*0.5:0;const d2=Math.hypot((X-cx)/(rx*0.55),(Y-gy)/(ry*0.35));if(d2<1)ff+=(1-d2)*(1-d2)*0.6;
+    if(inb){const v=a[j];if(v>0.01)ff+=Math.pow(Math.min(1,v*1.6),1.15)*0.7;}
+    if(ff>0.004)add(Y*W+X,inb&&a[j]>0.35?o.hi:o.lo,ff*k);}
+  if(o.body)for(const i of gp){const j=((i/W|0)-by)*bw+i%W-bx;o.body(i,a[j],add);}}
 class DartFrog extends Frog{
   constructor(world,x,y){super(world,x,y,'dart');this.sc=0.96;this.call=0;this.callT=rand(6,14);this.warn=0;this.tap=0;this.glint=0;
     this.morph=0;const ps=save.pets&&save.pets.dart;if(ps)delete ps.morph;this.seed=rand(40);}// always the classic blue (other morphs wait for a swatch feature)
@@ -2430,7 +2493,7 @@ class DartFrog extends Frog{
   startle(x,y){if(this.state==='grabbed'||this.state==='fall')return;this.warn=1;super.startle?super.startle(x,y):0;}
   tryGrab(x,y){const r=super.tryGrab(x,y);if(r){this.warn=1;if(!this.preview)SFX.play('trill');}return r;}
   petMe(){const r=super.petMe();if(r&&!this.preview){this.glint=Math.min(1,this.glint+0.05);this.pT=(this.pT||0)-1/60;if(this.pT<=0){this.pT=rand(1.4,2.4);SFX.play('chirp');}}return r;}
-  update(dt){super.update(dt);const w=this.world;
+  update(dt){this.sc=this.sw&&this.sw.sc||0.96;super.update(dt);const w=this.world;if(this.sw&&this.sw.fx==='toxic')this.fumes(dt);
     this.warn=Math.max(0,this.warn-dt*(this.state==='grabbed'?0.1:0.6));if(this.state==='grabbed')this.warn=Math.max(this.warn,0.6);this.glint=Math.max(0,this.glint-dt*0.3);
     // taps its toes while it eyes up prey
     this.tap+=((this.state==='hunt'&&this.mode==='sit'?1:0)-this.tap)*Math.min(1,dt*8);
@@ -2439,6 +2502,9 @@ class DartFrog extends Frog{
     if(this.call>0)this.call-=dt;else if(this.isActive()&&this.mode==='sit'&&(this.state==='idle'||this.state==='petted')){this.callT-=dt*(misted?6:1);if(this.callT<=0){this.callT=rand(10,22);this.call=1.4;if(!this.preview)SFX.play('trill');}}}
   sac(){return this.call>0?Math.max(0,Math.sin((1.4-this.call)*Math.PI*4.3))*Math.min(1,this.call*3):0;}
   color(m,q,s,l,x,y){const P=this.pal;if(this.warn>0.15&&Math.sin(this.t*18)>0)q=Math.min(3,q+1);
+    const V=this.sw&&this.sw.body?this.sw:null;// patterned skins paint the body and legs themselves
+    if(V){if(m===M.BODY)return V.body(s,l,q,x,y,this);if(m===M.LIMB&&V.limb)return V.limb(s,l,q,x,y,this);
+      if(m===M.TOE){if(V.toeF)return V.toeF(x,y,this)[Math.min(3,q+1)];if(V.toe)return V.toe[q];}}
     switch(m){
       case M.BODY:{// hand-placed markings along the body (s: 2.6 snout .. 13.5 rump, l: -1..1 across), crisp at this size
         if(P.pat===1){const w=(l*l)*0.6;if((s>7.5-w&&s<9.3-w)||(s>10.9+w&&s<12.7+w))return P.spot[q];return P.body[q];}// bumblebee bands
@@ -2485,15 +2551,40 @@ class DartFrog extends Frog{
     const closed=this.eyesClosed||this.blink>0;
     for(const sd of[-1,1]){const[ex,ey]=this.L(3.6,sd*3.3);cap(ex,ey,1.85,ex,ey,1.85,closed?M.LID:M.EYE,3,0,0,1.2);}
     if(this.tg){const m=this.mouthScreen(),T=this.tg;cap(m.x,m.y,.8,T.tx,T.ty,.9,M.TONGUE,5);cap(T.tx,T.ty,1.4,T.tx,T.ty,1.4,M.TONGUE,5);}
+    // toxic king: big venom glands bulging out behind the eyes, so it's broad-shouldered from above; they pulse and swell when it's alarmed
+    if(this.sw&&this.sw.fx==='toxic'){const pu=0.5+0.5*Math.sin(t*1.8);for(const sd of[-1,1]){const[ax,ay]=this.L(1.4,sd*4.3),[bx,by]=this.L(-0.8,sd*4.7),r=1.75+pu*0.15+this.warn*0.4;cap(ax,ay,r,bx,by,r*0.85,M.CLAW,2,0,0,0.9);}}
   }
   mouthScreen(){const[x,y]=this.L(6.6,0);return{x,y};}
-  drawExtras(fb){const Wt=hex('#ffffff'),c=Math.cos(this.ang),s=Math.sin(this.ang);
+  drawExtras(fb){const Wt=hex('#ffffff'),c=Math.cos(this.ang),s=Math.sin(this.ang),fx=this.sw&&this.sw.fx;
+    if(fx){const W=fb.w,g=this.gp||(this.gp=[]);g.length=0;for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++){const v=fb.mat[y*W+x];if(v&&v!==M.EYE&&v!==M.LID)g.push(y*W+x);}}// body pixels, for the glow
+    if(fx==='toxic'){const G=hex('#a8ff4a'),T=hex('#7ad80a');// fumes seeping off its glands, and glowing three-toed tracks where it lands
+      for(const g of this.gas||[]){const a=Math.sin(Math.min(1,g.t/g.life)*Math.PI)*0.35,R2=Math.ceil(g.r);for(let yy=-R2;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++){const d=Math.hypot(xx,yy)/g.r;if(d<1)pmix(fb,g.x+xx,g.y+yy,G,a*(1-d)*(0.6+0.6*vnoise((g.x+xx)*0.5,(g.y+yy)*0.5+g.t)));}}
+      for(const p of this.prints||[]){const a=0.75*Math.min(1,p.life/2),pc=Math.cos(p.a),ps=Math.sin(p.a);pmix(fb,p.x,p.y,T,a);for(const o of[-0.8,0,0.8])pmix(fb,p.x+pc*2-ps*o*1.6,p.y+ps*2+pc*o*1.6,T,a);}}
     // wet, glossy skin: bright little highlights on the back and head, toward the light
     const gl=(lx,ly,a)=>{const[x,y]=this.L(lx,ly);pmix(fb,x,y,Wt,a);};
     gl(-2.4,-1.6,0.85);gl(-1.6,-2.2,0.55);gl(2.6,-1.4,0.7);if(this.glint>0.2||this.warn>0.3){gl(-3.4,1.4,0.6);gl(0.6,-2.8,0.6);}
     // eye shine
     if(!(this.eyesClosed||this.blink>0))for(const sd of[-1,1]){const[ex,ey]=this.L(3.6,sd*3.3);pset(fb,Math.round(ex-0.9),Math.round(ey-1.0),Wt);}
   }
+  get selfLit(){return!!(this.sw&&this.sw.fx);}// galaxy and toxic king glow in the menu previews too
+  toLocal(x,y){const c=Math.cos(this.ang),s=Math.sin(this.ang),dx=x-this.x,dy=y-(this.y-(this.h||0));return[dx*c+dy*s,-dx*s+dy*c];}
+  fumes(dt){const gas=this.gas||(this.gas=[]),pr=this.prints||(this.prints=[]);
+    this.gT=(this.gT??0)-dt;if(this.gT<=0&&gas.length<7){this.gT=rand(0.35,0.8);const sd=Math.random()<0.5?-1:1,[x,y]=this.L(0.3,sd*4.6);gas.push({x,y,vx:rand(-3,3),vy:rand(-5,-2),r:rand(1.8,3),t:0,life:rand(1.6,2.6)});}
+    for(const g of gas){g.t+=dt;g.x+=g.vx*dt;g.y+=g.vy*dt;g.r+=dt*1.2;}this.gas=gas.filter(g=>g.t<g.life);
+    const air=this.h>0.5;if(this.wasAir&&!air&&!this.preview)for(const sd of[-1,1]){const[x,y]=this.L(-3,sd*4.5);pr.push({x:Math.round(x),y:Math.round(y),a:this.ang,life:5});}this.wasAir=air;
+    for(const p of pr)p.life-=dt;this.prints=pr.filter(p=>p.life>0);}
+  glow(fb,night){const fx=this.sw&&this.sw.fx;if(!fx)return;const W=fb.w,t=this.t;
+    if(fx==='galaxy'){const k=0.1+night*0.85,B=hex('#3a2a88');
+      bodyLight(fb,this,this.gp||[],{k,hi:hex('#8a6aff'),lo:hex('#4a2aa8'),body:(i,v,add)=>add(i,B,0.2*k)});
+      // its stars are fixed to the skin and twinkle one at a time, a few with little cross sparkles
+      for(const i of this.gp||[]){const x=i%W,y=(i/W)|0,[u,v]=this.toLocal(x,y),h=hash(Math.round(u*1.1)+40,Math.round(v*1.1)+17);if(h<0.9)continue;
+        const tw=0.5+0.5*Math.sin(t*(1.5+h*3)+h*50),b=(0.35+0.75*tw*tw)*(0.6+night*0.4);padd(fb,x,y,200*b,195*b,255*b);
+        if(h>0.965&&tw>0.6)for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]])padd(fb,x+dx,y+dy,90*b,80*b,140*b);}}
+    if(fx==='toxic'){const k=0.15+night*0.85,L=hex('#7ae01a');
+      // the light comes only from its stripes and glands: the black stays black
+      const lit=(this.gp||[]).filter(i=>((fb.px[i]>>8)&255)>90);bodyLight(fb,this,lit,{k:k*0.6,hi:hex('#9aff3a'),lo:hex('#2a9a0a'),body:(i,v,add)=>add(i,L,0.3*k)});
+      for(const g of this.gas||[]){const a=Math.sin(Math.min(1,g.t/g.life)*Math.PI)*0.14*(0.4+night*0.6),R2=Math.ceil(g.r);for(let yy=-R2;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++){const d=Math.hypot(xx,yy)/g.r;if(d<1){const f=a*(1-d)*(0.7+0.6*vnoise((g.x+xx)*0.5,(g.y+yy)*0.5+g.t));padd(fb,g.x+xx,g.y+yy,60*f,200*f,20*f);}}}
+      for(const p of this.prints||[]){const a=Math.min(1,p.life/2)*(0.4+night*0.6),pc=Math.cos(p.a),ps=Math.sin(p.a);padd(fb,p.x,p.y,90*a,220*a,30*a);for(const o of[-0.8,0,0.8])padd(fb,p.x+pc*2-ps*o*1.6,p.y+ps*2+pc*o*1.6,70*a,180*a,20*a);}}}
   statusText(){if(this.state==='grabbed')return 'is flashing its warning colours at you';if(this.sac()>0.05||this.call>0.2)return 'is singing a buzzy little trill';
     if(this.state==='hunt'&&this.tap>0.5)return `is tapping its toes at ${PREY_NAME[this.prey?.type]||'something'}`;
     if(!this.isActive()&&this.state!=='sleeping')return 'is tucked in for the night';
