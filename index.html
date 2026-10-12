@@ -3738,7 +3738,10 @@ class Slime extends Pet{
       for(const p of P){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vh-=120*dt;p.h=Math.max(0,p.h+p.vh*dt);}m.fx=P.filter(p=>p.t<p.life);m.wasAir=m.h>0;m.sq=Math.max(0,(m.sq||0)-dt*4);}}
   popFrom(k){const P=this.pearls,F=this.fish;if(k==='boba'&&P&&P.length)return this.U(P[P.length-1].u,P[P.length-1].v);
     if(k==='fish'&&F)return this.U(Math.cos(F.a)*F.r,Math.sin(F.a)*F.r*0.9);if(k==='snow')return this.U(-0.42,0.2);if(k==='cube')return this.U(0.2,-0.1);return[this.x,this.y-this.h];}
-  draw(fb){const S=this.sw||{};
+  draw(fb){const S=this.sw||{},mb=this.mini;
+    if(mb&&mb.kind&&mb.y<this.y-1){mb.back=1;const W=fb.w,X=Math.round(mb.x),Y=Math.round(mb.y-mb.h),keep=[];// a baby hopping behind it goes on first, so the jelly covers it (and you see it through the jelly)
+      for(let y=Y-10;y<=Y+12;y++)for(let x=X-10;x<=X+10;x++)if(x>=0&&y>=0&&x<W&&y<fb.h)keep.push([y*W+x,fb.px[y*W+x]]);
+      this.drawBaby(fb,mb);if(typeof SUBBUF!=='undefined'&&SUBBUF.length===fb.px.length)for(const[i,c]of keep)if(fb.px[i]!==c)SUBBUF[i]=fb.px[i];}else if(mb)mb.back=0;
     if(S.fx==='chrome'){if(!this.bgs||this.bgs.length!==fb.px.length)this.bgs=new Uint32Array(fb.px.length);this.bgs.set(fb.px);}// the mirror needs what's behind it
     const mm=this.mini;if(mm&&mm.kind)this.mini=null;try{this.drawBlob(fb);}finally{this.mini=mm;}// a pop-out baby isn't a jelly blob
     for(const b of this.blobs()){if(!b.id)continue;const W=fb.w;for(let y=Math.floor(b.y-b.ry-1);y<=b.y+b.ry+1;y++)for(let x=Math.floor(b.x-b.rx-1);x<=b.x+b.rx+1;x++){if(x<0||y<0||x>=W||y>=fb.h)continue;const i=y*W+x;if(fb.mat[i]&&Math.hypot((x+.5-b.x)/(b.rx+0.6),(y+.5-b.y)/(b.ry+0.6))<1)fb.ll[i]=b.id;}}}
@@ -3747,7 +3750,7 @@ class Slime extends Pet{
     if(S.inside)this.drawInside(fb,S.inside);
     if(S.fx==='chrome')this.drawChrome(fb);if(S.fx==='glitter')this.drawGlitter(fb);if(S.fx==='cube')this.drawBevel(fb);
     const mm=this.mini;if(mm&&mm.kind)this.mini=null;try{this.drawFace(fb);}finally{this.mini=mm;}
-    if(mm&&mm.kind)this.drawBaby(fb,mm);}
+    if(mm&&mm.kind&&!mm.back)this.drawBaby(fb,mm);}
   inBody(fb,x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=fb.w||y>=fb.h)return false;const i=y*fb.w+x;return fb.mat[i]&&fb.cls[i]===2;}
   drawInside(fb,ins){const put=(fb,x,y,c,a=1)=>{if(this.inBody(fb,x,y))a>=1?pset(fb,x,y,c):pmix(fb,x,y,c,a);},out=this.mini&&this.mini.kind,t=this.t;
     const clip=i=>fb.mat[i]&&fb.cls[i]===2,tint=this.cr[2],item=(k,x,y,o={})=>slimeItem(fb,k,x,y,Object.assign({clip,tint},o));
