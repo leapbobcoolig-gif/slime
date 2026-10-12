@@ -453,7 +453,7 @@ body.fun-hud #petKind{align-self:flex-start;display:inline-block;margin-top:3px;
 body.fun-hud #petKind.swing{animation:skswing .9s cubic-bezier(.3,1.4,.5,1)}
 @keyframes sksway{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1deg)}}
 @keyframes skswing{0%{transform:rotate(-1.5deg)}25%{transform:rotate(7deg)}55%{transform:rotate(-4deg)}80%{transform:rotate(2deg)}100%{transform:rotate(-1.5deg)}}
-body.fun-hud #lvl{background:conic-gradient(from 0deg,#ff8fb1 0,#ff5d8a calc(var(--p,0)*1turn),#1e120a 0);box-shadow:none;border-radius:50%}
+body.fun-hud #lvl{background:none;box-shadow:none;border-radius:50%}
 body.fun-hud #lvl::before{inset:0;border-radius:0;background:var(--skin) 0 0/100% 100% no-repeat;image-rendering:pixelated}
 body.fun-hud #lvl b{color:#fff0c0;text-shadow:1px 0 0 #1a0c04,-1px 0 0 #1a0c04,0 1px 0 #1a0c04,0 -1px 0 #1a0c04,0 2px 0 #1a0c04}
 body.fun-hud #lvl small{background:#e8b04a;color:#3a2006;box-shadow:0 0 0 2px #1a0c04;border-radius:2px}
@@ -7618,7 +7618,7 @@ const ui={
   cuddleHTML(){const ps=petSave(),cs=cuddleState(ps),nx=cuddleNext(ps),grumpy=game.world&&game.world.mood==='grumpy';
     return `Cuddle coins <b style="color:#ff7a9a">${'&#9829;'.repeat(cs.n)}<span style="opacity:.3">${'&#9829;'.repeat(CUD_MAX-cs.n)}</span></b>${nx?` · next in ${mmss(nx)}`:''}${grumpy?' · <span style="color:#9ab4d0">too grumpy</span>':''}<i><em style="width:${Math.round(cs.love*100)}%"></em></i>`;},
   refreshPet(){if(!game.kind)return;$('petName').textContent=game.name+' ▾';$('petKind').textContent=SPECIES[game.kind].label+(game.world&&game.world.pet&&game.world.pet.mind?' · '+game.world.pet.mind.temper:'');this.refreshLevel();},
-  refreshLevel(){if(!game.kind)return;const ps=petSave();if(this._lv&&ps.lvl>this._lv&&this._lvKind===game.kind){const L=$('lvl');L.classList.remove('spin');void L.offsetWidth;L.classList.add('spin');}this._lv=ps.lvl;this._lvKind=game.kind;$('lvlNum').textContent=ps.lvl;const fr=ps.xp/xpNeed(ps.lvl);$('lvl').style.setProperty('--p',fr.toFixed(3));$('lvl').title=`Bond ${ps.lvl} · ${Math.round(fr*100)}% to the next level`;},
+  refreshLevel(){if(!game.kind)return;const ps=petSave();if(this._lv&&ps.lvl>this._lv&&this._lvKind===game.kind){const L=$('lvl');L.classList.remove('spin');void L.offsetWidth;L.classList.add('spin');}this._lv=ps.lvl;this._lvKind=game.kind;$('lvlNum').textContent=ps.lvl;const fr=ps.xp/xpNeed(ps.lvl);$('lvl').style.setProperty('--p',fr.toFixed(3));HUDSKIN.lvlP=fr;if(HUDSKIN.on)HUDSKIN.paint($('lvl'),'medal');$('lvl').title=`Bond ${ps.lvl} · ${Math.round(fr*100)}% to the next level`;},
   refreshLight(){const d=game.world?game.world.dayTarget>0.5:true;$('btnLight').querySelector('img').src=iconURL(d?'sun':'moon');},
   tuckTray(mode){if(mode&&!save.set.trayTuck)return;const tr=$('tray'),tab=$('trayTab');if(!tr||!tab)return;if(mode==='drag'&&this.tuck==='pick')return;this.tuck=mode||null;
     tr.classList.toggle('tuck',!!mode);tab.hidden=!mode||tr.hidden;if(mode){tab.innerHTML='';if(game.food)tab.appendChild(foodCanvas(game.food));tab.insertAdjacentHTML('beforeend',mode==='drag'?'<span>DROP HERE TO PUT BACK</span>':'<span>FOOD &#9650;</span>');}},
@@ -7952,7 +7952,7 @@ const HAND={// a slim white cartoon glove: three long fingers, a thumb and a cuf
 const HUDSKIN={on:false,tp:3,cache:new Map(),ro:null,faceT:0,blink:0,lastMood:'',
   seedOf(s){let h=7;for(const c of String(s))h=(h*31+c.charCodeAt(0))%9973;return h;},
   // tw x th texels; returns a data URL
-  draw(kind,tw,th,seed){const key=kind+':'+tw+':'+th+':'+seed;if(this.cache.has(key))return this.cache.get(key);
+  draw(kind,tw,th,seed){const lp=clamp(this.lvlP||0,0,1),key=kind+':'+tw+':'+th+':'+seed+(kind==='medal'?':'+Math.round(lp*48):'');if(this.cache.has(key))return this.cache.get(key);
     const cv=document.createElement('canvas');cv.width=tw;cv.height=th;const cx=cv.getContext('2d'),img=cx.createImageData(tw,th),d=new Uint32Array(img.data.buffer);
     const put=(x,y,c)=>{if(x>=0&&y>=0&&x<tw&&y<th)d[y*tw+x]=c;},get=(x,y)=>d[y*tw+x];
     const dark=hex('#1a0c04'),hi=hex('#e8b878'),BR=ramp('#6a4210','#b07820','#e8b04a','#fff0a8');
@@ -7964,8 +7964,8 @@ const HUDSKIN={on:false,tp:3,cache:new Map(),ro:null,faceT:0,blink:0,lastMood:''
     const chamf=(x,y,W,H,r)=>{const cx2=x<r?r-x:x>W-1-r?x-(W-1-r):0,cy2=y<r?r-y:y>H-1-r?y-(H-1-r):0;return cx2+cy2>r;};
     const screw=(x,y)=>{for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){const e=Math.abs(i)+Math.abs(j);put(x+i,y+j,e===2?BR[0]:(i+j<0?BR[3]:BR[2]));}put(x-1,y+1,BR[1]);put(x+1,y-1,BR[1]);put(x,y,BR[1]);put(x+1,y+2,shade(get(x+1,y+2)||dark,0.6));};
     if(kind==='medal'){const R=tw/2,c0=(tw-1)/2;for(let y=0;y<th;y++)for(let x=0;x<tw;x++){const dx=x-c0,dy=y-c0,r=Math.hypot(dx,dy),l=-(dx+dy)/(r||1);
-        // a dark rim, then a clear band where the bond progress ring shows through, a dark edge, then the wooden face (lit along its top-left)
-        const bw=Math.max(2,R*0.32);if(r>R-0.3)continue;if(r>R-1.2)put(x,y,dark);else if(r>R-1.2-bw)continue;else if(r>R-2.1-bw)put(x,y,dark);else if(r>R-2.9-bw&&l>0.2)put(x,y,mixc(wood(x,y),hi,0.35));
+        // a dark rim, then the bond progress ring (pink fills clockwise from the top over a dark track), a dark edge, then the wooden face (lit along its top-left)
+        const bw=Math.max(2,R*0.32);if(r>R-0.3)continue;if(r>R-1.2)put(x,y,dark);else if(r>R-1.2-bw){let a=Math.atan2(dx,-dy)/TAU;if(a<0)a+=1;put(x,y,a<Math.round(lp*48)/48?(l>0.3?hex('#ff8fb1'):hex('#ff5d8a')):hex('#1e120a'));}else if(r>R-2.1-bw)put(x,y,dark);else if(r>R-2.9-bw&&l>0.2)put(x,y,mixc(wood(x,y),hi,0.35));
         else put(x,y,mixc(wood(x,y),hex('#2a1608'),0.1));}}
     else{const lip=kind==='btn'?3:kind==='btnDown'?1:kind==='paperless'?1:2,top=kind==='btnDown'?2:0,rr=kind==='btn'||kind==='btnDown'?2:2;
       for(let y=top;y<th;y++)for(let x=0;x<tw;x++){const yy=y-top,H2=th-top;if(chamf(x,yy,tw,H2,rr))continue;
