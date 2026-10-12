@@ -332,6 +332,7 @@ body.fun-tools #dock{padding:4px;background:#1a0f06;border-color:#060a07;box-sha
 .roster{display:block}
 .pfilt{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .pwrap{display:grid;grid-template-columns:290px 1fr;gap:16px;height:min(600px,calc(100vh - 230px));min-height:360px}
+@media (min-width:761px){#roster.colours .pdet{overflow:hidden}#roster.colours .pbig canvas{height:clamp(110px,30vh,240px);aspect-ratio:auto;object-fit:cover}#roster.colours .pcols{flex:1;min-height:0;overflow-y:auto;padding-right:4px}#roster.colours .pgo{flex:none;margin-top:0}}
 .plist{overflow:auto;padding-right:6px;display:flex;flex-direction:column;gap:2px}.plist .rgroup{margin-top:4px}.pnone{color:var(--mute);font-size:18px;padding:10px}
 .prow{display:flex;align-items:center;gap:10px;padding:5px 7px;border-radius:8px;background:none;border:0;text-align:left;cursor:pointer;color:inherit;font:inherit;flex:none}
 .prow:hover{background:rgba(255,220,160,.08)}.prow.on{background:#3a2412;box-shadow:inset 0 0 0 2px #ffd870}
@@ -361,7 +362,17 @@ body.fun-hud .modal .pdet{background:#3a2412;box-shadow:inset 0 0 0 2px #6a4826,
 .ptag{position:absolute;top:6px;right:6px;display:flex;align-items:center;gap:4px;font-family:var(--display);font-size:10px;padding:4px 7px 3px;border-radius:6px;box-shadow:0 2px 0 rgba(0,0,0,.45)}
 .ptag img{width:13px;height:13px}.ptag.price{background:#2a1608;color:#ffe08a;box-shadow:inset 0 0 0 2px #c8901e,0 2px 0 rgba(0,0,0,.45)}.ptag.free{background:#8fcf5a;color:#14200c}.ptag.here{left:6px;right:auto;background:#ffd870;color:#3a2006}
 .chips{display:flex;gap:5px;flex-wrap:wrap;min-height:0}.chips:empty{display:none}
-.swrow{display:flex;flex-direction:column;gap:6px}.swdots{display:flex;gap:6px;flex-wrap:wrap}.swdot{width:24px;height:24px;border-radius:50%;border:2px solid #060a07;box-shadow:inset 0 0 0 2px rgba(255,255,255,.18);cursor:pointer;padding:0;position:relative}.swdot.on{outline:3px solid #ffd27a;outline-offset:1px}.swdot.lock::after{content:'';position:absolute;right:-3px;bottom:-3px;width:9px;height:9px;border-radius:50%;background:#f4c64a;border:2px solid #060a07}.swact{display:flex;align-items:center;gap:8px}.swnm{flex:1;font-family:var(--display);font-size:11px;color:#f4e2bc}.pdet>*{flex-shrink:0}.pinfo{display:flex;flex-direction:column;gap:9px}.pinfo>*{flex-shrink:0}.swbtn{flex:none;min-width:64px;justify-content:center;padding:5px 10px;font-size:12px;display:flex;align-items:center;gap:4px}.swbtn img{width:12px;height:12px}.swbtn.buy{background:linear-gradient(#f4c64a,#c8901e)!important;color:#2a1a04!important;text-shadow:none!important}
+.pdet>*{flex-shrink:0}.pinfo{display:flex;flex-direction:column;gap:9px}.pinfo>*{flex-shrink:0}.pcol{flex:none;justify-content:center;display:flex;align-items:center;gap:8px;padding:7px 10px}.pcd{width:16px;height:16px;border-radius:50%;border:2px solid #060a07;flex:none}
+.pcolh{display:flex;align-items:center;gap:10px}.pcolh .btn{flex:none;padding:5px 10px;font-size:13px}.pcolh b{font-family:var(--display);font-size:12px;color:#ffe6b0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tierh{font-family:var(--display);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#a8c890;display:flex;align-items:center;gap:6px}.tierh::after{content:'';flex:1;height:2px;background:#4a3420}.tierh.v{color:#8ab8f0}.tierh.s{color:#c89af0}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:6px}
+.scard{font:inherit;background:#24160a;border:0;border-radius:7px;box-shadow:inset 0 0 0 2px #5a3c22;padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;cursor:pointer;color:inherit}
+.scard.on{box-shadow:inset 0 0 0 3px #ffd27a}.scard.wear::after{content:'✓';position:absolute;top:3px;right:6px;color:#9ae86a;font:bold 14px sans-serif;text-shadow:0 1px 0 #000}
+.scard .dot{width:40px;height:40px;border-radius:50%;border:3px solid #060a07;box-shadow:inset 0 0 0 2px rgba(255,255,255,.2)}
+.scard .n{font-family:var(--display);font-size:9px;color:#f4e2bc;line-height:1.2;text-align:center}
+.scard .pr{font-size:13px;color:#ffd27a;display:flex;gap:3px;align-items:center}.scard .pr img{width:11px;height:11px}.scard .pr.own{color:#9ae86a}
+.scard.ghost{opacity:.4;cursor:default;box-shadow:inset 0 0 0 2px #3a2814}.scard.ghost .dot{border:3px dashed #6a5642;box-shadow:none}
+.pgo.buy img{width:13px;height:13px;vertical-align:-1px}
 .chip{display:flex;align-items:center;gap:4px;font-family:var(--display);font-size:9px;color:#f4e2bc;background:rgba(0,0,0,.3);padding:4px 7px 3px;border-radius:6px}.chip img{width:12px;height:12px}.chip.bond{color:#ffb8cc}
 .rgroup{grid-column:1/-1;display:flex;align-items:baseline;gap:10px;font-family:var(--display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);border-bottom:2px solid var(--line);padding:8px 2px 5px;margin-top:6px;scroll-margin-top:90px}
 .rgroup span{font-size:9px;letter-spacing:.04em;color:var(--mute);text-transform:none}
@@ -415,7 +426,7 @@ input[type=range]{accent-color:var(--moss);width:180px}
   .gwrap{grid-template-columns:1fr}.machine{justify-self:center}.ctip{width:170px}
   /* menus keep one fixed size on phones: their insides scroll, so switching critters or tabs never resizes the window */
   .modal:not(#mWelcome) .sheet{height:calc(100vh - 32px);height:calc(100dvh - 32px)}
-  #mPets .sheet{display:flex;flex-direction:column}#mPets .roster{flex:1;min-height:0;display:flex;flex-direction:column}#mPets .pwrap{flex:1;min-height:0}#mPets .pdet{flex:1;min-height:0;overflow:hidden}#mPets .pbig canvas{height:clamp(84px,24vh,190px);aspect-ratio:auto;object-fit:cover}#mPets .pinfo{flex:1;min-height:0;overflow-y:auto;padding-right:4px}#mPets .pgo{margin-top:0;flex:none}
+  #mPets .sheet{display:flex;flex-direction:column}#mPets .roster{flex:1;min-height:0;display:flex;flex-direction:column}#mPets .pwrap{flex:1;min-height:0}#mPets .pdet{flex:1;min-height:0;overflow:hidden}#mPets .pbig canvas{height:clamp(84px,24vh,190px);aspect-ratio:auto;object-fit:cover}#mPets .pinfo{flex:1;min-height:0;overflow-y:auto;padding-right:4px}#mPets .pgo{margin-top:0;flex:none}#roster.colours .pfilt,#roster.colours .plist{display:none}
   #mPets .pbl,#mPets .pbl.open{display:block;-webkit-line-clamp:unset;overflow:visible;cursor:auto}
   #gcv{width:256px;height:352px}
       }
@@ -2232,16 +2243,46 @@ const SWATCHES={
     {id:'wild',name:'Wild',price:40,dot:['#6a6640','#26261a'],outline:'#0e0e08',pal:{axo:{skin:ramp('#26261a','#45452c','#6a6640','#948e62'),belly:ramp('#3a3a26','#5e5c3e','#8a865c','#b8b28a'),gill:ramp('#2e1424','#4e2440','#74385e','#9e5a84'),fin:ramp('#3a3a2a','#5e5e44','#8a8864','#b6b490'),speck:ramp('#0e0e08','#1a1a10','#26261a','#34342a'),eye:ramp('#3a3008','#7a6414','#b8962a','#e8c860')}}},
     {id:'golden',name:'Golden albino',price:60,dot:['#f4c65a','#ff9476'],outline:'#4a2408',pal:{axo:{skin:ramp('#8a5a14','#d0982a','#f4c65a','#fff0b4'),belly:ramp('#9a6a24','#dcaa48','#f8d684','#fff6d4'),gill:ramp('#9a3424','#dc6448','#ff9476','#ffcab4'),fin:ramp('#a07a3a','#dcb470','#f6dca4','#fff6e0'),eye:ramp('#4a2228','#7a3e46','#b06a74','#e4a8b0')}}},
     {id:'melanoid',name:'Melanoid',price:40,dot:['#30303c','#463052'],outline:'#050508',pal:{axo:{skin:ramp('#101014','#1e1e26','#30303c','#4a4a58'),belly:ramp('#16161c','#262630','#3a3a48','#565666'),gill:ramp('#1a1020','#2e1e38','#463052','#664a74'),fin:ramp('#18181e','#2a2a34','#40404c','#5e5e6c')}}},
-    {id:'copper',name:'Copper',price:60,dot:['#d07a34','#e65424'],outline:'#2a1006',pal:{axo:{skin:ramp('#5a260c','#9a4a1a','#d07a34','#f4ae6a'),belly:ramp('#7a3e18','#b8682e','#e49a56','#fcca92'),gill:ramp('#6a1408','#b02a10','#e65424','#ff9a6a'),fin:ramp('#8a5428','#c88a50','#eebc84','#fde4c4'),speck:ramp('#3a1406','#5a200a','#78300e','#984014'),eye:ramp('#4a2228','#7a3e46','#b06a74','#e4a8b0')}}}]};
+    {id:'copper',name:'Copper',price:60,dot:['#d07a34','#e65424'],outline:'#2a1006',pal:{axo:{skin:ramp('#5a260c','#9a4a1a','#d07a34','#f4ae6a'),belly:ramp('#7a3e18','#b8682e','#e49a56','#fcca92'),gill:ramp('#6a1408','#b02a10','#e65424','#ff9a6a'),fin:ramp('#8a5428','#c88a50','#eebc84','#fde4c4'),speck:ramp('#3a1406','#5a200a','#78300e','#984014'),eye:ramp('#4a2228','#7a3e46','#b06a74','#e4a8b0')}}}],
+  lizard:[
+    {id:'bluethroat',name:'Blue-throat',price:40,dot:['#3478d8','#46a049'],pal:{liz:{head:ramp('#0e2a5a','#1a4a9a','#3478d8','#86c0ff')}}},
+    {id:'juvenile',name:'Juvenile brown',price:40,dot:['#94703a','#eaeab8'],outline:'#120c04',pal:{liz:{body:ramp('#3a2610','#64461e','#94703a','#c4a066'),head:ramp('#3a2a12','#644a22','#90703e','#bea06c'),dark:ramp('#1e1408','#342410','#4a361a','#625028'),dots:ramp('#8a8a5a','#c4c48a','#eaeab8','#fffbe0')}}},
+    {id:'turquoise',name:'Turquoise',price:60,dot:['#2aa89a','#2e86b8'],pal:{liz:{body:ramp('#0a3a3a','#16706a','#2aa89a','#78e0cc'),head:ramp('#0e2e4a','#1a5480','#2e86b8','#7ac4ec'),dark:ramp('#062222','#0e3a38','#165450','#226e66')}}}],
+  snake:[
+    {id:'redsided',name:'Red-sided',price:40,dot:['#a01c18','#e8d868'],pal:{snake:{dark:ramp('#3a0606','#6a0e0e','#a01c18','#d0402e'),stripe:ramp('#6a5a1a','#b0a038','#e8d868','#fff6b0')}}},
+    {id:'blue',name:'Blue',price:40,dot:['#38506a','#5ab0de'],pal:{snake:{body:ramp('#141e2a','#22344a','#38506a','#58708c'),head:ramp('#121a24','#1e2c3c','#2e4258','#4a6078'),stripe:ramp('#1a4a6a','#2e7aa8','#5ab0de','#a8e2ff'),lip:ramp('#3a5a6a','#6a90a0','#a0c4d0','#dcf0f6')}}},
+    {id:'melanistic',name:'Melanistic',price:60,dot:['#202026','#8e8e98'],outline:'#020202',pal:{snake:{body:ramp('#0a0a0c','#141418','#202026','#303038'),head:ramp('#08080a','#121216','#1e1e24','#2c2c34'),stripe:ramp('#16161a','#26262c','#3a3a42','#52525c'),lip:ramp('#3a3a40','#62626a','#8e8e98','#c0c0c8'),dark:ramp('#020203','#060608','#0c0c10','#141418')}}},
+    {id:'flame',name:'Albino flame',price:60,dot:['#f0945a','#fbeaa8'],outline:'#3a1206',pal:{snake:{body:ramp('#8a3a1a','#c8642e','#f0945a','#ffc89a'),head:ramp('#8a4020','#c86c38','#ee9a64','#ffcca0'),stripe:ramp('#a08a40','#e0c870','#fbeaa8','#fffbe6'),dark:ramp('#7a2414','#b03a22','#e0603a','#ff9670'),eye:ramp('#5a0a10','#a01a24','#e03a40','#ff8a8a'),lip:ramp('#a08060','#d8b894','#f6e2c8','#fffbf0')}}}],
+  turtle:[
+    {id:'threetoed',name:'Three-toed',price:40,dot:['#4e6a2a','#f47a20'],pal:{turtle:{shell:ramp('#1e2a14','#34481e','#4e6a2a','#728e3e'),blot:ramp('#2e3a1a','#465a24','#627a30','#869e44'),marg:ramp('#24301a','#3a4e24','#566e30','#7a9244'),skin:ramp('#4a2a10','#7e4a1a','#b06e2a','#d89a4a'),spot:ramp('#7a2a06','#c84a0e','#f47a20','#ffb262')}}},
+    {id:'ornate',name:'Ornate',price:40,dot:['#1e1c18','#ffd830'],outline:'#020202',pal:{turtle:{shell:ramp('#080808','#121210','#1e1c18','#2c2a24'),blot:ramp('#8a6a00','#d4a810','#ffd830','#fff490'),marg:ramp('#0e0e0c','#1c1a16','#2c2a24','#3e3a32'),skin:ramp('#0e0e0c','#1e1c18','#34302a','#4e4a40'),spot:ramp('#8a7a00','#d4bc10','#ffe430','#fff490')}}},
+    {id:'albino',name:'Albino',price:60,dot:['#f0d8b4','#ea4050'],outline:'#3a2414',pal:{turtle:{shell:ramp('#9a7a5a','#d0b08a','#f0d8b4','#fff4e2'),blot:ramp('#b88a2a','#e8b84a','#fcd878','#fff2c0'),seam:ramp('#7a5a3a','#9a7a54','#b89a70','#d4b88e'),marg:ramp('#a8865e','#d8b68c','#f2dab6','#fff6e6'),skin:ramp('#a08870','#d0b8a0','#ecdcc8','#fff8ee'),spot:ramp('#c89a3a','#ecc060','#ffdc8a','#fff2c8'),eye:ramp('#6a0a14','#b01a28','#ea4050','#ff9aa4'),claw:ramp('#8a7a6a','#b8a898','#d8ccc0','#f4ece4')}}},
+    {id:'gulf',name:'Gulf coast',price:40,dot:['#343a40','#969a9e'],pal:{turtle:{shell:ramp('#14161a','#22262a','#343a40','#4c545a'),blot:ramp('#2a3034','#3e464c','#56606a','#727e88'),marg:ramp('#1a1e22','#2a3036','#3e464e','#58626a'),skin:ramp('#2a2c2e','#46494c','#66696c','#8a8e90'),spot:ramp('#4a4e52','#6e7276','#969a9e','#c0c4c8')}}}],
+  chameleon:[
+    {id:'highblue',name:'High-blue',price:40,dot:['#2a8ab0','#e8c828'],pal:{cham:{body:ramp('#0e3044','#185a7a','#2a8ab0','#6ac4e4'),band:ramp('#6a5a08','#b4980e','#e8c828','#fff07a'),exBody:ramp('#0a2a5a','#16509a','#2a80d8','#7ab8ff'),exBand:ramp('#7a3a06','#c8620e','#f49024','#ffc46a')}}},
+    {id:'sunset',name:'Sunset',price:40,dot:['#d07a24','#c8301e'],pal:{cham:{body:ramp('#5a2a08','#9a4a12','#d07a24','#f4b060'),band:ramp('#4a0a0a','#8a1a14','#c8301e','#f06a4a'),exBody:ramp('#6a3a06','#b4660e','#ec9a20','#ffd06a'),exBand:ramp('#5a0a1a','#a01a30','#e0304a','#ff7a8a'),stripe:ramp('#7a6a3a','#b8a868','#e6dca0','#fffbe0')}}},
+    {id:'translucent',name:'Translucent',price:60,dot:['#acd4a6','#a8d4c0'],outline:'#14241a',pal:{cham:{body:ramp('#4a6a4a','#7aa47a','#acd4a6','#e2fadc'),band:ramp('#4a6a5a','#78a490','#a8d4c0','#dcfaee'),dark:ramp('#3a4a3a','#5a6e5a','#7e947e','#a6bca6')}}}],
+  dragon:[
+    {id:'red',name:'Red',price:40,dot:['#d05a30','#e64a20'],pal:{dragon:{base:ramp('#5a1e10','#9a361c','#d05a30','#f4946a'),orange:ramp('#6a1408','#b02a10','#e64a20','#ff8a5a'),light:ramp('#8a5040','#c88068','#f0b49a','#ffe0d0')}}},
+    {id:'citrus',name:'Citrus',price:40,dot:['#e8c030','#f4a624'],pal:{dragon:{base:ramp('#6a5008','#b08a14','#e8c030','#fff07a'),orange:ramp('#7a4a06','#c8780e','#f4a624','#ffd06a'),light:ramp('#8a8040','#c8bc6a','#f0e6a0','#fffbd8')}}},
+    {id:'zero',name:'Zero',price:60,dot:['#b0b0b2','#3a3a3e'],outline:'#141414',pal:{dragon:{base:ramp('#4a4a4c','#7e7e80','#b0b0b2','#e0e0e0'),dark:ramp('#38383a','#5a5a5c','#7e7e80','#a2a2a4'),light:ramp('#8a8a8c','#c4c4c4','#ececec','#ffffff'),orange:ramp('#5a5a5c','#929294','#c4c4c6','#efefef'),beard:ramp('#101012','#222226','#3a3a3e','#5a5a5e'),dull:ramp('#3a3a3c','#5a5a5c','#7a7a7c','#9a9a9c')}}}],
+  gecko:[
+    {id:'tangerine',name:'Tangerine',price:40,dot:['#ee8424','#2c2620'],pal:{gecko:{base:ramp('#6a2a06','#b8540e','#ee8424','#ffbc6a'),band:ramp('#5a2004','#984010','#c86420','#e8944a')}}},
+    {id:'macksnow',name:'Mack snow',price:40,dot:['#dcdcd0','#4a4a5a'],pal:{gecko:{base:ramp('#6a6a62','#a8a89c','#dcdcd0','#fbfbf4'),cream:ramp('#8a8a80','#c4c4b8','#ececE2','#ffffff'),lav:ramp('#2a2a34','#4a4a5a','#6e6e82','#9a9aae'),band:ramp('#4a4a50','#76767e','#a2a2aa','#cacad0')}}},
+    {id:'blizzard',name:'Blizzard',price:60,dot:['#ece4cc','#c4bca4'],outline:'#2a2418',pal:{gecko:{base:ramp('#8a8270','#c4bca4','#ece4cc','#fffcf0'),cream:ramp('#8a8270','#c4bca4','#ece4cc','#fffcf0'),spot:ramp('#8a8270','#c4bca4','#ece4cc','#fffcf0'),lav:ramp('#8a8270','#c4bca4','#e6dec6','#fffcf0'),band:ramp('#8a8270','#c4bca4','#ece4cc','#fffcf0'),eye:ramp('#3a1a10','#6a2a1a','#9a3a24','#c8584a')}}},
+    {id:'blacknight',name:'Black night',price:60,dot:['#2a2424','#0a0808'],outline:'#020202',pal:{gecko:{base:ramp('#0c0a0a','#1a1616','#2a2424','#3e3636'),cream:ramp('#1a1616','#2e2828','#463e3c','#625856'),spot:ramp('#040303','#0a0808','#120e0e','#1c1616'),lav:ramp('#0c0a0a','#1a1616','#2a2424','#3e3636'),band:ramp('#141010','#241e1e','#383030','#504646')}}}]};
 // the critter's own colours, for its 'Original' button
-const SWATCH_BASE={frog:['#56c23b','#ea3b2b'],dart:['#509cff','#0e1636'],salamander:['#2e2b38','#f1b81f'],axolotl:['#f6a8b6','#ff5c84']};
+const SWATCH_BASE={frog:['#56c23b','#ea3b2b'],dart:['#509cff','#0e1636'],salamander:['#2e2b38','#f1b81f'],axolotl:['#f6a8b6','#ff5c84'],
+  lizard:['#46a049','#35a37f'],snake:['#3e4d2b','#e0d072'],turtle:['#664222','#dcae3c'],chameleon:['#4ea03a','#34a07a'],dragon:['#bb8a4c','#e08c3c'],gecko:['#e8c246','#2c2620']};
 const swatchById=(kind,id)=>id&&(SWATCHES[kind]||[]).find(s=>s.id===id)||null;
 // which swatch a critter wears: the one being tried on in the menu preview, else the one saved for it
 const swatchOf=pet=>swatchById(pet.kind,pet.skinTry!==undefined?pet.skinTry:save.pets[pet.kind]?.skin);
 function withSkin(pet,fn){const sw=swatchOf(pet);if(pet.baseOutline===undefined)pet.baseOutline=pet.outline;
   pet.outline=sw&&sw.outline?(sw.ol??=hex(sw.outline)):pet.baseOutline;pet.skinMorph=sw&&sw.morph||null;if(!sw||!sw.pal)return fn();
   const saved=[];for(const k in sw.pal){const P=PAL[k];for(const kk in sw.pal[k]){saved.push([P,kk,P[kk]]);P[kk]=sw.pal[k][kk];}if(sw.outline){saved.push([P,'outline',P.outline]);P.outline=sw.outline;}}
-  try{return fn();}finally{for(let i=saved.length-1;i>=0;i--){const[P,kk,v]=saved[i];if(v===undefined)delete P[kk];else P[kk]=v;}}}
+  // chameleon and dragon mix their colours ahead of time, so redo that with the swatch on (and back again after)
+  if(pet.updateColors)pet.updateColors();
+  try{return fn();}finally{for(let i=saved.length-1;i>=0;i--){const[P,kk,v]=saved[i];if(v===undefined)delete P[kk];else P[kk]=v;}if(pet.updateColors)pet.updateColors();}}
 class DartFrog extends Frog{
   constructor(world,x,y){super(world,x,y,'dart');this.sc=0.96;this.call=0;this.callT=rand(6,14);this.warn=0;this.tap=0;this.glint=0;
     this.morph=0;const ps=save.pets&&save.pets.dart;if(ps)delete ps.morph;this.seed=rand(40);}// always the classic blue (other morphs wait for a swatch feature)
@@ -7966,7 +8007,7 @@ const ui={
   },
   // the big panel on the right: a live window onto the selected critter and everything about it
   petDetail(det){const kind=this.petSel,sp=SPECIES[kind],ps=save.pets[kind],here=kind===game.kind,own=petOwned(kind),pr=petPrice(kind),first2=this.petFirst;
-    det.innerHTML='';this.previews=[];
+    det.innerHTML='';this.previews=[];$('roster').classList.remove('colours');
     const pv=document.createElement('div');pv.className='pbig';const cv=document.createElement('canvas');cv.width=128;cv.height=72;cv.className='px';pv.appendChild(cv);
     pv.insertAdjacentHTML('beforeend',here?'<span class="ptag here">Here now</span>':ps?'':own?'<span class="ptag free">Free</span>':`<span class="ptag price"><img class="px" src="${iconURL('coin')}" alt="">${pr}</span>`);det.appendChild(pv);
     const hd=document.createElement('div');hd.className='pdh';hd.innerHTML=`<h3>${ps?ps.name:sp.label}</h3><div class="sub">${ps?sp.label+' · <b class="temper" title="Personality comes from the name. Same name, same personality!">'+mindFor(kind,ps.name).temper+'</b>':'<i>'+sp.latin+'</i>'}</div>`;det.appendChild(hd);
@@ -7981,27 +8022,11 @@ const ui={
       rb.addEventListener('click',e=>{e.stopPropagation();const inp=document.createElement('input');inp.className='rnin';inp.maxLength=14;inp.value=ps.name;h3.replaceWith(inp);inp.focus();inp.select();
         const done=ok=>{if(done.d)return;done.d=true;const nm=inp.value.trim().slice(0,14);if(ok&&nm){ps.name=nm;if(kind===game.kind){game.name=nm;if(game.world.pet)game.world.pet.mind=mindFor(kind,nm);this.refreshPet();}markDirty();writeSave();SFX.play('tick');}this.renderPets(first2);};
         inp.addEventListener('keydown',e=>{if(e.key==='Enter')done(true);else if(e.key==='Escape')done(false);e.stopPropagation();});inp.addEventListener('blur',()=>done(true));});}
-    // colour swatches: tap one to try it on the live preview, then buy or wear it
+    // colours live on their own page, so the critter page stays the same size however many there are
     const SW=SWATCHES[kind];
-    if(SW){const box=document.createElement('div');box.className='swrow';hd.after(box);let tryId=ps?.skin||'';
-      const paint=()=>{const owned=id=>!id||(ps?.skins||[]).includes(id),o=swatchById(kind,tryId),nm=o?o.name:'Original';box.innerHTML='';
-        const dots=document.createElement('div');dots.className='swdots';box.appendChild(dots);
-        [{id:'',name:'Original',dot:SWATCH_BASE[kind]},...SW].forEach(w=>{const d=document.createElement('button');d.className='swdot'+(w.id===tryId?' on':'')+(owned(w.id)?'':' lock');
-          d.title=w.name+(owned(w.id)?'':` · ${w.price} coins`);d.setAttribute('aria-label',d.title);d.style.background=`linear-gradient(135deg,${w.dot[0]} 58%,${w.dot[1]} 58%)`;
-          d.addEventListener('click',()=>{tryId=w.id;const p=this.previews[0];if(p)p.pet.skinTry=tryId;SFX.play('tick');paint();});dots.appendChild(d);});
-        const row=document.createElement('div');row.className='swact';box.appendChild(row);
-        row.insertAdjacentHTML('beforeend',`<span class="swnm">${nm}</span>`);
-        const a=document.createElement('button');a.className='btn alt swbtn';row.appendChild(a);
-        if(tryId===(ps?.skin||'')){a.textContent='Wearing';a.disabled=true;}
-        else if(owned(tryId)){a.textContent='Wear';a.disabled=!ps;}
-        else if(!ps){a.textContent=`Adopt first · ${o.price}`;a.disabled=true;}
-        else{a.classList.add('buy');a.innerHTML=`<img class="px" src="${iconURL('coin')}" alt="">${o.price}`;}
-        a.addEventListener('click',()=>{if(!ps)return;
-          if(!owned(tryId)){if(save.coins<o.price){SFX.play('nope');a.textContent=`Need ${o.price-save.coins} more`;setTimeout(paint,1600);return;}
-            save.coins-=o.price;(ps.skins||(ps.skins=[])).push(tryId);this.bumpCoins();SFX.play('coin');}else SFX.play('ui');
-          ps.skin=tryId||undefined;if(!tryId)delete ps.skin;markDirty();writeSave();
-          if(here&&game.world.pet)game.world.pet.skinTry=undefined;this.renderPets(first2);});};
-      paint();}
+    if(SW){const cb=document.createElement('button');cb.className='btn alt pcol';const have=1+(ps?.skins||[]).filter(id=>swatchById(kind,id)).length;
+      cb.innerHTML=`<span class="pcd" style="background:linear-gradient(135deg,${(swatchById(kind,ps?.skin)||{dot:SWATCH_BASE[kind]}).dot.join(' 50%,')} 50%)"></span>Colours · ${have}/${SW.length+1}`;
+      cb.addEventListener('click',()=>{SFX.play('tick');this.petColours(det);});hd.after(cb);}
     const b=document.createElement('button');b.className='btn pgo'+(own?'':' buy');b.textContent=here?'Here now':ps?`Visit ${ps.name}`:own?'Adopt':`Adopt · ${pr} coins`;b.disabled=here;
     b.addEventListener('click',()=>{
       if(!petOwned(kind)){if(save.coins<pr){SFX.play('nope');b.textContent=`Need ${pr-save.coins} more coins`;setTimeout(()=>{b.textContent=`Adopt · ${pr} coins`;},1600);return;}
@@ -8011,6 +8036,38 @@ const ui={
     det.appendChild(b);
     {const info=document.createElement('div');info.className='pinfo';pv.after(info);let n=info.nextSibling;while(n&&n!==b){const nx=n.nextSibling;info.appendChild(n);n=nx;}}
     {const p=this.livePreview(kind,cv);p.pet.skinTry=undefined;drawPreview(p);this.previews.push(p);}
+  },
+  // a critter's colours page: the live preview stays put up top, the colour chips scroll underneath,
+  // and one button at the bottom buys or wears whichever chip you're trying on
+  petColours(det,tryId){const kind=this.petSel,sp=SPECIES[kind],ps=save.pets[kind],SW=SWATCHES[kind],first2=this.petFirst;
+    if(tryId===undefined)tryId=ps?.skin||'';
+    $('roster').classList.add('colours');det.innerHTML='';this.previews=[];
+    const top=document.createElement('div');top.className='pcolh';top.innerHTML=`<button class="btn alt">‹ Back</button><b>${ps?ps.name+'\'s':sp.label} colours</b>`;det.appendChild(top);
+    top.querySelector('button').addEventListener('click',()=>{SFX.play('tick');this.petDetail(det);});
+    const pv=document.createElement('div');pv.className='pbig';const cv=document.createElement('canvas');cv.width=128;cv.height=72;cv.className='px';pv.appendChild(cv);det.appendChild(pv);
+    const owned=id=>!id||(ps?.skins||[]).includes(id),worn=ps?.skin||'';
+    const list=document.createElement('div');list.className='pinfo pcols';det.appendChild(list);
+    const tier=(cls,label)=>{const h=document.createElement('div');h.className='tierh '+cls;h.textContent=label;list.appendChild(h);const g=document.createElement('div');g.className='sgrid';list.appendChild(g);return g;};
+    const g=tier('','Natural');
+    [{id:'',name:'Original',dot:SWATCH_BASE[kind]},...SW].forEach(w=>{const c=document.createElement('button');c.className='scard'+(w.id===tryId?' on':'')+(w.id===worn&&ps?' wear':'');
+      c.innerHTML=`<span class="dot" style="background:linear-gradient(135deg,${w.dot[0]} 50%,${w.dot[1]} 50%)"></span><span class="n">${w.name}</span>`+
+        (w.id===worn&&ps?'<span class="pr own">Wearing</span>':owned(w.id)?'<span class="pr own">Owned</span>':`<span class="pr"><img class="px" src="${iconURL('coin')}" alt="">${w.price}</span>`);
+      c.addEventListener('click',()=>{if(w.id===tryId)return;SFX.play('tick');const st=list.scrollTop;this.petColours(det,w.id);det.querySelector('.pcols').scrollTop=st;});g.appendChild(c);});
+    for(const[cls,label,n]of[['v','Vivid · coming later',3],['s','Special · coming later',1]]){const gg=tier(cls,label);for(let i=0;i<n;i++)gg.insertAdjacentHTML('beforeend','<div class="scard ghost"><span class="dot"></span><span class="n">???</span></div>');}
+    const o=swatchById(kind,tryId),a=document.createElement('button');a.className='btn pgo';det.appendChild(a);
+    if(tryId===worn){a.textContent=ps?'Wearing':`Adopt ${sp.label} to wear colours`;a.disabled=true;}
+    else if(owned(tryId)){a.textContent='Wear';a.disabled=!ps;}
+    else if(!ps){a.textContent=`Adopt first · ${o.price} coins`;a.disabled=true;}
+    else{a.classList.add('buy');a.innerHTML=`Buy · <img class="px" src="${iconURL('coin')}" alt="">${o.price}`;}
+    a.addEventListener('click',()=>{if(!ps)return;
+      if(!owned(tryId)){if(save.coins<o.price){SFX.play('nope');a.textContent=`Need ${o.price-save.coins} more coins`;setTimeout(()=>{if(a.isConnected)a.innerHTML=`Buy · <img class="px" src="${iconURL('coin')}" alt="">${o.price}`;},1600);return;}
+        save.coins-=o.price;(ps.skins||(ps.skins=[])).push(tryId);this.bumpCoins();SFX.play('coin');}else SFX.play('ui');
+      if(tryId)ps.skin=tryId;else delete ps.skin;markDirty();writeSave();
+      if(kind===game.kind&&game.world.pet)game.world.pet.skinTry=undefined;
+      const st=list.scrollTop;this.petColours(det,tryId);det.querySelector('.pcols').scrollTop=st;
+      // the strip's little picture shows the new colour too
+      const r=$('roster').querySelector('.prow.on');if(r){const im=r.querySelector('img,canvas');if(im)im.replaceWith(petSnap(kind));}});
+    {const p=this.livePreview(kind,cv);p.pet.skinTry=tryId;drawPreview(p);this.previews.push(p);}
   },
   // a critter's live preview window stays the same little world while the menu is open, so refreshing the menu
   // (filters, renaming, putting a hat on) doesn't respawn the critter somewhere else
