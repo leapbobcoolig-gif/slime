@@ -855,6 +855,13 @@ const SFX=(()=>{
     buzz:()=>tone(200,0.22,{type:'sawtooth',to:250,gain:0.035}),
     shimmer:()=>{[1320,1660,1980,2640].forEach((f,i)=>tone(f,0.18,{delay:i*0.05,type:'sine',gain:0.035}));},
     bunhop:()=>{tone(220,0.14,{type:'sine',to:420,gain:0.12});tone(110,0.08,{type:'triangle',to:80,gain:0.08});},
+    clockTick:()=>{tone(2600,0.015,{type:'square',gain:0.012});noise(0.01,{filter:'highpass',freq:5000,gain:0.03});},
+    clockTock:()=>{tone(1900,0.015,{type:'square',gain:0.012});noise(0.01,{filter:'highpass',freq:4000,gain:0.03});},
+    gearStep:()=>{tone(170,0.14,{type:'square',to:110,gain:0.035});noise(0.05,{filter:'bandpass',freq:2600,q:4,gain:0.09});tone(940,0.12,{type:'triangle',gain:0.03,to:900});noise(0.18,{delay:0.05,filter:'highpass',freq:3500,gain:0.025});},
+    steamPuff:()=>noise(0.3,{filter:'highpass',freq:3200,to:1500,gain:0.045,attack:0.03}),
+    windRatchet:()=>{for(let k=0;k<3;k++)noise(0.012,{delay:k*0.05,filter:'bandpass',freq:3800,q:6,gain:0.08});},
+    windDown:()=>tone(620,1.3,{type:'sawtooth',to:70,gain:0.022,vib:[14,30]}),
+    windBell:()=>{tone(1760,0.9,{gain:0.05});tone(2637,0.6,{delay:0.01,gain:0.022});},
     gingerHop:()=>{for(let k=0;k<5;k++)tone(rand(2300,3300),0.12,{delay:k*0.022,type:'triangle',gain:0.022});noise(0.05,{filter:'highpass',freq:6000,gain:0.03});},// sleigh bells
     gingerLand:()=>{tone(120,0.1,{to:70,gain:0.12});for(let k=0;k<4;k++)noise(0.035,{delay:k*0.028+rand(0,0.012),filter:'bandpass',freq:rand(1600,3200),q:2,gain:0.1});},// cookie crunch
     doorCreak:()=>{tone(170,0.45,{type:'sawtooth',to:250,gain:0.022,vib:[22,25],attack:0.05});tone(340,0.3,{delay:0.1,type:'triangle',to:300,gain:0.012,vib:[17,20]});},
@@ -987,7 +994,7 @@ const SFX=(()=>{
   const BUS_OF={};
   'tick ui tap sparkle levelup coin coinburst whoosh close beep nope bloop achieve yay reveal0 reveal1 reveal2 reveal3 insert ratchet clunk pop rattle chest ask place scoop unhook hang clack pluck tink2'.split(' ').forEach(n=>BUS_OF[n]='ui');
   'plip bpop drip splash ocean burble rumble wind whirr toot tune musicbox flutter boing bell boop blow zap squeak2 lightsOn lightsOff tink'.split(' ').forEach(n=>BUS_OF[n]='world');
-  const GAP={gingerLand:0.25,chimneyPuff:2,musicBox:5,shutterClack:1,doorCreak:1.5,cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
+  const GAP={clockTick:0.2,clockTock:0.2,gearStep:0.15,steamPuff:1,windRatchet:0.16,windDown:3,windBell:3,gingerLand:0.25,chimneyPuff:2,musicBox:5,shutterClack:1,doorCreak:1.5,cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
   function play(name,arg){
     if(!ac||muted||!S[name])return;const now=ac.currentTime;
     if(last[name]!==undefined&&now-last[name]<(GAP[name]??0.03))return;last[name]=now;
@@ -2560,7 +2567,32 @@ const SWATCHES={
   {id:'sandstone',name:'Sandstone',price:40,dot:['#c8a46a','#6a7a30'],pal:{golem:{stone:ramp('#5a4428','#8a6c44','#b8925e','#dcbc88'),stoneD:ramp('#3a2a18','#5a4428','#8a6c44','#b0905e'),head:ramp('#5e482a','#8e7048','#bc9a64','#e0c490'),moss:ramp('#2e3a10','#4a5a1a','#6a7a30','#90a048'),mossL:ramp('#4a5a1a','#6e8228','#98ac40','#c4d464')}}},
   {id:'snowcap',name:'Snowcap',price:40,dot:['#6e7a8a','#f0f6ff'],eye:'#7ad8ff',pal:{golem:{stone:ramp('#2a3038','#46505c','#6a7684','#96a2b0'),stoneD:ramp('#1a1e24','#2e343c','#46505c','#66707c'),head:ramp('#2e343c','#4a5460','#6e7a88','#9aa6b4'),moss:ramp('#9aa8b8','#c8d4e0','#e8f0f8','#ffffff'),mossL:ramp('#b0bcc8','#d8e2ec','#f2f8ff','#ffffff'),eye:'#7ad8ff',eyeC:'#f0fcff'}}},
   {id:'autumn',name:'Autumn',price:40,dot:['#6e675d','#e07a28'],pal:{golem:{moss:ramp('#5a1e0a','#9a3a10','#d0601c','#f09038'),mossL:ramp('#7a4a0a','#b8780e','#e8a824','#ffd060'),eye:'#ffc860',eyeC:'#fff6e0'}}},
-  {id:'basalt',name:'Basalt',price:60,dot:['#24222a','#ff8a3a'],outline:'#020202',pal:{golem:{stone:ramp('#0e0e12','#1a1a20','#2a2a32','#40404a'),stoneD:ramp('#08080a','#121216','#1e1e24','#2e2e36'),head:ramp('#101014','#1e1e24','#30303a','#484852'),moss:ramp('#4a1406','#8a2a0a','#d04a14','#ff8a3a'),mossL:ramp('#6a2a06','#b04a0e','#f07a20','#ffb860'),eye:'#ff9a3a',eyeC:'#fff0d0'}}}],
+  {id:'basalt',name:'Basalt',price:60,dot:['#24222a','#ff8a3a'],outline:'#020202',pal:{golem:{stone:ramp('#0e0e12','#1a1a20','#2a2a32','#40404a'),stoneD:ramp('#08080a','#121216','#1e1e24','#2e2e36'),head:ramp('#101014','#1e1e24','#30303a','#484852'),moss:ramp('#4a1406','#8a2a0a','#d04a14','#ff8a3a'),mossL:ramp('#6a2a06','#b04a0e','#f07a20','#ffb860'),eye:'#ff9a3a',eyeC:'#fff0d0'}}},
+  // vivid: painted patterns, no moss garden. paint(m,u,v,q,x,y,crack): u,v local to the part (torso u -4..4, v -5.4..5.4)
+  {id:'brick',name:'Toy bricks',tier:'vivid',bare:1,dot:['#e0302a','#2a6ae0'],outline:'#1a0a0a',pal:{golem:{eye:'#ffffff',eyeC:'#ffffff'}},
+   C:{1:ramp('#7a0a08','#b81a14','#e0302a','#ff6a5a'),2:ramp('#0a2a7a','#1a4ab8','#2a6ae0','#6aa0ff'),3:ramp('#8a6a00','#c8a000','#f0c800','#fff07a'),5:ramp('#0a5a1a','#1a8a2a','#2ab83a','#7ae87a')},
+   paint(m,u,v,q,x,y){const C=this.C[m===M.BODY?1:m===M.LIMB?2:m===M.SLATE?5:3];// plastic bricks with studs on top
+     if(m===M.BODY||m===M.CLAW2||m===M.SLATE){const g=m===M.BODY?2.6:2.2,su=fract(u/g+0.5)-0.5,sv=fract(v/g+0.5)-0.5,d=Math.hypot(su,sv)*g;
+       if(d<0.75)return C[Math.min(3,q+1)];if(d<1.05&&su+sv>0)return C[Math.max(0,q-1)];}
+     return C[q];}},
+  {id:'plush',name:'Patchwork plush',tier:'vivid',bare:1,dot:['#ff9ab8','#7ad8c0'],outline:'#3a1a2a',pal:{golem:{eye:'#3a1a2a',eyeC:'#ffffff'}},
+   F:[ramp('#a04a6a','#e07a9a','#ff9ab8','#ffd0e0'),ramp('#2a8a7a','#4ab8a0','#7ad8c0','#c0f4e4'),ramp('#b08a1a','#e0b830','#ffd860','#fff0b0'),ramp('#3a5aa0','#5a80d0','#8aaaf0','#c8d8ff'),ramp('#8a5aa0','#b080c8','#d0a8e8','#f0dcff')],
+   paint(m,u,v,q,x,y){const g=m===M.BODY?4.2:3.2,row=Math.floor(v/g),cu=Math.floor(u/g+row*0.5),fu=fract(u/g+row*0.5),fv=fract(v/g),id=hash(cu*3+m*7,row*5+m),F=this.F[Math.floor(id*5)];// fabric patches, stitched together
+     if((fu<0.08||fv<0.08)&&((x+y)&1))return hex('#fff8f0');if(fu<0.08||fv<0.08)return F[Math.max(0,q-1)];
+     const pat=Math.floor(id*31)%3;if(pat===1&&(((x>>1)+(y>>1))&1))return F[Math.max(0,q-1)];if(pat===2&&(x%3===0&&y%3===0))return hex('#fffaf4');return F[q];}},// plain, gingham, polka dot
+  {id:'graffiti',name:'Graffiti',tier:'vivid',bare:1,dot:['#8a8a90','#ff3aa8'],outline:'#101014',pal:{golem:{eye:'#ffffff',eyeC:'#ffffff'}},
+   G:ramp('#3a3a40','#5a5a62','#82828a','#a8a8b0'),S:[ramp('#a0105a','#e02a8a','#ff4ab0','#ff9ad4'),ramp('#0a6a9a','#1aa0d8','#3ad0ff','#a0eeff'),ramp('#a08a00','#e0c000','#ffe82a','#fff6a0'),ramp('#2a8a1a','#4ac82a','#7aff4a','#c8ffa0')],
+   paint(m,u,v,q,x,y){const n=vnoise(x*0.16+m*13,y*0.16+5),k=Math.floor(vnoise(x*0.07+40,y*0.07)*4)%4,S=this.S[k];// spray-painted tags on grey concrete
+     if(n>0.62)return S[q];if(n>0.56)return hex('#101014');
+     const n2=vnoise(x*0.3+90,y*0.3);if(n2>0.8)return this.S[(k+2)%4][Math.max(1,q)];return this.G[hash(x,y)>0.9?Math.max(0,q-1):q];}},
+  {id:'tiki',name:'Tiki totem',tier:'vivid',bare:1,dot:['#8a5428','#2ab8a8'],outline:'#1a0a02',pal:{golem:{eye:'#ffd040',eyeC:'#ffffff'}},
+   W:ramp('#3a1c08','#6a3814','#9a5a2a','#c88a4a'),T:ramp('#0a5a5a','#1a8a8a','#2ab8a8','#7ae8d8'),Rd:ramp('#7a1408','#b82a14','#e04a2a','#ff8a6a'),
+   paint(m,u,v,q,x,y){const W=this.W;// carved wood, painted bands of zigzags and stripes, carved grooves
+     if(m===M.BODY){const a=u+4.2,b=Math.floor(a/2.1),f=fract(a/2.1);if(f<0.14)return W[0];
+       if(b%2===0){const z=Math.abs(fract(v/1.6)-0.5)*2;return Math.abs(f-0.2-z*0.6)<0.16?this.T[q]:W[q];}return Math.abs(v)<1.2?this.Rd[q]:(fract(v/1.3)<0.3?W[0]:W[q]);}
+     if(m===M.CLAW2)return u>1.5?this.T[q]:W[q];if(m===M.SLATE)return this.Rd[q];if(m===M.LIMB)return((y>>1)&1)?this.T[Math.max(0,q-1)]:W[q];return W[q];}},
+  {id:'geode',name:'Amethyst',tier:'special',bare:1,fx:'geode',dot:['#4a3a50','#c080ff'],outline:'#100818',pal:{golem:{eye:'#e0a0ff',eyeC:'#ffffff'}}},
+  {id:'clock',name:'Clockwork colossus',tier:'mythic',bare:1,fx:'clock',dot:['#c89a3a','#6a4a20'],outline:'#1a0e04'}],
  mush:[
   {id:'golden',name:'Golden cap',price:40,dot:['#f0b828','#f6eedc'],pal:{mush:{cap:ramp('#6a3a06','#b0700e','#f0b828','#ffe070')}}},
   {id:'porcini',name:'Porcini',price:40,dot:['#8a5428','#e2d6be'],pal:{mush:{cap:ramp('#3a1e0a','#5e3416','#8a5428','#b8804a'),spot:ramp('#8a6a48','#b89470','#d8b890','#f0d8b4')}}},
@@ -5543,6 +5575,8 @@ function glowShrooms(fb,w,night){if(!w.shrooms||night<0.1)return;for(const m of 
 //  Moss golem: a blocky stone biped with a square head and glowing eyes. Stomps along swinging
 //  its long arms, flinches with its arms over its head, sits down to sleep and blooms when petted.
 // =====================================================================
+const GSK={am:ramp('#2a1040','#5a2a8a','#9a5ad8','#d8a8ff'),amS:ramp('#1a1420','#2e2636','#4a3a50','#6a5a70'),
+  br:ramp('#3a2008','#7a4e1a','#c89a3a','#f0d880'),cu:ramp('#3a1408','#7a3a1a','#b8643a','#e8a070'),fe:ramp('#141418','#26262c','#40404a','#6a6a76'),ag:ramp('#4a4a50','#8a8a94','#c8c8d0','#ffffff'),tin:ramp('#7a6a1a','#c8b030','#f0dc5a','#fff8b0')};
 class Golem extends Pet{
   constructor(world,x,y){
     super();this.initCommon(world,'golem');
@@ -5580,7 +5614,7 @@ class Golem extends Pet{
   // startled: arms up over the head, a shudder and a few pebbles shaken loose
   startle(x,y){if(this.state==='grabbed'||this.state==='fall')return;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.speed=0;
     this.state='flinch';this.timer=rand(1.6,2.2);if(!this.preview){SFX.play('rumble');const w=this.world;for(let i=0;i<5;i++)spawn(w,'crumb',this.x+rand(-5,5),this.y+rand(-4,4),{h:8,vh:rand(10,30),vx:rand(-16,16),vy:rand(-10,10),life:1.6,c:hex(pick(['#6e675d','#4a4540','#44802e']))});}}
-  petMe(){const r=super.petMe();if(r){const was=this.bloom;this.bloom=Math.min(1,this.bloom+0.02);if(was<0.3&&this.bloom>=0.3&&!this.preview)SFX.play('chime');if(!this.preview&&Math.random()<0.03)SFX.play('rumble');}return r;}
+  petMe(){const r=super.petMe();if(r){const was=this.bloom;this.bloom=Math.min(1,this.bloom+0.02);if(this.fxNow==='clock'){if(!this.preview)SFX.play('windRatchet');}else if(was<0.3&&this.bloom>=0.3&&!this.preview)SFX.play('chime');if(!this.preview&&Math.random()<0.03)SFX.play('rumble');}return r;}
   update(dt){
     this.t+=dt;this.blinkT-=dt;if(this.blinkT<0){this.blink=0.2;this.blinkT=rand(3,7);}if(this.blink>0)this.blink-=dt;
     this.bloom=Math.max(0,this.bloom-dt*0.012);
@@ -5592,7 +5626,7 @@ class Golem extends Pet{
     else this.brain(dt);
     this.flinch+=((this.state==='flinch'&&this.timer>0.3?1:0)-this.flinch)*Math.min(1,dt*9);
     this.sit+=((this.state==='sleeping'?1:0)-this.sit)*Math.min(1,dt*2.5);
-    const B=this.world.bounds;this.x+=Math.cos(this.ang)*this.speed*dt;this.y+=Math.sin(this.ang)*this.speed*dt;
+    const B=this.world.bounds,wk=this.windK||1;this.x+=Math.cos(this.ang)*this.speed*wk*dt;this.y+=Math.sin(this.ang)*this.speed*wk*dt;
     const bump=this.x<B.x0+7||this.x>B.x1-7||this.y<B.y0+7||this.y>B.y1-7;this.x=clamp(this.x,B.x0+7,B.x1-7);this.y=clamp(this.y,B.y0+7,B.y1-7);
     if(bump&&this.state==='wander')[this.tx,this.ty]=this.randomSpot();
     this.pts[0].x=this.x;this.pts[0].y=this.y;
@@ -5604,7 +5638,7 @@ class Golem extends Pet{
     else{this.lookT=(this.lookT||rand(2,4))-dt;if(this.lookT<=0){this.lookT=rand(2.5,5.5);this.lookTo=Math.random()<0.35?0:rand(-0.9,0.9);}lt=this.lookTo||0;}
     this.look+=clamp((lt-this.look)*dt*2.2,-1.1*dt,1.1*dt);if(this.state!=='strike')this.reach+=(0-this.reach)*Math.min(1,dt*4);
     this.chewPh=this.state==='chew'?this.chewPh+dt/0.7:0;
-    this.updateFeet(dt);this.syncHeld();
+    this.updateFeet(dt);this.syncHeld();this.skinGolem(dt);
   }
   syncHeld(){if(this.held){const m=this.mouthScreen();this.held.sx=m.x;this.held.sy=m.y;}}
   // biped gait: one foot at a time plants with a thud; the body bobs and twists with the step
@@ -5612,7 +5646,7 @@ class Golem extends Pet{
     for(const F of this.feet){const[rx,ry]=this.footRest(F);
       if(this.sit>0.05||this.state==='grabbed'){F.fx=lerp(F.fx,rx,Math.min(1,dt*8));F.fy=lerp(F.fy,ry,Math.min(1,dt*8));F.stepping=false;F.lift=0;continue;}
       if(F.stepping){F.st+=dt/F.dur;const e=ease(Math.min(1,F.st)),tx=rx+vx*F.dur*0.9,ty=ry+vy*F.dur*0.9;F.fx=lerp(F.sx,tx,e);F.fy=lerp(F.sy,ty,e);F.lift=Math.sin(Math.PI*Math.min(1,F.st));
-        if(F.st>=1){F.stepping=false;F.lift=0;this.lastStep=F.side;if(!this.preview&&moving){SFX.play('stomp');dust(this.world,F.fx,F.fy,5);this.thud=1;if(save.set.shake)game.shake=Math.max(game.shake,0.26);}}}
+        if(F.st>=1){F.stepping=false;F.lift=0;this.lastStep=F.side;if(!this.preview&&moving){SFX.play(this.fxNow==='clock'?'gearStep':'stomp');dust(this.world,F.fx,F.fy,5);this.thud=1;if(save.set.shake)game.shake=Math.max(game.shake,0.26);}}}
       else{const d=Math.hypot(F.fx-rx,F.fy-ry),other=this.feet.find(o=>o!==F);
         if(d>(moving?2.2:0.9)&&!other.stepping&&(this.lastStep!==F.side||d>4)){F.stepping=true;F.st=0;F.sx=F.fx;F.sy=F.fy;F.dur=moving?clamp(0.5*5/Math.max(this.speed,3),0.3,0.6):0.3;}}}
     const sw=this.feet[0].stepping?-1:this.feet[1].stepping?1:0;this.stepPh+=(sw-this.stepPh)*Math.min(1,dt*6);}
@@ -5622,7 +5656,8 @@ class Golem extends Pet{
   release(){if(this.state!=='grabbed')return;this.state='fall';this.vh=0;}
   grabStep(dt){this.gt+=dt;this.h+=(10-this.h)*Math.min(1,dt*6);this.x=this.grabX;this.y=this.grabY+this.h;this.flinch+=(0.6-this.flinch)*Math.min(1,dt*4);this.updateFeet(dt);}
   color(m,q,s,l,x,y){const P=PAL.golem,F=m===M.CLAW2?this.hf:this.frame,dx=x+.5-F.x,dy=y+.5-F.y,u=(dx*F.c+dy*F.s)/this.sc,v=(-dx*F.s+dy*F.c)/this.sc;
-    const crack=Math.abs(vnoise(u*0.8+3,v*0.8)-0.5)<0.03;
+    const crack=Math.abs(vnoise(u*0.8+3,v*0.8)-0.5)<0.03,S=this.sw;
+    if(S&&S.fx==='clock')return this.clockColor(m,q,x,y);if(S&&S.fx==='geode')return this.geodeColor(m,q,u,v,x,y);if(S&&S.paint)return S.paint(m,u,v,q,x,y,crack);
     switch(m){
       case M.BODY:{// torso top: a thick moss mat with a stone rim showing around the edges
         const edge=Math.max(Math.abs(u)/4.1,Math.abs(v)/5.4),mo=vnoise(u*0.5+20,v*0.5+4)*0.35+(1-edge)*0.9;
@@ -5635,6 +5670,7 @@ class Golem extends Pet{
     }return INK;}
   draw(fb0){
     const sc=this.sc,fb={cap:(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r),box:(cx,cy,hw,hh,a,...r)=>fb0.box(cx,cy,hw*sc,hh*sc,a,...r)};
+    if(this.sw&&this.sw.fx==='clock')return this.drawClock(fb0);
     const oy=-this.h,sit=this.sit,fl=this.flinch,shake=fl>0.3?Math.sin(this.t*40)*0.25*fl:0;
     this.thud=Math.max(0,(this.thud||0)-0.12);const bob=Math.abs(this.stepPh)*0.5-(this.thud||0)*0.6,tw=this.stepPh*0.08,A=this.ang+tw,mv=clamp(this.speed/4,0,1);
     const L=(u,v)=>{const c=Math.cos(A)*sc,s=Math.sin(A)*sc;return[this.x+c*u-s*v+shake,this.y-this.h-bob*sc+s*u+c*v];};
@@ -5658,8 +5694,9 @@ class Golem extends Pet{
     // head: a square block with a heavy brow, hunched in front of the torso
     const hu=4.7-sit*0.9+this.reach*0.5,pu=hu-1.4,ha=A+this.look,[p0,p1]=L(pu,0),h0=p0+Math.cos(ha)*1.4*sc,h1=p1+Math.sin(ha)*1.4*sc;
     fb.box(h0,h1,2.6,2.8,ha,M.CLAW2,4,0,0,0.3,1.1);this.hf={x:h0,y:h1,c:Math.cos(ha),s:Math.sin(ha)};this._head=[h0,h1,ha];
+    if(this.sw&&this.sw.fx==='geode')this.drawCrystals(fb0);
   }
-  drawExtras(fb){const P=PAL.golem,W=fb.w,g=this.glowPx,sc=this.sc;g.length=0;
+  drawExtras(fb){if(this.sw&&this.sw.fx==='clock')return this.clockExtras(fb);const P=PAL.golem,W=fb.w,g=this.glowPx,sc=this.sc;g.length=0;
     const onMe=(x,y)=>{const i=Math.floor(y)*W+Math.floor(x);return i>=0&&i<fb.mat.length&&fb.mat[i];};
     // square glowing eyes on the front face, under the brow (dim slits when asleep)
     if(this._head&&this.flinch<0.5){const[hx,hy,ha]=this._head,c=Math.cos(ha),s=Math.sin(ha),asleep=this.state==='sleeping'||this.eyesClosed,shut=asleep||this.blink>0;
@@ -5669,15 +5706,83 @@ class Golem extends Pet{
       if(kind==='mush'){pset(fb,x,y+1,hex('#e8dcc0'));pset(fb,x-1,y,hex('#8a5a30'));pset(fb,x,y,hex('#b07a44'));pset(fb,x+1,y,hex('#8a5a30'));pset(fb,x,y-1,hex('#d8a868'));}
       else{const c=kind==='f1'?['#f6a6c6','#d0608a']:kind==='f2'?['#fff0a0','#e0b030']:['#b8a6ff','#7a60d0'];
         pset(fb,x-1,y,hex(c[0]));pset(fb,x+1,y,hex(c[0]));pset(fb,x,y-1,hex(c[0]));pset(fb,x,y+1,hex(c[1]));pset(fb,x,y,hex('#ffe070'));}};
+    if(this.sw&&this.sw.fx==='geode')this.geodeGlints(fb);
     const bare=this.sw&&this.sw.bare;if(bare)return;// themed skins: no moss garden, no glowing runes
     sprout(-2.6,2.6,'mush');sprout(-1.8,-3.0,'mush');sprout(0.6,1.6,'f1');
     const bl=this.bloom;if(bl>0.15)sprout(-0.8,-1.0,'f2');if(bl>0.3)sprout(-3.0,-0.6,'f3');if(bl>0.45)sprout(1.6,-2.4,'f1');if(bl>0.6)sprout(-2.0,1.0,'f2');if(bl>0.75)sprout(1.8,3.4,'f3');if(bl>0.9)sprout(-3.2,3.6,'f1');
     // rune lines carved into the shoulder blocks (glow at night)
     for(const sd of[-1,1]){const F=this.frame;for(const[u,v]of[[1.4,6.0],[0.6,6.0],[-0.2,6.0],[0.6,5.2],[0.6,6.8]]){const x=F.x+(F.c*u-F.s*sd*v)*sc,y=F.y+(F.s*u+F.c*sd*v)*sc;if(onMe(x,y))g.push([x,y,0.55]);}}
   }
-  glow(fb,night){const k=Math.max(0.3,night);for(const[x,y,s]of this.glowPx){const b=k*s*(0.7+0.3*Math.sin(this.t*1.8+x));padd(fb,x,y,60*b,200*b,90*b);
+  glow(fb,night){if(this.sw&&this.sw.fx==='clock')return this.clockGlow(fb,night);const k=Math.max(0.3,night);for(const[x,y,s]of this.glowPx){const b=k*s*(0.7+0.3*Math.sin(this.t*1.8+x));padd(fb,x,y,60*b,200*b,90*b);
     if(s>0.9&&night>0.3)for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])padd(fb,x+dx,y+dy,20*b*night,70*b*night,30*b*night);}}
-  statusText(){switch(this.state){case 'flinch':return 'flinched and covered its head!';case 'wander':return 'is stomping around';case 'idle':return this.isActive()?'is standing very still, like a statue':'is dozing on its feet';
+  // ---- skins
+  skinGolem(dt){const S=swatchOf(this)||{};this.fxNow=S.fx||null;if(S.fx!=='clock'){this.windK=1;return;}
+    const run=this.state!=='sleeping',w0=this.wind??1;// it winds down as it walks; petting winds it back up
+    this.wind=clamp(w0-dt*(this.speed>0.5?0.012:0.003)+(this.state==='petted'?dt*0.4:0),0,1);this.windK=0.35+0.65*Math.min(1,this.wind/0.3);
+    if(!this.preview){if(w0>0.2&&this.wind<=0.2)SFX.play('windDown');if(w0<0.98&&this.wind>=0.98)SFX.play('windBell');}
+    this.gearA=(this.gearA||0)+dt*(run?(0.6+this.speed*0.5)*this.windK:0);this.keyA=(this.keyA||0)+dt*(run?2.4*(0.3+this.wind):0);
+    if(this.preview)return;
+    this.tickT=(this.tickT||0)-dt;if(this.tickT<=0&&run&&this.speed<0.5){this.tickT=0.6/Math.max(0.4,this.windK);this.tock=!this.tock;SFX.play(this.tock?'clockTock':'clockTick');}
+    this.puffT=(this.puffT||0)-dt;if(this.puffT<=0&&run){this.puffT=this.speed>1?0.5:rand(1.2,2.4);const F=this.frame,sd=Math.random()<0.5?-1:1,x=F.x+(F.c*-0.2-F.s*sd*3.2)*this.sc,y=F.y+(F.s*-0.2+F.c*sd*3.2)*this.sc;
+      spawn(this.world,'steam',x,y-2,{vx:rand(-4,4),vy:rand(-12,-6),life:rand(.6,1),ph:0});if(this.speed<=1&&Math.random()<0.4)SFX.play('steamPuff');}}
+  geodeColor(m,q,u,v,x,y){const AM=GSK.am;// a golem grown out of amethyst: small sharp facets that flash as they turn to the light, crusty stone feet and fists
+    if(m===M.CORAL){const c=[AM[1],AM[2],AM[3],hex('#fdf4ff')][q];return hash(x*5,y*3)>0.8?AM[Math.max(0,q-1)]:c;}// crystal points: hard light and dark sides
+    if(m===M.CLAW&&hash(x*3,y*5)>0.25)return GSK.amS[q];
+    const sz=m===M.BODY?1.3:1.0,[e,id]=salVoro(u+3+m*5,v+7,sz,3+m),dot=Math.cos(id*2.399-(this.ang+(m===M.CLAW2?(this.look||0):0)-0.8)),h=hash(x*7+3,y*11+1);
+    if(e<0.09*sz)return dot>0.2?hex('#f4e4ff'):AM[0];// facet edges: bright on the lit side, black on the shadow side
+    const lit=Math.pow(Math.max(0,dot),3);if(lit>0.75)return h>0.5?hex('#ffffff'):hex('#ead0ff');if(lit>0.4)return h>0.7?hex('#fdf4ff'):AM[3];
+    let qq=clamp(Math.round(q*0.5+dot*1.4+0.6+(e/sz-0.3)*1.2),0,3);if(h>0.88)qq=Math.min(3,qq+1);else if(h<0.1)qq=Math.max(0,qq-1);// grainy inner sparkle
+    return AM[qq];}
+  drawCrystals(fb){const F=this.frame,sc=this.sc,P=(u,v)=>[F.x+(F.c*u-F.s*v)*sc,F.y+(F.s*u+F.c*v)*sc],bl=this.bloom||0;// crystal points on its shoulders and back; petting grows more
+    const pts=[[0.6,5.6,1.6,0.3],[-0.8,6.0,2.0,-0.4],[1.6,5.2,1.3,0.9],[0.6,-5.6,1.6,-0.3],[-0.8,-6.0,2.0,0.4],[1.6,-5.2,1.3,-0.9],[-3.2,1.2,1.8,2.6],[-3.4,-1.0,2.1,3.6]];
+    if(bl>0.2)pts.push([-1.8,2.6,1.4,2.2]);if(bl>0.45)pts.push([-2.0,-2.8,1.5,3.9]);if(bl>0.7)pts.push([-3.8,0.1,1.9,3.1]);
+    for(const[u,v,l,a0]of pts){const a=Math.atan2(v,u)+a0*0.3,[bx,by]=P(u,v),[tx,ty]=P(u+Math.cos(a)*l,v+Math.sin(a)*l);fb.cap(bx,by,0.95*sc,tx,ty-1.2,0.2*sc,M.CORAL,6);}}
+  geodeGlints(fb){const F=this.frame,W=fb.w,RB=['#ff8ab0','#ffe07a','#8affd0','#8ac8ff'];// four-point glints with a flash of rainbow at the tips
+    for(let k=0;k<7;k++){const u=Math.sin(k*2.3)*3.2,v=Math.cos(k*1.7)*4.4,ph=Math.sin(this.t*1.1+k*1.9+this.ang*4+this.x*0.1);if(ph<0.8)continue;
+      const x=F.x+(F.c*u-F.s*v)*this.sc,y=F.y+(F.s*u+F.c*v)*this.sc,i=Math.round(y)*W+Math.round(x);if(!fb.mat[i])continue;const a=(ph-0.8)/0.2;
+      pmix(fb,x,y,hex('#ffffff'),a);for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])pmix(fb,x+dx,y+dy,hex('#ffffff'),a*0.8);if(a>0.5)[[2,0],[-2,0],[0,2],[0,-2]].forEach(([dx,dy],j)=>pmix(fb,x+dx,y+dy,hex(RB[(j+k)%4]),a*0.6));}}
+  // ---- mythic: a clockwork colossus. Brass boiler, a gear that turns as it walks, a key on its back, lamp eyes, a firebox glowing through a grille
+  clockColor(m,q,x,y){const K=GSK;
+    switch(m){case M.BODY:{const F=this.frame,r=Math.hypot(x+.5-F.x,y+.5-F.y)/this.sc;return K.br[r>3.9?Math.max(0,q-1):q];}
+      case M.LIMB:return((x+y)&1)&&q>1?K.fe[q-1]:K.fe[q];case M.CLAW:return K.br[Math.max(0,q-1)];case M.SLATE:return K.fe[q];
+      case M.CLAW2:return K.cu[q];case M.TOE:return K.tin[q];case M.STAR:return K.fe[Math.min(3,q+1)];case M.ROCK:return K.br[Math.min(3,q+1)];case M.CORAL:return K.ag[q];}return INK;}
+  drawClock(fb0){const sc=this.sc,fb={cap:(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r),box:(cx,cy,hw,hh,a,...r)=>fb0.box(cx,cy,hw*sc,hh*sc,a,...r)};
+    const sit=this.sit,fl=this.flinch,shake=fl>0.3?Math.sin(this.t*40)*0.25*fl:0;this.thud=Math.max(0,(this.thud||0)-0.12);
+    const bob=Math.abs(this.stepPh)*0.5-(this.thud||0)*0.6,A=this.ang+this.stepPh*0.08,mv=clamp(this.speed/4,0,1);
+    const L=(u,v)=>{const c=Math.cos(A)*sc,s=Math.sin(A)*sc;return[this.x+c*u-s*v+shake,this.y-this.h-bob*sc+s*u+c*v];};
+    for(const F of this.feet){const lift=F.lift*1.2*sc;fb.box(F.fx,F.fy-this.h-lift,2.0,1.6,this.ang,M.CLAW,1,0,0,0.3,1.2);}
+    const tu=-0.4-sit*1.0,[tx,ty]=L(tu,0);fb.cap(tx,ty,4.6,tx,ty,4.6,M.BODY,2);this.frame={x:tx,y:ty,c:Math.cos(A),s:Math.sin(A)};// round boiler
+    for(const sd of[-1,1]){const swing=-this.stepPh*sd*2.4*mv;let fu=3.4+swing*1.2,fv=sd*8.2,fz=0;
+      if(sit>0.05){fu=lerp(fu,3.8,sit);fv=lerp(fv,sd*7.2,sit);}if(fl>0.02){fu=lerp(fu,4.6,fl);fv=lerp(fv,sd*2.4,fl);fz=fl*3;}
+      if(this.reach>0.02&&sd>0){fu=lerp(fu,6.6,this.reach);fv=lerp(fv,1.6,this.reach);fz=this.reach*2;}
+      const[s0,s1]=L(0.2,sd*5.4),[e0,e1]=L(lerp(0.2,fu,0.5)-0.8,lerp(sd*7,fv,0.5)),[f0,f1]=L(fu,fv);
+      fb.cap(s0,s1,1.1,e0,e1,0.9,M.LIMB,3);fb.cap(e0,e1,0.8,f0,f1-fz*sc,0.8,M.LIMB,3);// piston arms
+      fb.box(f0,f1-fz*sc,1.7,1.7,A,M.CLAW,3,0,0,1.1,1.1);fb.cap(s0,s1,1.6,s0,s1,1.6,M.SLATE,3);}// brass fists, iron shoulder joints
+    const ga=this.gearA||0,[gx,gy]=L(tu,0),gr=2.5;fb.cap(gx,gy,gr,gx,gy,gr,M.STAR,4);// a steel gear turning in the boiler
+    for(let k=0;k<8;k++){const a=ga+k/8*TAU,t0=gx+Math.cos(a)*(gr+0.5)*sc,t1=gy+Math.sin(a)*(gr+0.5)*sc;fb0.cap(t0,t1,0.55*sc,t0,t1,0.55*sc,M.STAR,4);}
+    fb.cap(gx,gy,1,gx,gy,1,M.ROCK,6);
+    const[kx,ky]=L(tu-5.4,0),kl=Math.cos(this.keyA||0)*2.6,c=Math.cos(A),s=Math.sin(A);fb.cap(kx,ky,0.5,...L(tu-4.2,0),0.5,M.CORAL,1);// the wind-up key: its bow spins edge-on and flat
+    fb.cap(kx-s*kl*sc,ky+c*kl*sc,1.1,kx+s*kl*sc,ky-c*kl*sc,1.1,M.CORAL,1);
+    const hu=4.4-sit*0.9+this.reach*0.5,ha=A+this.look,[h0,h1]=L(hu,0);fb.box(h0,h1,2.5,2.7,ha,M.CLAW2,5,0,0,0.6,1.1);this.hf={x:h0,y:h1,c:Math.cos(ha),s:Math.sin(ha)};this._head=[h0,h1,ha];// copper helmet
+    for(const sd of[-1,1]){const[px,py]=L(tu+1.2,sd*3.2);fb.cap(px,py,0.75,px,py,0.75,M.SLATE,5);}// two little smokestacks
+    const bl=clamp((this.bloom||0)*3,0,1);if(bl>0.05){const[fx,fy]=L(tu-2.2,1.8),up=bl*5*sc,sp=Math.sin(this.t*9)*(1-bl)*1.5;// petted: a tin flower boings up on a spring
+      fb0.cap(fx,fy,0.35*sc,fx+sp,fy-up,0.35*sc,M.LIMB,7);for(let k=0;k<5;k++){const a=this.t*2+k/5*TAU,px=fx+sp+Math.cos(a)*1.3*sc,py=fy-up+Math.sin(a)*1.0*sc;fb0.cap(px,py,0.6*sc,px,py,0.6*sc,M.TOE,8);}
+      fb0.cap(fx+sp,fy-up,0.6*sc,fx+sp,fy-up,0.6*sc,M.CLAW2,9);}}
+  clockExtras(fb){const W=fb.w,gl=this.glowPx,K=GSK,sc=this.sc,F=this.frame;gl.length=0;
+    if(this._head){const[hx,hy,ha]=this._head,c=Math.cos(ha),s=Math.sin(ha),asleep=this.state==='sleeping',shut=asleep||this.blink>0;// lamp eyes
+      for(const sd of[-1,1]){const ex=hx+c*2.3*sc-s*sd*1.3*sc,ey=hy+s*2.3*sc+c*sd*1.3*sc,L1=shut?K.br[0]:hex('#ffc84a');
+        for(const[a,b]of[[0,0],[1,0],[0,1],[1,1]])pset(fb,ex+a-0.5,ey+b-0.5,L1);if(!shut)pset(fb,ex-0.5,ey-0.5,hex('#fff4c0'));if(!asleep){gl.push([ex,ey,1]);gl.push([ex+1,ey+1,1]);}}
+      const nx=hx-c*0.6*sc,ny=hy-s*0.6*sc,na=-Math.PI*0.9+(this.wind??1)*Math.PI*0.8;pset(fb,nx,ny,hex('#fff8e0'));pset(fb,nx+Math.cos(na)*1.2,ny+Math.sin(na)*1.2,hex('#c01818'));}// a gauge: how wound up it is
+    const u0=-2.9,E=this.emi=[],fire=this.state==='sleeping'?0.35:0.8+0.2*Math.sin(this.t*7);// the firebox grille on its back
+    for(let k=-1;k<=1;k++){const v=k*1.1,x=F.x+(F.c*u0-F.s*v)*sc,y=F.y+(F.s*u0+F.c*v)*sc;
+      for(const d of[-1,0,1]){const X=Math.round(x-F.s*d),Y=Math.round(y+F.c*d),col=mixc(hex('#3a1004'),hex(d?'#ff7a1a':'#ffd060'),fire);pset(fb,X,Y,col);if(X>=0&&Y>=0&&X<W&&Y<fb.h)E.push(Y*W+X,col);}}
+    this.fireAt=[F.x+F.c*u0*sc,F.y+F.s*u0*sc,fire];
+    pset(fb,F.x,F.y,K.fe[0]);for(let k=0;k<10;k++){const a=k/10*TAU;pset(fb,F.x+Math.cos(a)*4.2*sc,F.y+Math.sin(a)*4.2*sc,K.br[3]);}}// axle, a ring of rivets
+  clockGlow(fb,night){const E=this.emi||[];for(let j=0;j<E.length;j+=2)fb.px[E[j]]=E[j+1];// the fire and the lamps are their own light
+    if(this.fireAt&&night>0.05){const[fx,fy,f]=this.fireAt;for(let yy=-10;yy<=10;yy++)for(let xx=-10;xx<=10;xx++){const d=Math.hypot(xx,yy)/10;if(d<1){const a=(1-d)*(1-d)*night*f;padd(fb,fx+xx,fy+yy,200*a,90*a,20*a);}}}
+    const k=Math.max(0.25,night);for(const[x,y]of this.glowPx){padd(fb,x,y,255*k,150*k,40*k);if(night>0.3)for(let yy=-4;yy<=4;yy++)for(let xx=-4;xx<=4;xx++){const d=Math.hypot(xx,yy)/4.5;if(d<1&&d>0){const a=(1-d)*(1-d)*night;padd(fb,x+xx,y+yy,80*a,46*a,10*a);}}}}
+  statusText(){if(this.fxNow==='clock'&&(this.wind??1)<0.2&&this.state!=='sleeping')return 'is winding down… give it a pet to wind it up!';
+    switch(this.state){case 'flinch':return 'flinched and covered its head!';case 'wander':return 'is stomping around';case 'idle':return this.isActive()?'is standing very still, like a statue':'is dozing on its feet';
     case 'petted':return this.bloom>0.3?'is blooming with happiness!':'rumbles happily';case 'sleeping':return 'sat down for a nap';}return super.statusText();}
 }
 
