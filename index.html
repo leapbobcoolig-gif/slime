@@ -180,11 +180,10 @@ body.fun-tools #dock{padding:4px;background:#1a0f06;border-color:#060a07;box-sha
 .ti.meh{opacity:.45}
 .seg{display:flex;gap:6px}
 #setPieces{margin:-4px 0 6px 12px;border-left:2px solid var(--line);padding-left:10px}
-#setPieces .srow,.subrows .srow{padding:6px 0;border:0}#setPieces label,.subrows label{font-size:15px}#setPieces small,.subrows small{font-size:12px}#setPieces .seg .btn,.subrows .seg .btn{padding:4px 10px;font-size:13px}
-.subrows{margin:-4px 0 6px 12px;border-left:2px solid var(--line);padding-left:10px}
-.sgrp{border-bottom:2px dashed var(--line)}.sgrp>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:10px 4px;font-family:var(--display);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);user-select:none}
-.sgrp>summary::-webkit-details-marker{display:none}.sgrp>summary::after{content:"";margin-left:auto;width:8px;height:8px;border:solid currentColor;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-2px,-2px);transition:transform .15s}
-.sgrp[open]>summary::after{transform:rotate(-135deg) translate(-2px,-2px)}.sgrp>.srow:last-of-type{border-bottom:0}.sgrp>.srow,.sgrp>#setPieces,.sgrp>.subrows{margin-left:6px}.seg .btn{flex:none;padding-inline:14px}.seg .btn.on{background:#3a3418;color:#ffe9a8;box-shadow:inset 0 0 0 2px var(--amber)}
+#setPieces .srow{padding:6px 0;border:0}#setPieces label{font-size:15px}#setPieces small{font-size:12px}#setPieces .seg .btn{padding:4px 10px;font-size:13px}
+#setTabs{margin:2px 0 6px}.spanel>.srow:last-child{border-bottom:0}
+.seg.chips{flex-wrap:wrap;justify-content:flex-end;max-width:58%}.seg.chips .btn{padding:5px 10px;font-size:13px}
+#mSettings .spanel{min-height:min(300px,52vh)}#mSettings .srow.sfoot{margin-top:6px;border-top:2px dashed var(--line);border-bottom:0;padding-top:12px}.sfoot label{font-size:17px}.sfoot small{font-size:14px}
 /* Fun UI: supply tanks you pluck food from */
 .ti.filler{visibility:hidden;pointer-events:none}
 .ti{touch-action:none}
@@ -588,31 +587,30 @@ body.fun-hud .gtoast.out{transform:none;translate:-50% -10px;opacity:0}
 </div></div>
 <div class="modal" id="mSettings" hidden><div class="sheet chunk" style="width:min(560px,100%)">
   <div class="sheet-h"><h2 id="setTitle" style="user-select:none">Settings</h2><button class="ibtn x" data-close aria-label="Close"><img class="px icX" alt=""></button></div>
-  <details class="sgrp" data-g="sound" open><summary>Sound</summary>
+  <div class="tabs" id="setTabs"><button class="tab" data-t="sound">Sound</button><button class="tab" data-t="display">Display</button><button class="tab" data-t="critters">Critters</button><button class="tab" data-t="iface">Interface</button></div>
+  <div class="spanel" data-t="sound">
   <div class="srow"><label for="setVol">Volume</label><input type="range" id="setVol" min="0" max="1" step="0.05"></div>
   <div class="srow"><label>Sound effects</label><button class="sw" id="setSfx" aria-label="Sound effects"></button></div>
-  <div class="srow"><label>Ambient music<small>Soft generative marimba, moodier at night.</small></label><button class="sw" id="setMusic" aria-label="Music"></button></div>
-  </details>
-  <details class="sgrp" data-g="display"><summary>Display</summary>
+  <div class="srow"><label>Music<small>A cozy tune that changes with your critter's mood.</small></label><button class="sw" id="setMusic" aria-label="Music"></button></div>
+  <div class="srow"><label for="setMVol">Music volume</label><input type="range" id="setMVol" min="0" max="1" step="0.05"></div>
+  </div>
+  <div class="spanel" data-t="display">
   <div class="srow"><label>Graphics<small id="gfxNote">Low makes the food tanks and menu previews animate more lightly.</small></label><div class="seg" id="setGfx"><button class="btn alt" data-v="auto">Auto</button><button class="btn alt" data-v="high">High</button><button class="btn alt" data-v="low">Low</button></div></div>
   <div class="srow"><label>Pixel-perfect scaling<small>Crisper pixels, smaller tank.</small></label><button class="sw" id="setPixel" aria-label="Pixel-perfect scaling"></button></div>
   <div class="srow"><label for="setUi">Interface size<small id="setUiV">Auto</small></label><div style="display:flex;gap:8px;align-items:center"><input type="range" id="setUi" min="0.6" max="1.4" step="0.05"><button class="btn alt" id="setUiAuto" style="flex:none">Auto</button></div></div>
   <div class="srow"><label>Screen shake</label><button class="sw" id="setShake" aria-label="Screen shake"></button></div>
-  </details>
-  <details class="sgrp" data-g="critters"><summary>Critters</summary>
+  </div>
+  <div class="spanel" data-t="critters">
   <div class="srow"><label>Thought bubbles<small>Little icons when your pet wants something.</small></label><button class="sw" id="setBubbles" aria-label="Thought bubbles"></button></div>
   <div class="srow"><label>Thought marks<small>Little ? ! and ... above critters while they think.</small></label><button class="sw" id="setThoughts" aria-label="Thought marks"></button></div>
-  <div class="srow"><label>Cute faces<small>Eyes and smiles on the slime, bun, mushroom and wisp. Pick which ones below.</small></label><div class="seg" id="setFaces"><button class="btn alt" data-v="1">All on</button><button class="btn alt" data-v="0">All off</button></div></div>
-  <div id="setFaceList" class="subrows"></div>
-  </details>
-  <details class="sgrp" data-g="iface"><summary>Interface</summary>
+  <div class="srow"><label>Cute faces<small>Eyes and smiles. Tap to switch each one.</small></label><div class="seg chips" id="setFaces"></div></div>
+  </div>
+  <div class="spanel" data-t="iface">
   <div class="srow"><label>Interface style<small>Mix and match: Fun (beta) turns each piece into a hands-on toy.</small></label><div class="seg" id="setIface"><button class="btn alt" data-v="basic">All basic</button><button class="btn alt" data-v="fun">All fun</button></div></div>
   <div id="setPieces"></div>
   <div class="srow"><label>Tuck food tray<small>The food tray tucks away while you carry or pick a food. Tap the little tab to bring it back.</small></label><button class="sw" id="setTrayTuck" aria-label="Tuck food tray"></button></div>
-  </details>
-  <details class="sgrp" data-g="save"><summary>Save</summary>
-  <div class="srow" id="resetRow"><label>Reset save<small>Coins, items and bonds start over.</small></label><button class="btn alt danger" id="resetBtn" style="flex:none">Reset</button></div>
-  </details>
+  </div>
+  <div class="srow sfoot" id="resetRow"><label>Reset save<small>Coins, items and bonds start over.</small></label><button class="btn alt danger" id="resetBtn" style="flex:none">Reset</button></div>
   <div class="srow" id="unlockRow" hidden><label>Unlock everything<small>Secret menu! Every critter, hat, toy, tool and decoration.</small></label><button class="btn" id="unlockBtn" style="flex:none">Unlock all</button></div>
 </div></div>
 
@@ -644,6 +642,68 @@ const mixc=(a,b,t)=>rgb(lerp(a&255,b&255,t),lerp(a>>8&255,b>>8&255,t),lerp(a>>>1
 // =====================================================================
 //  Sound: everything synthesized with Web Audio (no files)
 // =====================================================================
+//  Music: one little composed loop ("Mossjar Theme", C major, 92 BPM, 16 bars) split into stems.
+//  The mix follows what's going on: instruments fade in and out when the critter is happy, sad,
+//  asleep for the night, or when a menu is open (then everything goes soft and muffled).
+// =====================================================================
+const NOTE=(()=>{const o={},N=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];for(let m=24;m<96;m++)o[N[m%12]+(Math.floor(m/12)-1)]=440*Math.pow(2,(m-69)/12);return o;})();
+const THEME={bpm:92,
+  chords:['C','Am','F','G','C','Em','F','G','Am','F','C','G','F','G','C','C'],
+  // the tune in eighth notes, one bar per line: a note, '-' holds the one before, '.' rests
+  melody:`E5 - G5 - A5 G5 E5 -|C5 - E5 - D5 C5 A4 -|F4 A4 C5 F5 E5 - C5 -|D5 - - - . B4 C5 D5|
+E5 - G5 - C6 - B5 A5|G5 - E5 - B4 - E5 -|A5 G5 F5 E5 D5 - C5 -|D5 - - - - - . .|
+A4 C5 E5 - A5 - G5 -|F5 - E5 - C5 - A4 -|G4 - C5 E5 G5 - E5 -|D5 - G5 - F5 - D5 -|
+C5 - F5 - A5 - G5 F5|E5 - D5 - B4 - G4 -|C5 E5 G5 C6 - - G5 E5|C5 - - - . . . .`};
+const CHORD={C:['C','E','G'],Am:['A','C','E'],F:['F','A','C'],G:['G','B','D'],Em:['E','G','B']};
+// stem mix per mood: bass, keys (plucked chords), melody (marimba), bells (countermelody), perc, musicbox (night tune), sad (soft flute line)
+const MUSIC_MIX={
+  content:{bass:1,keys:0.9,melody:1,bells:0,perc:0.6,musicbox:0,sad:0,lp:12000},
+  thriving:{bass:1,keys:1,melody:1,bells:1,perc:1,musicbox:0,sad:0,lp:12000},
+  sad:{bass:0.7,keys:0.6,melody:0,bells:0,perc:0,musicbox:0,sad:1,lp:2600},
+  night:{bass:0.6,keys:0.5,melody:0,bells:0,perc:0,musicbox:1,sad:0,lp:3400}};
+function makeMusic(C,out,nbuf){
+  const STEMS=['bass','keys','melody','bells','perc','musicbox','sad'],G={},lvl={},on={},lp=C.createBiquadFilter(),inp=C.createGain();
+  lp.type='lowpass';lp.frequency.value=12000;lp.Q.value=0.5;inp.connect(lp);lp.connect(out);
+  for(const k of STEMS){G[k]=C.createGain();G[k].gain.value=0;G[k].connect(inp);lvl[k]=0;on[k]=0;}
+  // parse the tune once into eighth-note events: [bar, slot, freq, length in eighths]
+  const mel=[];THEME.melody.replace(/\n/g,'').split('|').forEach((bar,b)=>{const t=bar.trim().split(/\s+/);t.forEach((n,i)=>{if(n==='-'||n==='.')return;let L=1;while(i+L<t.length&&t[i+L]==='-')L++;mel.push([b,i,NOTE[n],L]);});});
+  const s16=60/THEME.bpm/4;
+  // --- little synths ---
+  const env=(g,t,v,a,d)=>{g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+a);g.gain.exponentialRampToValueAtTime(0.0001,t+a+d);};
+  const osc=(dest,type,f,t,v,a,d,det=0)=>{const o=C.createOscillator(),g=C.createGain();o.type=type;o.frequency.value=f;o.detune.value=det;env(g,t,v,a,d);o.connect(g);g.connect(dest);o.start(t);o.stop(t+a+d+0.05);};
+  const nz=(dest,t,v,d,freq,type='highpass')=>{const src=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();src.buffer=nbuf;f.type=type;f.frequency.value=freq;env(g,t,v,0.003,d);src.connect(f);f.connect(g);g.connect(dest);src.start(t,Math.random()*0.5);src.stop(t+d+0.05);};
+  const I={
+    bass:(f,t,d)=>{osc(G.bass,'triangle',f,t,0.16,0.01,d);osc(G.bass,'sine',f,t,0.1,0.01,d*0.8);},
+    pluck:(f,t)=>{osc(G.keys,'triangle',f,t,0.035,0.004,0.45,-6);osc(G.keys,'triangle',f,t,0.03,0.004,0.35,7);osc(G.keys,'sine',f*2,t,0.008,0.003,0.12);},
+    marimba:(f,t,d)=>{osc(G.melody,'sine',f,t,0.075,0.004,0.35+d*0.25);osc(G.melody,'sine',f*4,t,0.012,0.002,0.07);},
+    bell:(f,t)=>{osc(G.bells,'sine',f,t,0.03,0.003,1.3);osc(G.bells,'sine',f*2.76,t,0.009,0.002,0.4);osc(G.bells,'sine',f*5.4,t,0.003,0.002,0.15);},
+    box:(f,t)=>{osc(G.musicbox,'triangle',f,t,0.03,0.003,1.5);osc(G.musicbox,'sine',f*3,t,0.006,0.002,0.35);},
+    flute:(f,t,d)=>{const o=C.createOscillator(),g=C.createGain(),lf=C.createOscillator(),lg=C.createGain();o.type='sine';o.frequency.value=f;lf.frequency.value=4.6;lg.gain.value=f*0.006;lf.connect(lg);lg.connect(o.frequency);
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.06,t+0.25);g.gain.setValueAtTime(0.06,t+d*0.7);g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.4);o.connect(g);g.connect(G.sad);o.start(t);lf.start(t);o.stop(t+d+0.5);lf.stop(t+d+0.5);},
+    kick:t=>{const o=C.createOscillator(),g=C.createGain();o.frequency.setValueAtTime(110,t);o.frequency.exponentialRampToValueAtTime(45,t+0.16);env(g,t,0.14,0.003,0.18);o.connect(g);g.connect(G.perc);o.start(t);o.stop(t+0.25);},
+    shake:(t,v)=>nz(G.perc,t,v,0.045,7000),rim:t=>nz(G.perc,t,0.025,0.03,1800,'bandpass')};
+  const tone=(name,oct)=>NOTE[name+oct];
+  // one sixteenth-note step of the whole arrangement
+  function step(k,t){const bar=Math.floor(k/16)%16,s=k%16,ch=CHORD[THEME.chords[bar]],root=ch[0],ei=s>>1,on8=!(s&1);
+    if(on.bass){if(s===0)I.bass(tone(root,2),t,s16*7);if(s===8){const r=tone(root,2),f=tone(ch[2],2);I.bass(f<r?f*2:f,t,s16*5);}if(s===14)I.bass(tone(root,3),t,s16*2);}
+    if(on.keys&&[0,3,6,8,11,14].includes(s)){const up=s===3||s===11;ch.forEach((n,i)=>I.pluck(tone(n,4),t+(up?(2-i):i)*0.012));}
+    if(on8&&(on.melody||on.musicbox))for(const[b,i,f,L]of mel)if(b===bar&&i===ei){if(on.melody)I.marimba(f,t,L);if(on.musicbox&&(ei%2===0||L>1))I.box(f*2,t);}
+    if(on.bells&&bar>=8&&(s===4||s===12)){const n=ch[s===4?1:2];I.bell(tone(n,6),t);}
+    if(on.perc){if(s===0||s===8)I.kick(t);if(s===4||s===12)I.rim(t);if(on8)I.shake(t,s%4===2?0.02:0.01);}
+    if(on.sad&&(s===0||s===8)){const n=s===0?ch[1]:ch[2];I.flute(tone(n,4),t,s16*7);}}
+  let k=0,next=0,cur=null,duck=1;
+  return{
+    // ctx: {day, mood, happy, menu, duck}
+    setContext(c){const night=c.day<0.35,sad=c.mood==='grumpy'||c.happy<30,base=night?'night':sad?'sad':c.mood==='thriving'?'thriving':'content',m=MUSIC_MIX[base],key=base+(c.menu?'+m':'')+(c.duck?'+d':''),now=C.currentTime;
+      if(key===cur)return;cur=key;
+      for(const s of STEMS){let v=m[s];if(c.menu&&(s==='perc'||s==='bells'))v=0;lvl[s]=v;G[s].gain.setTargetAtTime(v*(c.duck?0.3:1),now,1.5);if(v>0)on[s]=1;}
+      lp.frequency.setTargetAtTime(c.menu?900:m.lp,now,0.6);},
+    tick(now){if(next<now)next=now+0.05;
+      while(next<now+0.35){step(k,next);k++;next+=s16;}
+      // a stem keeps playing while it fades out, then stops being scheduled
+      for(const s of STEMS)if(on[s]&&lvl[s]<=0&&G[s].gain.value<0.005)on[s]=0;},
+    stems:G,filter:lp};}
+// =====================================================================
 const SFX=(()=>{
   let ac=null,master=null,musicBus=null,nbuf=null,muted=false,vol=0.8,musicOn=true,mist=null,buzz=null,bee=null,slit=null,eng=null;const last={};
   function init(){
@@ -652,9 +712,8 @@ const SFX=(()=>{
     try{ac=new C();}catch(e){ac=null;return;}
     const comp=ac.createDynamicsCompressor();comp.threshold.value=-18;comp.ratio.value=3;
     master=ac.createGain();master.gain.value=vol*0.6;master.connect(comp);comp.connect(ac.destination);
-    musicBus=ac.createGain();musicBus.gain.value=musicOn?0.55:0;musicBus.connect(master);
+    musicBus=ac.createGain();musicBus.gain.value=musicOn?0.55*mvol:0;musicBus.connect(master);
     nbuf=ac.createBuffer(1,ac.sampleRate,ac.sampleRate);const d=nbuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-    mT=ac.currentTime+0.5;
   }
   const J=()=>1+(Math.random()-.5)*0.1;
   function tone(f,dur,o={}){
@@ -830,24 +889,14 @@ const SFX=(()=>{
     const now=ac.currentTime;eng.o.frequency.setTargetAtTime(70+v*170,now,0.08);eng.o2.frequency.setTargetAtTime(35+v*85,now,0.08);
     eng.f.frequency.setTargetAtTime(500+v*1600,now,0.1);eng.g.gain.setTargetAtTime(muted||v<=0?0:0.02+v*0.035,now,0.08);
   }
-  // gentle generative ambience: pentatonic marimba + slow pad, brighter by day
-  let mT=0,beat=0,chordI=0;
-  const DAY=[523.25,587.33,659.25,783.99,880,1046.5],NIGHT=[440,523.25,587.33,659.25,783.99,880];
-  function music(dayness){
-    if(!ac||!musicOn)return;const now=ac.currentTime;if(mT<now)mT=now+0.05;
-    const day=dayness>0.5,step=day?0.42:0.56,sc=day?DAY:NIGHT;
-    while(mT<now+0.4){
-      if(beat%16===0){const roots=day?[261.6,220,174.6,196]:[220,174.6,196,164.8],r=roots[chordI++%4];
-        for(const m of[1,1.5,2])tone(r*m*0.5,step*16,{at:mT,type:'sine',gain:0.018,attack:1.4,dest:musicBus,nojit:true});}
-      if(Math.random()<(beat%4===0?0.8:0.38)){const f=sc[Math.floor(Math.random()*sc.length)]*(Math.random()<0.2?0.5:1);
-        tone(f,0.9,{at:mT,type:'sine',gain:0.05,attack:0.004,dest:musicBus,nojit:true});tone(f*4,0.15,{at:mT,type:'sine',gain:0.008,dest:musicBus,nojit:true});}
-      mT+=step;beat++;
-    }
-  }
+  // the adaptive theme (see makeMusic): built on first use, fed the game's mood every frame
+  let mus=null,mvol=0.8;
+  function music(ctx){if(!ac||!musicOn)return;if(!mus)mus=makeMusic(ac,musicBus,nbuf);mus.setContext(ctx);mus.tick(ac.currentTime);}
+  function setMusicVol(v){mvol=v;if(musicBus)musicBus.gain.setTargetAtTime(musicOn?0.55*mvol:0,ac.currentTime,0.1);}
   function setMuted(m){muted=m;if(m){mistOn(false);}}
   function setVolume(v){vol=v;if(master)master.gain.setTargetAtTime(v*0.6,ac.currentTime,0.03);}
-  function setMusic(on){musicOn=on;if(musicBus)musicBus.gain.setTargetAtTime(on?0.55:0,ac.currentTime,0.3);}
-  return{init,play,mistOn,buzzLevel,beeBuzz,slither,engine,music,setMuted,setVolume,setMusic,get muted(){return muted;},get ready(){return!!ac;}};
+  function setMusic(on){musicOn=on;if(musicBus)musicBus.gain.setTargetAtTime(on?0.55*mvol:0,ac.currentTime,0.3);}
+  return{init,play,mistOn,buzzLevel,beeBuzz,slither,engine,music,setMuted,setVolume,setMusic,setMusicVol,get mus(){return mus;},get muted(){return muted;},get ready(){return!!ac;}};
 })();
 window.addEventListener('pointerdown',()=>SFX.init(),true);
 window.addEventListener('keydown',()=>SFX.init(),true);
@@ -6404,7 +6453,7 @@ function updatePlay(dt){
   let nf=0,nc=0;for(const q of w.prey){if(q.caught)continue;if(q.type==='fly'&&(q.landT<=0||q.inHand))nf++;if(q.type==='cricket')nc++;}
   SFX.buzzLevel(Math.min(0.05,nf*0.018));SFX.beeBuzz(pet.kind==='bee'&&pet.state!=='grabbed'?pet.buzzV||0:pet.kind==='bee'?0.05:0,pet.kind==='bee'?(pet.state==='grabbed'?1.2:pet.buzzP||0):0);
   SFX.slither(pet.kind==='snake'&&pet.state!=='grabbed'?Math.min(0.07,Math.abs(pet.speed||0)/46*0.08):0);
-  SFX.music(w.dayness);
+  SFX.music({day:w.dayness,mood:w.mood,happy:w.stats.happy,menu:ui.modalOpen(),duck:w.toys.some(o=>o.id==='musicbox'&&o.play2>0)});
   game.chirpT-=dt;if(game.chirpT<=0){game.chirpT=rand(3,7);if(nc)SFX.play('chirp');}
   game.croakT-=dt;if(game.croakT<=0){game.croakT=rand(8,15);if(w.dayness<0.4)SFX.play('croak');}
   if(game.shake>0){game.shake-=dt;const k=Math.ceil(game.shake*12);$('stage').style.transform=game.shake>0&&save.set.shake?`translate(${(Math.random()-.5)*k}px,${(Math.random()-.5)*k}px)`:'';}
@@ -7490,7 +7539,7 @@ const ui={
     document.querySelectorAll('.modal').forEach(m=>m.addEventListener('pointerdown',e=>{if(e.target===m&&!game.firstRun)this.close();}));
     $('gPull').addEventListener('click',()=>this.pull());$('gcv').addEventListener('click',()=>{if(G.state==='ready'){G.state='shake';G.t=0;SFX.play('rattle');}else if(G.state==='idle')this.pull();});
     // settings
-    const S=save.set;$('setVol').value=S.vol;$('setVol').addEventListener('input',e=>{S.vol=+e.target.value;SFX.setVolume(S.vol);markDirty();});
+    const S=save.set;$('setVol').value=S.vol;$('setVol').addEventListener('input',e=>{S.vol=+e.target.value;SFX.setVolume(S.vol);markDirty();});$('setMVol').value=S.mvol??0.8;$('setMVol').addEventListener('input',e=>{S.mvol=+e.target.value;SFX.setMusicVol(S.mvol);markDirty();});
     const sw=(id,key,fn)=>{const b=$(id);b.classList.toggle('on',!!S[key]);b.addEventListener('click',()=>{S[key]=!S[key];b.classList.toggle('on',S[key]);fn&&fn(S[key]);markDirty();SFX.play('ui');});};
     const uiAuto=()=>innerWidth<=760||innerHeight<=520?0.78:1;
     this.applyUI=()=>{const z=save.set.ui||uiAuto();for(const id of['top','dock','toast','zoomChip'])$(id).style.zoom=z;document.querySelectorAll('.sheet').forEach(e=>e.style.zoom=z);
@@ -7498,17 +7547,14 @@ const ui={
     $('setUi').addEventListener('input',e=>{save.set.ui=+e.target.value;this.applyUI();fit();markDirty();});
     $('setUiAuto').addEventListener('click',()=>{delete save.set.ui;this.applyUI();fit();markDirty();SFX.play('ui');});
     window.addEventListener('resize',()=>{if(!save.set.ui){this.applyUI();fit();}});this.applyUI();
-    // cute faces: all on/off, or critter by critter
-    const fl=$('setFaceList'),syncF=()=>{const on=FACE_PETS.filter(([k])=>faceOn(k)).length;for(const b of $('setFaces').children)b.classList.toggle('on',b.dataset.v==='1'?on===FACE_PETS.length:on===0);
-      for(const sg of fl.querySelectorAll('.seg'))for(const b of sg.children)b.classList.toggle('on',(b.dataset.v==='1')===faceOn(sg.dataset.k));};
+    // cute faces: one little toggle chip per critter
     const setF=(k,v)=>{save.set.faces=save.set.faces||Object.fromEntries(FACE_PETS.map(([q])=>[q,faceOn(q)?1:0]));save.set.faces[k]=v;};
-    for(const b of $('setFaces').children)b.addEventListener('click',()=>{for(const[k]of FACE_PETS)setF(k,+b.dataset.v);syncF();markDirty();SFX.play('ui');});
-    for(const[k,n]of FACE_PETS){const r=document.createElement('div');r.className='srow';r.innerHTML=`<label>${n}</label><div class="seg" data-k="${k}"><button class="btn alt" data-v="1">On</button><button class="btn alt" data-v="0">Off</button></div>`;
-      for(const b of r.querySelectorAll('button'))b.addEventListener('click',()=>{setF(k,+b.dataset.v);syncF();markDirty();SFX.play('ui');});fl.appendChild(r);}
-    syncF();
-    // settings groups fold open and shut; which ones are open is remembered for this visit
-    for(const d of document.querySelectorAll('#mSettings .sgrp')){let o=null;try{o=sessionStorage.getItem('mj.sg.'+d.dataset.g);}catch(e){}if(o!==null)d.open=o==='1';
-      d.addEventListener('toggle',()=>{try{sessionStorage.setItem('mj.sg.'+d.dataset.g,d.open?'1':'0');}catch(e){}if(d.open)SFX.play('tick');});}
+    for(const[k,n]of FACE_PETS){const b=document.createElement('button');b.className='btn alt'+(faceOn(k)?' on':'');b.textContent=n;b.setAttribute('aria-pressed',faceOn(k));
+      b.addEventListener('click',()=>{setF(k,faceOn(k)?0:1);b.classList.toggle('on',faceOn(k));b.setAttribute('aria-pressed',faceOn(k));markDirty();SFX.play('ui');});$('setFaces').appendChild(b);}
+    // tabs, like the other menus: one panel at a time, and it remembers the last one
+    const showTab=t=>{for(const b of $('setTabs').children)b.classList.toggle('on',b.dataset.t===t);for(const pn of document.querySelectorAll('#mSettings .spanel'))pn.hidden=pn.dataset.t!==t;};
+    for(const b of $('setTabs').children)b.addEventListener('click',()=>{if(save.set.setTab===b.dataset.t)return;save.set.setTab=b.dataset.t;showTab(b.dataset.t);markDirty();SFX.play('tick');});
+    showTab(save.set.setTab||'sound');
     const sp=$('setPieces');for(const P of FUN_PIECES){const r=document.createElement('div');r.className='srow';r.innerHTML=`<label>${P.name}<small>${P.fun}</small></label><div class="seg" data-k="${P.id}"><button class="btn alt" data-v="0">Basic</button><button class="btn alt" data-v="1">Fun</button></div>`;
       for(const b of r.querySelectorAll('button'))b.addEventListener('click',()=>{save.set.fun=save.set.fun||{};if(b.dataset.v==='1')save.set.fun[P.id]=1;else delete save.set.fun[P.id];markDirty();SFX.play('ui');this.applyIface();this.funHints();});sp.appendChild(r);}
     this.funHints=()=>{if(FUN('tools')&&!save.set.funHint){save.set.funHint=1;this.toast('Your hand does the petting now: rub to pet, hold to pick up, double-tap to knock on the glass. Tools hang on the pegboard.');}};
@@ -7803,8 +7849,8 @@ const ui={
   livePreview(kind,cv){this.livePv=this.livePv||{};const k=kind+'|'+cv.width+'x'+cv.height;let p=this.livePv[k];
     if(p){p.ctx=cv.getContext('2d');drawPreview(p);}else{p=this.livePv[k]=petPreview(kind,cv);showBrain(p);}return p;},
   tickPreviews(dt){
-    // low graphics: menu previews step at about 12fps instead of every frame
-    if(document.body.classList.contains('gfx-low')){this.pvAcc=(this.pvAcc||0)+dt;if(this.pvAcc<1/12)return;dt=Math.min(this.pvAcc,0.25);this.pvAcc=0;}
+    // low graphics: menu previews step at about 30fps instead of every frame
+    if(document.body.classList.contains('gfx-low')){this.pvAcc=(this.pvAcc||0)+dt;if(this.pvAcc<1/30)return;dt=Math.min(this.pvAcc,0.25);this.pvAcc=0;}
     for(const p of this.previews){p.pw.t+=dt;p.pet.update(dt);drawPreview(p);}
   },
 };
@@ -8141,7 +8187,7 @@ function frame(now){
   ui.tick(dt);
   requestAnimationFrame(frame);
 }
-loadSave();SFX.setVolume(save.set.vol);SFX.setMuted(!save.set.sfx);SFX.setMusic(save.set.music);
+loadSave();SFX.setVolume(save.set.vol);SFX.setMuted(!save.set.sfx);SFX.setMusic(save.set.music);SFX.setMusicVol(save.set.mvol??0.8);
 game.world=createWorld();setTank(save.cur&&SPECIES[save.cur]?habitatOf(save.cur):'terra',true);
 ui.init();ui.coinShown=save.coins;$('coinNum').textContent=save.coins;fit();
 const away=applyAway();
