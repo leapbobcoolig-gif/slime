@@ -4279,7 +4279,7 @@ class FuzzWorm extends Pet{
 //  scratches the dirt, peeps a lot, follows the hand around like a duckling, flutters its stubby wings when
 //  it's happy, shakes itself off when misted and naps at night with its head tucked into its fluff.
 // =====================================================================
-const CHICKC={down:ramp('#a87a08','#e2b420','#ffe050','#fff6b4'),beak:ramp('#a04a08','#e07a14','#ffa83a','#ffd890'),outline:'#3a2604'};
+const CHICKC={down:ramp('#a87a08','#e2b420','#ffe050','#fff6b4'),beak:ramp('#a04a08','#e07a14','#ffa83a','#ffd890'),outline:'#3a2604'};PAL.chick=CHICKC;
 class Chick extends Pet{
   constructor(world,x,y){super();this.initCommon(world,'chick');
     this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.sc=1;this.outline=hex(CHICKC.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.seam=3;
