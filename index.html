@@ -3718,16 +3718,15 @@ class Slime extends Pet{
       for(const p of N){if(landed||jump){const a=rand(TAU),k=rand(0.6,1.6);p.vu+=Math.cos(a)*k;p.vv+=Math.sin(a)*k-0.6;}if(this.state==='grabbed'){p.vu+=rand(-3,3)*dt;p.vv+=rand(-3,3)*dt;}// every hop shakes up a flurry
         p.vv+=dt*0.25;p.vu+=Math.sin(this.t*1.3+p.u*5)*dt*0.08;p.vu*=1-dt*0.9;p.vv*=1-dt*0.9;p.u+=p.vu*dt;p.v+=p.vv*dt;const d=Math.hypot(p.u,p.v);if(d>0.78){p.u*=0.78/d;p.v*=0.78/d;p.vu*=-0.3;p.vv*=-0.3;}}}
     if(S.fx==='chrome'){if(landed)this.rip={t:0};if(this.rip&&(this.rip.t+=dt)>1)this.rip=null;}
-    if(S.fx==='cube'){// it tumbles: each hop tips it over onto its next face, toward where it's going
-      if(jump){if(Math.hypot(this.vx,this.vy)>1){const da=Math.atan2(this.vy,this.vx),ca=this.cubeA||0;this.rollD=da;this.cubeT=da+Math.round((ca-da)/(Math.PI/2))*Math.PI/2;}else this.rollD=null;this.airT=0;}// square up to the way it's rolling, turning the short way round
-      if(this.phase==='air')this.airT=(this.airT||0)+dt;this.rollP=this.phase==='air'&&this.rollD!=null?clamp(this.airT/0.42,0,1):0;
-      this.cubeA=(this.cubeA||0)+((this.cubeT??0)-(this.cubeA||0))*Math.min(1,dt*10);
-      const N=this.N,sx=1+this.sq*0.3,sy=(1-this.sq*0.26)*0.82,ca=this.cubeA,th=this.rollP*Math.PI/2,Lr=Math.abs(Math.cos(th))+Math.abs(Math.sin(th))-1,dx=Math.cos(this.rollD||0),dy=Math.sin(this.rollD||0);
+    if(S.fx==='cube'){// it turns a quarter turn with every hop: smoothly over the whole jump, landing square again
+      if(jump){this.spinFrom=this.cubeA||0;this.spinTo=this.spinFrom+(this.vx>=0?1:-1)*Math.PI/2;this.airT=0;this.airDur=Math.max(0.2,2*this.vh/230);}
+      if(this.phase==='air'&&this.spinTo!=null){this.airT+=dt;const p=clamp(this.airT/this.airDur,0,1);this.cubeA=lerp(this.spinFrom,this.spinTo,p*p*(3-2*p));}
+      else if(this.spinTo!=null)this.cubeA+=(this.spinTo-this.cubeA)*Math.min(1,dt*20);
+      const N=this.N,sx=1+this.sq*0.3,sy=(1-this.sq*0.26)*0.82,ca=this.cubeA||0;
       for(let i=0;i<N;i++){const p=this.ring[i],a=i/N*TAU,c=Math.abs(Math.cos(a-ca)),s2=Math.abs(Math.sin(a-ca)),r=Math.pow(Math.pow(c,7)+Math.pow(s2,7),-1/7)*0.9;
-        const wb=(this.wob||0)*Math.sin(i*TAU/N*4+this.t*26)*0.8;let px=Math.cos(a)*(this.R*r+wb),py=Math.sin(a)*(this.R*r+wb);
-        const pr=px*dx+py*dy;px+=dx*pr*Lr;py+=dy*pr*Lr;// mid-tumble it's up on an edge, so from above it looks longer along the roll
-        const tx=this.x+px*sx,ty=this.y+py*sy;p.x+=(tx-p.x)*Math.min(1,dt*18);p.y+=(ty-p.y)*Math.min(1,dt*18);}
-      if(landed){this.wob=1;this.splash={t:0,x:this.x,y:this.y};}this.wob=Math.max(0,(this.wob||0)-dt*2.2);// a jelly jiggle and a splash of acid where it lands
+        const wb=(this.wob||0)*Math.sin(i*TAU/N*4+this.t*26)*0.8,tx=this.x+Math.cos(a)*(this.R*r+wb)*sx,ty=this.y+Math.sin(a)*(this.R*r+wb)*sy;p.x+=(tx-p.x)*Math.min(1,dt*30);p.y+=(ty-p.y)*Math.min(1,dt*30);}// held firmly square, corners stay crisp while it turns
+      if(landed){this.wob=1;this.splash={t:0,x:this.x,y:this.y};const T=this.trail||(this.trail=[]);T.push({x:this.x,y:this.y,r:this.R*0.75,life:6});if(T.length>6)T.shift();}// a jiggle, a splash, and a puddle of acid left behind
+      for(const q of this.trail||[])q.life-=dt;this.trail=(this.trail||[]).filter(q=>q.life>0);this.wob=Math.max(0,(this.wob||0)-dt*2.2);// a jelly jiggle and a splash of acid where it lands
       if(this.splash&&(this.splash.t+=dt)>0.7)this.splash=null;
       const bo=this.bones||(this.bones=[]);if(this.inside&&this.inside.t<dt*1.5&&bo.length<4)bo.push({u:rand(-0.4,0.4),v:rand(-0.3,0.5),a:rand(TAU)});// each meal leaves a bone behind inside
       const fz=this.fizz||(this.fizz=[]);if(this.inside&&this.inside.t<4&&Math.random()<dt*14)fz.push({u:rand(-0.3,0.3),v:rand(-0.1,0.4),t:0});for(const f of fz){f.t+=dt;f.v-=dt*0.5;}this.fizz=fz.filter(f=>f.t<0.8);}
@@ -3759,7 +3758,7 @@ class Slime extends Pet{
       const G=hex('#2a8a3a');for(let k=0;k<4;k++){const[x,y]=this.U(-0.45+Math.sin(t*1.5+k)*0.04*k,0.55-k*0.12);put(fb,x,y,G);}}// a sprig of pondweed
     if(ins==='snow'){if(!out){const[x,y]=this.U(-0.42,0.2);item('snow',x,y);}
       for(const p of this.flakes||[]){const[x,y]=this.U(p.u,p.v);put(fb,x,y,hex('#ffffff'),0.9);}}
-    if(ins==='cube'){const ca=this.cubeA||0,c=Math.cos(ca),sn=Math.sin(ca),sl=Math.sin((this.rollP||0)*Math.PI)*0.14,su=-Math.cos(this.rollD||0)*sl,sv=-Math.sin(this.rollD||0)*sl,L=(u,v)=>this.U(u*c-v*sn+su,(u*sn+v*c)*1.1+sv);// an adventurer's leftovers, sloshing back as it tumbles
+    if(ins==='cube'){const ca=this.cubeA||0,c=Math.cos(ca),sn=Math.sin(ca),L=(u,v)=>this.U(u*c-v*sn,(u*sn+v*c)*1.1);// an adventurer's leftovers, turning with it
       const Au=hex('#ffd040'),Au2=hex('#b08010'),Ag=hex('#e0e4ec'),Br=hex('#6a3a14'),Rd=hex('#e0203a'),Bn=hex('#f4ecd0');
       {const[x0,y0]=L(-0.55,0.35),[x1,y1]=L(0.45,-0.45),n=Math.max(1,Math.hypot(x1-x0,y1-y0)),dx=(x1-x0)/n,dy=(y1-y0)/n;for(let k=0;k<=n;k++)put(fb,x0+dx*k,y0+dy*k,k<2?Br:Ag);// a sword
         put(fb,x0+dx*2-dy*1.5,y0+dy*2+dx*1.5,Au2);put(fb,x0+dx*2,y0+dy*2,Au);put(fb,x0+dx*2+dy*1.5,y0+dy*2-dx*1.5,Au2);}
@@ -3788,18 +3787,23 @@ class Slime extends Pet{
     for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++){const i=y*W+x;if(!fb.mat[i]||fb.cls[i]!==2)continue;const b=BL.find(b=>b.id===fb.ll[i])||BL[0],h=hash(Math.round((x-b.x)*0.9)+50+b.id*13,Math.round((y-b.y)*0.9)+70);if(h<0.8)continue;
       const tw=0.5+0.5*Math.sin(h*40+t*(1.5+h*2)+this.ang*2+(this.x+this.y)*0.15),hue=((h*977+t*0.4+this.ang)%1+1)%1;
       fb.px[i]=mixc(fb.px[i],slimeHsl(hue,0.9,0.5+tw*0.35),0.55+tw*0.45);if(tw>0.93)for(const[a,c]of[[-1,0],[1,0],[0,-1],[0,1]])if(this.inBody(fb,x+a,y+c))pmix(fb,x+a,y+c,Wt,0.7);}}
-  drawAcid(fb){const W=fb.w,mat=fb.mat,t=this.t,S_=this.splash;
+  drawAcid(fb){const W=fb.w,mat=fb.mat,t=this.t,S_=this.splash,A0=hex('#9affc8'),G=hex('#2a6a4a'),Wt=hex('#ffffff');
+    for(const q of this.trail||[]){const k=Math.min(1,q.life/3);// glistening acid puddles where it landed, fizzing as they dry
+      for(let yy=-Math.ceil(q.r*0.6);yy<=q.r*0.6;yy++)for(let xx=-Math.ceil(q.r);xx<=q.r;xx++){const X=Math.round(q.x+xx),Y=Math.round(q.y+yy+1);if(X<0||Y<0||X>=W||Y>=fb.h||mat[Y*W+X])continue;
+        const d=Math.hypot(xx/q.r,yy/(q.r*0.6))+(vnoise(X*0.5,Y*0.5)-0.5)*0.5;if(d>1)continue;const i=Y*W+X;fb.px[i]=mixc(fb.px[i],d>0.82?G:A0,(d>0.82?0.3:0.07)*k);
+        if(d<0.75&&Math.abs(xx/q.r+yy/(q.r*0.6)+0.5)<0.12)pmix(fb,X,Y,Wt,0.35*k);if(hash(X,Y)>0.985&&Math.sin(t*6+X)>0.3)pmix(fb,X,Y,hex('#e0ffe8'),0.8*k);}}
     if(S_){const k=S_.t/0.7,A=hex('#9affc8');for(let i=0;i<14;i++){const a=i/14*TAU+hash(i,7)*0.4,r=this.R*(0.7+k*0.8)*(0.8+hash(i,3)*0.4),x=S_.x+Math.cos(a)*r,y=S_.y+1+Math.sin(a)*r*0.55;// droplets of acid flung out as it lands
       if(!mat[Math.round(y)*W+Math.round(x)])pmix(fb,x,y,A,(1-k)*0.8);}}
     // light shining down through the jelly throws rippling mint caustics into its shadow
     const h_=this.h||0,lx=this.x+1+h_*0.35,ly=this.y+1,R2=this.R,k=(0.4+0.6*this.world.dayness)*(1-Math.min(0.6,h_/20));
     for(let yy=-R2*0.7;yy<=R2*0.7;yy++)for(let xx=-R2;xx<=R2;xx++){const X=Math.round(lx+xx),Y=Math.round(ly+yy);if(X<0||Y<0||X>=W||Y>=fb.h||mat[Y*W+X])continue;
       const d=Math.hypot(xx/R2,yy/(R2*0.7));if(d>1)continue;const c=Math.abs(Math.sin(X*0.55+vnoise(X*0.3+t*0.8,Y*0.4)*5+t*1.4)*Math.sin(Y*0.7-vnoise(X*0.35,Y*0.3-t*0.7)*5));if(c>0.7)pmix(fb,X,Y,hex('#c8ffe0'),Math.min(0.6,(c-0.7)*3)*(1-d*d)*k);}}
-  drawBevel(fb){const W=fb.w,mat=fb.mat,Hi=hex('#ffffff'),Lo=hex('#06261c'),th=(this.rollP||0)*Math.PI/2,hs=this.R*0.9,dx=Math.cos(this.rollD||0),dy=Math.sin(this.rollD||0);// light catches the cube's top-left edges
-    const L=Math.abs(Math.cos(th))+Math.abs(Math.sin(th)),edge=hs*(L-2*Math.sin(th));// mid-tumble: the face it's rolling onto shows at the front, a little darker
+  drawBevel(fb){const W=fb.w,mat=fb.mat,Hi=hex('#ffffff'),Lo=hex('#06261c'),ca=this.cubeA||0,c=Math.cos(ca),s=Math.sin(ca),cx=this.x,cy=this.y-this.h;
+    const hx=this.R*0.9*(1+this.sq*0.3),hy=this.R*0.9*(1-this.sq*0.26);// the edges catch the light by which way each face of the cube points, so the light slides round as it turns
     for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++){const i=y*W+x;if(!mat[i]||fb.cls[i]!==2||fb.ll[i])continue;
-      if(th>0.05){const s=(x+.5-this.x)*dx+(y+.5-(this.y-this.h))/0.82*dy;if(s>edge+0.7)fb.px[i]=mixc(fb.px[i],Lo,0.22);else if(s>edge-0.7)fb.px[i]=mixc(fb.px[i],Hi,0.45);}
-      if(!mat[i-W]||!mat[i-1])fb.px[i]=mixc(fb.px[i],Hi,0.5);else if(!mat[i+W]||!mat[i+1])fb.px[i]=mixc(fb.px[i],Lo,0.35);else if(!mat[i-2*W]||!mat[i-2])fb.px[i]=mixc(fb.px[i],Hi,0.18);}}
+      const wx=(x+.5-cx)/hx,wy=(y+.5-cy)/(hy*0.82),lx=wx*c+wy*s,ly=-wx*s+wy*c,e=1-Math.max(Math.abs(lx),Math.abs(ly));if(e>0.3)continue;
+      const nx0=Math.abs(lx)>Math.abs(ly)?Math.sign(lx):0,ny0=nx0?0:Math.sign(ly),nx=nx0*c-ny0*s,ny=nx0*s+ny0*c,lit=-(nx*0.7+ny*0.7),k=e<0.15?1:0.45;
+      if(lit>0.15)fb.px[i]=mixc(fb.px[i],Hi,Math.min(0.6,lit*0.6)*k);else if(lit<-0.15)fb.px[i]=mixc(fb.px[i],Lo,Math.min(0.4,-lit*0.4)*k);}}
 }
 
 // =====================================================================
