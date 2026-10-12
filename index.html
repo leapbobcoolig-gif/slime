@@ -855,6 +855,12 @@ const SFX=(()=>{
     buzz:()=>tone(200,0.22,{type:'sawtooth',to:250,gain:0.035}),
     shimmer:()=>{[1320,1660,1980,2640].forEach((f,i)=>tone(f,0.18,{delay:i*0.05,type:'sine',gain:0.035}));},
     bunhop:()=>{tone(220,0.14,{type:'sine',to:420,gain:0.12});tone(110,0.08,{type:'triangle',to:80,gain:0.08});},
+    gingerHop:()=>{for(let k=0;k<5;k++)tone(rand(2300,3300),0.12,{delay:k*0.022,type:'triangle',gain:0.022});noise(0.05,{filter:'highpass',freq:6000,gain:0.03});},// sleigh bells
+    gingerLand:()=>{tone(120,0.1,{to:70,gain:0.12});for(let k=0;k<4;k++)noise(0.035,{delay:k*0.028+rand(0,0.012),filter:'bandpass',freq:rand(1600,3200),q:2,gain:0.1});},// cookie crunch
+    doorCreak:()=>{tone(170,0.45,{type:'sawtooth',to:250,gain:0.022,vib:[22,25],attack:0.05});tone(340,0.3,{delay:0.1,type:'triangle',to:300,gain:0.012,vib:[17,20]});},
+    chimneyPuff:()=>{noise(0.4,{filter:'lowpass',freq:520,to:180,gain:0.07,attack:0.08});},
+    musicBox:()=>{[1568,1976,2349,1976,3136].forEach((f,i)=>{tone(f,0.5,{delay:i*0.16,type:'sine',gain:0.03});tone(f*2,0.2,{delay:i*0.16,type:'sine',gain:0.008});});},
+    shutterClack:()=>{noise(0.02,{filter:'bandpass',freq:1300,q:3,gain:0.14});tone(320,0.04,{gain:0.06});noise(0.02,{delay:0.09,filter:'bandpass',freq:1100,q:3,gain:0.12});tone(280,0.04,{delay:0.09,gain:0.05});},
     bunland:()=>{tone(150,0.1,{type:'sine',to:70,gain:0.16});noise(0.05,{filter:'lowpass',freq:500,gain:0.07});},
     fwump:()=>{noise(0.12,{filter:'lowpass',freq:700,gain:0.12,attack:0.02});tone(180,0.12,{type:'sine',to:120,gain:0.08});},
     crust:()=>{for(let i=0;i<4;i++)noise(0.015,{delay:i*0.045+Math.random()*0.02,filter:'bandpass',freq:3200+Math.random()*1500,q:2,gain:0.07});},
@@ -981,7 +987,7 @@ const SFX=(()=>{
   const BUS_OF={};
   'tick ui tap sparkle levelup coin coinburst whoosh close beep nope bloop achieve yay reveal0 reveal1 reveal2 reveal3 insert ratchet clunk pop rattle chest ask place scoop unhook hang clack pluck tink2'.split(' ').forEach(n=>BUS_OF[n]='ui');
   'plip bpop drip splash ocean burble rumble wind whirr toot tune musicbox flutter boing bell boop blow zap squeak2 lightsOn lightsOff tink'.split(' ').forEach(n=>BUS_OF[n]='world');
-  const GAP={cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
+  const GAP={gingerLand:0.25,chimneyPuff:2,musicBox:5,shutterClack:1,doorCreak:1.5,cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
   function play(name,arg){
     if(!ac||muted||!S[name])return;const now=ac.currentTime;
     if(last[name]!==undefined&&now-last[name]<(GAP[name]??0.03))return;last[name]=now;
@@ -2345,6 +2351,7 @@ const salVoro=(u,v,sz,seed)=>{const cu=Math.floor(u/sz),cv=Math.floor(v/sz);let 
     if(d<d1){d2=d1;d1=d;id=X*131+Y*71;}else if(d<d2)d2=d;}return[d2-d1,id];};// [distance to the cell edge, cell id]
 const SAL_FIRE=['#4a0804','#a01a08','#e84a0c','#ff8a14','#ffc840','#fff4c0'].map(hex);
 const salFire=h=>SAL_FIRE[h>0.9?5:h>0.74?4:h>0.56?3:h>0.38?2:h>0.2?1:0];
+const fract=a=>a-Math.floor(a);
 const SWATCHES={
   frog:[
     {id:'purple',name:'Purple-sided',price:40,dot:['#7438c0','#56c23b'],outline:'#160828',pal:{frog:{flank:ramp('#240a42','#45197c','#7438c0','#b088f0'),bar:ramp('#3a1a5a','#6a3aa0','#a874e0','#e2c8ff'),toe:ramp('#5a1a4a','#9a2a7a','#d84aa8','#ff9ad8')}}},
@@ -2518,7 +2525,37 @@ const SWATCHES={
   {id:'matcha',name:'Matcha',price:40,dot:['#7aa83a','#f0e6c0'],pal:{bun:{top:ramp('#2a4210','#4a6e1e','#7aa83a','#b4d86a'),crust:ramp('#5e2e0a','#934c14','#c47828','#e8a84c')}}},
   {id:'ube',name:'Ube',price:40,dot:['#8a4ac8','#d8b4f0'],pal:{bun:{top:ramp('#2a0e48','#4e1e7a','#8a4ac8','#c08ef0'),crust:ramp('#3a1a52','#64307e','#9050b0','#bc80d8'),crumb:ramp('#8a70a4','#b89ad4','#d8b4f0','#f6e8ff')}}},
   {id:'melonpan',name:'Melon pan',price:60,dot:['#e8d870','#a8c850'],pal:{bun:{top:ramp('#7a6a1a','#b8a43a','#e8d870','#fff6b8'),crust:ramp('#6a7a1e','#94ac34','#bcd458','#e0f094')}}},
-  {id:'burnt',name:'Extra toasty',price:40,dot:['#2a1a12','#8a6a4a'],outline:'#060302',pal:{bun:{top:ramp('#0a0604','#160e08','#24180e','#3a2818'),crust:ramp('#160c06','#2a1a0e','#402a18','#5e3e24')}}}],
+  {id:'burnt',name:'Extra toasty',price:40,dot:['#2a1a12','#8a6a4a'],outline:'#060302',pal:{bun:{top:ramp('#0a0604','#160e08','#24180e','#3a2818'),crust:ramp('#160c06','#2a1a0e','#402a18','#5e3e24')}}},
+  // vivid: painted patterns on the same bun. paint(c,u,v,q,x,y,k): u -1..1 across, v 0 (base) .. 1 (top of the dome), k 0 on the pale sides .. 1 on the crust
+  {id:'mimic',name:'Mimic',tier:'vivid',dot:['#8a5426','#ffc83a'],outline:'#1a0a02',
+   W:ramp('#3a1c08','#6a3814','#8a5426','#b0763e'),Fe:ramp('#1e1e24','#3a3a44','#5a5a66','#8a8a98'),
+   paint(c,u,v,q,x,y,k){if(Math.abs(Math.abs(u)-0.68)<0.13||v>0.93||v<0.07)return this.Fe[q];// iron straps and rims
+     if(Math.abs(v-0.66)<0.05)return this.W[0];// the seam where the lid closes
+     if(Math.abs(u)<0.14&&v>0.12&&v<0.27)return Math.abs(u)<0.07&&v<0.2?hex('#140604'):hex(q>1?'#ffc83a':'#a06a10');// gold lock and keyhole
+     const pl=v>0.66?fract((v-0.66)*3.2):fract(v*3.2);if(pl<0.16)return this.W[Math.max(0,q-1)];// planks
+     return this.W[(hash(Math.round(x*0.5),y)>0.8&&q>0)?q-1:q];}},
+  {id:'burger',name:'Burger',tier:'vivid',dot:['#d08a3a','#5ac83a'],outline:'#2a1004',
+   T:ramp('#7a3a0a','#b0601a','#d08a3a','#f0b468'),L:ramp('#2a6a1a','#3e9a28','#5ac83a','#9ae870'),Ch:ramp('#c88a00','#f0b400','#ffd23a','#ffec8a'),Pt:ramp('#2a1006','#4a2010','#6a3418','#8a4a28'),Ss:hex('#fff6dc'),
+   paint(c,u,v,q,x,y,k){const w=Math.sin(u*11)*0.03;// sesame bun, lettuce, cheese, patty, bottom bun
+     if(v<0.08)return this.T[Math.max(0,q-1)];if(v<0.24+w)return this.Pt[q];
+     if(v<0.3||(v<0.36&&Math.abs(fract(u*1.6+0.2)-0.5)<0.12))return this.Ch[q];// cheese, a melted corner hanging down
+     if(v<0.4+w*1.5)return this.L[q];
+     if(hash(x*5+1,y*9+2)>0.86&&v>0.5)return this.Ss;return this.T[q];}},
+  {id:'cinnamon',name:'Cinnamon roll',tier:'vivid',dot:['#c88a4a','#fffaf0'],outline:'#2e1204',
+   D:ramp('#9a6a3e','#d4a26a','#f0cc98','#fff0d4'),C:ramp('#3a1404','#6a2a0a','#94420e','#b8642a'),I:hex('#fffaf2'),
+   paint(c,u,v,q,x,y,k){if(v<0.42){const s=fract(v*4.2+u*0.15);return s<0.32?this.C[q]:this.D[q];}// rolled layers seen from the side
+     const r=Math.hypot(u,(v-0.72)*2.4),a=Math.atan2(v-0.72,u),s=fract(r*1.7-a/TAU);// the swirl on top
+     let o=s<0.4?this.C[q]:this.D[q];const zz=0.62+Math.abs(fract(u*2.5)-0.5)*0.36;if(Math.abs(v-zz)<0.06&&Math.abs(u)<0.8)o=this.I;// a zigzag of icing
+     return o;}},
+  {id:'party',name:'Party bun',tier:'vivid',dot:['#ff8ac8','#7ad8ff'],outline:'#3a1030',candle:1,
+   F:ramp('#c04a8a','#ee78b4','#ff9ed0','#ffd4ec'),SP:['#ff4a4a','#ffd23a','#4ad86a','#4aa8ff','#fff6f0','#b46aff'].map(hex),
+   paint(c,u,v,q,x,y,k){const drip=Math.pow(Math.max(0,Math.sin(u*8.5+1.2)),4)*0.3,edge=0.55-drip;if(v<edge)return c;// thick frosting dripping down the sides
+     if(hash(x*7+1,y*13+2)>0.86)return this.SP[Math.floor(hash(x,y*3)*6)];// rainbow sprinkles
+     return this.F[v<edge+0.08&&q>0?q-1:q];}},
+  {id:'mochi',name:'Strawberry mochi',tier:'special',fx:'mochi',dot:['#ffe4ec','#ff5a6a'],outline:'#6a3a48',
+   S:ramp('#d8a8b4','#f2cad4','#ffe4ec','#fff8fa'),
+   paint(c,u,v,q,x,y,k){const o=this.S[q];return hash(x*11+3,y*7+1)>0.93?mixc(o,hex('#ffffff'),0.7):o;}},// soft rice skin dusted with starch
+  {id:'ginger',name:'Gingerbread house',tier:'mythic',fx:'ginger',dot:['#b06a2a','#ffffff'],outline:'#2a1004'}],
  golem:[
   {id:'sandstone',name:'Sandstone',price:40,dot:['#c8a46a','#6a7a30'],pal:{golem:{stone:ramp('#5a4428','#8a6c44','#b8925e','#dcbc88'),stoneD:ramp('#3a2a18','#5a4428','#8a6c44','#b0905e'),head:ramp('#5e482a','#8e7048','#bc9a64','#e0c490'),moss:ramp('#2e3a10','#4a5a1a','#6a7a30','#90a048'),mossL:ramp('#4a5a1a','#6e8228','#98ac40','#c4d464')}}},
   {id:'snowcap',name:'Snowcap',price:40,dot:['#6e7a8a','#f0f6ff'],eye:'#7ad8ff',pal:{golem:{stone:ramp('#2a3038','#46505c','#6a7684','#96a2b0'),stoneD:ramp('#1a1e24','#2e343c','#46505c','#66707c'),head:ramp('#2e343c','#4a5460','#6e7a88','#9aa6b4'),moss:ramp('#9aa8b8','#c8d4e0','#e8f0f8','#ffffff'),mossL:ramp('#b0bcc8','#d8e2ec','#f2f8ff','#ffffff'),eye:'#7ad8ff',eyeC:'#f0fcff'}}},
@@ -3635,7 +3672,7 @@ class Slime extends Pet{
   tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;this.phase='rest';return true;}
   dragTo(x,y){this.grabX=x;this.grabY=y;}
   release(){if(this.state!=='grabbed')return;this.state='fall';this.vh=0;}
-  update(dt){const S=swatchOf(this)||{},air0=this.phase==='air';this.R=8.5*(S.sc||1);this.sndHop=S.fx==='cube'?'cubeHop':null;this.sndLand=S.fx==='cube'?'cubeLand':null;
+  update(dt){const S=swatchOf(this)||{},air0=this.phase==='air';this.R=8.5*(S.sc||1);const bun=this.kind==='bun';this.sndHop=S.fx==='cube'?'cubeHop':S.fx==='ginger'?'gingerHop':bun?'bunhop':null;this.sndLand=S.fx==='cube'?'cubeLand':S.fx==='ginger'?'gingerLand':bun?'bunland':null;
     this.baseUpdate(dt);this.skinUpdate(dt,S,air0&&this.phase!=='air',!air0&&this.phase==='air');}
   baseUpdate(dt){
     this.t+=dt;const w=this.world,B=w.bounds,st0=this.state;
@@ -3755,7 +3792,10 @@ class Slime extends Pet{
   drawInside(fb,ins){const put=(fb,x,y,c,a=1)=>{if(this.inBody(fb,x,y))a>=1?pset(fb,x,y,c):pmix(fb,x,y,c,a);},out=this.mini&&this.mini.kind,t=this.t;
     const clip=i=>fb.mat[i]&&fb.cls[i]===2,tint=this.cr[2],item=(k,x,y,o={})=>slimeItem(fb,k,x,y,Object.assign({clip,tint},o));
     if(ins==='boba'){for(const p of(this.pearls||[]).slice(0,out?-1:undefined)){const[x,y]=this.U(p.u,p.v);item('boba',x,y);}
-      const P1=hex('#ff7aa8'),P2=hex('#c84a78'),[sx,sy]=this.U(0.25,-0.35);for(let k=0;k<6;k++){const x=sx+k*0.7,y=sy-k*1.1;pset(fb,x,y,P1);pset(fb,x+1,y,P2);}pset(fb,sx+4.2,sy-7.2,hex('#5a1a32'));pset(fb,sx+5.2,sy-7.2,P2);}// a fat straw
+      const P0=hex('#ffc8dc'),P1=hex('#ff6a9e'),P2=hex('#c03a6e'),O=hex('#4a1028'),[sx,sy]=this.U(0.42,-0.2),n=Math.round(this.R*0.55+4);// a fat outlined straw, slanting up out of the top
+      for(let k=0;k<=n;k++){const x=Math.round(sx+k*0.42),y=Math.round(sy-k),inn=this.inBody(fb,x,y),m=(c,a)=>inn?mixc(c,tint,a):c,a=inn?0.35:0;
+        pset(fb,x-1,y,m(O,0.2));pset(fb,x,y,m(P0,a));pset(fb,x+1,y,m(P1,a));pset(fb,x+2,y,m(P2,a));pset(fb,x+3,y,m(O,0.2));}
+      const tx=Math.round(sx+n*0.42),ty=Math.round(sy-n);for(let a=-1;a<=3;a++)pset(fb,tx+a,ty-1,O);pset(fb,tx,ty,hex('#2a0814'));pset(fb,tx+1,ty,hex('#2a0814'));}
     if(ins==='fish'){const F=this.fish;if(F&&!out){const[x,y]=this.U(Math.cos(F.a)*F.r,Math.sin(F.a)*F.r*0.9);item('fish',x,y,{flip:Math.sin(F.a)>0,tail:Math.sin(t*9)*0.6});}
       for(const b of this.bub||[]){const[x,y]=this.U(b.u,b.v);put(fb,x,y,hex('#ffffff'),0.7);}
       const G=hex('#2a8a3a');for(let k=0;k<4;k++){const[x,y]=this.U(-0.45+Math.sin(t*1.5+k)*0.04*k,0.55-k*0.12);put(fb,x,y,G);}}// a sprig of pondweed
@@ -4420,16 +4460,18 @@ class Cuttle extends Kraken{
 // =====================================================================
 const BUNC={top:ramp('#4a1e04','#78380a','#a85816','#d48a34'),crust:ramp('#5e2e0a','#934c14','#c47828','#e8a84c'),crumb:ramp('#9a7a56','#d4b88e','#f0dcb6','#fff6e2'),
   glaze:hex('#fff8e4'),wet:ramp('#8a7458','#bca482','#dccaa6','#f2e6cc')};
-PAL.bun=BUNC;// so swatches can recolour it like the others
+PAL.bun=BUNC;
+const HOUSE={wall:ramp('#4a1e06','#7a3810','#a8581e','#cc7e3a'),roof:ramp('#3a1604','#62280a','#8a3e14','#b05e28'),ice:ramp('#c8c4cc','#e8e6ee','#fffcf8','#ffffff'),brick:ramp('#5a1810','#8a2a1a','#b04030','#d06048'),gum:['#ff4a5a','#4ad86a','#ffd23a','#4aa8ff'].map(hex)};// so swatches can recolour it like the others
 class Bun extends Slime{
   get translucent(){return 0;}
   constructor(world,x,y){super(world,x,y);this.kind='bun';this.mind=mindFor('bun','');this.outline=hex(SPECIES.bun.outline);this.R=8;this.seam=0.8;
     this.warm=0.7;this.butter=0;this.honey=0;this.toast=0;this.soggy=0;this.proof=0;this.puff=0;this.steamT=0;this.steamK=0;this.miniCD=1e9;this.sndHop='bunhop';this.sndLand='bunland';this.frame={x,y,rx:7,H:5};}
-  bodyH(){return(10+this.proof*1.4)*(1-this.sq*0.26-this.puff*0.2);}
-  bodyW(){return(7.4+this.proof*0.9)*(1+this.sq*0.2+this.puff*0.14);}
+  get house(){return this.sw&&this.sw.fx==='ginger';}
+  bodyH(){return this.house?15*(1-this.sq*0.2):(10+this.proof*1.4)*(1-this.sq*0.26-this.puff*0.2);}
+  bodyW(){return this.house?8*(1+this.sq*0.12):(7.4+this.proof*0.9)*(1+this.sq*0.2+this.puff*0.14);}
   faceX(){return this.x+Math.cos(this.ang)*this.bodyW()*0.14;}
   mouthScreen(){return{x:this.faceX(),y:this.y-this.h-this.bodyH()*0.3};}
-  hatAnchor(){const H=this.bodyH();return{x:this.x,y:this.y-this.h-H-0.6,a:this.ang,s:1.0,fy:0.5,eye:{x:this.faceX()+0.5,y:this.y-this.h-H*0.48+0.6,sp:2.5}};}
+  hatAnchor(){const H=this.bodyH()+(this.house?0.8:0);return{x:this.x,y:this.y-this.h-H-0.6,a:this.ang,s:1.0,fy:0.5,eye:{x:this.faceX()+0.5,y:this.y-this.h-H*0.48+0.6,sp:2.5}};}
   hitTest(x,y){return Math.hypot((x-this.x)/(this.bodyW()+2),(y-(this.y-this.h-this.bodyH()*0.5))/(this.bodyH()*0.75+2))<1?0:-1;}
   petMe(){const r=Pet.prototype.petMe.call(this);if(r&&!this.preview){this.puff=Math.min(1,this.puff+0.25);this.warm=Math.min(1,this.warm+0.02);
       this.fwT=(this.fwT||0)-1/60;if(this.fwT<=0){this.fwT=0.5;SFX.play('fwump');for(let i=0;i<3;i++)spawn(this.world,'steam',this.x+rand(-5,5),this.y-this.h-this.bodyH()*0.7+rand(-2,2),{vx:rand(-10,10),vy:rand(-12,-4),life:rand(.4,.7),ph:0});}}
@@ -4439,7 +4481,7 @@ class Bun extends Slime{
     if(t==='butter'){this.butter=1;this.warm=1;SFX.play('sizzle');for(let i=0;i<8;i++)spawn(w,'spark',this.x+rand(-6,6),this.y-this.h-rand(1,8),{life:rand(0.6,1.1)});}
     else if(t==='honey'){this.honey=1;w.stats.water=Math.min(100,w.stats.water+50);SFX.play('yum');for(let i=0;i<6;i++)spawn(w,'spark',this.x+rand(-6,6),this.y-this.h-rand(1,8),{life:rand(0.6,1.1)});}
     else SFX.play('yum');}
-  update(dt){this.miniCD=1e9;this.mini=null;const w=this.world;super.update(this.honey>0.3?dt*0.85:dt);this.inside=null;this.col=this.colT=SLIME_COL.base;
+  update(dt){this.miniCD=1e9;this.mini=null;const w=this.world,air0=this.phase==='air';super.update(this.honey>0.3?dt*0.85:dt);this.inside=null;this.col=this.colT=SLIME_COL.base;
     const st=this.state;
     this.warm=clamp(this.warm+(st==='basking'?0.2:-0.01)*dt,0,1);
     if(st==='basking'){this.toast=Math.min(1,this.toast+dt*0.04);this.crT=(this.crT||0)-dt;if(this.crT<=0&&!this.preview){this.crT=rand(2,4);SFX.play('crust');}}else this.toast=Math.max(0,this.toast-dt*0.003);
@@ -4454,8 +4496,19 @@ class Bun extends Slime{
     // steam: more when it's warm and freshly buttered, a slow sleepy puff while it naps
     this.steamK+=((this.warm>0.12&&this.soggy<0.5?clamp((this.warm-0.12)/0.6,0,1)*(st==='sleeping'?0.55:1):0)-(this.steamK||0))*Math.min(1,dt*1.5);
     if(this.soggy>0.3&&!this.preview&&Math.random()<dt*this.soggy*3)spawn(w,'fdrop',this.x+rand(-5,5),this.y,{h:rand(2,6),vh:0,life:0.6});
+    this.skinBun(dt,swatchOf(this)||{},air0&&this.phase!=='air');
   }
-  color(m,q,s,l,x,y){const F=this.frame,v=clamp((F.y-(y+.5))/Math.max(1,F.H),0,1.2),u=(x+.5-F.x)/F.rx;
+  skinBun(dt,S,landed){const w=this.world,st=this.state;
+    if(S.fx==='mochi'&&landed&&!this.preview)for(let i=0;i<6;i++)spawn(w,'steam',this.x+rand(-7,7),this.y+rand(-1,1),{vx:rand(-14,14),vy:rand(-6,2),life:rand(.3,.6),ph:0});// a puff of starch
+    if(S.fx!=='ginger'){this.drops=null;return;}
+    if(landed&&Math.random()<0.5){const D=this.drops||(this.drops=[]);D.push({x:this.x+rand(-6,6),y:this.y+rand(0,2),c:hex(['#ff4a5a','#4ad86a','#ffd23a','#4aa8ff'][Math.floor(rand(4))]),life:8});if(D.length>5)D.shift();}// gumdrops shaken loose
+    for(const d of this.drops||[])d.life-=dt;if(this.drops)this.drops=this.drops.filter(d=>d.life>0);
+    if(this.preview)return;
+    const lit=st!=='sleeping'&&w.dayness<0.45;if(lit&&this.wasLit===false)SFX.play('musicBox');this.wasLit=lit;// the lights come on at dusk
+    if(st==='sleeping'&&this.lastSt!=='sleeping')SFX.play('shutterClack');if(st==='chew'&&this.lastSt!=='chew')SFX.play('doorCreak');this.lastSt=st;
+    this.puffT=(this.puffT??rand(3,6))-dt;if(this.puffT<=0){this.puffT=rand(5,9);if(st!=='sleeping')SFX.play('chimneyPuff');}}
+  color(m,q,s,l,x,y){const F=this.frame,v=clamp((F.y-(y+.5))/Math.max(1,F.H),0,1.2),u=(x+.5-F.x)/F.rx,S=this.sw;
+    if(S&&S.fx==='ginger')return this.houseColor(m,q,x,y);
     if(m!==M.BODY)return BUNC.crumb[q];
     let qq=q;if(this.toast>0.4&&qq>0)qq--;
     // pale, doughy sides where it baked snug against its neighbours; a golden-brown glossy top
@@ -4463,17 +4516,25 @@ class Bun extends Slime{
     if(k<=0)c=BUNC.crumb[Math.min(3,qq+1)];else{const cq=Math.max(0,qq-(q===3?1:0)),cc=(v>0.72&&Math.abs(u)<0.75?BUNC.top:BUNC.crust)[cq];c=k>=1?cc:mixc(BUNC.crumb[Math.min(3,qq+1)],cc,k);}
     if(k>0.5){if(q===3&&hash(x*3,y*7)>0.55)c=mixc(c,BUNC.glaze,0.3+this.butter*0.5);
       if(this.honey>0.2&&q>=2&&hash(x*7+Math.floor(this.t*3),y*5)>0.9)c=hex('#ffd060');}
+    if(S&&S.paint)c=S.paint(c,u,v,q,x,y,k);
     if(this.soggy>0.05)c=mixc(c,BUNC.wet[q],this.soggy*0.6);
     return c;}
-  draw(fb){const x=this.x,y=this.y-this.h,rx=this.bodyW(),H=this.bodyH(),ry=Math.min(rx*0.8,H*0.62);this.frame={x,y,rx,H};
+  houseColor(m,q,x,y){const G=this.gh;if(!G)return HOUSE.wall[q];
+    if(m===M.LIMB){const dy=y+.5-G.ry,r=G.ry-y-1;if(dy>-0.6)return HOUSE.ice[q];// roof: gingerbread tiles piped with rows of icing, a snowy cap of icing on the eaves
+      const row=Math.floor(r/2.6);if((r%2.6)<0.8&&((x+row*2)%4+4)%4<2)return HOUSE.ice[Math.max(1,q)];return HOUSE.roof[q];}
+    if(m===M.CLAW)return HOUSE.brick[q];
+    return hash(x*3,y*5)>0.86?HOUSE.wall[Math.max(0,q-1)]:HOUSE.wall[q];}
+  draw(fb){if(this.house)return this.drawHouse(fb);
+    const x=this.x,y=this.y-this.h,rx=this.bodyW(),H=this.bodyH(),ry=Math.min(rx*0.8,H*0.62);this.frame={x,y,rx,H};
     // a soft rounded-square roll (a squircle), the pillowy top a touch fuller than the base it sits on
     const cy=y-H*0.47,ryT=H*0.53,ryB=H*0.47,pts=[];
     for(let i=0;i<32;i++){const a=i/32*TAU,c=Math.cos(a),s=Math.sin(a),e=2/3.4;pts.push([x+rx*Math.sign(c)*Math.pow(Math.abs(c),e),cy+(s<0?ryT:ryB)*Math.sign(s)*Math.pow(Math.abs(s),e)]);}
     this.rasterBlob(fb,x,cy,pts,M.BODY);}
-  drawExtras(fb){const x=this.x,y=this.y-this.h,H=this.bodyH(),rx=this.bodyW(),K=hex('#2a1206'),W1=hex('#ffffff'),c=Math.cos(this.ang),fwd=Math.sin(this.ang)>-0.6;
+  drawExtras(fb){if(this.house)return this.drawHouseExtras(fb);const S=this.sw||{},x=this.x,y=this.y-this.h,H=this.bodyH(),rx=this.bodyW(),K=hex('#2a1206'),W1=hex('#ffffff'),c=Math.cos(this.ang),fwd=Math.sin(this.ang)>-0.6;
     // glossy glaze glint that slides a touch as it turns
     const gx=x-rx*0.42-c*0.8,gy=y-H*0.82;pset(fb,gx,gy,BUNC.glaze);pset(fb,gx+1,gy-1,W1);pset(fb,gx+2,gy-1,BUNC.glaze);if(this.butter>0.3){pset(fb,gx+4,gy-1.5,W1);pset(fb,gx+1,gy+1,BUNC.glaze);}
     drawSteam(fb,x,y-H-0.5,this.steamK,this.t,3);
+    if(S.candle)this.drawCandle(fb);if(S.fx==='mochi')this.drawBerry(fb);
     if(!fwd||!faceOn(this.kind))return;// walking away (or faces switched off): no face
     const fx=Math.round(this.faceX()),fy=Math.round(y-H*0.48),asleep=this.state==='sleeping'||this.eyesClosed,happy=this.state==='petted'||this.world.stats.happy>80||this.honey>0.3,sad=this.soggy>0.3,shut=asleep||this.blink>0;
     const P2=hex('#ff8a9a'),T=hex('#e0566a');
@@ -4487,12 +4548,50 @@ class Bun extends Slime{
     else if(sad){pmix(fb,fx-1,my+1,K,0.8);pset(fb,fx,my,K);pmix(fb,fx+1,my+1,K,0.8);}
     else if(happy){pmix(fb,fx-1,my,K,0.8);pset(fb,fx,my,K);pmix(fb,fx+1,my,K,0.8);pset(fb,fx,my+1,T);}
     else if(!asleep){pmix(fb,fx-1,my,K,0.8);pset(fb,fx,my,K);pmix(fb,fx+1,my,K,0.8);pmix(fb,fx,my+1,hex('#8a3038'),0.7);}}
-  glow(fb,night){const k=night*this.warm*0.55;if(k<0.04)return;const x=this.x,y=this.y-this.h-this.bodyH()*0.5;
+  glow(fb,night){const S=this.sw||{};
+    if(this.house)return this.houseGlow(fb,night);
+    if(S.candle&&night>0.05){const x=this.x+1,y=this.y-this.h-this.bodyH()-6,fl=0.85+0.15*Math.sin(this.t*17);// candlelight
+      for(let yy=-8;yy<=8;yy++)for(let xx=-8;xx<=8;xx++){const d=Math.hypot(xx,yy)/8;if(d<1){const f=(1-d)*(1-d)*night*fl;padd(fb,x+xx,y+yy,120*f,80*f,20*f);}}
+      const E=this.emi||[];for(let j=0;j<E.length;j+=2)fb.px[E[j]]=E[j+1];}
+    const k=night*this.warm*0.55;if(k<0.04)return;const x=this.x,y=this.y-this.h-this.bodyH()*0.5;
     for(let yy=-7;yy<=7;yy++)for(let xx=-10;xx<=10;xx++){const d=Math.hypot(xx/10,yy/7);if(d>=1)continue;const f=k*(1-d)*(1-d);padd(fb,x+xx,y+yy,70*f,36*f,8*f);}}
   statusText(){if(this.soggy>0.4)return 'is soggy and sulking. It hates the mister!';if(this.state==='basking')return this.toast>0.5?'is getting lovely and toasty':'is warming up under the lamp';
     if(this.state==='sleeping')return 'is napping and slowly puffing up (proofing!)';if(this.state==='petted')return 'is squishing like soft dough';if(this.state==='grabbed')return 'is being squeezed like a stress ball';
     if(this.state==='chew')return `is nibbling ${PREY_NAME[this.held?.type]||'something'}`;if(this.butter>0.4)return 'is glistening with melted butter';if(this.honey>0.4)return 'is sticky and sparkly with honey';
     if(this.phase==='air')return 'is boinging along';return Pet.prototype.statusText.call(this);}
+  drawCandle(fb){const x=Math.round(this.x+1),y=Math.round(this.y-this.h-this.bodyH())-1,fl=Math.sin(this.t*17)>0,E=this.emi=[];// a birthday candle, flame flickering
+    for(let b=0;b<4;b++)pset(fb,x,y-b,b&1?hex('#4aa8ff'):hex('#fff6f0'));
+    for(const[a,b,c]of[[0,-4,'#ffd23a'],[fl?1:0,-5,'#ff9a2a']]){const X=x+a,Y=y+b;pset(fb,X,Y,hex(c));if(X>=0&&Y>=0&&X<fb.w&&Y<fb.h)E.push(Y*fb.w+X,hex(c));}pmix(fb,x,y-6,hex('#fff0a0'),fl?0.6:0.3);}
+  drawBerry(fb){const x=Math.round(this.x+this.bodyW()*0.15),y=Math.round(this.y-this.h-this.bodyH())+1,Rd=[hex('#8a1020'),hex('#d02a3a'),hex('#ff5a64')],Sd=hex('#ffe08a'),Lf=hex('#4aa83a'),Lf2=hex('#2a7a2a');// a strawberry sunk into the top
+    for(const[a,b,c]of[[-2,-1,1],[-1,-1,2],[0,-1,2],[1,-1,1],[2,-1,0],[-2,0,1],[-1,0,2],[0,0,1],[1,0,1],[2,0,0],[-1,1,1],[0,1,1],[1,1,0]])pset(fb,x+a,y+b,Rd[c]);
+    pset(fb,x-1,y,Sd);pset(fb,x+1,y-1,Sd);pset(fb,x,y+1,Sd);pset(fb,x-1,y-2,Lf);pset(fb,x,y-2,Lf2);pset(fb,x+1,y-2,Lf);pset(fb,x,y-3,Lf);}
+  // ---- mythic: a gingerbread house. Windows are its eyes, the door is its mouth
+  drawHouse(fb){const x=this.x,y=this.y-this.h,sq=this.sq,w=8*(1+sq*0.12),wh=7.5*(1-sq*0.2),rh=7.5*(1-sq*0.2),ry=y-wh;
+    this.gh={x,y,w,ry,top:ry-rh};this.frame={x,y,rx:w,H:wh+rh};
+    this.rasterBlob(fb,x,y-wh/2,[[x-w,y],[x+w,y],[x+w,ry],[x-w,ry]],M.BODY);
+    this.rasterBlob(fb,x,ry-rh*0.4,[[x-w-1.6,ry+1],[x+w+1.6,ry+1],[x+0.5,ry-rh],[x-0.5,ry-rh]],M.LIMB);// gable roof, eaves overhanging
+    fb.cap(x+w*0.5,ry-rh*0.6,0.8,x+w*0.5,ry-rh*0.95,0.8,M.CLAW,2);}// brick chimney
+  drawHouseExtras(fb){const G=this.gh;if(!G)return;const x=G.x,y=G.y,K=hex('#2a1206'),Wt=hex('#fffcf8'),t=this.t,asleep=this.state==='sleeping',night=1-this.world.dayness;
+    for(const d of this.drops||[])pmix(fb,d.x,d.y,d.c,Math.min(1,d.life/2));
+    const GD=HOUSE.gum;for(let i=-1;i<=1;i++)pset(fb,x+i*3.2,G.ry+2.6,GD[(i+3)%4]);// gumdrops along the eaves and up on the ridge
+    pset(fb,x,G.top+0.6,GD[0]);pset(fb,x-1,G.top+1.6,GD[1]);pset(fb,x+1,G.top+1.6,GD[2]);
+    for(const dx of[-7,-4,2,6]){pset(fb,x+dx,G.ry+1.5,Wt);if(dx&1)pset(fb,x+dx,G.ry+2.5,Wt);}// icing drips
+    drawSteam(fb,x+G.w*0.5,G.top+1.5,asleep?0.3:0.7,t,5);
+    const lit=asleep?0:0.55+night*0.45,shut=asleep||this.blink>0,look=Math.cos(this.ang)>0.3?1:Math.cos(this.ang)<-0.3?-1:0;
+    const E=this.emi=[],put=(X,Y,c,e)=>{X=Math.round(X);Y=Math.round(Y);pset(fb,X,Y,c);if(e&&X>=0&&Y>=0&&X<fb.w&&Y<fb.h)E.push(Y*fb.w+X,c);};
+    for(const sd of[-1,1]){const wx=Math.round(x+sd*4.5)-1,wy=Math.round(G.ry+2.2);
+      for(let a=0;a<=2;a++)put(wx+a,wy+2,Wt);// icing sill
+      for(let a=0;a<3;a++)for(let b=0;b<2;b++)put(wx+a,wy+b,shut?hex('#5a2a0a'):mixc(hex('#c87a20'),hex('#ffe070'),lit*(b===0?1:0.85)),!shut);
+      if(shut)for(let a=0;a<3;a++)put(wx+a,wy+(a===1?0:1),hex('#3a1604'));else{put(wx+1+look,wy,K);put(wx+1+look,wy+1,K);}}// shutters for blinks and sleep; pupils looking out
+    const chew=this.state==='chew'&&Math.sin(t*14)>0,dx=Math.round(x)-1,dy=Math.round(y)-4;// the door swings open to eat
+    for(let a=0;a<3;a++)for(let b=0;b<4;b++)if(!(b===0&&a!==1))pset(fb,dx+a,dy+b,chew?hex('#1a0802'):hex('#5a2a0a'));if(!chew)pset(fb,dx+2,dy+2,hex('#ffd23a'));
+    pmix(fb,dx-2,dy+1,hex('#ff8a9a'),0.7);pmix(fb,dx+4,dy+1,hex('#ff8a9a'),0.7);// frosting blush
+    const cx=Math.round(x+G.w)+2,cy=Math.round(y);for(let b=0;b<5;b++)pset(fb,cx,cy-b,b&1?hex('#e02030'):Wt);pset(fb,cx-1,cy-5,hex('#e02030'));pset(fb,cx-2,cy-4,Wt);// candy cane
+    if(night>0.05&&lit>0)for(const sd of[-1,1]){const lx=x+sd*4.6,ly=y+1;// window light spilling onto the ground in front
+      for(let yy=0;yy<=6;yy++)for(let xx=-4;xx<=4;xx++){const d=Math.hypot(xx/(2.5+yy*0.35),yy/6);if(d<1){const f=(1-d)*0.32*night;padd(fb,lx+xx,ly+yy,255*f,170*f,60*f);}}}}
+  houseGlow(fb,night){const G=this.gh,E=this.emi||[];for(let j=0;j<E.length;j+=2)fb.px[E[j]]=E[j+1];// lit windows keep their own colour at night
+    if(!G||this.state==='sleeping'||night<0.05)return;
+    for(const sd of[-1,1]){const wx=G.x+sd*4.6,wy=G.ry+3.4;for(let yy=-6;yy<=6;yy++)for(let xx=-7;xx<=7;xx++){const d=Math.hypot(xx,yy)/7;if(d<1&&d>0.2){const f=(1-d)*(1-d)*night;padd(fb,wx+xx,wy+yy,90*f,55*f,10*f);}}}}
 }
 // =====================================================================
 //  Blacktip reef shark (a small one): a sleek little shark with black-tipped fins.
