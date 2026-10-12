@@ -181,7 +181,7 @@ body.fun-tools #dock{padding:4px;background:#1a0f06;border-color:#060a07;box-sha
 .seg{display:flex;gap:6px}
 #setPieces{margin:-4px 0 6px 12px;border-left:2px solid var(--line);padding-left:10px}
 #setPieces .srow{padding:6px 0;border:0}#setPieces label{font-size:15px}#setPieces small{font-size:12px}#setPieces .seg .btn{padding:4px 10px;font-size:13px}
-#setTabs{margin:2px 0 6px}.spanel>.srow:last-child{border-bottom:0}
+#setTabs{margin:2px 0 6px}.srow.mix{display:grid;grid-template-columns:1fr auto auto;column-gap:12px;row-gap:4px}.srow.mix label{grid-row:1;grid-column:1}.srow.mix .mixv{grid-row:1;grid-column:2}.srow.mix .sw{grid-row:1/3;grid-column:3;align-self:center}.srow.mix input[type=range]{grid-row:2;grid-column:1/3;width:100%;margin:0}.mixv{text-align:right;font-size:17px;color:var(--mute);font-variant-numeric:tabular-nums;align-self:end}.mixsp{display:none}.srow.mix.off input,.srow.mix.off .mixv,.srow.mix.off small{opacity:.4}.mixh{margin:12px 4px 0;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}.srow.master{border-bottom:0}.spanel>.srow:last-child{border-bottom:0}
 .seg.chips{flex-wrap:wrap;justify-content:flex-end;max-width:58%}.seg.chips .btn{padding:5px 10px;font-size:13px}
 #mSettings .spanel{min-height:min(300px,52vh)}#mSettings .srow.sfoot{margin-top:6px;border-top:2px dashed var(--line);border-bottom:0;padding-top:12px}.sfoot label{font-size:17px}.sfoot small{font-size:14px}
 /* Fun UI: supply tanks you pluck food from */
@@ -589,10 +589,13 @@ body.fun-hud .gtoast.out{transform:none;translate:-50% -10px;opacity:0}
   <div class="sheet-h"><h2 id="setTitle" style="user-select:none">Settings</h2><button class="ibtn x" data-close aria-label="Close"><img class="px icX" alt=""></button></div>
   <div class="tabs" id="setTabs"><button class="tab" data-t="sound">Sound</button><button class="tab" data-t="display">Display</button><button class="tab" data-t="critters">Critters</button><button class="tab" data-t="iface">Interface</button></div>
   <div class="spanel" data-t="sound">
-  <div class="srow"><label for="setVol">Volume</label><input type="range" id="setVol" min="0" max="1" step="0.05"></div>
-  <div class="srow"><label>Sound effects</label><button class="sw" id="setSfx" aria-label="Sound effects"></button></div>
-  <div class="srow"><label>Music<small>A cozy tune that changes with your critter's mood.</small></label><button class="sw" id="setMusic" aria-label="Music"></button></div>
-  <div class="srow"><label for="setMVol">Music volume</label><input type="range" id="setMVol" min="0" max="1" step="0.05"></div>
+  <div class="srow mix master"><label for="setVol">Master volume</label><input type="range" id="setVol" min="0" max="1" step="0.05"><output class="mixv" for="setVol"></output><span class="mixsp"></span></div>
+  <div class="mixh">Mixer</div>
+  <div class="srow mix" id="mixMusic"><label for="setMVol">Music<small>Follows the mood and menus.</small></label><input type="range" id="setMVol" min="0" max="1" step="0.05"><output class="mixv" for="setMVol"></output><button class="sw" id="setMusic" aria-label="Music"></button></div>
+  <div class="srow mix sfxch"><label for="mixCrit">Critters<small>Steps, chomps, chirps.</small></label><input type="range" id="mixCrit" data-ch="crit" min="0" max="1.5" step="0.05"><output class="mixv" for="mixCrit"></output><span class="mixsp"></span></div>
+  <div class="srow mix sfxch"><label for="mixWorld">Tank &amp; toys<small>Misting, water, toys.</small></label><input type="range" id="mixWorld" data-ch="world" min="0" max="1.5" step="0.05"><output class="mixv" for="mixWorld"></output><span class="mixsp"></span></div>
+  <div class="srow mix sfxch"><label for="mixUi">Menus &amp; coins<small>Buttons, coins, gachapon.</small></label><input type="range" id="mixUi" data-ch="ui" min="0" max="1.5" step="0.05"><output class="mixv" for="mixUi"></output><span class="mixsp"></span></div>
+  <div class="srow mix"><label>Sound effects<small>All effects on or off (M key).</small></label><span class="mixsp wide"></span><button class="sw" id="setSfx" aria-label="Sound effects"></button></div>
   </div>
   <div class="spanel" data-t="display">
   <div class="srow"><label>Graphics<small id="gfxNote">Low makes the food tanks and menu previews animate more lightly.</small></label><div class="seg" id="setGfx"><button class="btn alt" data-v="auto">Auto</button><button class="btn alt" data-v="high">High</button><button class="btn alt" data-v="low">Low</button></div></div>
@@ -787,14 +790,15 @@ function makeChill(C,out,nbuf){
     get step(){return k;}};}
 // =====================================================================
 const SFX=(()=>{
-  let ac=null,master=null,musicBus=null,nbuf=null,muted=false,vol=0.8,musicOn=true,mist=null,buzz=null,bee=null,slit=null,eng=null;const last={};
+  let ac=null,master=null,musicBus=null,bus={},busVol={crit:1,world:1,ui:1},cur=null,nbuf=null,muted=false,vol=0.8,musicOn=true,mist=null,buzz=null,bee=null,slit=null,eng=null;const last={};
   function init(){
     if(ac){if(ac.state==='suspended')ac.resume();return;}
     const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
     try{ac=new C();}catch(e){ac=null;return;}
     const comp=ac.createDynamicsCompressor();comp.threshold.value=-18;comp.ratio.value=3;
     master=ac.createGain();master.gain.value=vol*0.6;master.connect(comp);comp.connect(ac.destination);
-    musicBus=ac.createGain();musicBus.gain.value=musicOn?0.55*mvol:0;musicBus.connect(master);
+    musicBus=ac.createGain();musicBus.gain.value=musicOn?MUSIC_LVL*mvol:0;musicBus.connect(master);
+    for(const k in busVol){bus[k]=ac.createGain();bus[k].gain.value=busVol[k];bus[k].connect(master);}
     nbuf=ac.createBuffer(1,ac.sampleRate,ac.sampleRate);const d=nbuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
   }
   const J=()=>1+(Math.random()-.5)*0.1;
@@ -802,13 +806,13 @@ const SFX=(()=>{
     const t=(o.at||ac.currentTime)+(o.delay||0),osc=ac.createOscillator(),g=ac.createGain(),j=o.nojit?1:J(),v=o.gain||0.3,a=o.attack||0.005;
     osc.type=o.type||'sine';osc.frequency.setValueAtTime(f*j,t);if(o.to)osc.frequency.exponentialRampToValueAtTime(Math.max(20,o.to*j),t+dur);
     g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+a);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    osc.connect(g);g.connect(o.dest||master);osc.start(t);osc.stop(t+dur+0.03);
+    osc.connect(g);g.connect(o.dest||cur||bus.crit);osc.start(t);osc.stop(t+dur+0.03);
   }
   function noise(dur,o={}){
     const t=ac.currentTime+(o.delay||0),src=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain(),v=o.gain||0.3;
     src.buffer=nbuf;f.type=o.filter||'bandpass';f.frequency.setValueAtTime((o.freq||1000)*J(),t);if(o.to)f.frequency.exponentialRampToValueAtTime(o.to,t+dur);f.Q.value=o.q||1;
     g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+(o.attack||0.004));g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    src.connect(f);f.connect(g);g.connect(master);src.start(t,Math.random()*0.5);src.stop(t+dur+0.03);
+    src.connect(f);f.connect(g);g.connect(cur||bus.crit);src.start(t,Math.random()*0.5);src.stop(t+dur+0.03);
   }
   const arp=(notes,step,o)=>notes.forEach((f,i)=>tone(f,o.dur||0.14,Object.assign({},o,{delay:i*step+(o.delay||0)})));
   const S={
@@ -876,7 +880,7 @@ const SFX=(()=>{
     reveal1:()=>arp([659,880,1175],0.08,{type:'triangle',gain:0.07,dur:0.22,nojit:true}),
     reveal2:()=>{arp([523,659,784,1047,1319],0.07,{type:'triangle',gain:0.07,dur:0.25,nojit:true});S.sparkle();},
     reveal3:()=>{arp([523,659,784,1047,784,1047,1319,1568],0.08,{type:'square',gain:0.035,dur:0.2,nojit:true});
-      [523,659,784,1047].forEach(f=>tone(f,1.4,{delay:0.66,type:'triangle',gain:0.05,attack:0.03,nojit:true}));setTimeout(()=>S.sparkle(),700);},
+      [523,659,784,1047].forEach(f=>tone(f,1.4,{delay:0.66,type:'triangle',gain:0.05,attack:0.03,nojit:true}));setTimeout(()=>play('sparkle'),700);},
     levelup:()=>{arp([523,659,784,1047],0.09,{type:'square',gain:0.035,dur:0.16,nojit:true});tone(1319,0.5,{delay:0.36,type:'triangle',gain:0.06,nojit:true});},
     boing:()=>{tone(180,0.25,{type:'sine',to:420,gain:0.14});tone(360,0.18,{type:'triangle',to:700,gain:0.04});},
     squeak2:()=>{tone(1500,0.1,{type:'square',to:2100,gain:0.04});tone(2100,0.12,{delay:0.08,type:'square',to:1400,gain:0.035});},
@@ -926,18 +930,22 @@ const SFX=(()=>{
     nope:()=>{tone(220,0.1,{type:'square',gain:0.03});tone(180,0.14,{delay:0.1,type:'square',gain:0.03});},
     chest:()=>{tone(260,0.12,{type:'triangle',to:420,gain:0.1});S.sparkle();},
   };
+  // which mixer channel each effect plays on (anything not listed is a critter sound)
+  const BUS_OF={};
+  'tick ui tap sparkle levelup coin coinburst whoosh close beep nope bloop achieve yay reveal0 reveal1 reveal2 reveal3 insert ratchet clunk pop rattle chest ask place scoop unhook hang clack pluck tink2'.split(' ').forEach(n=>BUS_OF[n]='ui');
+  'plip bpop drip splash ocean burble rumble wind whirr toot tune musicbox flutter boing bell boop blow zap squeak2 lightsOn lightsOff tink'.split(' ').forEach(n=>BUS_OF[n]='world');
   const GAP={step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
   function play(name,arg){
     if(!ac||muted||!S[name])return;const now=ac.currentTime;
     if(last[name]!==undefined&&now-last[name]<(GAP[name]??0.03))return;last[name]=now;
-    try{S[name](arg);}catch(e){}
+    cur=BUS_OF[name]?bus[BUS_OF[name]]:bus.crit;try{S[name](arg);}catch(e){}cur=null;
   }
   function mistOn(on){
     if(!ac)return;const now=ac.currentTime;
     if(on&&!mist&&!muted){const src=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();
-      src.buffer=nbuf;src.loop=true;f.type='bandpass';f.frequency.value=3200;f.Q.value=0.7;g.gain.setValueAtTime(0,now);g.gain.setTargetAtTime(0.13,now,0.04);
-      src.connect(f);f.connect(g);g.connect(master);src.start();mist={src,g};}
-    else if(!on&&mist){mist.g.gain.setTargetAtTime(0,now,0.06);mist.src.stop(now+0.4);mist=null;}
+      src.buffer=nbuf;src.loop=true;src.playbackRate.value=0.8;f.type='lowpass';f.frequency.value=2400;f.Q.value=0.3;g.gain.setValueAtTime(0,now);g.gain.setTargetAtTime(0.045,now,0.08);
+      src.connect(f);f.connect(g);g.connect(bus.world);src.start();mist={src,g};}
+    else if(!on&&mist){mist.g.gain.setTargetAtTime(0,now,0.08);mist.src.stop(now+0.5);mist=null;}
   }
   // the pet bee's wings: one plain, low bzzzz while it's airborne (a single soft saw, rounded off by a lowpass, with a gentle wingbeat wobble);
   // v is loudness, p lifts the pitch a little when it's zooming
@@ -945,7 +953,7 @@ const SFX=(()=>{
     if(!ac)return;
     if(!bee){if(v<=0)return;const o=ac.createOscillator(),lfo=ac.createOscillator(),ld=ac.createGain(),f=ac.createBiquadFilter(),g=ac.createGain();
       o.type='sawtooth';o.frequency.value=118;lfo.frequency.value=9;ld.gain.value=4;lfo.connect(ld);ld.connect(o.frequency);
-      f.type='lowpass';f.frequency.value=480;f.Q.value=0.6;o.connect(f);f.connect(g);g.gain.value=0;g.connect(master);o.start();lfo.start();bee={g,o,f};}
+      f.type='lowpass';f.frequency.value=480;f.Q.value=0.6;o.connect(f);f.connect(g);g.gain.value=0;g.connect(bus.crit);o.start();lfo.start();bee={g,o,f};}
     const t=ac.currentTime;bee.o.frequency.setTargetAtTime(118+p*22,t,0.15);bee.f.frequency.setTargetAtTime(480+p*160,t,0.2);
     bee.g.gain.setTargetAtTime(muted?0:v*1.6,t,v>0?0.08:0.12);
   }
@@ -953,34 +961,35 @@ const SFX=(()=>{
     if(!ac)return;
     if(!buzz){if(v<=0)return;const o=ac.createOscillator(),lfo=ac.createOscillator(),ld=ac.createGain(),f=ac.createBiquadFilter(),g=ac.createGain();
       o.type='sawtooth';o.frequency.value=195;lfo.frequency.value=7;ld.gain.value=14;lfo.connect(ld);ld.connect(o.frequency);
-      f.type='bandpass';f.frequency.value=650;f.Q.value=2;g.gain.value=0;o.connect(f);f.connect(g);g.connect(master);o.start();lfo.start();buzz={g,lfo};}
+      f.type='bandpass';f.frequency.value=650;f.Q.value=2;g.gain.value=0;o.connect(f);f.connect(g);g.connect(bus.world);o.start();lfo.start();buzz={g,lfo};}
     buzz.lfo.frequency.setTargetAtTime(6+Math.sin(ac.currentTime*1.3)*2,ac.currentTime,0.2);
     buzz.g.gain.setTargetAtTime(muted?0:v,ac.currentTime,0.15);
   }
   function slither(v){
     if(!ac)return;
     if(!slit){if(v<=0)return;const src=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();
-      src.buffer=nbuf;src.loop=true;f.type='lowpass';f.frequency.value=1200;f.Q.value=0.5;g.gain.value=0;src.connect(f);f.connect(g);g.connect(master);src.start();slit={g,f};}
+      src.buffer=nbuf;src.loop=true;f.type='lowpass';f.frequency.value=1200;f.Q.value=0.5;g.gain.value=0;src.connect(f);f.connect(g);g.connect(bus.crit);src.start();slit={g,f};}
     slit.g.gain.setTargetAtTime(muted?0:v,ac.currentTime,0.1);slit.f.frequency.setTargetAtTime(700+v*9000,ac.currentTime,0.1);
   }
   function engine(v){// RC car motor: sawtooth hum whose pitch follows speed
     if(!ac)return;
     if(!eng){if(v<=0)return;const o=ac.createOscillator(),o2=ac.createOscillator(),f=ac.createBiquadFilter(),g=ac.createGain();
       o.type='sawtooth';o2.type='square';o.frequency.value=70;o2.frequency.value=35;f.type='lowpass';f.frequency.value=700;f.Q.value=3;g.gain.value=0;
-      o.connect(f);o2.connect(f);f.connect(g);g.connect(master);o.start();o2.start();eng={o,o2,f,g};}
+      o.connect(f);o2.connect(f);f.connect(g);g.connect(bus.world);o.start();o2.start();eng={o,o2,f,g};}
     const now=ac.currentTime;eng.o.frequency.setTargetAtTime(70+v*170,now,0.08);eng.o2.frequency.setTargetAtTime(35+v*85,now,0.08);
     eng.f.frequency.setTargetAtTime(500+v*1600,now,0.1);eng.g.gain.setTargetAtTime(muted||v<=0?0:0.02+v*0.035,now,0.08);
   }
   // the adaptive theme (see makeChill): built on first use, fed the game's mood every frame
-  let mus=null,mvol=0.8;
+  let mus=null,mvol=0.8;const MUSIC_LVL=0.85;
+  function setBus(k,v){busVol[k]=v;if(bus[k])bus[k].gain.setTargetAtTime(v,ac.currentTime,0.05);}
   let duckG=null,ducked=false;
   function music(ctx){if(!ac||!musicOn)return;if(!mus){duckG=ac.createGain();duckG.connect(musicBus);mus=makeChill(ac,duckG,nbuf);}
     mus.setContext(ctx);if(!!ctx.duck!==ducked){ducked=!!ctx.duck;duckG.gain.setTargetAtTime(ducked?0.3:1,ac.currentTime,0.3);}mus.tick(ac.currentTime);}
-  function setMusicVol(v){mvol=v;if(musicBus)musicBus.gain.setTargetAtTime(musicOn?0.55*mvol:0,ac.currentTime,0.1);}
+  function setMusicVol(v){mvol=v;if(musicBus)musicBus.gain.setTargetAtTime(musicOn?MUSIC_LVL*mvol:0,ac.currentTime,0.1);}
   function setMuted(m){muted=m;if(m){mistOn(false);}}
   function setVolume(v){vol=v;if(master)master.gain.setTargetAtTime(v*0.6,ac.currentTime,0.03);}
-  function setMusic(on){musicOn=on;if(musicBus)musicBus.gain.setTargetAtTime(on?0.55*mvol:0,ac.currentTime,0.3);}
-  return{init,play,mistOn,buzzLevel,beeBuzz,slither,engine,music,setMuted,setVolume,setMusic,setMusicVol,get mus(){return mus;},get muted(){return muted;},get ready(){return!!ac;}};
+  function setMusic(on){musicOn=on;if(musicBus)musicBus.gain.setTargetAtTime(on?MUSIC_LVL*mvol:0,ac.currentTime,0.3);}
+  return{init,play,mistOn,buzzLevel,beeBuzz,slither,engine,music,setMuted,setVolume,setMusic,setMusicVol,setBus,get mus(){return mus;},get muted(){return muted;},get ready(){return!!ac;}};
 })();
 window.addEventListener('pointerdown',()=>SFX.init(),true);
 window.addEventListener('keydown',()=>SFX.init(),true);
@@ -7623,7 +7632,12 @@ const ui={
     document.querySelectorAll('.modal').forEach(m=>m.addEventListener('pointerdown',e=>{if(e.target===m&&!game.firstRun)this.close();}));
     $('gPull').addEventListener('click',()=>this.pull());$('gcv').addEventListener('click',()=>{if(G.state==='ready'){G.state='shake';G.t=0;SFX.play('rattle');}else if(G.state==='idle')this.pull();});
     // settings
-    const S=save.set;$('setVol').value=S.vol;$('setVol').addEventListener('input',e=>{S.vol=+e.target.value;SFX.setVolume(S.vol);markDirty();});$('setMVol').value=S.mvol??0.8;$('setMVol').addEventListener('input',e=>{S.mvol=+e.target.value;SFX.setMusicVol(S.mvol);markDirty();});
+    const S=save.set;S.mix=Object.assign({crit:1,world:1,ui:1},S.mix);
+    const pct=el=>{const o=el.parentNode.querySelector('.mixv');if(o)o.textContent=Math.round(el.value*100)+'%';};
+    $('setVol').value=S.vol;pct($('setVol'));$('setVol').addEventListener('input',e=>{S.vol=+e.target.value;SFX.setVolume(S.vol);pct(e.target);markDirty();});$('setMVol').value=S.mvol??0.8;pct($('setMVol'));$('setMVol').addEventListener('input',e=>{S.mvol=+e.target.value;SFX.setMusicVol(S.mvol);pct(e.target);markDirty();});
+    for(const el of document.querySelectorAll('#mSettings input[data-ch]')){const k=el.dataset.ch;el.value=S.mix[k];pct(el);el.addEventListener('input',()=>{S.mix[k]=+el.value;SFX.setBus(k,S.mix[k]);pct(el);markDirty();});
+      el.addEventListener('change',()=>SFX.play(k==='crit'?'chomp':k==='world'?'plip':'coin'));}
+    ui.mixDim=()=>{$('mixMusic').classList.toggle('off',!S.music);for(const r of document.querySelectorAll('#mSettings .sfxch'))r.classList.toggle('off',!S.sfx);};ui.mixDim();
     const sw=(id,key,fn)=>{const b=$(id);b.classList.toggle('on',!!S[key]);b.addEventListener('click',()=>{S[key]=!S[key];b.classList.toggle('on',S[key]);fn&&fn(S[key]);markDirty();SFX.play('ui');});};
     const uiAuto=()=>innerWidth<=760||innerHeight<=520?0.78:1;
     this.applyUI=()=>{const z=save.set.ui||uiAuto();for(const id of['top','dock','toast','zoomChip'])$(id).style.zoom=z;document.querySelectorAll('.sheet').forEach(e=>e.style.zoom=z);
@@ -7650,7 +7664,7 @@ const ui={
       for(const seg of sp.querySelectorAll('.seg'))for(const b of seg.children)b.classList.toggle('on',(b.dataset.v==='1')===FUN(seg.dataset.k));
       this.renderTray();fit();};
     for(const b of $('setIface').children)b.addEventListener('click',()=>{save.set.fun=b.dataset.v==='fun'?Object.fromEntries(FUN_PIECES.map(p=>[p.id,1])):{};markDirty();SFX.play('ui');this.applyIface();this.funHints();});this.applyIface();
-    sw('setSfx','sfx',v=>SFX.setMuted(!v));sw('setMusic','music',v=>SFX.setMusic(v));sw('setShake','shake');sw('setBubbles','bubbles');sw('setThoughts','thoughts');sw('setTrayTuck','trayTuck',v=>{if(!v)ui.tuckTray(null);});sw('setPixel','pixel',()=>fit());
+    sw('setSfx','sfx',v=>{SFX.setMuted(!v);ui.mixDim();});sw('setMusic','music',v=>{SFX.setMusic(v);ui.mixDim();});sw('setShake','shake');sw('setBubbles','bubbles');sw('setThoughts','thoughts');sw('setTrayTuck','trayTuck',v=>{if(!v)ui.tuckTray(null);});sw('setPixel','pixel',()=>fit());
     $('resetBtn').addEventListener('click',()=>{const b=$('resetBtn');if(this.resetArm&&performance.now()-this.resetArm<3000){game.resetting=true;try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem('mossjar.pet');}catch(e){}location.reload();}
       else{this.resetArm=performance.now();b.textContent='Tap again to reset';setTimeout(()=>{b.textContent='Reset';},3000);}});
     // secret: tap the Settings title 5 times quickly to reveal the unlock-all row
@@ -8229,7 +8243,7 @@ window.addEventListener('keydown',e=>{
   const k=e.key.toLowerCase(),map={'1':'feed','2':'pet','3':'grab','4':'mist','5':'scoop','6':'tap','7':'play'};
   if(FUN('tools')&&/^[1-9]$/.test(k)){const id=PEG.ids()[+k-1];if(id){SFX.play('tick');if(game.tool===id)setTool(null);else setTool(id);}else if(game.tool)setTool(null);return;}
   if(map[k])ui.toolClick(map[k]);else if(k==='l')toggleLight();
-  else if(k==='m'){save.set.sfx=!save.set.sfx;SFX.setMuted(!save.set.sfx);$('setSfx').classList.toggle('on',save.set.sfx);markDirty();ui.toast(save.set.sfx?'Sound effects on':'Sound effects off',true);}
+  else if(k==='m'){save.set.sfx=!save.set.sfx;SFX.setMuted(!save.set.sfx);$('setSfx').classList.toggle('on',save.set.sfx);ui.mixDim?.();markDirty();ui.toast(save.set.sfx?'Sound effects on':'Sound effects off',true);}
   else if(k==='o')ui.openModal('mGoals');else if(k==='b')ui.openModal('mBag');else if(k==='g')ui.openModal('mGacha');else if(k==='p')ui.openModal('mPets');
   else if(k==='f'){const fs=FOOD_ORDER;game.food=fs[(fs.indexOf(game.food)+1)%fs.length];ui.foodCat=null;if(game.tool!=='feed')setTool('feed');else ui.renderTray();}
 });
@@ -8271,7 +8285,7 @@ function frame(now){
   ui.tick(dt);
   requestAnimationFrame(frame);
 }
-loadSave();SFX.setVolume(save.set.vol);SFX.setMuted(!save.set.sfx);SFX.setMusic(save.set.music);SFX.setMusicVol(save.set.mvol??0.8);
+loadSave();SFX.setVolume(save.set.vol);SFX.setMuted(!save.set.sfx);SFX.setMusic(save.set.music);SFX.setMusicVol(save.set.mvol??0.8);for(const[k,v]of Object.entries(save.set.mix||{}))SFX.setBus(k,v);
 game.world=createWorld();setTank(save.cur&&SPECIES[save.cur]?habitatOf(save.cur):'terra',true);
 ui.init();ui.coinShown=save.coins;$('coinNum').textContent=save.coins;fit();
 const away=applyAway();
