@@ -4461,6 +4461,17 @@ class Cuttle extends Kraken{
 const BUNC={top:ramp('#4a1e04','#78380a','#a85816','#d48a34'),crust:ramp('#5e2e0a','#934c14','#c47828','#e8a84c'),crumb:ramp('#9a7a56','#d4b88e','#f0dcb6','#fff6e2'),
   glaze:hex('#fff8e4'),wet:ramp('#8a7458','#bca482','#dccaa6','#f2e6cc')};
 PAL.bun=BUNC;
+// little procedural props for bun skins (strawberry, candle, candy cane): built from caps and lit like everything else
+const BUN_ITEM={outline:hex('#2a0a08'),seam:0,color(m,q,s,l,x,y){const C=this.C;
+    if(m===3)return C[(y&1)?3:6][Math.max(1,q)];if(m===5)return C[((x+y)>>1)&1?5:6][Math.max(1,q)];return C[m][Math.max(1,q)];},// candle and cane: painted stripes
+  C:{1:ramp('#7a0a18','#c01a2c','#ee3a48','#ff8a90'),2:ramp('#1a5a1a','#2e8a2a','#4ab83a','#8ae070'),3:ramp('#1a4a8a','#2a78d0','#4aa8ff','#a8d8ff'),5:ramp('#7a0810','#c01020','#e82030','#ff7a80'),6:ramp('#a8a0a8','#d8d4dc','#fff8f4','#ffffff')}};
+function bunItem(fb,kind,x,y,o={}){
+  freshLayer(fb,()=>{const c=(ax,ay,ar,bx,by,br,m)=>fb.cap(ax,ay,ar,bx,by,br,m,1);
+    if(kind==='berry'){c(x-0.2,y-0.3,1.9,x,y+1.3,0.9,1);c(x-1.5,y-1.6,0.55,x+1.5,y-1.6,0.55,2);c(x,y-2,0.45,x,y-3,0.35,2);}
+    if(kind==='candle')c(x,y,0.55,x,y-3.4,0.55,3);
+    if(kind==='cane'){c(x,y,0.6,x,y-4.2,0.6,5);c(x,y-4.2,0.6,x-1.4,y-5.2,0.6,5);c(x-1.4,y-5.2,0.6,x-2.2,y-4.2,0.6,5);}
+    composite(fb,BUN_ITEM,{sAmt:o.shadow?0.6:0,sdx:1,sdy:1});});
+  if(kind==='berry'){const X=Math.round(x),Y=Math.round(y),Sd=hex('#ffe08a');pset(fb,X-1,Y,Sd);pset(fb,X+1,Y-1,Sd);pset(fb,X,Y+1,Sd);}}// seeds
 const HOUSE={wall:ramp('#4a1e06','#7a3810','#a8581e','#cc7e3a'),roof:ramp('#3a1604','#62280a','#8a3e14','#b05e28'),ice:ramp('#c8c4cc','#e8e6ee','#fffcf8','#ffffff'),brick:ramp('#5a1810','#8a2a1a','#b04030','#d06048'),gum:['#ff4a5a','#4ad86a','#ffd23a','#4aa8ff'].map(hex)};// so swatches can recolour it like the others
 class Bun extends Slime{
   get translucent(){return 0;}
@@ -4559,12 +4570,9 @@ class Bun extends Slime{
     if(this.state==='sleeping')return 'is napping and slowly puffing up (proofing!)';if(this.state==='petted')return 'is squishing like soft dough';if(this.state==='grabbed')return 'is being squeezed like a stress ball';
     if(this.state==='chew')return `is nibbling ${PREY_NAME[this.held?.type]||'something'}`;if(this.butter>0.4)return 'is glistening with melted butter';if(this.honey>0.4)return 'is sticky and sparkly with honey';
     if(this.phase==='air')return 'is boinging along';return Pet.prototype.statusText.call(this);}
-  drawCandle(fb){const x=Math.round(this.x+1),y=Math.round(this.y-this.h-this.bodyH())-1,fl=Math.sin(this.t*17)>0,E=this.emi=[];// a birthday candle, flame flickering
-    for(let b=0;b<4;b++)pset(fb,x,y-b,b&1?hex('#4aa8ff'):hex('#fff6f0'));
-    for(const[a,b,c]of[[0,-4,'#ffd23a'],[fl?1:0,-5,'#ff9a2a']]){const X=x+a,Y=y+b;pset(fb,X,Y,hex(c));if(X>=0&&Y>=0&&X<fb.w&&Y<fb.h)E.push(Y*fb.w+X,hex(c));}pmix(fb,x,y-6,hex('#fff0a0'),fl?0.6:0.3);}
-  drawBerry(fb){const x=Math.round(this.x+this.bodyW()*0.15),y=Math.round(this.y-this.h-this.bodyH())+1,Rd=[hex('#8a1020'),hex('#d02a3a'),hex('#ff5a64')],Sd=hex('#ffe08a'),Lf=hex('#4aa83a'),Lf2=hex('#2a7a2a');// a strawberry sunk into the top
-    for(const[a,b,c]of[[-2,-1,1],[-1,-1,2],[0,-1,2],[1,-1,1],[2,-1,0],[-2,0,1],[-1,0,2],[0,0,1],[1,0,1],[2,0,0],[-1,1,1],[0,1,1],[1,1,0]])pset(fb,x+a,y+b,Rd[c]);
-    pset(fb,x-1,y,Sd);pset(fb,x+1,y-1,Sd);pset(fb,x,y+1,Sd);pset(fb,x-1,y-2,Lf);pset(fb,x,y-2,Lf2);pset(fb,x+1,y-2,Lf);pset(fb,x,y-3,Lf);}
+  drawCandle(fb){const x=this.x+1,y=this.y-this.h-this.bodyH()-1,fl=Math.sin(this.t*17)>0,E=this.emi=[];bunItem(fb,'candle',x,y);// a birthday candle, flame flickering
+    for(const[a,b,c]of[[0,-4.6,'#ffd23a'],[fl?1:0,-5.6,'#ff9a2a']]){const X=Math.round(x+a),Y=Math.round(y+b);pset(fb,X,Y,hex(c));if(X>=0&&Y>=0&&X<fb.w&&Y<fb.h)E.push(Y*fb.w+X,hex(c));}pmix(fb,x,y-6.6,hex('#fff0a0'),fl?0.6:0.3);}
+  drawBerry(fb){bunItem(fb,'berry',this.x+this.bodyW()*0.15,this.y-this.h-this.bodyH()+1.2);}// a strawberry sunk into the top
   // ---- mythic: a gingerbread house. Windows are its eyes, the door is its mouth
   drawHouse(fb){const x=this.x,y=this.y-this.h,sq=this.sq,w=8*(1+sq*0.12),wh=7.5*(1-sq*0.2),rh=7.5*(1-sq*0.2),ry=y-wh;
     this.gh={x,y,w,ry,top:ry-rh};this.frame={x,y,rx:w,H:wh+rh};
@@ -4586,7 +4594,7 @@ class Bun extends Slime{
     const chew=this.state==='chew'&&Math.sin(t*14)>0,dx=Math.round(x)-1,dy=Math.round(y)-4;// the door swings open to eat
     for(let a=0;a<3;a++)for(let b=0;b<4;b++)if(!(b===0&&a!==1))pset(fb,dx+a,dy+b,chew?hex('#1a0802'):hex('#5a2a0a'));if(!chew)pset(fb,dx+2,dy+2,hex('#ffd23a'));
     pmix(fb,dx-2,dy+1,hex('#ff8a9a'),0.7);pmix(fb,dx+4,dy+1,hex('#ff8a9a'),0.7);// frosting blush
-    const cx=Math.round(x+G.w)+2,cy=Math.round(y);for(let b=0;b<5;b++)pset(fb,cx,cy-b,b&1?hex('#e02030'):Wt);pset(fb,cx-1,cy-5,hex('#e02030'));pset(fb,cx-2,cy-4,Wt);// candy cane
+    bunItem(fb,'cane',x+G.w+2.5,y,{shadow:1});// candy cane by the door
     if(night>0.05&&lit>0)for(const sd of[-1,1]){const lx=x+sd*4.6,ly=y+1;// window light spilling onto the ground in front
       for(let yy=0;yy<=6;yy++)for(let xx=-4;xx<=4;xx++){const d=Math.hypot(xx/(2.5+yy*0.35),yy/6);if(d<1){const f=(1-d)*0.32*night;padd(fb,lx+xx,ly+yy,255*f,170*f,60*f);}}}}
   houseGlow(fb,night){const G=this.gh,E=this.emi||[];for(let j=0;j<E.length;j+=2)fb.px[E[j]]=E[j+1];// lit windows keep their own colour at night
