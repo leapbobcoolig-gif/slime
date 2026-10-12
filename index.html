@@ -8227,9 +8227,17 @@ const HUDSKIN={on:false,tp:3,cache:new Map(),ro:null,faceT:0,blink:0,lastMood:''
     ctx.putImageData(img,0,0);},
 };
 // Graphics quality: Auto picks Low on phones (touch screens / small screens), High elsewhere
-function gfxAutoLow(){return matchMedia('(pointer:coarse)').matches||Math.min(innerWidth,innerHeight)<500;}
+// Auto graphics starts on High and watches how smoothly the tank really runs. If frames keep arriving slowly
+// (under about 48fps through two 4-second stretches of normal play) it switches to Low and remembers that for this
+// device. On Low, a long smooth spell clears the memory so the next visit tries High again (no switching mid-play).
+const PERF={sum:0,n:0,slow:0,fast:0};
+function gfxAutoLow(){return save.set.gfxAuto==='low';}
+function perfWatch(ms){if((save.set.gfx||'auto')!=='auto'||document.hidden||game.mode!=='play'||ui.modalOpen()||ms>120)return;
+  PERF.sum+=ms;PERF.n++;if(PERF.sum<4000)return;const avg=PERF.sum/PERF.n;PERF.sum=PERF.n=0;
+  if(!document.body.classList.contains('gfx-low')){if(avg>21){if(++PERF.slow>=2){PERF.slow=0;save.set.gfxAuto='low';markDirty();applyGfx();}}else PERF.slow=0;}
+  else if(avg<17.5){if(++PERF.fast>=8){PERF.fast=0;if(save.set.gfxAuto==='low'){save.set.gfxAuto='high';markDirty();}}}else PERF.fast=0;}
 function applyGfx(){const m=save.set.gfx||'auto',al=gfxAutoLow(),low=m==='low'||(m==='auto'&&al);document.body.classList.toggle('gfx-low',low);
-  const g=$('setGfx');if(g)for(const b of g.children)b.classList.toggle('on',b.dataset.v===m);const n=$('gfxNote');if(n)n.textContent=`Low makes the food tanks and menu previews animate more lightly. Auto picks ${al?'Low':'High'} on this device.`;}
+  const g=$('setGfx');if(g)for(const b of g.children)b.classList.toggle('on',b.dataset.v===m);const n=$('gfxNote');if(n)n.textContent=`Low makes the food tanks and menu previews animate more lightly. Auto starts on High and switches to Low if the game runs slowly here (now: ${document.body.classList.contains('gfx-low')?'Low':'High'}).`;}
 const FUN_PIECES=[{id:'food',name:'Food',fun:'Supply tanks you pluck food from'},{id:'tools',name:'Tools',fun:'Your hand + a pegboard of real tools'},{id:'needs',name:'Needs',fun:'Gauges on the glass; grime shows a dirty tank'},{id:'hud',name:'Top bar',fun:'Wood & brass name plate, bouncy buttons, swinging signs'}];
 const FUN=k=>!!(save.set&&save.set.fun&&save.set.fun[k]);
 // cute faces can be switched on or off per critter (older saves had one switch for all of them)
@@ -8349,7 +8357,7 @@ window.addEventListener('pagehide',()=>{if(game.kind)writeSave();});
 // =====================================================================
 let last=performance.now(),staticDrawn=false;
 function frame(now){
-  const dt=Math.min(0.05,(now-last)/1000);last=now;
+  perfWatch(now-last);const dt=Math.min(0.05,(now-last)/1000);last=now;
   if(game.mode==='play'){updatePlay(dt);renderPlay();camFollow(dt);}
   else if(!staticDrawn&&R.bg){fb.px.set(R.bg);for(let k=0;k<R.frameIdx.length;k++){const i=R.frameIdx[k];fb.px[i]=R.frame[i];}applyLight(1);ctx.putImageData(fb.img,0,0);staticDrawn=true;}
   ui.tick(dt);
