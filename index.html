@@ -7843,6 +7843,9 @@ function showBrain(p){const pet=p.pet,PW=p.fb.w,PH=p.fb.h;p.pw.bounds={x0:6,y0:8
   const chains=()=>[pet.pts,pet.spine].filter(C=>C&&C.length>2),settle=(k)=>{const c=Math.cos(pet.ang),sn=Math.sin(pet.ang);if(pet.headAng!==undefined)pet.headAng+=wrapA(pet.ang-pet.headAng)*k;for(const C of chains()){let L=0;for(let j=1;j<C.length;j++)L+=Math.hypot(C[j].x-C[j-1].x,C[j].y-C[j-1].y);L/=C.length-1;
     for(let j=1;j<C.length;j++){C[j].x+=(C[0].x-c*L*j-C[j].x)*k;C[j].y+=(C[0].y-sn*L*j-C[j].y)*k;}}};
   if(chains().length&&pet.ang!==undefined){pet.ang=side?Math.PI:0;settle(1);}
+  // plant every foot where it rests from the first frame, so legs don't start bunched up and scramble into place
+  pet.update(1/600);for(const L of pet.legs||[])if(L.rx!==undefined){L.fx=L.rx;L.fy=L.ry;L.stepping=false;L.lift=0;}
+  if(pet.feet&&pet.footRest)for(const F of pet.feet){[F.fx,F.fy]=pet.footRest(F);F.stepping=false;}
   pet.brain=function(dt){
     // while it poses, the body slowly settles out straight behind the head so it's easy to see
     if(!walking){if(this.stop)this.stop(dt);settle(Math.min(1,dt*1.2));T-=dt;if(T<=0){walking=true;side^=1;T=10;}return;}
