@@ -862,6 +862,9 @@ const SFX=(()=>{
     windRatchet:()=>{for(let k=0;k<3;k++)noise(0.012,{delay:k*0.05,filter:'bandpass',freq:3800,q:6,gain:0.08});},
     windDown:()=>tone(620,1.3,{type:'sawtooth',to:70,gain:0.022,vib:[14,30]}),
     windBell:()=>{tone(1760,0.9,{gain:0.05});tone(2637,0.6,{delay:0.01,gain:0.022});},
+    foxYip:()=>{tone(900,0.07,{type:'triangle',to:1500,gain:0.05});tone(1300,0.09,{delay:0.08,type:'triangle',to:1900,gain:0.04});},// a soft little yip
+    foxChime:()=>{[1046,1568,2093].forEach((f,i)=>tone(f,0.9-i*0.2,{delay:i*0.09,type:'sine',gain:0.04}));tone(523,1.2,{type:'sine',gain:0.025});},// a temple-bell chime
+    foxWhoosh:()=>{noise(0.35,{filter:'bandpass',freq:1800,to:600,q:1.5,gain:0.06,attack:0.05});tone(700,0.25,{type:'sine',to:300,gain:0.02});},// whispery whoosh
     gummyBoing:()=>{tone(180,0.28,{type:'sine',to:420,gain:0.1,vib:[18,0.6]});tone(90,0.12,{type:'triangle',to:60,gain:0.06});},// a wobbly rubbery boing
     gummySquelch:()=>{noise(0.12,{filter:'lowpass',freq:900,to:300,gain:0.09});tone(240,0.1,{type:'sine',to:140,gain:0.05});},
     sugarCrunch:()=>{for(let k=0;k<4;k++)noise(0.02,{delay:k*0.03+rand(0,0.01),filter:'bandpass',freq:rand(3500,6000),q:3,gain:0.05});},
@@ -1000,7 +1003,7 @@ const SFX=(()=>{
   const BUS_OF={};
   'tick ui tap sparkle levelup coin coinburst whoosh close beep nope bloop achieve yay reveal0 reveal1 reveal2 reveal3 insert ratchet clunk pop rattle chest ask place scoop unhook hang clack pluck tink2'.split(' ').forEach(n=>BUS_OF[n]='ui');
   'plip bpop drip splash ocean burble rumble wind whirr toot tune musicbox flutter boing bell boop blow zap squeak2 lightsOn lightsOff tink'.split(' ').forEach(n=>BUS_OF[n]='world');
-  const GAP={clockTick:0.2,clockTock:0.2,gearStep:0.15,steamPuff:1,windRatchet:0.16,windDown:3,windBell:3,gummyBoing:0.25,gummySquelch:0.4,sugarCrunch:0.6,reefBloom:3,fishScatter:1,fishNibble:0.25,gingerLand:0.25,chimneyPuff:2,musicBox:5,shutterClack:1,doorCreak:1.5,cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
+  const GAP={clockTick:0.2,clockTock:0.2,gearStep:0.15,steamPuff:1,windRatchet:0.16,windDown:3,windBell:3,foxYip:0.6,foxChime:1,foxWhoosh:0.8,gummyBoing:0.25,gummySquelch:0.4,sugarCrunch:0.6,reefBloom:3,fishScatter:1,fishNibble:0.25,gingerLand:0.25,chimneyPuff:2,musicBox:5,shutterClack:1,doorCreak:1.5,cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
   function play(name,arg){
     if(!ac||muted||!S[name])return;const now=ac.currentTime;
     if(last[name]!==undefined&&now-last[name]<(GAP[name]??0.03))return;last[name]=now;
@@ -2647,7 +2650,14 @@ const SWATCHES={
   {id:'spirit',name:'Spirit green',price:40,dot:['#5af07a','#c0ff5a'],pal:{wisp:{a:ramp('#0a4a1a','#18a03a','#5af07a','#c8ffd4','#ffffff'),b:ramp('#3a5a0a','#78b018','#c0ff5a','#f0ffc8','#ffffff')}}},
   {id:'rose',name:'Rose',price:40,dot:['#ff6ab4','#c070ff'],pal:{wisp:{a:ramp('#6a0a3a','#d0287a','#ff6ab4','#ffd0ea','#ffffff'),b:ramp('#3a0a6a','#8030d0','#c070ff','#ecd4ff','#ffffff')}}},
   {id:'gold',name:'Gold',price:60,dot:['#ffd84a','#fff4c0'],pal:{wisp:{a:ramp('#6a4a06','#c0900e','#ffd84a','#fff4c0','#ffffff'),b:ramp('#5a3a0a','#a87018','#f0b040','#ffe8a8','#ffffff')}}},
-  {id:'void',name:'Void',price:60,dot:['#5a1aa0','#0a0418'],pal:{wisp:{a:ramp('#06020e','#1a0a3a','#5a1aa0','#b070ff','#f0e0ff'),b:ramp('#020208','#0e0a2a','#3a2a8a','#8a7ae0','#e4e0ff')}}}],
+  {id:'void',name:'Void',price:60,dot:['#5a1aa0','#0a0418'],pal:{wisp:{a:ramp('#06020e','#1a0a3a','#5a1aa0','#b070ff','#f0e0ff'),b:ramp('#020208','#0e0a2a','#3a2a8a','#8a7ae0','#e4e0ff')}}},
+  // vivid: their own flame colours, and the orbiting motes restyled (mote), embers as hearts (ember)
+  {id:'lantern',name:"Jack-o'-lantern",tier:'vivid',dot:['#ff8a1a','#8a3ad0'],mote:'bat',pal:{wisp:{a:ramp('#3a0a5a','#8a2ad0','#ff8a1a','#ffd080','#fff4d0'),b:ramp('#2a0a4a','#7a1ab8','#ff7a14','#ffc860','#fff0c0')}}},
+  {id:'valentine',name:'Valentine',tier:'vivid',dot:['#ff4a7a','#ffb0c8'],mote:'heart',ember:'heart',pal:{wisp:{a:ramp('#5a0418','#c0103a','#ff4a7a','#ffb0c8','#fff0f4'),b:ramp('#6a0a2a','#e03060','#ff7aa0','#ffd0dc','#ffffff')}}},
+  {id:'frost',name:'Frostfire',tier:'vivid',dot:['#bfefff','#5aa8ff'],mote:'flake',frost:1,pal:{wisp:{a:ramp('#0a2a5a','#2a6ab8','#7ac0f0','#d8f4ff','#ffffff'),b:ramp('#1a3a6a','#4a8ad8','#a8dcff','#eefaff','#ffffff')}}},
+  {id:'candy',name:'Cotton candy',tier:'vivid',dot:['#ff9ad4','#8ad0ff'],mote:'sprinkle',swirl:1,pal:{wisp:{a:ramp('#6a1a4a','#d050a0','#ff9ad4','#ffd8ee','#ffffff'),b:ramp('#0a3a6a','#3a88d0','#8ad0ff','#d8f0ff','#ffffff')}}},
+  {id:'aurora',name:'Aurora trail',tier:'special',fx:'aurora',mote:'star',swirl:1,dot:['#3affa0','#a05aff'],pal:{wisp:{a:ramp('#0a4a3a','#18a878','#3affa0','#c8ffe8','#ffffff'),b:ramp('#2a0a5a','#6a2ab8','#a05aff','#e0c8ff','#ffffff')}}},
+  {id:'kitsune',name:'Kitsune',tier:'mythic',fx:'kitsune',dot:['#ffffff','#e8344a'],outline:'#1a1a4a',pal:{wisp:{a:ramp('#0a1650','#2a4ad8','#6aa8ff','#d0ecff','#ffffff'),b:ramp('#1a0a5a','#4a3ae0','#9a9aff','#e4e4ff','#ffffff')}}}],
  fuzzworm:[
   {id:'sunny',name:'Sunny yellow',price:40,dot:['#ffd83a','#fff4a8'],pal:{fuzz:{pink:ramp('#9a7006','#e4b414','#ffd83a','#fff4a8')}}},
   {id:'sky',name:'Sky blue',price:40,dot:['#4ab4ff','#b8e4ff'],outline:'#06121e',pal:{fuzz:{pink:ramp('#0e4a9a','#2a80e4','#4ab4ff','#b8e4ff')}}},
@@ -4964,13 +4974,16 @@ class Nudi extends Pet{
 //  steams when misted, and by day dozes as a small ember.
 // =====================================================================
 const WISPA=[hex('#3a1a8a'),hex('#5a3cf0'),hex('#38c8ff'),hex('#bafcff'),hex('#ffffff')],WISPB=[hex('#0e4a5a'),hex('#18a888'),hex('#56f0c0'),hex('#d4ffee'),hex('#ffffff')];
-PAL.wisp={a:WISPA,b:WISPB};// the two flame colours it drifts between
+PAL.wisp={a:WISPA,b:WISPB};
+const KITSUNE={fur:ramp('#7a84c0','#c4d0f2','#eef4ff','#ffffff'),red:ramp('#7a1a3a','#c03a5a','#ee6a86','#ffb0c0'),fire:ramp('#1a2aa0','#3a6aff','#8ac8ff','#e8f8ff'),ink:hex('#1a1030')},
+  AURORA={g:ramp('#0a4a2a','#18a860','#3aff9a','#c8ffe0','#ffffff'),v:ramp('#2a0a5a','#6a2ab8','#a85aff','#e4c8ff','#ffffff'),t:ramp('#0a3a4a','#1a8aa0','#3ae0e0','#c8ffff','#ffffff')};// the two flame colours it drifts between
 class Wisp extends Pet{
   constructor(world,x,y){super();this.initCommon(world,'wisp');
     this.x=x;this.y=y;this.ang=0;this.h=8;this.vx=0;this.vy=0;this.speed=0;this.sc=1;this.outline=hex('#0a1240');this.n=1;this.pts=[{x,y}];this.gt=0;
     this.joy=0;this.dim=0;this.flare=0;this.snuff=0;this.wet=0;this.hue=rand(TAU);this.motes=[];this.embT=0;this.embers=[];this.trail=[];this.seed=rand(50);
     this.face=Math.PI/2;this.faceT=Math.PI/2;this.lookT=0;this.licks=[];this.lickT=0;this.selfLit=true;}
   isActive(){return true;}
+  kit(){return(swatchOf(this)||{}).fx==='kitsune';}
   ember(){return this.state==='sleeping'?1:0;}
   core(){return{x:this.x,y:this.y-this.h};}
   lure(){return this.ember()>0.5||this.wet>0.3?null:{x:this.x,y:this.y,h:this.h};}
@@ -4994,11 +5007,11 @@ class Wisp extends Pet{
     if(T.t>0.25&&Math.hypot(p.x-this.x,p.y-this.y)<5){p.caught=true;this.held=p;this.tg=null;catchFx(this,p);if(!this.preview)SFX.play('absorb');return 'caught';}
     if(T.t>3){this.tg=null;return 'miss';}return null;}
   syncHeld(){if(this.held){const c=this.core(),k=this.state==='chew'?Math.min(1,(this.chewT||0)*1.5):0;this.held.sx=c.x;this.held.sy=c.y+1.5-k*1.5;}}
-  finishEating(){super.finishEating();this.flare=1;if(!this.preview){SFX.play('chime');for(let i=0;i<12;i++)this.embers.push({x:this.x+rand(-3,3),y:this.y-this.h+rand(-3,3),vx:rand(-14,14),vy:rand(-26,-6),life:rand(0.5,1)});}}
+  finishEating(){super.finishEating();this.flare=1;if(!this.preview){SFX.play(this.kit()?'foxChime':'chime');for(let i=0;i<12;i++)this.embers.push({x:this.x+rand(-3,3),y:this.y-this.h+rand(-3,3),vx:rand(-14,14),vy:rand(-26,-6),life:rand(0.5,1)});}}
   startle(x,y){if(this.state==='grabbed')return;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.snuff=1;
     const a=Math.atan2(this.y-y,this.x-x),B=this.world.bounds;this.vx+=Math.cos(a)*50;this.vy+=Math.sin(a)*50;this.tx=clamp(this.x+Math.cos(a)*45,B.x0+8,B.x1-8);this.ty=clamp(this.y+Math.sin(a)*45,B.y0+8,B.y1-8);this.state='wander';this.pace='run';this.timer=1.5;
-    if(!this.preview){SFX.play('whoosh');think(this,'!');const c=this.core();spawn(this.world,'smoke',c.x,c.y,{vx:0,life:1.4});}}
-  petMe(){const r=super.petMe();if(r&&!this.preview){this.joy=Math.min(1,this.joy+0.06);this.pT=(this.pT||0)-1/60;if(this.pT<=0){this.pT=rand(1,1.8);SFX.play('chime');}}return r;}
+    if(!this.preview){SFX.play(this.kit()?'foxWhoosh':'whoosh');think(this,'!');const c=this.core();spawn(this.world,'smoke',c.x,c.y,{vx:0,life:1.4});}}
+  petMe(){const r=super.petMe();if(r&&!this.preview){this.joy=Math.min(1,this.joy+0.06);this.pT=(this.pT||0)-1/60;if(this.pT<=0){this.pT=rand(1,1.8);SFX.play(this.kit()?'foxYip':'chime');}}return r;}
   hitTest(x,y){const c=this.core();return Math.hypot(x-c.x,y-(c.y-3))<9?0:-1;}
   tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;if(!this.preview)SFX.play('chime');return true;}
   dragTo(x,y){this.grabX=x;this.grabY=y;}
@@ -5028,11 +5041,75 @@ class Wisp extends Pet{
     for(const L of this.licks){L.x+=(L.vx+Math.sin(L.ph+L.life*14)*4)*dt;L.y+=L.vy*dt;L.life-=dt;}this.licks=this.licks.filter(L=>L.life>0);
     this.embT-=dt;if(this.embT<=0&&this.ember()<1){this.embT=rand(0.15,0.35)/(1+this.joy+this.flare);const c=this.core();this.embers.push({x:c.x+rand(-1.5,1.5),y:c.y-this.flameH()*0.8,vx:rand(-3,3),vy:rand(-14,-8),life:rand(0.6,1.1)});}
     for(const e of this.embers){e.px=e.x;e.py=e.y;e.x+=e.vx*dt;e.y+=e.vy*dt;e.vx*=1-dt;e.life-=dt;}this.embers=this.embers.filter(e=>e.life>0);
-    const c=this.core();this.trail.unshift({x:c.x,y:c.y});if(this.trail.length>16)this.trail.pop();}
-  color(){return INK;}
-  draw(fb){}// it's all light: drawn in glow(), after the night falls
+    const c=this.core();this.trail.unshift({x:c.x,y:c.y});if(this.trail.length>16)this.trail.pop();
+    const S=swatchOf(this)||{};if(S.frost)for(const L of this.licks)if(!L.ice){L.ice=1;L.vy=rand(3,7);L.vx*=0.3;L.r*=0.7;}// frostfire: tongues break off as ice flakes and drift down
+    if(S.fx==='aurora'){const A=this.aur=this.aur||[];this.aurT=(this.aurT||0)-dt;if(this.aurT<=0){this.aurT=0.12;const L=A[0];if(!L||Math.hypot(L.x-c.x,L.y-c.y)>1.2)A.unshift({x:c.x,y:this.y,top:c.y-6,life:3.5});}
+      for(const a of A)a.life-=dt;this.aur=A.filter(a=>a.life>0);}}
+  // it's all light (drawn in glow(), after the night falls), except the kitsune: a little white spirit fox with red mask markings,
+  // three tails tipped with foxfire and two foxfire orbs, drawn as a solid sprite and lit by its own tail flames
+  color(m,q,s,l,x,y){if(!this.kit())return INK;const K=KITSUNE;if(this._fb){const ix=y*this._fb.w+x;this.emi.push(ix);if(m===M.LIMB&&s>0.6)this.tipPx.push(ix,s>0.72?K.fire[Math.min(3,q+1)]:K.fire[3]);}
+    if(m===M.LIMB)return s>0.72?K.fire[Math.min(3,q+1)]:s>0.6?K.fire[3]:K.fur[q];// white fur burning into foxfire at the tail tips
+    if(m===M.CLAW2)return K.red[q];return K.fur[q];}
+  foxPose(){const c=this.core();return{cx:c.x,cy:c.y,fx:clamp(Math.cos(this.face),-1,1),sl:this.ember()>0.5,happy:this.joy>0.4||this.flare>0.5||this.state==='petted',t:this.t};}
+  draw(fb){this.seam=0;if(!this.kit())return;this._fb=fb;this.emi=[];this.tipPx=[];this.seam=0.9;this.inner=hex('#4a5aa0');// soft seams split the three tails apart
+    const{cx,cy,fx,sl,happy,t}=this.foxPose(),C=(ax,ay,ar,bx,by,br,m,sa,sb,bias)=>fb.cap(ax,ay,ar,bx,by,br,m,2,sa,sb,bias),k=sl?0.75:1;
+    // three fluffy tails streaming out behind it, curling up at the tips (wrapped round it when it naps)
+    const side=fx>0.15?-1:fx<-0.15?1:(this._side||-1);this._side=side;const fan=(happy?1.35:1)*(1-this.snuff*0.5),bx=cx+side*1.6*k,by=cy+3.6*k;this._tails=[];
+    for(let i=0;i<3;i++){const a=sl?(side>0?0.5:Math.PI-0.5)+side*(i-1)*0.5:Math.atan2(-0.25-(i-1)*0.75*fan,side),curl=-side*(0.55+i*0.1)*(sl?-0.8:1);let px=bx,py=by;
+      for(let j=1;j<=8;j++){const s2=j/8,aa=a+curl*s2*s2+Math.sin(t*2.4+i*2.1+s2*2)*0.15*s2,nx=px+Math.cos(aa)*1.5*k,ny=py+Math.sin(aa)*1.5*k,r=(0.7+1.9*Math.sin(Math.min(1,s2*1.1)*Math.PI*0.88))*k;
+        fb.cap(px,py,r*0.9,nx,ny,r,M.LIMB,1,s2-0.12,s2,i*1.3);px=nx;py=ny;}this._tails.push([px,py]);}
+    C(cx,cy+3.6*k,3.0*k,cx,cy+1.2*k,3.1*k,M.BODY,0,0,0.6);// body
+    for(const sd of[-1,1])C(cx+sd*1.5*k,cy+5.6*k,1.1*k,cx+sd*1.5*k,cy+5.6*k,1.1*k,M.BODY,0,0,0.7);// little paws
+    const hx=cx+fx*0.8,hy=cy-2.4*k;C(hx,hy,4.0*k,hx,hy,4.0*k,M.BODY,0,0,1.0);// head
+    for(const sd of[-1,1])C(hx+sd*2.7*k,hy+1.4*k,2.1*k,hx+sd*2.7*k,hy+1.4*k,2.1*k,M.BODY,0,0,1.05);// fluffy cheeks
+    const ed=sl?0.6:this.snuff>0.5?0.75:1;// ears flatten when it naps or gets a fright
+    for(const sd of[-1,1]){const ex=hx+sd*2.5*k,ey=hy-2.4*k,tx=hx+sd*(3.0+1.4*ed+(1-ed)*2.5)*k,ty=hy-(2.4+6.0*ed)*k;C(ex,ey,2.0*k,tx,ty,0.35,M.CLAW,0,1,1.2);
+      C(ex+sd*0.2,ey-0.6,1.05*k,ex+(tx-ex)*0.7,ey+(ty-ey)*0.7,0.3,M.CLAW2,0,1,1.6);}// pink inner ears
+    C(hx+fx*1.2,hy+1.2*k,1.7*k,hx+fx*2.2,hy+2.6*k,1.0*k,M.BODY,0,0,1.5);// pointed muzzle
+    this._face={hx,hy,fx,k,sl,happy};}
+  drawExtras(fb){if(!this.kit()||!this._face)return;const{hx,hy,fx,k,sl,happy}=this._face,K=KITSUNE.ink,Rd=hex('#e0283c'),ex0=this._ex=[],P=(x,y,c)=>{x=Math.round(x);y=Math.round(y);pset(fb,x,y,c);ex0.push(y*fb.w+x);};
+    for(const sd of[-1,1]){const ex=hx+sd*1.7*k+fx*0.9,ey=hy+0.2;
+      if(sl||happy){P(ex-1,ey,K);P(ex,ey-1,K);P(ex+1,ey,K);}else{P(ex,ey,K);P(ex,ey+1,K);P(ex+sd,ey,K);}// content ^ ^ eyes, or narrow fox eyes
+      P(ex+sd*1.2,ey-1.3,Rd);}// a red kitsune mask flick above each eye
+    P(hx+fx*0.8,hy-2.4*k,Rd);P(hx+fx*0.8,hy-3.2*k,Rd);P(hx+fx*2.2,hy+3.2*k,K);}// a flame mark on the brow, the nose at the tip of the muzzle
+  kitsuneGlow(fb,night){const{cx,cy,t,sl}=this.foxPose(),add=(px,py,c,f)=>padd(fb,px,py,(c&255)*f,(c>>8&255)*f,(c>>>16&255)*f),B=KITSUNE.fire,flick=0.9+0.1*Math.sin(t*13),W=fb.w,E=this.emi||[],tails=sl?[]:this._tails||[];
+    const gk=(0.3+night*0.7)*flick*(sl?0.5:1);for(let yy=-7;yy<=7;yy++)for(let xx=-18;xx<=18;xx++){const d=Math.hypot(xx/18,yy/7);if(d<1)add(this.x+xx,this.y+yy,B[2],(1-d)*(1-d)*0.5*gk);}// a pool of blue light below
+    // a spirit: its white fur glows softly at night (the face stays crisp), the foxfire tips keep their own blue
+    const set=new Set(E),skip=new Set(this._ex||[]);if(night>0.05){const Wt=hex('#e8f0ff');for(const i of set)if(!skip.has(i))fb.px[i]=mixc(fb.px[i],Wt,0.5*night);}
+    // its own foxfire lights its fur: blue light falling off with distance from each tail flame, brightest on the rim facing it
+    if(tails.length){const lb=(0.35+night*0.65)*flick;for(const i of set){if(skip.has(i))continue;const x=i%W,y=(i/W)|0;let L=0;for(const[tx,ty]of tails){const d=Math.hypot(x-tx,y-(ty-2));L+=Math.max(0,1-d/14)**2;}
+      if(L<0.02)continue;let edge=0;for(const o of[1,-1,W,-W])if(!set.has(i+o))edge=1;add(x,y,B[2],Math.min(1,L)*lb*(edge?0.75:0.3));}}
+    const T=this.tipPx||[];for(let j=0;j<T.length;j+=2)fb.px[T[j]]=T[j+1];
+    for(const[px,py]of tails){for(let n=0;n<7;n++){const f=n/6,fl=Math.sin(t*9+px+n)*0.7*f,yy=py-1-f*5,ww=(1-f)*1.6;for(let xx=-2;xx<=2;xx++){const d=Math.abs(xx+fl)/(ww+0.3);if(d<1)pmix(fb,px+xx,yy,f<0.3?B[3]:f<0.7?B[2]:B[1],(1-d)*(1-f*0.6)*0.85);}}// foxfire licking off the tail tips
+      for(let yy=-4;yy<=4;yy++)for(let xx=-4;xx<=4;xx++){const d=Math.hypot(xx,yy)/4.5;if(d<1)add(px+xx,py-2+yy,B[2],(1-d)*(1-d)*0.35*(0.4+night*0.6));}}
+    for(let i=0;i<2;i++){const a=t*1.6+i*Math.PI,ox=cx+Math.cos(a)*11,oy=cy-1+Math.sin(a)*4,al=Math.sin(a)>0?1:0.55;// two foxfire orbs circling it, with wispy tails
+      for(let j=6;j>=0;j--){const aj=a-j*0.12,px=cx+Math.cos(aj)*11,py=cy-1+Math.sin(aj)*4-j*0.25,r=j===0?1.8:1.2*(1-j/7);for(let yy=-2;yy<=2;yy++)for(let xx=-2;xx<=2;xx++){const d=Math.hypot(xx,yy)/(r+0.2);if(d<1)pmix(fb,px+xx,py+yy,j===0&&d<0.5?B[3]:B[2],(1-d)*al*(1-j/8)*0.9);}}
+      for(let yy=-5;yy<=5;yy++)for(let xx=-5;xx<=5;xx++){const d=Math.hypot(xx,yy)/5.5;if(d<1)add(ox+xx,oy+yy,B[2],(1-d)*(1-d)*0.25*(0.3+night*0.7));}}}
+  // per-pixel flame colours: cotton candy spun pink and blue, aurora curtains rippling up through it
+  swirlPal(px,py,t){if(this.sw.fx==='aurora'){const v=Math.sin(px*0.8+Math.sin(py*0.25+t*1.3)*2.2-t*2.4);return v>0.2?AURORA.g:v<-0.2?AURORA.v:AURORA.t;}
+    const k=Math.sin((px-this.x)*0.7+(py-this.y)*0.35-t*3+vnoise(px*0.3,py*0.3)*3);return k>0?PAL.wisp.a:PAL.wisp.b;}
+  // vivid motes: bats, hearts, snowflakes, candy sprinkles; aurora: twinkling stars
+  motesX(fb,cx,cy,pal,t){const S=this.sw;
+    for(let i=0;i<3;i++){const R0=9+this.joy*2+Math.sin(t*1.3+i)*1.2,a=t*2.2+i*TAU/3,px=Math.round(cx+Math.cos(a)*R0),py=Math.round(cy-3+Math.sin(a)*3.2+Math.sin(t*3+i)*0.8),front=Math.sin(a)>0,al=front?1:0.5,C=front?pal[4]:pal[3],C2=pal[2];
+      const P=(dx,dy,c,k=1)=>pmix(fb,px+dx,py+dy,c,al*k);
+      if(S.mote==='bat'){const fl=Math.sin(t*16+i*2)>0;P(0,0,C);P(-1,0,C2);P(1,0,C2);if(fl){P(-2,-1,C2);P(2,-1,C2);}else{P(-2,1,C2);P(2,1,C2);}}
+      else if(S.mote==='heart'){P(-1,-1,C);P(1,-1,C);P(-1,0,C);P(0,0,C);P(1,0,C);P(0,1,C);}
+      else if(S.mote==='flake'){P(0,0,hex('#ffffff'));for(const[dx,dy]of[[0,-1],[0,1],[-1,0],[1,0]])P(dx,dy,C,0.8);for(const[dx,dy]of[[-1,-1],[1,1],[1,-1],[-1,1]])P(dx*2,dy*2,C2,0.5);}
+      else if(S.mote==='star'){const tw=0.5+0.5*Math.sin(t*6+i*2);P(0,0,hex('#ffffff'),tw);for(const[dx,dy]of[[0,-1],[0,1],[-1,0],[1,0]])P(dx,dy,C2,tw*0.6);}
+      else if(S.mote==='sprinkle'){const c=hex(['#ff5a8a','#ffe04a','#5ad0ff','#8aff7a'][i%4]),an=t*3+i;P(0,0,c);P(Math.round(Math.cos(an)),Math.round(Math.sin(an)),c);}
+      for(let j=1;j<5;j++){const aj=a-j*0.09;pmix(fb,cx+Math.cos(aj)*R0,cy-3+Math.sin(aj)*3.2+Math.sin(t*3+i)*0.8,pal[2],(1-j/5)*0.35*al);}}}
+  embersX(fb,pal){for(const m of this.embers){const k=Math.min(1,m.life*1.4),X=Math.round(m.x),Y=Math.round(m.y);if(k<0.5){pmix(fb,X,Y,pal[3],k);continue;}// little hearts
+    for(const[dx,dy]of[[-1,0],[1,0],[0,0],[0,1]])pmix(fb,X+dx,Y+dy,pal[3],k*0.9);pmix(fb,X-1,Y-1,pal[3],k*0.7);pmix(fb,X+1,Y-1,pal[3],k*0.7);}}
+  frostX(fb,pal,t){for(let k=0;k<14;k++){const a=k/14*TAU+hash(k,3),r=8+hash(k,5)*9,x=Math.round(this.x+Math.cos(a)*r),y=Math.round(this.y+Math.sin(a)*r*0.4),tw=Math.max(0,Math.sin(t*3+k*1.7));// a ring of frost glinting on the ground
+    pmix(fb,x,y,hex('#e8f8ff'),0.35+0.4*tw);if(tw>0.85){pmix(fb,x-1,y,hex('#ffffff'),0.5);pmix(fb,x+1,y,hex('#ffffff'),0.5);pmix(fb,x,y-1,hex('#ffffff'),0.5);}}}
+  // aurora: curtains of light left hanging where it has been, violet up top into green, rippling and fading, lighting the ground below
+  auroraX(fb,t,night){const A=this.aur||[],G=[60,255,160],V=[160,90,255],kk=0.35+night*0.65;
+    for(let i=0;i<A.length;i++){const a=A[i],f=Math.min(1,a.life/3.5),al=f*f*kk*0.5,x0=a.x+Math.sin(t*1.5+i*0.5)*1.5,bot=a.y-2,top=a.top-8-Math.sin(t*2+i*0.7)*3;
+      for(let y=Math.floor(top);y<=bot;y++){const v=(y-top)/(bot-top),w=al*(0.4+0.6*Math.sin(v*Math.PI))*(0.7+0.3*Math.sin(y*0.8+t*5+i)),r=V[0]+(G[0]-V[0])*v,g=V[1]+(G[1]-V[1])*v,b=V[2]+(G[2]-V[2])*v;
+        padd(fb,x0,y,r*w,g*w,b*w);padd(fb,x0+1,y,r*w*0.5,g*w*0.5,b*w*0.5);}
+      for(let xx=-3;xx<=3;xx++){const g=al*0.12*(1-Math.abs(xx)/4);padd(fb,a.x+xx,a.y+(i&1),G[0]*g,G[1]*g,G[2]*g);}}}
   pal(){const k=0.5+0.5*Math.sin(this.hue),A=PAL.wisp.a,B=PAL.wisp.b;return A.map((a,i)=>mixc(a,B[i],k));}
-  glow(fb,night){const pal=this.pal(),c=this.core(),cx=c.x,cy=c.y,x=this.x,y=this.y,t=this.t,H=this.flameH()+Math.sin(t*11)*0.8,r0=this.flameR()*(1+Math.sin(t*5.3)*0.05),vx=this.vx,vy=this.vy,e=this.ember(),bright=(1-this.dimK()*0.5),W=fb.w;
+  glow(fb,night){if(this.kit())return this.kitsuneGlow(fb,night);const S=this.sw||{},pal=this.pal(),c=this.core(),cx=c.x,cy=c.y,x=this.x,y=this.y,t=this.t,H=this.flameH()+Math.sin(t*11)*0.8,r0=this.flameR()*(1+Math.sin(t*5.3)*0.05),vx=this.vx,vy=this.vy,e=this.ember(),bright=(1-this.dimK()*0.5),W=fb.w;
     const add=(px,py,col,f)=>padd(fb,px,py,((col)&255)*f,((col>>8)&255)*f,((col>>16)&255)*f),flick=0.88+0.08*Math.sin(t*13)+0.05*Math.sin(t*31+1);
     // a flickering pool of light on the ground, rippling a little, and a soft halo; both much stronger at night
     const gk=(0.32+night*0.68)*bright*flick;for(let yy=-7;yy<=7;yy++)for(let xx=-18;xx<=18;xx++){const d=Math.hypot(xx/18,yy/7);if(d<1)add(x+xx,y+yy,pal[2],(1-d)*(1-d)*0.6*gk*(0.8+0.4*vnoise((x+xx)*0.25+t*1.5,(y+yy)*0.4)));}
@@ -5041,6 +5118,7 @@ class Wisp extends Pet{
     if(e<0.5&&this.wet<0.5){const y0=Math.floor(cy-H-9),y1=Math.floor(cy-H*0.35),x0=Math.floor(cx-7),x1=Math.ceil(cx+7);
       for(let py=y0;py<=y1;py++){if(py<0||py>=fb.h)continue;const k=1-Math.abs((py-(y0+y1)/2)/((y1-y0)/2+0.01)),sh=Math.round(Math.sin(py*0.9+t*11)*k*1.2);if(!sh)continue;
         const o=py*W,row=[];for(let px=x0-2;px<=x1+2;px++)row.push(px>=0&&px<W?fb.px[o+px]:0);for(let px=x0;px<=x1;px++){if(px<0||px>=W)continue;const v=row[px-sh-(x0-2)];if(v)fb.px[o+px]=v;}}}
+    if(S.fx==='aurora')this.auroraX(fb,t,night);if(S.frost)this.frostX(fb,pal,t);
     // moving: ghost flames stream behind it like a comet
     const sp=Math.hypot(vx,vy);if(sp>6)for(let k=2;k<this.trail.length;k+=2){const T=this.trail[k],rr=r0*(1-k/18)*0.9,al=(1-k/16)*0.32*Math.min(1,sp/28);if(rr<0.5)continue;
       for(let yy=-6;yy<=6;yy++)for(let xx=-6;xx<=6;xx++){const d=Math.hypot(xx,yy*0.9)/rr;if(d<1)pmix(fb,T.x+xx,T.y+yy-k*0.4,d<0.45?pal[3]:pal[2],(1-d)*al);}}
@@ -5052,7 +5130,8 @@ class Wisp extends Pet{
     for(let py=Math.floor(cy-H-3);py<=cy+r0+1;py++)for(let px=Math.floor(cx-r0-5);px<=cx+r0+5;px++){const I=field(px+.5,py+.5)*bright;if(I<=0)continue;const d=hash(px*13,py*7)*0.12;
       // a slow swirl runs through the bands so the colour visibly churns
       const J=I+(vnoise(px*0.35-t*1.6,py*0.3+t*2.2+this.seed)-0.5)*0.22;
-      if(J>0.86-d)pmix(fb,px,py,pal[4],0.95);else if(J>0.64-d)pmix(fb,px,py,pal[3],0.8);else if(J>0.4-d)pmix(fb,px,py,pal[2],0.6);else if(J>0.18-d)pmix(fb,px,py,pal[1],0.42);else pmix(fb,px,py,pal[0],0.26);}
+      const pl=S.swirl?this.swirlPal(px,py,t):pal;if(S.frost&&J>0.3&&((px*2+py)%5===0||(px*2-py+50)%7===0)){pmix(fb,px,py,hex('#ffffff'),0.55);continue;}// frostfire: sharp ice facets
+      if(J>0.86-d)pmix(fb,px,py,pl[4],0.95);else if(J>0.64-d)pmix(fb,px,py,pl[3],0.8);else if(J>0.4-d)pmix(fb,px,py,pl[2],0.6);else if(J>0.18-d)pmix(fb,px,py,pl[1],0.42);else pmix(fb,px,py,pl[0],0.26);}
     // tongues of flame that break off the top and drift up, shrinking
     for(const L of this.licks){const k=L.life/L.max,rr=L.r*k;if(rr<0.35){pmix(fb,L.x,L.y,pal[3],k);continue;}const R2=Math.ceil(rr+1);
       for(let yy=-R2-1;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++){const d=Math.hypot(xx,yy*(yy<0?0.65:1.1))/rr;if(d<1)pmix(fb,L.x+xx,L.y+yy,d<0.45?pal[4]:d<0.75?pal[3]:pal[2],(1-d*0.6)*Math.min(1,k*1.6)*0.85);}}
@@ -5068,11 +5147,13 @@ class Wisp extends Pet{
         else if(this.wet>0.4||this.snuff>0.5){pset(fb,ex,ey,K);pset(fb,ex+(sd<0?1:-1),ey-1,K);}
         else{pset(fb,ex,ey-1,K);pset(fb,ex,ey,K);pset(fb,ex,ey+1,K);if(fy<0.25){pmix(fb,ex,ey-1,pal[3],0.4);}}}}
     // motes circling it with little light trails; the ones behind it are dimmer
-    if(e<0.5)for(let i=0;i<3;i++){const R=9+this.joy*2+Math.sin(t*1.3+i)*1.2;for(let j=5;j>=0;j--){const a=t*2.2+i*TAU/3-j*0.09,px=cx+Math.cos(a)*R,py=cy-3+Math.sin(a)*3.2+Math.sin(t*3+i)*0.8,front=Math.sin(a)>0,al=(1-j/6)*(front?1:0.45);
+    if(S.mote){if(e<0.5)this.motesX(fb,cx,cy,pal,t);}
+    else if(e<0.5)for(let i=0;i<3;i++){const R=9+this.joy*2+Math.sin(t*1.3+i)*1.2;for(let j=5;j>=0;j--){const a=t*2.2+i*TAU/3-j*0.09,px=cx+Math.cos(a)*R,py=cy-3+Math.sin(a)*3.2+Math.sin(t*3+i)*0.8,front=Math.sin(a)>0,al=(1-j/6)*(front?1:0.45);
       if(j===0){pmix(fb,px,py,front?pal[4]:pal[3],al);if(front){pmix(fb,px+1,py,pal[3],0.55);pmix(fb,px-1,py,pal[3],0.55);pmix(fb,px,py-1,pal[2],0.4);}}else pmix(fb,px,py,pal[2],al*0.5);}}
     // embers with a short streak behind them
-    for(const m of this.embers){const k=Math.min(1,m.life*1.4)*(0.75+0.25*Math.sin(t*25+m.x));pmix(fb,m.x,m.y,pal[3],k);if(m.px!=null)pmix(fb,(m.x+m.px)/2,(m.y+m.py)/2+0.6,pal[2],k*0.5);}}
-  statusText(){if(this.state==='grabbed')return 'is fizzing in your hand';if(this.ember()>0.5)return 'is dozing as a little ember';if(this.wet>0.3)return 'is hissing and steaming. It does NOT like water!';
+    if(S.ember)this.embersX(fb,pal);else for(const m of this.embers){const k=Math.min(1,m.life*1.4)*(0.75+0.25*Math.sin(t*25+m.x));pmix(fb,m.x,m.y,pal[3],k);if(m.px!=null)pmix(fb,(m.x+m.px)/2,(m.y+m.py)/2+0.6,pal[2],k*0.5);}}
+  statusText(){if(this.kit()){if(this.ember()>0.5)return 'is curled up in its tails, dozing';if(this.state==='petted'||this.joy>0.5)return 'is fanning its tails out, all happy';}
+    if(this.state==='grabbed')return 'is fizzing in your hand';if(this.ember()>0.5)return 'is dozing as a little ember';if(this.wet>0.3)return 'is hissing and steaming. It does NOT like water!';
     if(this.state==='chew')return `is absorbing ${PREY_NAME[this.held?.type]||'something'} into its flame`;if(this.joy>0.5||this.flare>0.4)return 'is flaring up, all bright and happy';if(this.state==='wander')return 'is drifting about the tank';return 'is flickering quietly';}
 }
 // =====================================================================
