@@ -2569,29 +2569,29 @@ const SWATCHES={
   {id:'autumn',name:'Autumn',price:40,dot:['#6e675d','#e07a28'],pal:{golem:{moss:ramp('#5a1e0a','#9a3a10','#d0601c','#f09038'),mossL:ramp('#7a4a0a','#b8780e','#e8a824','#ffd060'),eye:'#ffc860',eyeC:'#fff6e0'}}},
   {id:'basalt',name:'Basalt',price:60,dot:['#24222a','#ff8a3a'],outline:'#020202',pal:{golem:{stone:ramp('#0e0e12','#1a1a20','#2a2a32','#40404a'),stoneD:ramp('#08080a','#121216','#1e1e24','#2e2e36'),head:ramp('#101014','#1e1e24','#30303a','#484852'),moss:ramp('#4a1406','#8a2a0a','#d04a14','#ff8a3a'),mossL:ramp('#6a2a06','#b04a0e','#f07a20','#ffb860'),eye:'#ff9a3a',eyeC:'#fff0d0'}}},
   // vivid: painted patterns, no moss garden. paint(m,u,v,q,x,y,crack): u,v local to the part (torso u -4..4, v -5.4..5.4)
-  {id:'brick',name:'Toy bricks',tier:'vivid',bare:1,dot:['#e0302a','#2a6ae0'],outline:'#1a0a0a',pal:{golem:{eye:'#ffffff',eyeC:'#ffffff'}},
+  {id:'brick',name:'Toy bricks',tier:'vivid',bare:1,deco:'brick',rune:'lbrick',eyeGlow:[140,140,160],dot:['#e0302a','#2a6ae0'],outline:'#1a0a0a',pal:{golem:{eye:'#ffffff',eyeC:'#ffffff'}},
    C:{1:ramp('#7a0a08','#b81a14','#e0302a','#ff6a5a'),2:ramp('#0a2a7a','#1a4ab8','#2a6ae0','#6aa0ff'),3:ramp('#8a6a00','#c8a000','#f0c800','#fff07a'),5:ramp('#0a5a1a','#1a8a2a','#2ab83a','#7ae87a')},
    paint(m,u,v,q,x,y){const C=this.C[m===M.BODY?1:m===M.LIMB?2:m===M.SLATE?5:3];// plastic bricks with studs on top
      if(m===M.BODY||m===M.CLAW2||m===M.SLATE){const g=m===M.BODY?2.6:2.2,su=fract(u/g+0.5)-0.5,sv=fract(v/g+0.5)-0.5,d=Math.hypot(su,sv)*g;
        if(d<0.75)return C[Math.min(3,q+1)];if(d<1.05&&su+sv>0)return C[Math.max(0,q-1)];}
      return C[q];}},
-  {id:'plush',name:'Patchwork plush',tier:'vivid',bare:1,dot:['#ff9ab8','#7ad8c0'],outline:'#3a1a2a',pal:{golem:{eye:'#3a1a2a',eyeC:'#ffffff'}},
+  {id:'plush',name:'Patchwork plush',tier:'vivid',bare:1,deco:'button',rune:'star',eyeGlow:0,dot:['#ff9ab8','#7ad8c0'],outline:'#3a1a2a',pal:{golem:{eye:'#3a1a2a',eyeC:'#ffffff'}},
    F:[ramp('#a04a6a','#e07a9a','#ff9ab8','#ffd0e0'),ramp('#2a8a7a','#4ab8a0','#7ad8c0','#c0f4e4'),ramp('#b08a1a','#e0b830','#ffd860','#fff0b0'),ramp('#3a5aa0','#5a80d0','#8aaaf0','#c8d8ff'),ramp('#8a5aa0','#b080c8','#d0a8e8','#f0dcff')],
    paint(m,u,v,q,x,y){const g=m===M.BODY?4.2:3.2,row=Math.floor(v/g),cu=Math.floor(u/g+row*0.5),fu=fract(u/g+row*0.5),fv=fract(v/g),id=hash(cu*3+m*7,row*5+m),F=this.F[Math.floor(id*5)];// fabric patches, stitched together
      if((fu<0.08||fv<0.08)&&((x+y)&1))return hex('#fff8f0');if(fu<0.08||fv<0.08)return F[Math.max(0,q-1)];
      const pat=Math.floor(id*31)%3;if(pat===1&&(((x>>1)+(y>>1))&1))return F[Math.max(0,q-1)];if(pat===2&&(x%3===0&&y%3===0))return hex('#fffaf4');return F[q];}},// plain, gingham, polka dot
-  {id:'graffiti',name:'Graffiti',tier:'vivid',bare:1,dot:['#8a8a90','#ff3aa8'],outline:'#101014',pal:{golem:{eye:'#ffffff',eyeC:'#ffffff'}},
+  {id:'graffiti',name:'Graffiti',tier:'vivid',bare:1,deco:'splat',rune:'neon',eyeGlow:[140,140,160],dot:['#8a8a90','#ff3aa8'],outline:'#101014',pal:{golem:{eye:'#ffffff',eyeC:'#ffffff'}},
    G:ramp('#3a3a40','#5a5a62','#82828a','#a8a8b0'),S:[ramp('#a0105a','#e02a8a','#ff4ab0','#ff9ad4'),ramp('#0a6a9a','#1aa0d8','#3ad0ff','#a0eeff'),ramp('#a08a00','#e0c000','#ffe82a','#fff6a0'),ramp('#2a8a1a','#4ac82a','#7aff4a','#c8ffa0')],
    paint(m,u,v,q,x,y){const n=vnoise(x*0.16+m*13,y*0.16+5),k=Math.floor(vnoise(x*0.07+40,y*0.07)*4)%4,S=this.S[k];// spray-painted tags on grey concrete
      if(n>0.62)return S[q];if(n>0.56)return hex('#101014');
      const n2=vnoise(x*0.3+90,y*0.3);if(n2>0.8)return this.S[(k+2)%4][Math.max(1,q)];return this.G[hash(x,y)>0.9?Math.max(0,q-1):q];}},
-  {id:'tiki',name:'Tiki totem',tier:'vivid',bare:1,dot:['#8a5428','#2ab8a8'],outline:'#1a0a02',pal:{golem:{eye:'#ffd040',eyeC:'#ffffff'}},
+  {id:'tiki',name:'Tiki totem',tier:'vivid',bare:1,deco:'hibiscus',rune:'ember',eyeGlow:[220,140,30],dot:['#8a5428','#2ab8a8'],outline:'#1a0a02',pal:{golem:{eye:'#ffd040',eyeC:'#ffffff'}},
    W:ramp('#3a1c08','#6a3814','#9a5a2a','#c88a4a'),T:ramp('#0a5a5a','#1a8a8a','#2ab8a8','#7ae8d8'),Rd:ramp('#7a1408','#b82a14','#e04a2a','#ff8a6a'),
    paint(m,u,v,q,x,y){const W=this.W;// carved wood, painted bands of zigzags and stripes, carved grooves
      if(m===M.BODY){const a=u+4.2,b=Math.floor(a/2.1),f=fract(a/2.1);if(f<0.14)return W[0];
        if(b%2===0){const z=Math.abs(fract(v/1.6)-0.5)*2;return Math.abs(f-0.2-z*0.6)<0.16?this.T[q]:W[q];}return Math.abs(v)<1.2?this.Rd[q]:(fract(v/1.3)<0.3?W[0]:W[q]);}
      if(m===M.CLAW2)return u>1.5?this.T[q]:W[q];if(m===M.SLATE)return this.Rd[q];if(m===M.LIMB)return((y>>1)&1)?this.T[Math.max(0,q-1)]:W[q];return W[q];}},
-  {id:'geode',name:'Amethyst',tier:'special',bare:1,fx:'geode',dot:['#4a3a50','#c080ff'],outline:'#100818',pal:{golem:{eye:'#e0a0ff',eyeC:'#ffffff'}}},
+  {id:'geode',name:'Amethyst',tier:'special',bare:1,eyeGlow:[190,80,255],fx:'geode',dot:['#4a3a50','#c080ff'],outline:'#100818',pal:{golem:{eye:'#e0a0ff',eyeC:'#ffffff'}}},
   {id:'clock',name:'Clockwork colossus',tier:'mythic',bare:1,fx:'clock',dot:['#c89a3a','#6a4a20'],outline:'#1a0e04'}],
  mush:[
   {id:'golden',name:'Golden cap',price:40,dot:['#f0b828','#f6eedc'],pal:{mush:{cap:ramp('#6a3a06','#b0700e','#f0b828','#ffe070')}}},
@@ -5575,6 +5575,23 @@ function glowShrooms(fb,w,night){if(!w.shrooms||night<0.1)return;for(const m of 
 //  Moss golem: a blocky stone biped with a square head and glowing eyes. Stomps along swinging
 //  its long arms, flinches with its arms over its head, sits down to sleep and blooms when petted.
 // =====================================================================
+// little procedural trinkets for the themed golem skins
+const GOLEM_ITEM={outline:hex('#1a1008'),seam:0,color(m,q){return this.C[m][Math.max(1,q)];},
+  C:{1:ramp('#7a0a08','#b81a14','#e0302a','#ff6a5a'),2:ramp('#0a2a7a','#1a4ab8','#2a6ae0','#6aa0ff'),3:ramp('#8a6a00','#c8a000','#f0c800','#fff07a'),4:ramp('#0a5a1a','#1a8a2a','#2ab83a','#7ae87a'),// toy bricks
+     5:ramp('#a04a6a','#e07a9a','#ff9ab8','#ffd0e0'),6:ramp('#2a8a7a','#4ab8a0','#7ad8c0','#c0f4e4'),7:ramp('#b08a1a','#e0b830','#ffd860','#fff0b0'),// buttons
+     8:ramp('#a0105a','#e02a8a','#ff4ab0','#ff9ad4'),9:ramp('#0a6a9a','#1aa0d8','#3ad0ff','#a0eeff'),10:ramp('#a08a00','#e0c000','#ffe82a','#fff6a0'),// paint splats
+     11:ramp('#8a0a2a','#d0203a','#ff4a5a','#ff9aa0'),12:ramp('#a07a00','#e0b000','#ffe040','#fff6a0'),13:ramp('#a06010','#e09020','#ffc860','#fff0c0')}};// hibiscus, its stamen; a light-up brick
+function golemItem(fb,kind,x,y,o={}){const i=o.i||0,a=o.a||0,k=o.s||1;
+  freshLayer(fb,()=>{const c=(ax,ay,ar,bx,by,br,m)=>fb.cap(ax,ay,ar,bx,by,br,m,1);
+    if(kind==='brick')fb.box(x,y,1.6*k,1.1*k,a+i*0.7,1+i%4,1,0,0,0.3,1);
+    if(kind==='lbrick')fb.box(x,y,1.3*k,1.0*k,a,13,1,0,0,0.3,1);
+    if(kind==='button')c(x,y,1.3*k,x,y,1.3*k,5+i%3);
+    if(kind==='splat'){const m=8+i%3,dx=(hash(i,3)-0.5)*3.4*k,dy=(hash(i,5)-0.5)*3.4*k;c(x,y,1.1*k,x,y,1.1*k,m);c(x+dx,y+dy,0.55*k,x+dx,y+dy,0.55*k,m);c(x-dy*0.6,y+dx*0.6,0.4*k,x-dy*0.6,y+dx*0.6,0.4*k,m);}
+    if(kind==='hibiscus'){for(let j=0;j<5;j++){const t=i+j/5*TAU,px=x+Math.cos(t)*1.0*k,py=y+Math.sin(t)*1.0*k;c(px,py,0.7*k,px,py,0.7*k,11);}c(x,y,0.45*k,x,y,0.45*k,12);}
+    composite(fb,GOLEM_ITEM,{sAmt:0.5,sdx:1,sdy:1});});
+  const X=Math.round(x),Y=Math.round(y);
+  if(kind==='brick'||kind==='lbrick')pset(fb,X-1,Y-1,hex('#ffffff'));// the stud catching the light
+  if(kind==='button'){pset(fb,X-1,Y,hex('#3a1a2a'));pset(fb,X+1,Y,hex('#3a1a2a'));}}// thread holes
 const GSK={am:ramp('#2a1040','#5a2a8a','#9a5ad8','#d8a8ff'),amS:ramp('#1a1420','#2e2636','#4a3a50','#6a5a70'),
   br:ramp('#3a2008','#7a4e1a','#c89a3a','#f0d880'),cu:ramp('#3a1408','#7a3a1a','#b8643a','#e8a070'),fe:ramp('#141418','#26262c','#40404a','#6a6a76'),ag:ramp('#4a4a50','#8a8a94','#c8c8d0','#ffffff'),tin:ramp('#7a6a1a','#c8b030','#f0dc5a','#fff8b0')};
 class Golem extends Pet{
@@ -5696,25 +5713,26 @@ class Golem extends Pet{
     fb.box(h0,h1,2.6,2.8,ha,M.CLAW2,4,0,0,0.3,1.1);this.hf={x:h0,y:h1,c:Math.cos(ha),s:Math.sin(ha)};this._head=[h0,h1,ha];
     if(this.sw&&this.sw.fx==='geode')this.drawCrystals(fb0);
   }
-  drawExtras(fb){if(this.sw&&this.sw.fx==='clock')return this.clockExtras(fb);const P=PAL.golem,W=fb.w,g=this.glowPx,sc=this.sc;g.length=0;
+  drawExtras(fb){if(this.sw&&this.sw.fx==='clock')return this.clockExtras(fb);const P=PAL.golem,W=fb.w,g=this.glowPx,sc=this.sc,S=this.sw||{},bare=S.bare;g.length=0;
     const onMe=(x,y)=>{const i=Math.floor(y)*W+Math.floor(x);return i>=0&&i<fb.mat.length&&fb.mat[i];};
     // square glowing eyes on the front face, under the brow (dim slits when asleep)
     if(this._head&&this.flinch<0.5){const[hx,hy,ha]=this._head,c=Math.cos(ha),s=Math.sin(ha),asleep=this.state==='sleeping'||this.eyesClosed,shut=asleep||this.blink>0;
       for(const sd of[-1,1]){const ex=hx+c*3.0*sc-s*sd*1.3*sc,ey=hy+s*3.0*sc+c*sd*1.3*sc,E=hex(asleep?'#2a5a34':P.eye),C=hex(P.eyeC);
-        pset(fb,ex,ey,E);if(!shut){pset(fb,ex-s*sd*0.9,ey+c*sd*0.9,E);pset(fb,ex+c*0.8,ey+s*0.8,C);}if(!asleep)g.push([ex,ey,1]);}}
+        pset(fb,ex,ey,E);if(!shut){pset(fb,ex-s*sd*0.9,ey+c*sd*0.9,E);pset(fb,ex+c*0.8,ey+s*0.8,C);}if(!asleep&&!(bare&&S.eyeGlow===0))g.push([ex,ey,1,bare?S.eyeGlow:null]);}}
     const sprout=(u,v,kind)=>{const F=this.frame,x=F.x+(F.c*u-F.s*v)*sc,y=F.y+(F.s*u+F.c*v)*sc;if(!onMe(x,y))return;
       if(kind==='mush'){pset(fb,x,y+1,hex('#e8dcc0'));pset(fb,x-1,y,hex('#8a5a30'));pset(fb,x,y,hex('#b07a44'));pset(fb,x+1,y,hex('#8a5a30'));pset(fb,x,y-1,hex('#d8a868'));}
       else{const c=kind==='f1'?['#f6a6c6','#d0608a']:kind==='f2'?['#fff0a0','#e0b030']:['#b8a6ff','#7a60d0'];
         pset(fb,x-1,y,hex(c[0]));pset(fb,x+1,y,hex(c[0]));pset(fb,x,y-1,hex(c[0]));pset(fb,x,y+1,hex(c[1]));pset(fb,x,y,hex('#ffe070'));}};
     if(this.sw&&this.sw.fx==='geode')this.geodeGlints(fb);
-    const bare=this.sw&&this.sw.bare;if(bare)return;// themed skins: no moss garden, no glowing runes
+    if(bare)return this.skinDeco(fb,g,onMe);// themed skins: their own trinkets in place of the moss garden, their own shoulder lights in place of the runes
     sprout(-2.6,2.6,'mush');sprout(-1.8,-3.0,'mush');sprout(0.6,1.6,'f1');
     const bl=this.bloom;if(bl>0.15)sprout(-0.8,-1.0,'f2');if(bl>0.3)sprout(-3.0,-0.6,'f3');if(bl>0.45)sprout(1.6,-2.4,'f1');if(bl>0.6)sprout(-2.0,1.0,'f2');if(bl>0.75)sprout(1.8,3.4,'f3');if(bl>0.9)sprout(-3.2,3.6,'f1');
     // rune lines carved into the shoulder blocks (glow at night)
     for(const sd of[-1,1]){const F=this.frame;for(const[u,v]of[[1.4,6.0],[0.6,6.0],[-0.2,6.0],[0.6,5.2],[0.6,6.8]]){const x=F.x+(F.c*u-F.s*sd*v)*sc,y=F.y+(F.s*u+F.c*sd*v)*sc;if(onMe(x,y))g.push([x,y,0.55]);}}
   }
-  glow(fb,night){if(this.sw&&this.sw.fx==='clock')return this.clockGlow(fb,night);const k=Math.max(0.3,night);for(const[x,y,s]of this.glowPx){const b=k*s*(0.7+0.3*Math.sin(this.t*1.8+x));padd(fb,x,y,60*b,200*b,90*b);
-    if(s>0.9&&night>0.3)for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])padd(fb,x+dx,y+dy,20*b*night,70*b*night,30*b*night);}}
+  glow(fb,night){if(this.sw&&this.sw.fx==='clock')return this.clockGlow(fb,night);const k=Math.max(0.3,night);for(const[x,y,s,C]of this.glowPx){const b=k*s*(0.7+0.3*Math.sin(this.t*1.8+x)),c=C||[60,200,90],h=C?[c[0]/3,c[1]/3,c[2]/3]:[20,70,30];padd(fb,x,y,c[0]*b,c[1]*b,c[2]*b);
+    if(s>0.9&&night>0.3)for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])padd(fb,x+dx,y+dy,h[0]*b*night,h[1]*b*night,h[2]*b*night);}
+    if(night>0.3)for(const[x,y,s,C]of this.glowPx){if(!C||s<1)continue;for(let yy=-3;yy<=3;yy++)for(let xx=-3;xx<=3;xx++){const d=Math.hypot(xx,yy)/3.5;if(d<1&&d>0.3){const f=(1-d)*(1-d)*night*0.5;padd(fb,x+xx,y+yy,C[0]*f,C[1]*f,C[2]*f);}}}}
   // ---- skins
   skinGolem(dt){const S=swatchOf(this)||{};this.fxNow=S.fx||null;if(S.fx!=='clock'){this.windK=1;return;}
     const run=this.state!=='sleeping',w0=this.wind??1;// it winds down as it walks; petting winds it back up
@@ -5725,6 +5743,14 @@ class Golem extends Pet{
     this.tickT=(this.tickT||0)-dt;if(this.tickT<=0&&run&&this.speed<0.5){this.tickT=0.6/Math.max(0.4,this.windK);this.tock=!this.tock;SFX.play(this.tock?'clockTock':'clockTick');}
     this.puffT=(this.puffT||0)-dt;if(this.puffT<=0&&run){this.puffT=this.speed>1?0.5:rand(1.2,2.4);const F=this.frame,sd=Math.random()<0.5?-1:1,x=F.x+(F.c*-0.2-F.s*sd*3.2)*this.sc,y=F.y+(F.s*-0.2+F.c*sd*3.2)*this.sc;
       spawn(this.world,'steam',x,y-2,{vx:rand(-4,4),vy:rand(-12,-6),life:rand(.6,1),ph:0});if(this.speed<=1&&Math.random()<0.4)SFX.play('steamPuff');}}
+  skinDeco(fb,g,onMe){const S=this.sw,F=this.frame,sc=this.sc,P=(u,v)=>[F.x+(F.c*u-F.s*v)*sc,F.y+(F.s*u+F.c*v)*sc],bl=this.bloom;
+    if(S.deco){const spots=[[-2.4,2.6],[0.8,-2.4],[1.6,2.4,0.25],[-2.6,-2.0,0.5],[-0.6,0.2,0.75]];// more of them as it's petted, like the moss blooms
+      spots.forEach(([u,v,need=0],i)=>{if(bl<need)return;const[x,y]=P(u,v);if(onMe(x,y))golemItem(fb,S.deco,x,y,{i,a:this.ang,s:sc});});}
+    if(!S.rune)return;const RC={lbrick:[230,150,40],star:[140,220,110],neon:[240,60,170],ember:[240,120,30]}[S.rune],col=hex({lbrick:'#ffc860',star:'#e0ffc0',neon:'#ff6ad0',ember:'#ffb050'}[S.rune]);
+    for(const sd of[-1,1]){const[cx,cy]=P(0.6,sd*6.0);if(!onMe(cx,cy))continue;
+      if(S.rune==='lbrick'){golemItem(fb,'lbrick',cx,cy,{a:this.ang,s:sc});g.push([cx,cy,1,RC]);g.push([cx+1,cy,1,RC]);continue;}// a light-up brick
+      const pts=S.rune==='star'?[[0,0],[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[1,1]]:S.rune==='neon'?[[-2,0],[-1,-1],[0,0],[1,-1],[2,0]]:[[0,0],[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1]];// glow-in-the-dark embroidered star, a neon tag, a carved ember spiral
+      for(const[a,b]of pts){const x=Math.round(cx)+a,y=Math.round(cy)+b;if(!onMe(x,y))continue;pset(fb,x,y,col);g.push([x,y,a===0&&b===0?1:0.7,RC]);}}}
   geodeColor(m,q,u,v,x,y){const AM=GSK.am;// a golem grown out of amethyst: small sharp facets that flash as they turn to the light, crusty stone feet and fists
     if(m===M.CORAL){const c=[AM[1],AM[2],AM[3],hex('#fdf4ff')][q];return hash(x*5,y*3)>0.8?AM[Math.max(0,q-1)]:c;}// crystal points: hard light and dark sides
     if(m===M.CLAW&&hash(x*3,y*5)>0.25)return GSK.amS[q];
