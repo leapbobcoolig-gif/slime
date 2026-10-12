@@ -804,7 +804,7 @@ const SFX=(()=>{
   function init(){
     if(ac){if(ac.state==='suspended')ac.resume();return;}
     const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
-    try{ac=new C({latencyHint:'playback'});}catch(e){try{ac=new C();}catch(e2){ac=null;return;}}
+    try{ac=new C({latencyHint:'balanced'});}catch(e){try{ac=new C();}catch(e2){ac=null;return;}}
     const comp=ac.createDynamicsCompressor();comp.threshold.value=-18;comp.ratio.value=3;
     master=ac.createGain();master.gain.value=vol*0.6;master.connect(comp);comp.connect(ac.destination);
     musicBus=ac.createGain();musicBus.gain.value=musicOn?MUSIC_LVL*mvol:0;musicBus.connect(master);
