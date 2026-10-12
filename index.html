@@ -2344,7 +2344,40 @@ const SWATCHES={
   {id:'crimson',name:'Deep-sea red',price:40,dot:['#c82a2a','#f0a0a0'],outline:'#1a0404',pal:{kraken:{body:ramp('#3a0808','#6e1414','#a82424','#e05a4a'),belly:ramp('#6a2a2a','#a04a46','#d07a70','#f4b4a8'),spot:ramp('#4a0a0a','#7a1616','#a82020','#d04a40')}}},
   {id:'abyss',name:'Abyss blue',price:40,dot:['#2a5aa8','#8ad0f0'],outline:'#040c1a',pal:{kraken:{body:ramp('#0a1a3a','#163464','#2a5aa8','#5a90d8'),belly:ramp('#2a4a6a','#4a7aa0','#7ab0d0','#b4e0f4'),spot:ramp('#0a2a5a','#14468a','#2a6ac0','#5aa0f0'),flush:ramp('#0a4a5a','#1a8a9a','#38c8d0','#9af0f0')}}},
   {id:'coral',name:'Coral',price:40,dot:['#f07a3a','#ffd0a0'],pal:{kraken:{body:ramp('#5a2008','#9a4214','#d8702a','#f8a860'),belly:ramp('#8a5a3a','#c08a5e','#ecb88a','#fde2c4'),spot:ramp('#7a2a0a','#b84a14','#e87a30','#ffb070')}}},
-  {id:'ghost',name:'Ghost',price:60,dot:['#e8dce8','#b8a0c0'],outline:'#2a1e2e',pal:{kraken:{body:ramp('#7a6a80','#aa98b0','#d8c8dc','#f8f0fa'),belly:ramp('#9a8aa0','#c8b8cc','#ece0ee','#ffffff'),spot:ramp('#8a6a92','#b090b8','#d4b8dc','#f0e0f4'),eye:ramp('#2a1a3a','#4a2e66','#7a50a0','#b48ad8')}}}],
+  {id:'ghost',name:'Ghost',price:60,dot:['#e8dce8','#b8a0c0'],outline:'#2a1e2e',pal:{kraken:{body:ramp('#7a6a80','#aa98b0','#d8c8dc','#f8f0fa'),belly:ramp('#9a8aa0','#c8b8cc','#ece0ee','#ffffff'),spot:ramp('#8a6a92','#b090b8','#d4b8dc','#f0e0f4'),eye:ramp('#2a1a3a','#4a2e66','#7a50a0','#b48ad8')}}},
+  // vivid, special and mythic paint the kraken themselves: body(u along it, v across), limb(s segment 0 root..7 tip, l across)
+  {id:'sailor',name:'Sailor',tier:'vivid',dot:['#1a2a6a','#f4f4f0'],outline:'#060a1c',
+    pal:{kraken:{sucker:hex('#ffffff'),eye:ramp('#3a2a08','#8a6a1a','#d8b040','#fff0a0')}},
+    N:ramp('#0a1238','#14205a','#22347e','#3a50a0'),Wt:ramp('#b8bcc8','#dcdee6','#f4f4f0','#ffffff'),Rd:ramp('#7a0a10','#b8141e','#e83a3a','#ff8a80'),
+    body(u,v,q){return(Math.floor((u+0.4)/1.25)&1?this.Wt:this.N)[q];},// breton stripes round the mantle
+    limb(s,l,q){return(Math.floor(s*0.9)&1?this.Rd:this.Wt)[Math.max(0,q-1)];}},// life-buoy bands down every arm
+  {id:'taffy',name:'Saltwater taffy',tier:'vivid',dot:['#ffa8d0','#9af0d0'],outline:'#3a1030',
+    pal:{kraken:{sucker:hex('#ffffff')}},
+    C:[ramp('#d05890','#f080b0','#ffa8d0','#ffd8ea'),ramp('#40b090','#68d8b0','#9af0d0','#d8fff0'),ramp('#c8c0c8','#e8e0e8','#fff8fc','#ffffff')],
+    body(u,v,q){const k=Math.floor((u*0.8+v*0.9+20)/1.1)%3;return this.C[k][q];},// pulled-candy stripes swirling across the mantle
+    limb(s,l,q){const k=((Math.floor(s*1.1+l*1.3)%3)+3)%3;return this.C[k][Math.max(0,q-1)];}},// candy-cane twist down each arm
+  {id:'treasure',name:'Sunken treasure',tier:'vivid',dot:['#f0c030','#d02040'],outline:'#2a1a04',
+    pal:{kraken:{sucker:hex('#fff6e8'),eye:ramp('#3a0408','#8a0a18','#e02a40','#ff9aa8')}},
+    G:ramp('#7a5208','#b8860e','#f0c030','#fff0a0'),J:[ramp('#5a0010','#a00a24','#e8204a','#ff9ab0'),ramp('#061a5a','#0c3aa8','#2a7aff','#a8d0ff'),ramp('#04401c','#0a7a34','#18c060','#a0ffc8')],
+    body(u,v,q){const cu=Math.floor(u/1.6),cv=Math.floor((v+5)/1.6),h=hash(cu*7+3,cv*11+1);// gold, set with cut gems
+      if(h>0.4){const fu=u/1.6-cu-0.5,fv=(v+5)/1.6-cv-0.5;if(Math.abs(fu)+Math.abs(fv)<0.42)return this.J[Math.floor(h*97)%3][Math.min(3,q+((fu+fv)<-0.1?1:0))];}
+      return this.G[q];},
+    limb(s,l,q){return this.G[Math.max(0,q-1)];}},
+  {id:'sketch',name:'Ink sketch',tier:'vivid',dot:['#f4ecd8','#1a1410'],outline:'#0a0806',
+    pal:{kraken:{sucker:hex('#1a1410'),eye:ramp('#f4ecd8','#f4ecd8','#f8f2e2','#ffffff')}},
+    P:ramp('#d8ccb0','#e8dcc0','#f4ecd8','#fffaf0'),K:ramp('#0a0806','#1a1410','#2a2218','#3a3024'),
+    body(u,v,q,x,y){if(q<=1&&((x+y)&3)===0)return this.K[1];if(q===0&&((x-y)&3)===0)return this.K[1];return this.P[q];},// cross-hatched in the shadows, like a pen drawing
+    limb(s,l,q,x,y){if(Math.abs(s-Math.round(s))<0.12&&s>0.5)return this.K[1];if(q<=0&&((x+y)&3)===0)return this.K[1];return this.P[Math.max(1,q)];}},
+  {id:'firefly',name:'Firefly squid',tier:'special',fx:'firefly',dot:['#0a1640','#5ad8ff'],outline:'#02040e',
+    pal:{kraken:{sucker:hex('#2a5aa8'),eye:ramp('#0a1a3a','#1a3a7a','#3a7ad8','#a8e0ff')}},
+    B:ramp('#0a1640','#16286a','#243e94','#3a5ab8'),Ph:ramp('#1a5ac8','#3a8aff','#5ad8ff','#d8f8ff'),
+    body(u,v,q,x,y,f){const cu=Math.floor(u*1.25),cv=Math.floor((v+5)*1.25),h=hash(cu*5+2,cv*9+4);if(h>0.8)return this.Ph[Math.min(3,1+q)];return this.B[q];},
+    limb(s,l,q){if(s>6.2)return this.Ph[2];return(hash(Math.floor(s*1.5),Math.round(l*2)+7)>0.85?this.Ph[1]:this.B[Math.max(0,q-1)]);}},
+  {id:'eldritch',name:'Eldritch',tier:'mythic',fx:'eldritch',arms:12,sc:1.45,segK:1.4,dot:['#0e0c14','#ffa020'],outline:'#000000',
+    pal:{kraken:{sucker:hex('#3a2a4a'),eye:ramp('#e08a10','#ffa020','#ffc850','#fff0b0')}},
+    B:ramp('#040406','#0a0a10','#14141e','#20202e'),Rim:ramp('#0a0a10','#14141e','#1e1c2a','#2c2840'),
+    body(u,v,q){return(q>=3?this.Rim:this.B)[q];},// void black, just a faint cold sheen where the light catches it
+    limb(s,l,q){return this.B[Math.max(0,q-1)];}}],
  wisp:[
   {id:'ember',name:'Ember',price:40,dot:['#ff7a2a','#ffd060'],pal:{wisp:{a:ramp('#6a1a0a','#c83a12','#ff7a2a','#ffd0a0','#ffffff'),b:ramp('#7a3a06','#d0700e','#ffc040','#fff0b0','#ffffff')}}},
   {id:'spirit',name:'Spirit green',price:40,dot:['#5af07a','#c0ff5a'],pal:{wisp:{a:ramp('#0a4a1a','#18a03a','#5af07a','#c8ffd4','#ffffff'),b:ramp('#3a5a0a','#78b018','#c0ff5a','#f0ffc8','#ffffff')}}},
@@ -3717,6 +3750,15 @@ class Scorpion extends Spider{
 // =====================================================================
 function waterSnap(w,x,y,minD=0.25){if(waterAt(w,x,y)>=minD)return[x,y];const B=w.bounds;
   for(let r=3;r<200;r+=3)for(let k=0;k<32;k++){const a=k/32*TAU,nx=clamp(x+Math.cos(a)*r,B.x0,B.x1),ny=clamp(y+Math.sin(a)*r,B.y0,B.y1);if(waterAt(w,nx,ny)>=minD)return[nx,ny];}return[x,y];}
+// the eldritch kraken's eyes, painted crisp: dark socket, amber iris lit from above, a slit pupil that looks toward (lx,ly), a glint. o = how open (0..1+)
+function eldritchEye(fb,x,y,r,o,lx,ly){const So=hex('#2a0e04'),Ir=hex('#ffa020'),Ih=hex('#ffd060'),K=hex('#060306'),Wt=hex('#fff6d8');
+  if(o<0.15){for(let k=-r;k<=r;k+=0.5)pset(fb,Math.round(x+k),Math.round(y),So);return;}
+  const R2=Math.ceil(r+1),ry=r*o;for(let yy=-R2;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++)if(Math.hypot(xx/(r+0.9),yy/(ry+0.9))<=1)pset(fb,x+xx,y+yy,So);
+  for(let yy=-R2;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++)if(Math.hypot(xx/r,yy/Math.max(0.5,ry))<=1)pset(fb,x+xx,y+yy,yy<-ry*0.3?Ih:Ir);
+  let ax=0,ay=0;const dd=Math.hypot(lx-x,ly-y);if(dd>0.5){ax=(lx-x)/dd*r*0.4;ay=(ly-y)/dd*ry*0.3;}
+  for(let k=-ry*0.85;k<=ry*0.85;k+=0.5)pset(fb,Math.round(x+ax),Math.round(y+ay+k),K);if(r>=1.6)pset(fb,Math.round(x+ax+1),Math.round(y+ay),K);
+  if(r>=1.4&&o>0.6)pset(fb,Math.round(x-r*0.5),Math.round(y-ry*0.5),Wt);}
+const ELDRITCH_EYES=[[3.9,0,2.9],[0.35,-3.0,1.5],[0.35,3.0,1.5]];// on the mantle: one huge eye and the two small ones by the arms
 class Kraken extends Pet{
   constructor(world,x,y){
     super();this.initCommon(world,'kraken');
@@ -3773,7 +3815,7 @@ class Kraken extends Pet{
     const tx=this.x+Math.cos(a)*50,ty=this.y+Math.sin(a)*50;[this.tx,this.ty]=w.tank==='aqua'?waterSnap(w,tx,ty,0.3):[tx,ty];
     this.ang=a;this.vx+=Math.cos(a)*40;this.vy+=Math.sin(a)*40;this.pulse=1;this.jetT=0.35;this.flush=1;this.state='flee';this.timer=2.2;}
   petMe(){const r=super.petMe();if(r){this.poke=0.9;}return r;}
-  update(dt){
+  update(dt){this.skinShape(dt);
     const w=this.world;this.t+=dt;this.blinkT-=dt;if(this.blinkT<0){this.blink=0.14;this.blinkT=rand(3,7);}if(this.blink>0)this.blink-=dt;
     this.pulse=Math.max(0,this.pulse-dt*2.6);this.reel=Math.max(0,this.reel-dt);this.poke=Math.max(0,(this.poke||0)-dt);
     const hot=this.state==='flee'||this.state==='strike'||(this.state==='hunt'&&this.hp&&this.hp.rush)?1:0;this.flush+=(hot-this.flush)*Math.min(1,dt*(hot?6:0.8));
@@ -3806,9 +3848,9 @@ class Kraken extends Pet{
   updateTent(dt,dangle){
     const sc=this.sc,land=!dangle&&this.onLand(),jet=land?0:clamp(this.speed/24,0,1),K=lerp(1.32,0.3,jet),P=game.pointer;
     const touch=this.state==='visiting'&&this.vd?this.vd:null,touchI=touch?this.pokeI(touch):-1;
-    for(let i=0;i<8;i++){const T=this.tent[i],N=T.nodes;
+    for(let i=0;i<this.tent.length;i++){const T=this.tent[i],N=T.nodes;
       const[rx,ry]=this.W(-0.9+Math.cos(Math.PI+T.off*0.72)*2.3,Math.sin(Math.PI+T.off*0.72)*2.3);N[0].x=rx;N[0].y=ry;
-      let base=dangle?Math.PI/2+T.off*0.3+Math.sin(this.t*3+i)*0.25:this.ang+Math.PI+T.off*K,seg=1.75*sc,stiff=5,target=null;
+      let base=dangle?Math.PI/2+T.off*0.3+Math.sin(this.t*3+i)*0.25:this.ang+Math.PI+T.off*K,seg=1.75*sc*(this.sw&&this.sw.segK||1),stiff=5,target=null;
       if(this.tg&&this.tg.ti===i){const p=this.tg.p;target=[p.x,p.y-p.h];}
       else if(this.reel>0&&this.reelTi===i){const m=this.mouthScreen(),k=this.reel/0.55;target=[lerp(m.x,N[7].x,k*0.6),lerp(m.y,N[7].y,k*0.6)];}
       else if(this.poke>0&&!this.preview&&P.inside){const d=Math.hypot(P.x-rx,P.y-ry);if(d<22&&i===this.pokeI(P))target=[P.x,P.y];}
@@ -3834,7 +3876,8 @@ class Kraken extends Pet{
   dragTo(x,y){this.grabX=x;this.grabY=y;}
   release(){if(this.state!=='grabbed')return;this.state='fall';this.vh=0;}
   grabStep(dt){this.gt+=dt;this.h+=(12-this.h)*Math.min(1,dt*10);this.x=this.grabX;this.y=this.grabY+this.h;this.ang+=wrapA(-Math.PI/2-this.ang)*Math.min(1,dt*4);this.flush=Math.max(this.flush,0.6);}
-  color(m,q,s,l,x,y){const P=PAL.kraken,F=this.frame;
+  color(m,q,s,l,x,y){const P=PAL.kraken,F=this.frame,V=this.sw&&this.sw.body?this.sw:null;
+    if(V){if(m===M.BODY||m===M.CLAW2){const dx=x+.5-F.x,dy=y+.5-F.y;return V.body((dx*F.c+dy*F.s)/this.sc,(-dx*F.s+dy*F.c)/this.sc,q,x,y,this);}if(m===M.LIMB)return V.limb(s,l,q,x,y,this);}// patterned skins
     switch(m){
       case M.BODY:case M.CLAW2:{const dx=x+.5-F.x,dy=y+.5-F.y,u=(dx*F.c+dy*F.s)/this.sc,v=(-dx*F.s+dy*F.c)/this.sc;
         const sp=vnoise(u*0.9+13,v*0.9+7),thr=0.68-this.flush*0.14;
@@ -3846,7 +3889,7 @@ class Kraken extends Pet{
       case M.PUPIL:return INK;
       case M.LID:return P.body[q];
     }return INK;}
-  draw(fb0){
+  draw(fb0){if(this.sw&&this.sw.fx==='eldritch')return this.drawEldritch(fb0);
     const sc=this.sc,fb={cap:(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r)};
     for(const T of this.tent){const N=T.nodes;for(let k=0;k<7;k++){const r0=1.25-k*0.13,r1=1.25-(k+1)*0.13;fb.cap(N[k].x,N[k].y,r0,N[k+1].x,N[k+1].y,r1,M.LIMB,1,k,k+1);}}
     // arm crown where the tentacles meet
@@ -3871,8 +3914,51 @@ class Kraken extends Pet{
     // bioluminescent spots for the night glow
     const g=this.glowPx;g.length=0;for(const[u,v]of[[3.0,1.8],[4.4,-1.4],[2.2,-2.3],[5.2,0.6],[3.8,0.1],[2.6,2.6]]){const[x,y]=this.W(u,v);g.push([x,y,1]);}
     for(const T of this.tent){const n=T.nodes[7];g.push([n.x,n.y,0.7]);}
+    const fx=this.sw&&this.sw.fx;if(fx){const gp=this.gp||(this.gp=[]);gp.length=0;for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++)if(fb.mat[y*W+x])gp.push(y*W+x);}// body pixels, for skin light
+    if(fx==='eldritch'){const[lx,ly]=this.eyeTarget(),E=this.ey||[];
+      ELDRITCH_EYES.forEach(([u,v,r],i)=>{const[x,y]=this.W(u,v);eldritchEye(fb,Math.round(x),Math.round(y),r*this.sc*0.8,(E[i]||{o:1}).o,lx,ly);});
+      this.tent.forEach((T,i)=>{if(i%2)return;const n=T.nodes[7];eldritchEye(fb,Math.round(n.x),Math.round(n.y),1.25,(E[3+(i>>1)]||{o:1}).o,lx,ly);});// an eye on the tip of every other arm
+      for(const p of this.ph||[])eldritchEye(fb,Math.round(p.x),Math.round(p.y),p.r,this.phOpen(p),lx,ly);}
   }
-  glow(fb,night){if(night<0.25)return;const k=(night-0.25)/0.75;
+  get selfLit(){return!!(this.sw&&this.sw.fx);}// firefly and eldritch light up in the menu previews too
+  // skins that change its shape: size, arm count and length; and the eldritch one's eyes
+  skinShape(dt){const sw=this.sw;this.sc=sw&&sw.sc||1.2;const n=sw&&sw.arms||8;
+    if(this.tent.length!==n){const x=this.x,y=this.y,sp=n>8?2.5:1.9;this.tent=[];for(let i=0;i<n;i++){const off=-sp+i*(2*sp/(n-1)),nodes=[];for(let k=0;k<8;k++)nodes.push({x:x-Math.cos(this.ang+off)*k*1.8,y:y-Math.sin(this.ang+off)*k*1.8});this.tent.push({off,curl:(i%2?1:-1)*rand(0.9,1.5),nodes});}this.tg=null;this.reel=0;}
+    if(!(sw&&sw.fx==='eldritch'))return;
+    // its eyes blink on their own, and all snap open and stare when it's startled, grabbed or poked
+    const E=this.ey||(this.ey=Array.from({length:3+(n>>1)},()=>({o:1,T:rand(1,6),b:0}))),alarm=this.state==='flee'||this.state==='grabbed'||this.poke>0;
+    for(const e of E){e.T-=dt;if(e.T<=0&&!alarm){e.T=rand(2,7);e.b=0.28;}e.b=Math.max(0,e.b-dt);const tgt=this.eyesClosed||e.b>0?0:1;e.o+=(tgt-e.o)*Math.min(1,dt*(tgt?8:20));if(alarm)e.o=Math.min(1.25,e.o+dt*6);}
+    // phantom eyes open in the water around it, glance at you, blink and fade
+    const ph=this.ph||(this.ph=[]);this.phT=(this.phT??2)-dt;if(this.phT<=0&&ph.length<3&&!this.preview){this.phT=rand(2.5,6);const a=rand(TAU),d=rand(18,30);ph.push({x:this.x+Math.cos(a)*d,y:this.y+Math.sin(a)*d*0.8,t:0,life:rand(2.4,3.6),r:rand(1.4,2.2)});}
+    for(const p of ph)p.t+=dt;this.ph=ph.filter(p=>p.t<p.life);}
+  phOpen(p){const f=p.t/p.life;return f<0.25?f/0.25:f>0.8?(1-f)/0.2:Math.abs(f-0.55)<0.04?0:1;}
+  eyeTarget(){const P=game.pointer;if(P.inside&&!this.preview)return[P.x,P.y];const q=this.prey;if(q&&q.x!=null)return[q.x,q.y-(q.h||0)];const a=this.ang+Math.sin(this.t*0.6)*0.8;return[this.x+Math.cos(a)*40,this.y+Math.sin(a)*40];}
+  // eldritch: long, whip-thin arms, a big ragged hood of a mantle; its eyes are painted on in drawExtras
+  drawEldritch(fb0){const sc=this.sc,cap=(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r);
+    for(const T of this.tent){const N=T.nodes;for(let k=0;k<7;k++)cap(N[k].x,N[k].y,Math.max(0.35,1.05-k*0.11),N[k+1].x,N[k+1].y,Math.max(0.3,1.05-(k+1)*0.11),M.LIMB,1,k,k+1);}
+    {const[a0,a1]=this.W(-0.9,0);cap(a0,a1,3.1,a0,a1,3.1,M.CLAW2,2,0,0,0.2);}
+    const pz=this.pulse,br=1+Math.sin(this.t*2.2)*0.04,[m0,m1]=this.W(1.9,0),[m2,m3]=this.W(4.4+pz*1.6,0);
+    this.frame={x:this.W(2.4,0)[0],y:this.W(2.4,0)[1],c:Math.cos(this.ang),s:Math.sin(this.ang)};
+    cap(m0,m1,4.6*(1-pz*0.2)*br,m2,m3,3.6*(1-pz*0.24)*br,M.BODY,2,0,0,0.6);
+    for(let i=0;i<5;i++){const v=-3.2+i*1.6,[x0,y0]=this.W(5.6-Math.abs(v)*0.35,v*0.85),[x1,y1]=this.W(7.4-Math.abs(v)*0.5+Math.sin(this.t*3+i)*0.3,v*1.05);cap(x0,y0,1.0,x1,y1,0.3,M.BODY,2,0,0,0.5);}// ragged, pointed flaps
+    for(const sd of[-1,1]){const[b0,b1]=this.W(0.5,sd*2.7);cap(b0,b1,1.95,b0,b1,1.95,M.BODY,2,0,0,0.9);}}
+  glow(fb,night){const fx=this.sw&&this.sw.fx,W=fb.w,t=this.t;
+    if(fx==='firefly'){const k=0.12+night*0.88;// a deep-blue glow; photophores twinkling at random, arm tips burning like little lanterns
+      bodyLight(fb,this,this.gp||[],{k:k*0.55,hi:hex('#3a9aff'),lo:hex('#0a3a9a')});
+      for(const i of this.gp||[]){const c=fb.px[i];if((c>>16&255)<170)continue;const x=i%W,y=(i/W)|0,tw=0.5+0.5*Math.sin(t*(1.2+hash(x,y)*2.5)+hash(y,x)*40);if(tw>0.35)padd(fb,x,y,60*tw*k,160*tw*k,255*tw*k);}
+      for(const T of this.tent){const n=T.nodes[7];for(let yy=-2;yy<=2;yy++)for(let xx=-2;xx<=2;xx++){const d=Math.hypot(xx,yy)/2.5;if(d<1)padd(fb,n.x+xx,n.y+yy,70*k*(1-d),190*k*(1-d),255*k*(1-d));}}
+      return;}
+    if(fx==='eldritch'){// it doesn't light the tank, it darkens it; only its eyes give off light
+      const body=new Set(this.gp||[]),cx=this.x+Math.cos(this.ang)*2*this.sc,cy=this.y-this.h,rx=38,ry=29;
+      for(let yy=-ry;yy<=ry;yy++)for(let xx=-rx;xx<=rx;xx++){const X=Math.round(cx+xx),Y=Math.round(cy+yy);if(X<0||Y<0||X>=W||Y>=fb.h)continue;const i=Y*W+X;if(body.has(i))continue;
+        const d=Math.hypot(xx/rx,yy/ry);if(d>=1)continue;const f=Math.pow(1-d,1.4)*(0.75+0.5*vnoise(X*0.12+t*0.35,Y*0.12-t*0.25))*0.55,c=fb.px[i],m=1-Math.min(0.7,f);
+        fb.px[i]=rgb((c&255)*m,((c>>8)&255)*m,Math.min(255,((c>>16)&255)*m+6*f));}
+      const E=this.ey||[];{const[ex,ey]=this.W(3.9,0),kk=(0.15+night*0.6)*Math.min(1,(E[0]||{o:1}).o);for(const i of this.gp||[]){const d=Math.hypot(i%W-ex,((i/W)|0)-ey)/11;if(d<1){const f=kk*(1-d)*(1-d);padd(fb,i%W,(i/W)|0,150*f,80*f,10*f);}}}// the big eye lights its own body
+      const k=0.25+night*0.75,glowAt=(x,y,r,a)=>{const R2=Math.ceil(r+3);for(let yy=-R2;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++){const d=Math.hypot(xx,yy)/(r+3);if(d<1){const f=a*k*(1-d)*(1-d);padd(fb,x+xx,y+yy,255*f,140*f,20*f);}}};
+      ELDRITCH_EYES.forEach(([u,v,r],i)=>{const[x,y]=this.W(u,v);glowAt(x,y,r*this.sc*0.8,0.8*Math.min(1,(E[i]||{o:1}).o));});
+      this.tent.forEach((T,i)=>{if(i%2)return;const n=T.nodes[7];glowAt(n.x,n.y,1.2,0.6*Math.min(1,(E[3+(i>>1)]||{o:1}).o));});
+      for(const p of this.ph||[])glowAt(p.x,p.y,p.r,0.6*this.phOpen(p));return;}
+    if(night<0.25)return;const k=(night-0.25)/0.75;
     g:for(const[x,y,s]of this.glowPx){const b=k*s*(0.6+0.4*Math.sin(this.t*2.3+x*0.7+y));padd(fb,x,y,40*b,190*b,220*b);
       for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])padd(fb,x+dx,y+dy,10*b,60*b,80*b);}}
   statusText(){if(this.onLand()&&this.state==='wander')return 'is exploring the land on its arms';switch(this.state){case 'wander':return 'is jetting around the pool';case 'idle':return 'is hovering and waving its tentacles';
