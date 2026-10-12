@@ -179,8 +179,6 @@ body.fun-tools #dock{padding:4px;background:#1a0f06;border-color:#060a07;box-sha
 .tcat i{font-style:normal;color:#ff7a9a;margin-left:4px}
 .ti.meh{opacity:.45}
 .seg{display:flex;gap:6px}
-#setPieces{margin:-4px 0 6px 12px;border-left:2px solid var(--line);padding-left:10px}
-#setPieces .srow{padding:6px 0;border:0}#setPieces label{font-size:15px}#setPieces small{font-size:12px}#setPieces .seg .btn{padding:4px 10px;font-size:13px}
 #setTabs{margin:2px 0 6px}.srow.mix{display:grid;grid-template-columns:1fr auto auto;column-gap:12px;row-gap:4px}.srow.mix label{grid-row:1;grid-column:1}.srow.mix .mixv{grid-row:1;grid-column:2}.srow.mix .sw{grid-row:1/3;grid-column:3;align-self:center}.srow.mix input[type=range]{grid-row:2;grid-column:1/3;width:100%;margin:0}.mixv{text-align:right;font-size:17px;color:var(--mute);font-variant-numeric:tabular-nums;align-self:end}.mixsp{display:none}.srow.mix.off input,.srow.mix.off .mixv,.srow.mix.off small{opacity:.4}.mixh{margin:12px 4px 0;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}.srow.master{border-bottom:0}.spanel>.srow:last-child{border-bottom:0}
 .seg.chips{flex-wrap:wrap;justify-content:flex-end;max-width:58%}.seg.chips .btn{padding:5px 10px;font-size:13px}
 #mSettings .spanel{min-height:min(300px,52vh)}#mSettings .srow.sfoot{margin-top:6px;border-top:2px dashed var(--line);border-bottom:0;padding-top:12px}.sfoot label{font-size:17px}.sfoot small{font-size:14px}
@@ -625,8 +623,6 @@ body.fun-hud .gtoast.out{transform:none;translate:-50% -10px;opacity:0}
   <div class="srow"><label>Cute faces<small>Eyes and smiles. Tap to switch each one.</small></label><div class="seg chips" id="setFaces"></div></div>
   </div>
   <div class="spanel" data-t="iface">
-  <div class="srow"><label>Interface style<small>Mix and match: Fun (beta) turns each piece into a hands-on toy.</small></label><div class="seg" id="setIface"><button class="btn alt" data-v="basic">All basic</button><button class="btn alt" data-v="fun">All fun</button></div></div>
-  <div id="setPieces"></div>
   <div class="srow"><label>Tuck food tray<small>The food tray tucks away while you carry or pick a food. Tap the little tab to bring it back.</small></label><button class="sw" id="setTrayTuck" aria-label="Tuck food tray"></button></div>
   </div>
   <div class="srow sfoot" id="resetRow"><label>Reset save<small>Coins, items and bonds start over.</small></label><button class="btn alt danger" id="resetBtn" style="flex:none">Reset</button></div>
@@ -9058,17 +9054,13 @@ const ui={
     const showTab=t=>{for(const b of $('setTabs').children)b.classList.toggle('on',b.dataset.t===t);for(const pn of document.querySelectorAll('#mSettings .spanel'))pn.hidden=pn.dataset.t!==t;};
     for(const b of $('setTabs').children)b.addEventListener('click',()=>{if(save.set.setTab===b.dataset.t)return;save.set.setTab=b.dataset.t;showTab(b.dataset.t);markDirty();SFX.play('tick');});
     showTab(save.set.setTab||'sound');
-    const sp=$('setPieces');for(const P of FUN_PIECES){const r=document.createElement('div');r.className='srow';r.innerHTML=`<label>${P.name}<small>${P.fun}</small></label><div class="seg" data-k="${P.id}"><button class="btn alt" data-v="0">Basic</button><button class="btn alt" data-v="1">Fun</button></div>`;
-      for(const b of r.querySelectorAll('button'))b.addEventListener('click',()=>{save.set.fun=save.set.fun||{};if(b.dataset.v==='1')save.set.fun[P.id]=1;else delete save.set.fun[P.id];markDirty();SFX.play('ui');this.applyIface();this.funHints();});sp.appendChild(r);}
     this.funHints=()=>{if(FUN('tools')&&!save.set.funHint){save.set.funHint=1;this.toast('Your hand does the petting now: rub to pet, hold to pick up, double-tap to knock on the glass. Tools hang on the pegboard.');}};
     for(const b of $('setGfx').children)b.addEventListener('click',()=>{save.set.gfx=b.dataset.v;markDirty();SFX.play('ui');applyGfx();});applyGfx();
     this.applyIface=()=>{if(save.set.iface==='fun'){save.set.fun=Object.fromEntries(FUN_PIECES.map(p=>[p.id,1]));}delete save.set.iface;if(save.set.fun){delete save.set.fun.room;if(save.set.fun.coins){delete save.set.fun.coins;if(save.set.fun.food&&save.set.fun.tools&&save.set.fun.needs)save.set.fun.hud=1;}}
       for(const P of FUN_PIECES)document.body.classList.toggle('fun-'+P.id,FUN(P.id));HUDSKIN.refresh();document.body.classList.toggle('fun',FUN_PIECES.some(p=>FUN(p.id)));
       if(FUN('tools')&&['pet','grab','tap'].includes(game.tool))setTool(null);canvas.style.cursor=game.tool||FUN('tools')?'none':'grab';
-      const all=FUN_PIECES.every(p=>FUN(p.id)),none=!FUN_PIECES.some(p=>FUN(p.id));for(const b of $('setIface').children)b.classList.toggle('on',b.dataset.v==='fun'?all:none);
-      for(const seg of sp.querySelectorAll('.seg'))for(const b of seg.children)b.classList.toggle('on',(b.dataset.v==='1')===FUN(seg.dataset.k));
       this.renderTray();fit();};
-    for(const b of $('setIface').children)b.addEventListener('click',()=>{save.set.fun=b.dataset.v==='fun'?Object.fromEntries(FUN_PIECES.map(p=>[p.id,1])):{};markDirty();SFX.play('ui');this.applyIface();this.funHints();});this.applyIface();
+    this.applyIface();this.funHints();
     sw('setSfx','sfx',v=>{SFX.setMuted(!v);ui.mixDim();});sw('setMusic','music',v=>{SFX.setMusic(v);ui.mixDim();});sw('setShake','shake');sw('setBubbles','bubbles');sw('setThoughts','thoughts');sw('setTrayTuck','trayTuck',v=>{if(!v)ui.tuckTray(null);});sw('setPixel','pixel',()=>fit());
     $('resetBtn').addEventListener('click',()=>{const b=$('resetBtn');if(this.resetArm&&performance.now()-this.resetArm<3000){game.resetting=true;try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem('mossjar.pet');}catch(e){}location.reload();}
       else{this.resetArm=performance.now();b.textContent='Tap again to reset';setTimeout(()=>{b.textContent='Reset';},3000);}});
@@ -9617,7 +9609,7 @@ function perfWatch(ms){if((save.set.gfx||'auto')!=='auto'||document.hidden||game
 function applyGfx(){const m=save.set.gfx||'auto',al=gfxAutoLow(),low=m==='low'||(m==='auto'&&al);document.body.classList.toggle('gfx-low',low);
   const g=$('setGfx');if(g)for(const b of g.children)b.classList.toggle('on',b.dataset.v===m);const n=$('gfxNote');if(n)n.textContent=`Low makes the food tanks and menu previews animate more lightly. Auto starts on High and switches to Low if the game runs slowly here (now: ${document.body.classList.contains('gfx-low')?'Low':'High'}).`;}
 const FUN_PIECES=[{id:'food',name:'Food',fun:'Supply tanks you pluck food from'},{id:'tools',name:'Tools',fun:'Your hand + a pegboard of real tools'},{id:'needs',name:'Needs',fun:'Gauges on the glass; grime shows a dirty tank'},{id:'hud',name:'Top bar',fun:'Wood & brass name plate, bouncy buttons, swinging signs'}];
-const FUN=k=>!!(save.set&&save.set.fun&&save.set.fun[k]);
+const FUN=k=>true;// the Fun interface is the only one now (the Basic option was removed)
 // cute faces can be switched on or off per critter (older saves had one switch for all of them)
 const FACE_PETS=[['slime','Slime'],['bun','Bun'],['mush','Mushroom'],['wisp','Wisp']];
 const faceOn=k=>{const F=save.set&&save.set.faces;return F&&k in F?!!F[k]:save.set.slimeFace!==false;};

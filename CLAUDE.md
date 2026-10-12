@@ -5,6 +5,8 @@ A single-file pixel pet game: everything lives in `index.html`. The player uses 
 ## General rules
 - Don't change existing music or visuals without asking first.
 - Menus must not change size.
+- The Fun interface is the only interface (the Basic option was removed).
+- A critter may have more than one Mythic skin when the user asks for it (the snake has two).
 - Every sprite and accessory is procedural: built from `fb.cap` / `fb.box` shapes and lit by `composite`. No hand-placed pixel sprites.
 - Glows should look like real light, not a flat tint.
 
