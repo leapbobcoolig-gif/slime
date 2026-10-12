@@ -5669,6 +5669,7 @@ class Golem extends Pet{
       if(kind==='mush'){pset(fb,x,y+1,hex('#e8dcc0'));pset(fb,x-1,y,hex('#8a5a30'));pset(fb,x,y,hex('#b07a44'));pset(fb,x+1,y,hex('#8a5a30'));pset(fb,x,y-1,hex('#d8a868'));}
       else{const c=kind==='f1'?['#f6a6c6','#d0608a']:kind==='f2'?['#fff0a0','#e0b030']:['#b8a6ff','#7a60d0'];
         pset(fb,x-1,y,hex(c[0]));pset(fb,x+1,y,hex(c[0]));pset(fb,x,y-1,hex(c[0]));pset(fb,x,y+1,hex(c[1]));pset(fb,x,y,hex('#ffe070'));}};
+    const bare=this.sw&&this.sw.bare;if(bare)return;// themed skins: no moss garden, no glowing runes
     sprout(-2.6,2.6,'mush');sprout(-1.8,-3.0,'mush');sprout(0.6,1.6,'f1');
     const bl=this.bloom;if(bl>0.15)sprout(-0.8,-1.0,'f2');if(bl>0.3)sprout(-3.0,-0.6,'f3');if(bl>0.45)sprout(1.6,-2.4,'f1');if(bl>0.6)sprout(-2.0,1.0,'f2');if(bl>0.75)sprout(1.8,3.4,'f3');if(bl>0.9)sprout(-3.2,3.6,'f1');
     // rune lines carved into the shoulder blocks (glow at night)
