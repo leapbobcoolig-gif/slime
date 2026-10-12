@@ -808,7 +808,7 @@ const SFX=(()=>{
     const comp=ac.createDynamicsCompressor();comp.threshold.value=-18;comp.ratio.value=3;
     master=ac.createGain();master.gain.value=vol*0.6;master.connect(comp);comp.connect(ac.destination);
     musicBus=ac.createGain();musicBus.gain.value=musicOn?MUSIC_LVL*mvol:0;musicBus.connect(master);
-    for(const k in busVol){bus[k]=ac.createGain();bus[k].gain.value=busVol[k];bus[k].connect(master);}
+    for(const k in busVol){bus[k]=ac.createGain();bus[k].gain.value=busLvl(k);bus[k].connect(master);}
     nbuf=ac.createBuffer(1,ac.sampleRate,ac.sampleRate);const d=nbuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
   }
   const J=()=>1+(Math.random()-.5)*0.1;
@@ -991,7 +991,10 @@ const SFX=(()=>{
   }
   // the adaptive theme (see makeChill): built on first use, fed the game's mood every frame
   let mus=null,mvol=0.8;const MUSIC_LVL=0.85;
-  function setBus(k,v){busVol[k]=v;if(bus[k])bus[k].gain.setTargetAtTime(v,ac.currentTime,0.05);}
+  // while a menu is open the critter and tank sounds sit quietly in the background (menu sounds stay full)
+  let menuQ=1;const busLvl=k=>busVol[k]*(k==='ui'?1:menuQ);
+  function setBus(k,v){busVol[k]=v;if(bus[k])bus[k].gain.setTargetAtTime(busLvl(k),ac.currentTime,0.05);}
+  function menuQuiet(on){const q=on?0.2:1;if(q===menuQ)return;menuQ=q;if(ac)for(const k of['crit','world'])bus[k].gain.setTargetAtTime(busLvl(k),ac.currentTime,0.15);}
   let duckG=null,ducked=false;
   function music(ctx){if(!ac||!musicOn)return;if(!mus){duckG=ac.createGain();duckG.connect(musicBus);mus=makeChill(ac,duckG,nbuf);}
     mus.setContext(ctx);if(!!ctx.duck!==ducked){ducked=!!ctx.duck;duckG.gain.setTargetAtTime(ducked?0.3:1,ac.currentTime,0.3);}mus.tick(ac.currentTime);}
@@ -999,7 +1002,7 @@ const SFX=(()=>{
   function setMuted(m){muted=m;if(m){mistOn(false);}}
   function setVolume(v){vol=v;if(master)master.gain.setTargetAtTime(v*0.6,ac.currentTime,0.03);}
   function setMusic(on){musicOn=on;if(musicBus)musicBus.gain.setTargetAtTime(on?MUSIC_LVL*mvol:0,ac.currentTime,0.3);}
-  return{init,play,mistOn,buzzLevel,beeBuzz,slither,engine,music,setMuted,setVolume,setMusic,setMusicVol,setBus,get mus(){return mus;},get muted(){return muted;},get ready(){return!!ac;}};
+  return{init,play,mistOn,buzzLevel,beeBuzz,slither,engine,music,setMuted,setVolume,setMusic,setMusicVol,setBus,menuQuiet,get buses(){return bus;},get mus(){return mus;},get muted(){return muted;},get ready(){return!!ac;}};
 })();
 window.addEventListener('pointerdown',()=>SFX.init(),true);
 window.addEventListener('keydown',()=>SFX.init(),true);
@@ -6591,7 +6594,7 @@ function updatePlay(dt){
   let nf=0,nc=0;for(const q of w.prey){if(q.caught)continue;if(q.type==='fly'&&(q.landT<=0||q.inHand))nf++;if(q.type==='cricket')nc++;}
   SFX.buzzLevel(Math.min(0.05,nf*0.018));SFX.beeBuzz(pet.kind==='bee'&&pet.state!=='grabbed'?pet.buzzV||0:pet.kind==='bee'?0.05:0,pet.kind==='bee'?(pet.state==='grabbed'?1.2:pet.buzzP||0):0);
   SFX.slither(pet.kind==='snake'&&pet.state!=='grabbed'?Math.min(0.07,Math.abs(pet.speed||0)/46*0.08):0);
-  SFX.music({day:w.dayness,mood:w.mood,happy:w.stats.happy,menu:MENU_MUSIC[ui.open]||(ui.open?'other':''),duck:w.toys.some(o=>o.id==='musicbox'&&o.play2>0)});
+  SFX.menuQuiet(ui.modalOpen());SFX.music({day:w.dayness,mood:w.mood,happy:w.stats.happy,menu:MENU_MUSIC[ui.open]||(ui.open?'other':''),duck:w.toys.some(o=>o.id==='musicbox'&&o.play2>0)});
   game.chirpT-=dt;if(game.chirpT<=0){game.chirpT=rand(3,7);if(nc)SFX.play('chirp');}
   game.croakT-=dt;if(game.croakT<=0){game.croakT=rand(8,15);if(w.dayness<0.4)SFX.play('croak');}
   if(game.shake>0){game.shake-=dt;const k=Math.ceil(game.shake*12);$('stage').style.transform=game.shake>0&&save.set.shake?`translate(${(Math.random()-.5)*k}px,${(Math.random()-.5)*k}px)`:'';}
