@@ -642,67 +642,149 @@ const mixc=(a,b,t)=>rgb(lerp(a&255,b&255,t),lerp(a>>8&255,b>>8&255,t),lerp(a>>>1
 // =====================================================================
 //  Sound: everything synthesized with Web Audio (no files)
 // =====================================================================
-//  Music: one little composed loop ("Mossjar Theme", C major, 92 BPM, 16 bars) split into stems.
-//  The mix follows what's going on: instruments fade in and out when the critter is happy, sad,
-//  asleep for the night, or when a menu is open (then everything goes soft and muffled).
+//  Music: one chill composed loop (F major, 70 BPM, 16 bars) split into stems. The arrangement
+//  follows what's going on: a lo-fi groove by day, a bouncier one when thriving, a hazy night version,
+//  a D-minor take with a whining synth when the critter is sad, and every menu has its own mix.
 // =====================================================================
-const NOTE=(()=>{const o={},N=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];for(let m=24;m<96;m++)o[N[m%12]+(Math.floor(m/12)-1)]=440*Math.pow(2,(m-69)/12);return o;})();
-const THEME={bpm:92,
-  chords:['C','Am','F','G','C','Em','F','G','Am','F','C','G','F','G','C','C'],
-  // the tune in eighth notes, one bar per line: a note, '-' holds the one before, '.' rests
-  melody:`E5 - G5 - A5 G5 E5 -|C5 - E5 - D5 C5 A4 -|F4 A4 C5 F5 E5 - C5 -|D5 - - - . B4 C5 D5|
-E5 - G5 - C6 - B5 A5|G5 - E5 - B4 - E5 -|A5 G5 F5 E5 D5 - C5 -|D5 - - - - - . .|
-A4 C5 E5 - A5 - G5 -|F5 - E5 - C5 - A4 -|G4 - C5 E5 G5 - E5 -|D5 - G5 - F5 - D5 -|
-C5 - F5 - A5 - G5 F5|E5 - D5 - B4 - G4 -|C5 E5 G5 C6 - - G5 E5|C5 - - - . . . .`};
-const CHORD={C:['C','E','G'],Am:['A','C','E'],F:['F','A','C'],G:['G','B','D'],Em:['E','G','B']};
-// stem mix per mood: bass, keys (plucked chords), melody (marimba), bells (countermelody), perc, musicbox (night tune), sad (soft flute line)
-const MUSIC_MIX={
-  content:{bass:1,keys:0.9,melody:1,bells:0,perc:0.6,musicbox:0,sad:0,lp:12000},
-  thriving:{bass:1,keys:1,melody:1,bells:1,perc:1,musicbox:0,sad:0,lp:12000},
-  sad:{bass:0.7,keys:0.6,melody:0,bells:0,perc:0,musicbox:0,sad:1,lp:2600},
-  night:{bass:0.6,keys:0.5,melody:0,bells:0,perc:0,musicbox:1,sad:0,lp:3400}};
-function makeMusic(C,out,nbuf){
-  const STEMS=['bass','keys','melody','bells','perc','musicbox','sad'],G={},lvl={},on={},lp=C.createBiquadFilter(),inp=C.createGain();
-  lp.type='lowpass';lp.frequency.value=12000;lp.Q.value=0.5;inp.connect(lp);lp.connect(out);
-  for(const k of STEMS){G[k]=C.createGain();G[k].gain.value=0;G[k].connect(inp);lvl[k]=0;on[k]=0;}
-  // parse the tune once into eighth-note events: [bar, slot, freq, length in eighths]
-  const mel=[];THEME.melody.replace(/\n/g,'').split('|').forEach((bar,b)=>{const t=bar.trim().split(/\s+/);t.forEach((n,i)=>{if(n==='-'||n==='.')return;let L=1;while(i+L<t.length&&t[i+L]==='-')L++;mel.push([b,i,NOTE[n],L]);});});
-  const s16=60/THEME.bpm/4;
-  // --- little synths ---
+// ---- Version B: "Mossjar Theme (Chill)" — F major, 70 BPM, soft 7th chords, long reverb ----
+const NB=(()=>{const o={},N=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'],FL={'Db':'C#','Eb':'D#','Gb':'F#','Ab':'G#','Bb':'A#'};for(let m=24;m<100;m++)o[N[m%12]+(Math.floor(m/12)-1)]=440*Math.pow(2,(m-69)/12);
+  return n=>{const m=n.match(/^([A-G]b?#?)(-?\d)$/);const k=(FL[m[1]]||m[1])+m[2];return o[k];};})();
+const CHILL={bpm:70,
+  chords:['Fmaj7','Am7','Dm7','Bbmaj7','Fmaj7','Am7','Gm7','C7sus4','Dm7','Am7','Bbmaj7','Fmaj7','Gm7','Am7','Bbmaj7','C7sus4'],
+  // kalimba tune, eighth-note slots per bar; notes ring out on their own
+  melody:`A5 . . G5 . . E5 .|C6 . . . A5 . . .|F5 . . A5 . . C6 .|D6 . . . . . . .|
+A5 . . G5 . . F5 .|E5 . . G5 . . C6 .|Bb5 . . A5 . . G5 .|F5 . . . G5 . . .|
+F5 . . A5 . . D6 .|C6 . . . E6 . . .|D6 . . C6 . . A5 .|G5 . . . A5 . . .|
+Bb5 . . D6 . . F6 .|E6 . . C6 . . A5 .|F5 . . G5 . . A5 .|G5 . . . . . . .`};
+const CH7={Fmaj7:['F3','A3','C4','E4'],Am7:['A2','C4','E4','G4'],Dm7:['D3','F3','A3','C4'],Bbmaj7:['Bb2','D3','F3','A3'],Gm7:['G2','Bb3','D4','F4'],C7sus4:['C3','F3','G3','Bb3']};
+const ROOT={Fmaj7:'F2',Am7:'A2',Dm7:'D2',Bbmaj7:'Bb1',Gm7:'G2',C7sus4:'C2'};
+// each mood (and each menu) is its own arrangement of the same song, so switching always blends in time
+const STEMS_B=['pad','keys','bass','melody','sparkle','lead','perc','tperc','bounce','nkeys','nbass','glass','whine','hats','mkeys','pluck','animals','chip','cbass','cnoise','brass','bells','toms','spiano','vinyl'];
+const mixB=o=>Object.assign(Object.fromEntries(STEMS_B.map(k=>[k,0])),{wet:0.3,lp:12000},o);
+const MIX_B={
+  content:mixB({pad:0.4,keys:1,bass:1,melody:1,perc:0.9,wet:0.28}),
+  thriving:mixB({pad:0.35,keys:0.9,bass:1,melody:0.9,perc:1,sparkle:0.6,lead:0.7,tperc:0.9,bounce:0.9,wet:0.3,lp:13000}),
+  night:mixB({pad:0.9,nkeys:0.6,nbass:0.6,glass:1,vinyl:0.8,wet:0.62,lp:3200}),
+  sad:mixB({pad:0.9,nbass:0.7,whine:1,spiano:0.6,vinyl:0.7,wet:0.58,lp:2600}),
+  menu:mixB({hats:0.8,mkeys:1,nbass:0.7,wet:0.22,lp:9000}),
+  settings:mixB({hats:1,wet:0.18,lp:14000}),
+  critters:mixB({pluck:1,pad:0.3,nbass:0.5,hats:0.45,animals:1,wet:0.4,lp:11000}),
+  gacha:mixB({chip:1,cbass:1,cnoise:1,wet:0.15,lp:14000}),
+  goals:mixB({brass:1,bells:1,toms:1,nbass:0.7,sparkle:0.5,wet:0.45,lp:12000})};
+// sad / grumpy moves the song into D minor: its own chords and a slow melody for the whining synth
+const SAD={chords:['Dm9','Am7','Dm7','Bbmaj7','Dm9','Am7','Gm7','A7sus4','Gm7','Am7','Bbmaj7','Dm9','Gm7','Am7','Bbmaj7','A7'],
+  voice:{Dm9:['D3','F3','A3','E4'],Am7:['A2','E3','G3','C4'],Dm7:['D3','F3','A3','C4'],Bbmaj7:['Bb2','D3','F3','A3'],Gm7:['G2','Bb2','D3','F3'],A7sus4:['A2','D3','E3','G3'],A7:['A2','C#3','E3','G3']},
+  root:{Dm9:'D2',Am7:'A1',Dm7:'D2',Bbmaj7:'Bb1',Gm7:'G1',A7sus4:'A1',A7:'A1'},
+  melody:`D5 - - - C5 - A4 -|C5 - - - - - . .|F4 - G4 - A4 - - -|D5 - - - - - . .|
+E5 - - - D5 - C5 -|E5 - - - C5 - - -|D5 - - - Bb4 - A4 -|G4 - - - A4 - - -|
+Bb4 - - - D5 - G4 -|A4 - - - E5 - - -|F5 - - - E5 - D5 -|E5 - - - D5 - - -|
+D5 - - - Bb4 - - -|C5 - - - A4 - G4 -|F4 - - - A4 - - -|A4 - - - - - - -`};
+const MENU_MUSIC={mSettings:'settings',mPets:'critters',mGacha:'gacha',mGoals:'goals'};
+function chillContext(c){const night=c.day<0.35,sad=c.mood==='grumpy'||c.happy<30;
+  if(c.menu)return c.menu==='settings'||c.menu==='critters'||c.menu==='gacha'||c.menu==='goals'?c.menu:'menu';
+  return night?'night':sad?'sad':c.mood==='thriving'?'thriving':'content';}
+function makeChill(C,out,nbuf){
+  const STEMS=STEMS_B,G={},lvl={},on={},inp=C.createGain(),lp=C.createBiquadFilter(),wet=C.createGain(),verb=C.createConvolver(),dly=C.createDelay(1),fb=C.createGain(),dlyOut=C.createGain();
+  lp.type='lowpass';lp.frequency.value=12000;lp.Q.value=0.4;inp.connect(lp);lp.connect(out);
+  const L=C.sampleRate*4,ir=C.createBuffer(2,L,C.sampleRate);for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<L;i++){const t=i/L;d[i]=(Math.random()*2-1)*Math.pow(1-t,3.2)*(i<C.sampleRate*0.02?i/(C.sampleRate*0.02):1);}}
+  verb.buffer=ir;wet.gain.value=0.3;verb.connect(wet);wet.connect(inp);
+  const s16=60/CHILL.bpm/4;dly.delayTime.value=s16*3;fb.gain.value=0.3;dly.connect(fb);fb.connect(dly);dly.connect(dlyOut);dlyOut.gain.value=0.3;dlyOut.connect(inp);dlyOut.connect(verb);
+  const send={pad:0.5,keys:0.3,bass:0.03,melody:0.6,sparkle:0.6,lead:0.4,perc:0.12,tperc:0.12,spiano:0.5,bounce:0.35,nkeys:0.6,nbass:0.05,glass:0.9,whine:0.7,hats:0.08,mkeys:0.3,pluck:0.4,animals:0.6,chip:0.15,cbass:0.03,cnoise:0.05,brass:0.5,bells:0.7,toms:0.4,vinyl:0};
+  const echo=['melody','glass','lead','bells','whine'];
+  for(const k of STEMS){G[k]=C.createGain();G[k].gain.value=0;G[k].connect(inp);const sv=C.createGain();sv.gain.value=send[k];G[k].connect(sv);sv.connect(verb);if(echo.includes(k)){const sd=C.createGain();sd.gain.value=0.4;G[k].connect(sd);sd.connect(dly);}lvl[k]=0;on[k]=0;}
+  const mel=[];CHILL.melody.replace(/\n/g,'').split('|').forEach((bar,b)=>bar.trim().split(/\s+/).forEach((n,i)=>{if(n!=='.'&&n!=='-')mel.push([b,i,NB(n)]);}));
+  const smel=[];SAD.melody.replace(/\n/g,'').split('|').forEach((bar,b)=>{const t=bar.trim().split(/\s+/);t.forEach((n,i)=>{if(n==='-'||n==='.')return;let L=1;while(i+L<t.length&&t[i+L]==='-')L++;smel.push([b,i,NB(n),L]);});});
+  // F major scale across the useful range, for the sad "sigh" phrases that lean in from the note above
+  const SCALE=[];for(let o=2;o<=6;o++)for(const n of['F','G','A','Bb','C','D','E'])SCALE.push(NB(n+o));SCALE.sort((a,b)=>a-b);const above=f=>SCALE.find(x=>x>f*1.01)||f*1.12;
+  const pulse=(()=>{const n=32,re=new Float32Array(n),im=new Float32Array(n),d=0.25;for(let i=1;i<n;i++)im[i]=2/(i*Math.PI)*Math.sin(i*Math.PI*d);return C.createPeriodicWave(re,im);})();
   const env=(g,t,v,a,d)=>{g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+a);g.gain.exponentialRampToValueAtTime(0.0001,t+a+d);};
-  const osc=(dest,type,f,t,v,a,d,det=0)=>{const o=C.createOscillator(),g=C.createGain();o.type=type;o.frequency.value=f;o.detune.value=det;env(g,t,v,a,d);o.connect(g);g.connect(dest);o.start(t);o.stop(t+a+d+0.05);};
-  const nz=(dest,t,v,d,freq,type='highpass')=>{const src=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();src.buffer=nbuf;f.type=type;f.frequency.value=freq;env(g,t,v,0.003,d);src.connect(f);f.connect(g);g.connect(dest);src.start(t,Math.random()*0.5);src.stop(t+d+0.05);};
+  const osc=(dest,type,f,t,v,a,d,det=0)=>{const o=C.createOscillator(),g=C.createGain();if(type==='pulse')o.setPeriodicWave(pulse);else o.type=type;o.frequency.value=f;o.detune.value=det;env(g,t,v,a,d);o.connect(g);g.connect(dest);o.start(t);o.stop(t+a+d+0.05);return o;};
+  const nz=(dest,t,v,d,freq,type='highpass',q=0.7)=>{const src=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();src.buffer=nbuf;f.type=type;f.frequency.value=freq;f.Q.value=q;env(g,t,v,0.002,d);src.connect(f);f.connect(g);g.connect(dest);src.start(t,Math.random()*0.5);src.stop(t+d+0.05);};
+  const ep=(dest,f,t,v,d)=>{osc(dest,'sine',f,t,0.05*v,0.006,d);osc(dest,'sine',f*2,t,0.009*v,0.004,d*0.35);osc(dest,'sine',f*7.1,t,0.004*v,0.002,0.07);};
   const I={
-    bass:(f,t,d)=>{osc(G.bass,'triangle',f,t,0.16,0.01,d);osc(G.bass,'sine',f,t,0.1,0.01,d*0.8);},
-    pluck:(f,t)=>{osc(G.keys,'triangle',f,t,0.035,0.004,0.45,-6);osc(G.keys,'triangle',f,t,0.03,0.004,0.35,7);osc(G.keys,'sine',f*2,t,0.008,0.003,0.12);},
-    marimba:(f,t,d)=>{osc(G.melody,'sine',f,t,0.075,0.004,0.35+d*0.25);osc(G.melody,'sine',f*4,t,0.012,0.002,0.07);},
-    bell:(f,t)=>{osc(G.bells,'sine',f,t,0.03,0.003,1.3);osc(G.bells,'sine',f*2.76,t,0.009,0.002,0.4);osc(G.bells,'sine',f*5.4,t,0.003,0.002,0.15);},
-    box:(f,t)=>{osc(G.musicbox,'triangle',f,t,0.03,0.003,1.5);osc(G.musicbox,'sine',f*3,t,0.006,0.002,0.35);},
-    flute:(f,t,d)=>{const o=C.createOscillator(),g=C.createGain(),lf=C.createOscillator(),lg=C.createGain();o.type='sine';o.frequency.value=f;lf.frequency.value=4.6;lg.gain.value=f*0.006;lf.connect(lg);lg.connect(o.frequency);
-      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.06,t+0.25);g.gain.setValueAtTime(0.06,t+d*0.7);g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.4);o.connect(g);g.connect(G.sad);o.start(t);lf.start(t);o.stop(t+d+0.5);lf.stop(t+d+0.5);},
-    kick:t=>{const o=C.createOscillator(),g=C.createGain();o.frequency.setValueAtTime(110,t);o.frequency.exponentialRampToValueAtTime(45,t+0.16);env(g,t,0.14,0.003,0.18);o.connect(g);g.connect(G.perc);o.start(t);o.stop(t+0.25);},
-    shake:(t,v)=>nz(G.perc,t,v,0.045,7000),rim:t=>nz(G.perc,t,0.025,0.03,1800,'bandpass')};
-  const tone=(name,oct)=>NOTE[name+oct];
-  // one sixteenth-note step of the whole arrangement
-  function step(k,t){const bar=Math.floor(k/16)%16,s=k%16,ch=CHORD[THEME.chords[bar]],root=ch[0],ei=s>>1,on8=!(s&1);
-    if(on.bass){if(s===0)I.bass(tone(root,2),t,s16*7);if(s===8){const r=tone(root,2),f=tone(ch[2],2);I.bass(f<r?f*2:f,t,s16*5);}if(s===14)I.bass(tone(root,3),t,s16*2);}
-    if(on.keys&&[0,3,6,8,11,14].includes(s)){const up=s===3||s===11;ch.forEach((n,i)=>I.pluck(tone(n,4),t+(up?(2-i):i)*0.012));}
-    if(on8&&(on.melody||on.musicbox))for(const[b,i,f,L]of mel)if(b===bar&&i===ei){if(on.melody)I.marimba(f,t,L);if(on.musicbox&&(ei%2===0||L>1))I.box(f*2,t);}
-    if(on.bells&&bar>=8&&(s===4||s===12)){const n=ch[s===4?1:2];I.bell(tone(n,6),t);}
-    if(on.perc){if(s===0||s===8)I.kick(t);if(s===4||s===12)I.rim(t);if(on8)I.shake(t,s%4===2?0.02:0.01);}
-    if(on.sad&&(s===0||s===8)){const n=s===0?ch[1]:ch[2];I.flute(tone(n,4),t,s16*7);}}
-  let k=0,next=0,cur=null,duck=1;
-  return{
-    // ctx: {day, mood, happy, menu, duck}
-    setContext(c){const night=c.day<0.35,sad=c.mood==='grumpy'||c.happy<30,base=night?'night':sad?'sad':c.mood==='thriving'?'thriving':'content',m=MUSIC_MIX[base],key=base+(c.menu?'+m':'')+(c.duck?'+d':''),now=C.currentTime;
-      if(key===cur)return;cur=key;
-      for(const s of STEMS){let v=m[s];if(c.menu&&(s==='perc'||s==='bells'))v=0;lvl[s]=v;G[s].gain.setTargetAtTime(v*(c.duck?0.3:1),now,1.5);if(v>0)on[s]=1;}
-      lp.frequency.setTargetAtTime(c.menu?900:m.lp,now,0.6);},
-    tick(now){if(next<now)next=now+0.05;
-      while(next<now+0.35){step(k,next);k++;next+=s16;}
-      // a stem keeps playing while it fades out, then stops being scheduled
-      for(const s of STEMS)if(on[s]&&lvl[s]<=0&&G[s].gain.value<0.005)on[s]=0;},
-    stems:G,filter:lp};}
+    pad:(fs,t,d,dest=G.pad,cut=900,v=0.05,att=1.6)=>{const f=C.createBiquadFilter(),g=C.createGain();f.type='lowpass';f.frequency.value=cut;f.Q.value=0.3;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+att);g.gain.setValueAtTime(v,t+d);g.gain.exponentialRampToValueAtTime(0.0001,t+d+2.4);
+      f.connect(g);g.connect(dest);for(const fr of fs)for(const det of[-9,8]){const o=C.createOscillator();o.type='sawtooth';o.frequency.value=fr;o.detune.value=det;const og=C.createGain();og.gain.value=0.22;o.connect(og);og.connect(f);o.start(t);o.stop(t+d+2.6);}return f;},
+    kal:(f,t)=>{osc(G.melody,'sine',f,t,0.06,0.003,1.1);osc(G.melody,'sine',f*5.4,t,0.008,0.002,0.1);osc(G.melody,'triangle',f,t,0.014,0.003,0.25);},
+    spark:(f,t)=>osc(G.sparkle,'triangle',f,t,0.018,0.004,0.4),
+    lead:(f,t,d)=>{const o=C.createOscillator(),g=C.createGain(),lf=C.createOscillator(),lg=C.createGain();o.type='sine';o.frequency.setValueAtTime(f*0.97,t);o.frequency.exponentialRampToValueAtTime(f,t+0.05);lf.frequency.value=5.5;lg.gain.value=f*0.008;lf.connect(lg);lg.connect(o.frequency);
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.045,t+0.04);g.gain.exponentialRampToValueAtTime(0.0001,t+d);o.connect(g);g.connect(G.lead);o.start(t);lf.start(t);o.stop(t+d+0.05);lf.stop(t+d+0.05);},
+    mar:(f,t,v)=>{osc(G.bounce,'sine',f,t,0.05*v,0.003,0.22);osc(G.bounce,'sine',f*4,t,0.008*v,0.002,0.04);},
+    glass:(f,t)=>{osc(G.glass,'sine',f,t,0.035,0.01,2.6);osc(G.glass,'sine',f*3,t,0.004,0.01,0.6);},
+    // the sad lead: a whining, slightly detuned synth that leans on the note above, then slides down onto the chord
+    // the sad lead: a whining, slightly detuned synth. It slides into each note (from a step above at the start of a phrase,
+    // from just below otherwise) and its vibrato grows the longer a note is held
+    whine:(f0,f1,t,d,glide)=>{const fl=C.createBiquadFilter(),g=C.createGain(),lf=C.createOscillator(),lg=C.createGain();fl.type='lowpass';fl.Q.value=5;fl.frequency.setValueAtTime(800,t);fl.frequency.linearRampToValueAtTime(1500,t+0.3);fl.frequency.linearRampToValueAtTime(950,t+d);
+      lf.frequency.value=5.2;lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(0,t+Math.min(0.4,d*0.3));lg.gain.linearRampToValueAtTime(f1*(d>0.8?0.014:0.006),t+d);lf.connect(lg);
+      for(const det of[-9,9]){const o=C.createOscillator();o.type='sawtooth';o.detune.value=det;o.frequency.setValueAtTime(f0,t);o.frequency.setValueAtTime(f0,t+glide*0.4);o.frequency.exponentialRampToValueAtTime(f1,t+glide);lg.connect(o.frequency);o.connect(fl);o.start(t);o.stop(t+d+0.8);}
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.03,t+0.12);g.gain.setValueAtTime(0.03,t+d*0.8);g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.6);fl.connect(g);g.connect(G.whine);lf.start(t);lf.stop(t+d+0.8);},
+    kick:(dest,t,v=0.13)=>{const o=C.createOscillator(),g=C.createGain();o.frequency.setValueAtTime(95,t);o.frequency.exponentialRampToValueAtTime(42,t+0.18);env(g,t,v,0.004,0.22);o.connect(g);g.connect(dest);o.start(t);o.stop(t+0.3);},
+    snap:(dest,t,v=1)=>{nz(dest,t,0.06*v,0.09,1900,'bandpass',1.2);nz(dest,t,0.02*v,0.03,5000);},
+    clap:(dest,t)=>{for(const o of[0,0.012,0.024])nz(dest,t+o,0.03,0.07,1400,'bandpass',0.9);},
+    tamb:(dest,t,v)=>{for(const o of[0,0.018,0.036])nz(dest,t+o,v,0.04,6500,'bandpass',2);},
+    hat:(dest,t,v,open)=>nz(dest,t,v,open?0.16:0.035,8000),
+    pluck:(f,t,v=1)=>{osc(G.pluck,'triangle',f,t,0.045*v,0.003,0.5);osc(G.pluck,'sine',f*2,t,0.012*v,0.002,0.15);osc(G.pluck,'sine',f*3,t,0.004*v,0.002,0.05);},
+    chip:(f,t,d,v=1)=>osc(G.chip,'pulse',f,t,0.03*v,0.002,d),
+    cbass:(f,t,d)=>osc(G.cbass,'triangle',f,t,0.14,0.002,d),
+    brass:(fs,t,d)=>{const fl=I.pad(fs,t,d,G.brass,400,0.045,0.25);fl.frequency.setValueAtTime(400,t);fl.frequency.exponentialRampToValueAtTime(2200,t+0.35);fl.frequency.exponentialRampToValueAtTime(1100,t+d);},
+    bell:(f,t)=>{osc(G.bells,'sine',f,t,0.04,0.003,1.6);osc(G.bells,'sine',f*2.76,t,0.012,0.002,0.5);osc(G.bells,'sine',f*5.4,t,0.004,0.002,0.15);},
+    tom:(t,f=140,v=0.14)=>{const o=C.createOscillator(),g=C.createGain();o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*0.6,t+0.3);env(g,t,v,0.004,0.35);o.connect(g);g.connect(G.toms);o.start(t);o.stop(t+0.45);},
+    crackle:t=>{const src=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();src.buffer=nbuf;f.type='highpass';f.frequency.value=3000;env(g,t,0.012+Math.random()*0.02,0.001,0.006);src.connect(f);f.connect(g);g.connect(G.vinyl);src.start(t,Math.random()*0.9);src.stop(t+0.02);}};
+  {const src=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();src.buffer=nbuf;src.loop=true;f.type='bandpass';f.frequency.value=5000;f.Q.value=0.4;g.gain.value=0.006;src.connect(f);f.connect(g);g.connect(G.vinyl);src.start();}
+  // little critter calls drifting in from somewhere in the room (critters menu)
+  const A=G.animals,CALLS={
+    chick:t=>{for(const o of[0,0.16])osc(A,'sine',2600,t+o,0.03,0.005,0.09).frequency.exponentialRampToValueAtTime(3500,t+o+0.08);},
+    frog:t=>{for(const o of[0,0.2]){const s=osc(A,'square',170,t+o,0.018,0.01,0.11),lf=C.createOscillator(),lg=C.createGain();lf.frequency.value=38;lg.gain.value=60;lf.connect(lg);lg.connect(s.frequency);lf.start(t+o);lf.stop(t+o+0.15);}},
+    cricket:t=>{for(let r=0;r<2;r++)for(let i=0;i<6;i++)osc(A,'sine',4600,t+r*0.45+i*0.04,0.012,0.003,0.02);},
+    bird:t=>{const o=osc(A,'sine',3000,t,0.02,0.02,0.45),lf=C.createOscillator(),lg=C.createGain();lf.frequency.value=26;lg.gain.value=380;lf.connect(lg);lg.connect(o.frequency);lf.start(t);lf.stop(t+0.5);o.frequency.setValueAtTime(3000,t);o.frequency.linearRampToValueAtTime(3600,t+0.45);},
+    gecko:t=>{let o=0;for(const gap of[0.13,0.11,0.09,0.08]){nz(A,t+o,0.05,0.03,1300,'bandpass',4);o+=gap;}},
+    bee:t=>{const o=C.createOscillator(),g=C.createGain(),f=C.createBiquadFilter(),lf=C.createOscillator(),lg=C.createGain(),d=1.4;// a bee drifting past
+      o.type='sawtooth';o.frequency.setValueAtTime(190,t);o.frequency.linearRampToValueAtTime(225,t+d*0.5);o.frequency.linearRampToValueAtTime(200,t+d);f.type='lowpass';f.frequency.value=700;
+      lf.frequency.value=7;lg.gain.value=7;lf.connect(lg);lg.connect(o.frequency);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.016,t+0.3);g.gain.setValueAtTime(0.016,t+d*0.6);g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+      o.connect(f);f.connect(g);g.connect(A);o.start(t);lf.start(t);o.stop(t+d+0.05);lf.stop(t+d+0.05);}};
+  const CALL_NAMES=Object.keys(CALLS);let nextCall=0,lastCall='';
+  const N=n=>NB(n);
+  function step(k,t){const bar=Math.floor(k/16)%16,s=k%16,sadOn=lvl.whine>0,sc=SAD.chords[bar],sch=SAD.voice[sc],cn=CHILL.chords[bar],ch=CH7[cn],nxt=CHILL.chords[(bar+1)%16],swing=(s%2)?s16*0.2:0,r=N(ROOT[cn]);t+=swing;const ei=s>>1,on8=!(s&1);
+    if(on.pad&&s===0)I.pad((sadOn?sch:ch).map(N),t,s16*15);
+    // day: offbeat electric piano stabs and a bouncy bass line
+    if(on.keys){if(s===0)ch.forEach((n,i)=>ep(G.keys,N(n)*2,t+i*0.02,0.6,0.9));if(s===6||s===14)[1,2,3].forEach((j,i)=>ep(G.keys,N(ch[j])*2,t+i*0.01,0.75,0.28));if(s===10)[0,2].forEach((j,i)=>ep(G.keys,N(ch[j])*2,t+i*0.01,0.6,0.22));}
+    if(on.bass){const b=(f,d,v=0.15)=>{osc(G.bass,'sine',f,t,v,0.01,d);osc(G.bass,'triangle',f,t,v*0.3,0.01,d*0.5);};
+      if(s===0)b(r,s16*2.5);if(s===3)b(r*2,s16*0.8,0.09);if(s===6)b(r*1.5,s16*1.5);if(s===10)b(r,s16*2);if(s===14){const nr=N(ROOT[nxt]);b(nr*(nr>r?0.94:1.06),s16*1.2,0.1);}}
+    if(on8)for(const[b,i,f]of mel)if(b===bar&&i===ei){if(on.melody)I.kal(f,t);if(on.lead)I.lead(f,t,s16*2.6);if(on.bells)I.bell(f,t);
+      if(on.chip){I.chip(f,t,s16*0.9);I.chip(f*2,t+s16,s16*0.6,0.5);}}
+    if(on.sparkle&&on8){const seq=[0,2,1,3,2,1,3,2],n=ch[seq[ei%8]];I.spark(N(n)*4,t);}
+    if(on.perc){if(s===0||s===7||s===10)I.kick(G.perc,t,s===7?0.08:0.13);if(s===4||s===12)I.snap(G.perc,t);I.hat(G.perc,t,s%4===2?0.02:s%2?0.008:0.012,s===14);}
+    // thriving: the lo-fi beat topped with claps and tambourine, and a marimba hopping around the chord
+    if(on.tperc){if(s===4||s===12)I.clap(G.tperc,t);if(s%2===1)I.tamb(G.tperc,t,s%4===3?0.018:0.01);}
+    if(on.bounce&&s%4!==3){const seq=[0,1,2,3,2,1],n=ch[seq[s%6]];I.mar(N(n)*4,t,s%4===0?1:0.7);}
+    // night: sparse piano, long bass, glassy chimes
+    if(on.nkeys){if(s===0)ch.forEach((n,i)=>ep(G.nkeys,N(n)*2,t+i*0.03,0.9,1.6));if(s===10)[1,3].forEach((j,i)=>ep(G.nkeys,N(ch[j])*2,t+i*0.04,0.7,1.4));}
+    if(on.nbass&&s===0)osc(G.nbass,'sine',sadOn?N(SAD.root[sc]):r,t,0.15,0.04,s16*13);
+    if(on.glass&&(s===0||s===6||s===12)){const n=ch[[3,2,1][s/6]];I.glass(N(n)*4,t);}
+    // sad: the slow D-minor melody on the whining synth, over a sparse low piano
+    if(on.whine&&on8)for(const[b,i,f,L]of smel)if(b===bar&&i===ei){const first=i===0&&bar%4===0,d=L*s16*2;I.whine(first?above(f):f*0.94,f,t,d,first?Math.min(0.5,d*0.4):0.08);}
+    if(on.spiano){if(s===0)sch.forEach((n,i)=>ep(G.spiano,N(n)*2,t+i*0.04,0.7,1.8));if(s===8)for(const[b,i,f]of smel)if(b===bar&&i===0)ep(G.spiano,f/2,t,0.6,1.4);}
+    // menus: a soft hi-hat beat (settings has only this), plus muted piano and a low bass for the other menus
+    if(on.hats){I.hat(G.hats,t,s%4===2?0.05:s%2?0.018:0.03,s===6||s===14);if(s===0||s===8)I.kick(G.hats,t,0.15);if(s===12&&bar%2)nz(G.hats,t,0.04,0.03,1800,'bandpass');}
+    if(on.mkeys&&(s===0||s===10)){const f=C.createBiquadFilter();f.type='lowpass';f.frequency.value=1300;f.connect(G.mkeys);ch.forEach((n,i)=>osc(f,'sine',N(n)*2,t+i*0.02,s===0?0.045:0.03,0.008,s===0?1.2:0.6));}
+    // critters menu: a nylon-string pluck walking up and down the chord
+    if(on.pluck&&on8){const seq=[0,1,2,3,2,1,2,3],n=ch[seq[ei]];I.pluck(N(n)*(ei===0?1:2),t,ei%2?0.75:1);}
+    // gachapon: chiptune! fast pulse-wave arpeggios, a bouncing triangle bass and noise drums
+    if(on.chip){const n=ch[[0,1,2,3][s%4]];I.chip(N(n)*4,t,s16*0.5,0.35);}
+    if(on.cbass&&on8)I.cbass(r*(ei%2?2:1),t,s16*1.6);
+    if(on.cnoise){if(on8)nz(G.cnoise,t,s%4===2?0.04:0.025,0.03,9000);if(s===4||s===12)nz(G.cnoise,t,0.07,0.09,2500,'bandpass',0.8);if(s===0||s===8){const o=osc(G.cnoise,'triangle',160,t,0.16,0.002,0.12);o.frequency.exponentialRampToValueAtTime(50,t+0.1);}}
+    // achievements: a soft brass swell, the tune on bells and a tom roll into every fourth bar
+    if(on.brass&&s===0)I.brass(ch.map(n=>N(n)*2),t,s16*14);
+    if(on.toms){if(s===0&&bar%4===0)I.tom(t,110,0.18);if(bar%4===3&&(s===10||s===12||s===14))I.tom(t,[180,150,120][(s-10)/2],0.12);}
+    if(on.vinyl&&Math.random()<0.35)I.crackle(t+Math.random()*s16);}
+  let k=0,next=0,cur=null;
+  return{stems:G,filter:lp,bpm:CHILL.bpm,bars:16,
+    setContext(c){const base=chillContext(c),m=MIX_B[base],now=C.currentTime;if(base===cur)return;cur=base;
+      for(const s of STEMS){const v=m[s];lvl[s]=v;G[s].gain.setTargetAtTime(v,now,0.4);if(v>0)on[s]=1;}
+      lp.frequency.setTargetAtTime(m.lp,now,0.3);wet.gain.setTargetAtTime(m.wet,now,0.3);fb.gain.setTargetAtTime(m.wet>0.5?0.38:0.28,now,0.3);},
+    tick(now){if(next<now)next=now+0.05;while(next<now+0.4){step(k,next);k++;next+=s16;}
+      if(on.animals&&lvl.animals>0){if(!nextCall)nextCall=now+1.5;if(now>=nextCall){let n;do{n=CALL_NAMES[Math.floor(Math.random()*CALL_NAMES.length)];}while(n===lastCall);lastCall=n;CALLS[n](now+0.1);nextCall=now+2.5+Math.random()*4;}}else nextCall=0;
+      for(const s of STEMS)if(on[s]&&lvl[s]<=0&&G[s].gain.value<0.004)on[s]=0;},
+    get step(){return k;}};}
 // =====================================================================
 const SFX=(()=>{
   let ac=null,master=null,musicBus=null,nbuf=null,muted=false,vol=0.8,musicOn=true,mist=null,buzz=null,bee=null,slit=null,eng=null;const last={};
@@ -889,9 +971,11 @@ const SFX=(()=>{
     const now=ac.currentTime;eng.o.frequency.setTargetAtTime(70+v*170,now,0.08);eng.o2.frequency.setTargetAtTime(35+v*85,now,0.08);
     eng.f.frequency.setTargetAtTime(500+v*1600,now,0.1);eng.g.gain.setTargetAtTime(muted||v<=0?0:0.02+v*0.035,now,0.08);
   }
-  // the adaptive theme (see makeMusic): built on first use, fed the game's mood every frame
+  // the adaptive theme (see makeChill): built on first use, fed the game's mood every frame
   let mus=null,mvol=0.8;
-  function music(ctx){if(!ac||!musicOn)return;if(!mus)mus=makeMusic(ac,musicBus,nbuf);mus.setContext(ctx);mus.tick(ac.currentTime);}
+  let duckG=null,ducked=false;
+  function music(ctx){if(!ac||!musicOn)return;if(!mus){duckG=ac.createGain();duckG.connect(musicBus);mus=makeChill(ac,duckG,nbuf);}
+    mus.setContext(ctx);if(!!ctx.duck!==ducked){ducked=!!ctx.duck;duckG.gain.setTargetAtTime(ducked?0.3:1,ac.currentTime,0.3);}mus.tick(ac.currentTime);}
   function setMusicVol(v){mvol=v;if(musicBus)musicBus.gain.setTargetAtTime(musicOn?0.55*mvol:0,ac.currentTime,0.1);}
   function setMuted(m){muted=m;if(m){mistOn(false);}}
   function setVolume(v){vol=v;if(master)master.gain.setTargetAtTime(v*0.6,ac.currentTime,0.03);}
@@ -6453,7 +6537,7 @@ function updatePlay(dt){
   let nf=0,nc=0;for(const q of w.prey){if(q.caught)continue;if(q.type==='fly'&&(q.landT<=0||q.inHand))nf++;if(q.type==='cricket')nc++;}
   SFX.buzzLevel(Math.min(0.05,nf*0.018));SFX.beeBuzz(pet.kind==='bee'&&pet.state!=='grabbed'?pet.buzzV||0:pet.kind==='bee'?0.05:0,pet.kind==='bee'?(pet.state==='grabbed'?1.2:pet.buzzP||0):0);
   SFX.slither(pet.kind==='snake'&&pet.state!=='grabbed'?Math.min(0.07,Math.abs(pet.speed||0)/46*0.08):0);
-  SFX.music({day:w.dayness,mood:w.mood,happy:w.stats.happy,menu:ui.modalOpen(),duck:w.toys.some(o=>o.id==='musicbox'&&o.play2>0)});
+  SFX.music({day:w.dayness,mood:w.mood,happy:w.stats.happy,menu:MENU_MUSIC[ui.open]||(ui.open?'other':''),duck:w.toys.some(o=>o.id==='musicbox'&&o.play2>0)});
   game.chirpT-=dt;if(game.chirpT<=0){game.chirpT=rand(3,7);if(nc)SFX.play('chirp');}
   game.croakT-=dt;if(game.croakT<=0){game.croakT=rand(8,15);if(w.dayness<0.4)SFX.play('croak');}
   if(game.shake>0){game.shake-=dt;const k=Math.ceil(game.shake*12);$('stage').style.transform=game.shake>0&&save.set.shake?`translate(${(Math.random()-.5)*k}px,${(Math.random()-.5)*k}px)`:'';}
