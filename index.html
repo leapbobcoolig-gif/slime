@@ -2683,7 +2683,7 @@ const SWATCHES={
   {id:'sunset',name:'Sunset',price:40,dot:['#ff9a2a','#8a3ad0'],pal:{nudi:{body:ramp('#6a2a06','#c05a0e','#ff9a2a','#ffd090'),rim:ramp('#2a0a4a','#5a1a8a','#8a3ad0','#c08aff'),rimD:ramp('#1a0630','#3a1260','#5e2496','#8a52c4'),white:ramp('#a89a6a','#d8cc9a','#f6eecc','#fffcf0')}}},
   {id:'glacier',name:'Glacier',price:60,dot:['#bce4f4','#ffffff'],outline:'#0a1a24',pal:{nudi:{body:ramp('#4a7a92','#7eb2ca','#bce4f4','#eefaff'),black:ramp('#2a4a5e','#40667c','#5a8298','#7aa0b4'),rim:ramp('#a8b4bc','#d8e2e8','#f6fbfd','#ffffff'),rimD:ramp('#7a8a94','#a8b8c2','#ccdae2','#e8f2f6')}}},
   // paint(m,u,v,side,q,s,x,y): u along the body (-5.4 tail..5.4 head), v across, side 0 spine..1 edge. gill: what replaces the gill flower
-  {id:'ballet',name:'Ballerina',tier:'vivid',dot:['#ffb4cc','#ffffff'],outline:'#3a1424',gill:'bow',
+  {id:'ballet',name:'Ballerina',tier:'vivid',dot:['#ffb4cc','#ffffff'],outline:'#3a1424',gill:'bow',halo:[90,30,60],rc(i){return[255,120,180];},
    P:ramp('#b86a86','#e898b4','#ffc4d8','#fff0f6'),Pk:ramp('#7a1a3a','#b8305a','#e85a88','#ff9ab8'),Wt:ramp('#c8bcc8','#ece4ee','#fffaff','#ffffff'),
    paint(m,u,v,side,q,s,x,y){if(m===M.BODY){// satin leotard: a deep rose bodice laced up the front, sequins on the rest
        if(side>0.84)return this.Wt[q];if(u>0.4&&u<3.6){const a=Math.abs(v);if(a<0.22||(a<1.1&&Math.abs(fract((u+a)/1.2)-0.5)<0.12))return this.Wt[q];return this.Pk[q];}
@@ -2691,7 +2691,7 @@ const SWATCHES={
      if(m===M.LIMB)return(((x+y)%3)===0?this.P:this.Wt)[q];// a white tulle tutu
      if(m===M.CLAW)return((s*4|0)%2?this.Wt:this.Pk)[q];// ribbons laced round the horns
      if(m===M.TOE)return(s>0.7?this.P:this.Pk)[q];return this.Pk[q];}},
-  {id:'kimono',name:'Kimono',tier:'vivid',dot:['#1a2a7a','#e0302a'],outline:'#0a0c22',gill:'parasol',
+  {id:'kimono',name:'Kimono',tier:'vivid',dot:['#1a2a7a','#e0302a'],outline:'#0a0c22',gill:'parasol',halo:[80,50,10],rc(i){return i%8<2?[255,90,60]:[255,190,80];},
    I:ramp('#0a1240','#18266a','#26409a','#4a66c8'),Wt:ramp('#9aa4c8','#d0d8f0','#f2f4ff','#ffffff'),Rd:ramp('#6a0a10','#a81a20','#e0302a','#ff7a6a'),Gd:ramp('#7a5a10','#b88a1a','#e8c040','#fff0a0'),Sk:ramp('#b05a7a','#e08aa8','#ffb8cc','#ffe8f0'),
    paint(m,u,v,side,q,s,x,y){if(m===M.BODY){if(Math.abs(u-0.3)<1.0)return Math.abs(u-0.3)<0.28?this.Gd[q]:this.Rd[q];// a red obi sash with a gold cord
        if(side>0.84)return this.Rd[q];
@@ -2701,14 +2701,14 @@ const SWATCHES={
      if(m===M.LIMB)return(((x+y)&3)===0?this.Gd:this.Rd)[q];// red hem flecked with gold
      if(m===M.CLAW)return s>0.75?this.Gd[3]:this.I[Math.max(0,q-1)];// lacquer hairpins with gold tips
      return(m===M.TOE?(s>0.85?this.Wt:this.Rd):this.Gd)[q];}},
-  {id:'jester',name:'Jester',tier:'vivid',dot:['#7a2ab8','#ffd23a'],outline:'#14081e',gill:'bells',
+  {id:'jester',name:'Jester',tier:'vivid',dot:['#7a2ab8','#ffd23a'],outline:'#14081e',gill:'bells',halo:[50,20,80],rc(i){return(i>>1)&1?[170,80,255]:[255,200,60];},
    Pu:ramp('#2a0a4a','#4a1a80','#7a2ab8','#b07ae8'),Gd:ramp('#8a6a06','#c89a10','#ffd23a','#fff2a0'),Rd:ramp('#6a0a14','#a81a2a','#e0304a','#ff8a9a'),Bk:ramp('#06060a','#14121c','#24202e','#3a3444'),
    paint(m,u,v,side,q,s,x,y){if(m===M.BODY){if(side>0.84)return this.Bk[q];// big harlequin diamonds, two across
        const a=Math.floor((u*0.55+v)/2.4+50),b=Math.floor((u*0.55-v)/2.4+50);return((a+b)&1?this.Pu:this.Gd)[q];}
      if(m===M.LIMB)return(Math.floor(u/1.4+(v>0?0.5:0))&1?this.Rd:this.Gd)[q];// zigzag points
      if(m===M.CLAW)return s>0.75?this.Gd[Math.min(3,q+1)]:((s*3|0)%2?this.Pu:this.Rd)[q];// striped horns tipped with gold balls
      if(m===M.TOE)return(s>0.5?this.Rd:this.Pu)[q];return this.Gd[q];}},// collar flaps, gold jingle bells
-  {id:'mermaid',name:'Mermaid',tier:'vivid',dot:['#2ac8b8','#b07ae8'],outline:'#08202a',gill:'shell',
+  {id:'mermaid',name:'Mermaid',tier:'vivid',dot:['#2ac8b8','#b07ae8'],outline:'#08202a',gill:'shell',halo:[10,70,70],rc(i){return(i>>2)&1?[150,110,255]:[60,230,200];},
    Tq:ramp('#0a4a5a','#1a8a8a','#2ac8b8','#9af4e4'),Vi:ramp('#2a1a5a','#5a3a9a','#9a6ae0','#d4b8ff'),Pl:ramp('#a49cb0','#d8d0e4','#f6f0fa','#ffffff'),Sh:ramp('#a04a5a','#e0809a','#ffb4c0','#fff0f0'),
    paint(m,u,v,side,q,s,x,y){if(m===M.BODY){if(Math.abs(v)<0.42&&Math.abs(u)<4.3){const b=fract(u/0.9);return b<0.15?this.Vi[0]:this.Pl[b<0.4?3:q];}// a string of pearls down the spine
        const r=Math.floor(v/1.1),su=fract(u/1.2+(r&1)*0.5)-0.5,sv=fract(v/1.1),edge=Math.hypot(su*1.2,sv-0.15)>0.62;// sequin scales fading teal to violet
@@ -2716,11 +2716,11 @@ const SWATCHES={
      if(m===M.LIMB)return(s>0.5?this.Pl:this.Tq)[q];// seafoam fins
      if(m===M.CLAW)return((s*3|0)%2?this.Pl:this.Vi)[q];
      return(m===M.TOE?this.Sh:this.Pl)[q];}},// a scallop shell
-  {id:'chroma',name:'Chroma wave',tier:'special',fx:'chroma',dot:['#ff4a8a','#3ad0ff'],outline:'#0a0a1a',
+  {id:'chroma',name:'Chroma wave',tier:'special',fx:'chroma',halo:[50,40,70],rc(i,t,n){const h=fract(i*0.02-(n.wave||0)*0.3),f=x=>Math.max(0,Math.cos((h-x)*TAU));return[255*f(0),255*f(1/3),255*f(2/3)];},dot:['#ff4a8a','#3ad0ff'],outline:'#0a0a1a',
    paint(m,u,v,side,q,s,x,y){const w=this.wave||0,h=fract(u*0.07-w*0.3+(m===M.LIMB?0.05:0)),L=[0.22,0.42,0.62,0.82][q],c=nudiHsl(h,0.75,L);// bands of colour rolling head to tail, like real chromatophore waves
      if(m===M.BODY){if(side>0.85)return nudiHsl(fract(h+0.5),0.9,Math.min(0.92,L+0.1));return Math.abs(fract(u*0.33-w*1.05)-0.5)<0.05?nudiHsl(h,0.6,0.9):c;}
      if(m===M.CLAW||m===M.TOE)return nudiHsl(fract(h+0.5+s*0.2),0.9,L+0.05);return c;}},
-  {id:'reef',name:'Reef keeper',tier:'mythic',fx:'reef',dot:['#ff7a5a','#2ac8b8'],outline:'#1a0a12',gill:'anemone',
+  {id:'reef',name:'Reef keeper',tier:'mythic',fx:'reef',dot:['#ff7a5a','#2ac8b8'],outline:'#1a0a12',gill:'anemone',halo:[10,50,45],rc(i){return[40,180,150];},
    B:ramp('#2a1430','#4a2a4a','#6e4466','#94667e'),Po:ramp('#8a2a3a','#d84a6a','#ff7a9a','#ffc4d4'),Yl:ramp('#8a6a06','#d0a010','#ffd23a','#fff4a0'),An:ramp('#0a5a5a','#1a9a8a','#3ad8b8','#b0fff0'),
    paint(m,u,v,side,q,s,x,y){if(m===M.BODY){// living rock, pitted with little cup polyps that open when it's happy
        const[e,id]=salVoro(u*0.75,v*0.75,1,3);if(e<0.1)return this.B[0];
@@ -4814,11 +4814,11 @@ class Shark extends Pet{
 function nudiHsl(h,s,l){const f=n=>{const k=(n+h*12)%12,a=s*Math.min(l,1-l);return l-a*Math.max(-1,Math.min(k-3,9-k,1));};return rgb(Math.round(f(0)*255),Math.round(f(8)*255),Math.round(f(4)*255));}
 class Nudi extends Pet{
   constructor(world,x,y){super();this.initCommon(world,'nudi');
-    this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vx=0;this.vy=0;this.speed=0;this.sc=1.75;
+    this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vx=0;this.vy=0;this.speed=0;this.sc=1.9;
     this.outline=hex(PAL.nudi.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.seam=0.6;this.frame={x,y,c:1,s:0};
     this.ph=rand(TAU);this.gill=1;this.rhino=1;this.shy=0;this.shim=0;this.curl=0;this.nibT=0;this.rim=[];}
   isActive(){return true;}
-  size(){this.sc=(swatchOf(this)||{}).fx==='reef'?2.1:1.75;}// the reef keeper is a size up
+  size(){this.sc=(swatchOf(this)||{}).fx==='reef'?2.1:1.9;}// the reef keeper is a size up
   W(lx,ly){const c=Math.cos(this.ang)*this.sc,s=Math.sin(this.ang)*this.sc;return[this.x+c*lx-s*ly,this.y-this.h+s*lx+c*ly];}
   len(){return 1-this.curl*0.32;}
   headPos(){const[x,y]=this.W(5.4*this.len(),0);return{x,y:y+this.h};}
@@ -4914,9 +4914,12 @@ class Nudi extends Pet{
       for(const[a,b,c]of[[-3,-1,O],[-3,0,Or],[-3,1,O],[-2,0,Or],[-1,0,Wt],[-1,-1,Wt],[-1,1,O],[0,0,Or],[0,-1,Or],[1,0,Or],[1,-1,Wt],[1,1,Or],[2,0,Wt],[2,-1,Or],[3,0,O]])pset(fb,X+a*d,Y+b,c);pset(fb,X+2*d,Y-1,O);}}
     if(S.fx==='chroma'&&this.shy>0.6){const[cx,cy]=this.W(0,0);for(let i=0;i<6;i++)pmix(fb,cx+rand(-6,6),cy+rand(-4,4),hex('#ffffff'),0.5*this.shy);}// startled flicker
     if(this.shim>0.2){const n=3;for(let i=0;i<n;i++){const u=((this.t*2.2+i*3)%10.4)-5.2,[x,y]=this.W(u*this.len(),Math.sin(this.t*3+i)*0.8);pmix(fb,x,y,hex('#ffffff'),0.6*this.shim);}}}
-  glow(fb,night){const S=this.sw;if(S&&S.tier!=='natural'){// skins drop the blue rim glow; the reef keeper's open polyps fluoresce instead
-      const P=this.polyp,k=night*(this.bloom||0);if(S.fx!=='reef'||!P||k<0.05)return;for(let i=0;i<P.length;i+=2){const x=P[i],y=P[i+1];padd(fb,x,y,40*k,200*k,170*k);for(const[a,b]of[[1,0],[-1,0],[0,1],[0,-1]])padd(fb,x+a,y+b,8*k,50*k,44*k);}return;}
-    const k=night*(0.55+this.shim*0.6);if(k<0.05)return;for(let i=0;i<this.rim.length;i+=2){const[x,y]=this.rim[i],b=k*(0.7+0.3*Math.sin(this.t*2+i*0.4));padd(fb,x,y,40*b,150*b,255*b);}const[cx,cy]=this.W(0,0);for(let yy=-5;yy<=5;yy++)for(let xx=-7;xx<=7;xx++){const d=Math.hypot(xx/7,yy/5);if(d<1){const f=k*0.35*(1-d);padd(fb,cx+xx,cy+yy,10*f,40*f,90*f);}}}
+  // night glow round the frilly skirt; skins tint it their own colours (rc(i,t) per skirt point, halo under the body)
+  glow(fb,night){const S=this.sw||{},k=night*(0.55+this.shim*0.6);
+    if(S.fx==='reef'&&this.polyp){const P=this.polyp,kp=night*(this.bloom||0);if(kp>0.05)for(let i=0;i<P.length;i+=2){const x=P[i],y=P[i+1];padd(fb,x,y,40*kp,200*kp,170*kp);for(const[a,b]of[[1,0],[-1,0],[0,1],[0,-1]])padd(fb,x+a,y+b,8*kp,50*kp,44*kp);}}
+    if(k<0.05)return;const rc=S.rc,H=S.halo||[10,40,90];
+    for(let i=0;i<this.rim.length;i+=2){const[x,y]=this.rim[i],b=k*(0.7+0.3*Math.sin(this.t*2+i*0.4)),c=rc?rc.call(S,i,this.t,this):[40,150,255];padd(fb,x,y,c[0]*b,c[1]*b,c[2]*b);}
+    const[cx,cy]=this.W(0,0);for(let yy=-5;yy<=5;yy++)for(let xx=-7;xx<=7;xx++){const d=Math.hypot(xx/7,yy/5);if(d<1){const f=k*0.35*(1-d);padd(fb,cx+xx,cy+yy,H[0]*f,H[1]*f,H[2]*f);}}}
   statusText(){const R=(swatchOf(this)||{}).fx==='reef';if(this.shy>0.5)return R?'pulled its coral in. The clownfish are hiding!':'tucked its horns and gills in. Shy!';if(R&&this.state==='petted')return 'is blooming. The clownfish are doing laps!';switch(this.state){
     case 'idle':return 'is grazing on the reef';case 'wander':return 'is gliding along on its frilly skirt';case 'petted':return 'is shimmering and fluffing its gills';
     case 'hunt':return 'is slowly heading for a snack';case 'chew':return `is nibbling ${PREY_NAME[this.held?.type]||'something'}`;case 'grabbed':return 'curled up into a little ball';}
