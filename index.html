@@ -864,6 +864,9 @@ const SFX=(()=>{
     windBell:()=>{tone(1760,0.9,{gain:0.05});tone(2637,0.6,{delay:0.01,gain:0.022});},
     foxYip:()=>{tone(900,0.07,{type:'triangle',to:1500,gain:0.05});tone(1300,0.09,{delay:0.08,type:'triangle',to:1900,gain:0.04});},// a soft little yip
     foxChime:()=>{[1046,1568,2093].forEach((f,i)=>tone(f,0.9-i*0.2,{delay:i*0.09,type:'sine',gain:0.04}));tone(523,1.2,{type:'sine',gain:0.025});},// a temple-bell chime
+    burnerWhoosh:()=>{noise(0.7,{filter:'bandpass',freq:450,to:1300,q:0.7,gain:0.09,attack:0.05});tone(65,0.6,{type:'sawtooth',to:80,gain:0.018});},// the burner roaring up
+    basketCreak:()=>{tone(330,0.11,{type:'sawtooth',to:270,gain:0.02});tone(420,0.07,{delay:0.06,type:'square',to:390,gain:0.01});},// wicker creak
+    balloonFlap:()=>{noise(0.3,{filter:'bandpass',freq:420,to:140,q:1.2,gain:0.07,attack:0.01});tone(190,0.32,{type:'triangle',to:80,gain:0.04});},// deflating flump
     foxWhoosh:()=>{noise(0.35,{filter:'bandpass',freq:1800,to:600,q:1.5,gain:0.06,attack:0.05});tone(700,0.25,{type:'sine',to:300,gain:0.02});},// whispery whoosh
     gummyBoing:()=>{tone(180,0.28,{type:'sine',to:420,gain:0.1,vib:[18,0.6]});tone(90,0.12,{type:'triangle',to:60,gain:0.06});},// a wobbly rubbery boing
     gummySquelch:()=>{noise(0.12,{filter:'lowpass',freq:900,to:300,gain:0.09});tone(240,0.1,{type:'sine',to:140,gain:0.05});},
@@ -1003,7 +1006,7 @@ const SFX=(()=>{
   const BUS_OF={};
   'tick ui tap sparkle levelup coin coinburst whoosh close beep nope bloop achieve yay reveal0 reveal1 reveal2 reveal3 insert ratchet clunk pop rattle chest ask place scoop unhook hang clack pluck tink2'.split(' ').forEach(n=>BUS_OF[n]='ui');
   'plip bpop drip splash ocean burble rumble wind whirr toot tune musicbox flutter boing bell boop blow zap squeak2 lightsOn lightsOff tink'.split(' ').forEach(n=>BUS_OF[n]='world');
-  const GAP={clockTick:0.2,clockTock:0.2,gearStep:0.15,steamPuff:1,windRatchet:0.16,windDown:3,windBell:3,foxYip:0.6,foxChime:1,foxWhoosh:0.8,gummyBoing:0.25,gummySquelch:0.4,sugarCrunch:0.6,reefBloom:3,fishScatter:1,fishNibble:0.25,gingerLand:0.25,chimneyPuff:2,musicBox:5,shutterClack:1,doorCreak:1.5,cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
+  const GAP={burnerWhoosh:1,basketCreak:0.35,balloonFlap:1,clockTick:0.2,clockTock:0.2,gearStep:0.15,steamPuff:1,windRatchet:0.16,windDown:3,windBell:3,foxYip:0.6,foxChime:1,foxWhoosh:0.8,gummyBoing:0.25,gummySquelch:0.4,sugarCrunch:0.6,reefBloom:3,fishScatter:1,fishNibble:0.25,gingerLand:0.25,chimneyPuff:2,musicBox:5,shutterClack:1,doorCreak:1.5,cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
   function play(name,arg){
     if(!ac||muted||!S[name])return;const now=ac.currentTime;
     if(last[name]!==undefined&&now-last[name]<(GAP[name]??0.03))return;last[name]=now;
@@ -2606,7 +2609,70 @@ const SWATCHES={
   {id:'golden',name:'Golden cap',price:40,dot:['#f0b828','#f6eedc'],pal:{mush:{cap:ramp('#6a3a06','#b0700e','#f0b828','#ffe070')}}},
   {id:'porcini',name:'Porcini',price:40,dot:['#8a5428','#e2d6be'],pal:{mush:{cap:ramp('#3a1e0a','#5e3416','#8a5428','#b8804a'),spot:ramp('#8a6a48','#b89470','#d8b890','#f0d8b4')}}},
   {id:'pinkgill',name:'Blue pinkgill',price:40,dot:['#3a6ae0','#e8a8b8'],pal:{mush:{cap:ramp('#0e1e5a','#1a3aa0','#3a6ae0','#80a8ff'),gill:ramp('#8a4a5a','#b8707e','#e0a0ae','#f8ccd6')}}},
-  {id:'amethyst',name:'Amethyst',price:60,dot:['#9a4ad8','#c8a0e8'],outline:'#12061e',pal:{mush:{cap:ramp('#2e0e4a','#56207e','#9a4ad8','#cc8cff'),stem:ramp('#5a4070','#8a6aa8','#b496d4','#dcc4f0'),gill:ramp('#3e2a58','#62468a','#8a68b8','#b496d8'),spot:ramp('#9a86b4','#c4b2dc','#e2d6f4','#ffffff')}}}],
+  {id:'amethyst',name:'Amethyst',price:60,dot:['#9a4ad8','#c8a0e8'],outline:'#12061e',pal:{mush:{cap:ramp('#2e0e4a','#56207e','#9a4ad8','#cc8cff'),stem:ramp('#5a4070','#8a6aa8','#b496d4','#dcc4f0'),gill:ramp('#3e2a58','#62468a','#8a68b8','#b496d8'),spot:ramp('#9a86b4','#c4b2dc','#e2d6f4','#ffffff')}}},
+  // vivid costumes: cap pattern (cap), stem/arms/feet (body), spots restyled, night spot glow in its own colours (glowC), a small accessory, themed spore puffs and babies
+  {id:'hero',name:'Superhero',tier:'vivid',dot:['#e02a2a','#2a5ad0'],rings:[[0,-1.6,1.2],[-4.0,0.2,0.5],[3.9,0.4,0.5]],spore:'pow',baby:'hero',glowC:()=>[255,210,40],facePatch:[3,-3,2],faceFx:'mask',faceH:3.0,
+   pal:{mush:{gill:ramp('#0a1236','#14225e','#1e3488','#3a56b4')}},
+   cap(u,v,q,x,y,c,P){const eu=u,ev=v+1.5,ed=Math.hypot(eu,ev*1.1),et=Math.atan2(ev,eu)+Math.PI/2,er=2.6*(0.42+0.58*Math.max(0,Math.cos(5*et))**0.7);// the star emblem
+     if(ed<er)return MSK.yel[Math.min(3,q+(ed<er*0.5?1:0))];if(ed<er+0.55)return MSK.red[0];
+     for(const[sx,sy,r]of MUSH_SPOTS){const du=u-sx,dv=v-sy;if(r<0.8&&du*du+dv*dv<r*r*0.8)return MSK.yel[Math.min(3,q)];}
+     return MSK.red[q];},
+   body(m,q,u,h){if(m===M.CLAW)return MSK.red[Math.max(0,q-1)];// cape
+     if(m===M.LIMB||m===M.TOE)return MSK.red[Math.max(1,q)];// gloves and boots
+     if(m===M.BODY){if(h>0.75&&h<1.35)return MSK.yel[Math.min(3,q+(Math.abs(u)<0.5?1:0))];return MSK.blue[q];}},// suit and belt
+   pre(fb){const sc=this.sc,top=this._top??this.y-8,fl=Math.sin(this.t*5)*0.4-Math.cos(this.ang)*Math.min(1,this.speed/6)*1.6;// a cape behind, flapping as it waddles
+     fb.cap(this.x,top+1.6*sc,2.2*sc,this.x+fl,this.y-this.h-0.6*sc,3.3*sc,M.CLAW,1,0,0,0.4);}},
+  {id:'frog',name:'Frog onesie',tier:'vivid',dot:['#4aaa2e','#eeeaa8'],spore:'bubble',baby:'frog',glowC:()=>[120,255,90],facePatch:[3,-3,2],faceFx:'blush',
+   pal:{mush:{gill:ramp('#6a6a2a','#a8a85a','#dcd890','#f6f2c4')}},
+   cap(u,v,q,x,y,c,P){for(const[sx,sy,r]of MUSH_SPOTS){const du=u-sx,dv=v-sy;if(du*du+dv*dv<r*r*0.9)return MSK.dgreen[Math.min(3,q)];}return MSK.green[q];},
+   body(m,q,u,h){if(m===M.TOE)return MSK.green[Math.min(3,q+1)];if(m===M.LIMB)return MSK.green[q];
+     if(m===M.BODY)return h<1.7&&Math.abs(u)<1.5?MSK.belly[q]:MSK.green[q];},
+   extras(fb){const c=this.capC,sc=this.sc,shut=this.state==='sleeping'||this.blink>0;// big frog eyes on top of the hood
+     mushItem(fb,()=>{for(const sd of[-1,1]){const ex=c.x+sd*2.1*sc,ey=c.y-c.ry*0.95;fb.cap(ex,ey,1.35*sc,ex,ey,1.35*sc,5,1,0,0,0);
+       if(!shut){fb.cap(ex,ey+0.15*sc,0.95*sc,ex,ey+0.15*sc,0.95*sc,3,1,0,0,1);fb.cap(ex+sd*0.1,ey+0.35*sc,0.45*sc,ex+sd*0.1,ey+0.35*sc,0.45*sc,4,1,0,0,2);}}});}},
+  {id:'knight',name:'Knight',tier:'vivid',dot:['#9aa2b4','#c81e28'],spore:'spark',baby:'helm',glowC:()=>[255,190,60],facePatch:[3,-3,2],
+   cap(u,v,q,x,y,c,P){const gv=c.ry/this.sc*0.55;
+     for(const[sx,sy,r]of MUSH_SPOTS){const du=u-sx,dv=v-sy;if(du*du+dv*dv<0.3)return MSK.steel[3];if(du*du+dv*dv<0.65&&du+dv>0)return MSK.steel[0];}// rivets
+     if(v>gv-0.55)return MSK.gold[q];if(Math.abs(u)<0.45)return MSK.steel[Math.min(3,q+1)];return MSK.steel[q];},// brass rim, a ridge down the middle
+   gill(u,v,q,x,y){return MSK.steel[((x+y)&1)?Math.max(0,q-1):Math.max(0,q-2)];},// chainmail under the brim
+   body(m,q,u,h,x,y){if(m===M.LIMB||m===M.TOE)return MSK.steel[Math.max(1,q)];
+     if(m===M.BODY){if(Math.abs(u)>1.5)return MSK.steel[((x+y)&1)?q:Math.max(0,q-1)];if(h>0.9&&h<1.35)return MSK.leather[q];return h<0.9?MSK.blue[q]:MSK.blue[q];}},
+   extras(fb){const c=this.capC,sc=this.sc,t=this.t,bk=-Math.cos(this.ang)*0.6;// a red plume, and a round shield on one arm
+     mushItem(fb,()=>{let px=c.x,py=c.y-c.ry*1.0;for(let k=1;k<=3;k++){const nx=c.x+(bk*k*0.9+Math.sin(t*3+k)*0.25)*sc-k*0.6*sc,ny=c.y-c.ry*1.0-(k===3?1.4:k*1.0)*sc;fb.cap(px,py,(1.0-k*0.1)*sc,nx,ny,(0.95-k*0.15)*sc,7,1,0,0,0);px=nx;py=ny;}
+       const H=this._hands&&this._hands[0];if(H){fb.cap(H[0]-0.5,H[1],1.45*sc,H[0]-0.5,H[1],1.45*sc,1,1,0,0,0);fb.cap(H[0]-0.5,H[1],0.5*sc,H[0]-0.5,H[1],0.5*sc,8,1,0,0,1);}});}},
+  {id:'gift',name:'Gift box',tier:'vivid',dot:['#2ab8a8','#e02a3a'],spore:'confetti',baby:'gift',glowC:()=>[255,225,140],
+   pal:{mush:{gill:ramp('#6a4a06','#a87a10','#e0b030','#fff0a0')}},
+   cap(u,v,q,x,y,c,P){const gv=c.ry/this.sc*0.55;
+     if(Math.abs(u)<0.6||(v>gv-0.85&&v<gv-0.2))return MSK.rib[Math.min(3,q+(Math.abs(u)<0.25?1:0))];// ribbon cross
+     for(const[sx,sy,r]of MUSH_SPOTS){const du=u-sx,dv=v-sy;if(du*du+dv*dv<r*r*0.75)return MSK.lace[Math.min(3,q+1)];}// white polka dots
+     return MSK.teal[q];},
+   body(m,q,u,h,x,y){if(m===M.TOE)return MSK.rib[Math.max(1,q)];if(m===M.LIMB)return MSK.teal[q];
+     if(m===M.BODY){if(h>0.8&&h<1.3)return MSK.rib[q];return(((x>>1)+(y>>1))&1)&&hash(x,y)>0.6?MSK.lace[q]:MSK.teal[q];}},
+   extras(fb){const c=this.capC,sc=this.sc,y0=c.y-c.ry*1.0;// a big bow on top
+     mushItem(fb,()=>{for(const sd of[-1,1])fb.cap(c.x,y0,0.6*sc,c.x+sd*1.9*sc,y0-0.9*sc,1.0*sc,9,1,0,0,0);for(const sd of[-1,1])fb.cap(c.x,y0,0.4*sc,c.x+sd*1.2*sc,y0+1.0*sc,0.45*sc,9,1,0,0,0);fb.cap(c.x,y0,0.7*sc,c.x,y0,0.7*sc,9,1,0,0,1.5);});}},
+  // special: a little rain cloud in a yellow raincoat; it rains under the brim and lightning flickers inside the cloud
+  {id:'rain',name:'Rain cloud',tier:'special',fx:'rain',dot:['#c8d2e0','#ffd030'],spore:'rain',baby:'cloud',glowC:()=>[150,190,255],facePatch:[3,-3,2],
+   pal:{mush:{gill:ramp('#262c3a','#3e4658','#5a647a','#7e88a0')}},
+   cap(u,v,q,x,y,c,P){const f=this.flash||0;let col;
+     for(const[sx,sy,r]of MUSH_SPOTS){const du=u-sx,dv=v-sy,R=r*1.7+0.5,d=Math.hypot(du,dv);if(d<R){col=d>R*0.75&&dv>0?MSK.cloud[Math.max(0,q-1)]:MSK.cloud[Math.min(3,q+(dv<0?1:0))];break;}}// puffs
+     col=col??MSK.cloud[q];return f>0?mixc(col,MSK.flashC,f*0.7):col;},
+   body(m,q,u,h,x,y){if(m===M.TOE)return MSK.red[Math.max(1,q)];if(m===M.LIMB)return MSK.yel[q];// red wellies
+     if(m===M.BODY){if(h<1.2&&Math.abs(u-0.1)<0.35&&Math.round(h*3)%2===0)return MSK.ink[2];return MSK.yel[q];}}},// raincoat buttons
+  // mythic: its cap is a hot-air balloon; it stands in a wicker basket with the burner on its head
+  {id:'balloon',name:'Hot-air balloon',tier:'mythic',full:1,balloon:1,spore:'smoke',baby:'balloon',faceH:3.3,hatK:1,glowC:()=>[255,170,60],
+   rings:[[-2.9,1.3,0.9],[0,1.65,0.9],[2.9,1.3,0.9]],
+   cap(u,v,q,x,y,c,P){const R=c.ry/this.sc;
+     for(const[sx,sy,r]of this.sw.rings){const du=u-sx,dv=v-sy,d=Math.hypot(du,dv),th=Math.atan2(dv,du)+Math.PI/2;if(d<r*(0.5+0.5*Math.cos(5*th))**0.6*1.2)return MSK.gold[Math.min(3,q+1)];}
+     if(v>R*0.12&&v<R*0.45)return MSK.navy[q];// a navy band with gold stars
+     if(v<-R*0.86)return MSK.lace[q];// crown
+     const hw=Math.sqrt(Math.max(0.3,R*R-Math.min(v,R*0.55)**2))*(v>R*0.55?Math.max(0.3,1-(v-R*0.55)/(R*0.9)):1),g=Math.floor(clamp(u/hw,-0.999,0.999)*2.5+50.5)&1;if(v>R*0.62)return MSK.red[Math.max(0,q-1)];return(g?MSK.red:MSK.lace)[v>R*0.6?Math.max(0,q-1):q];},// gores
+   body(m,q,u,h,x,y){if(m===M.LID)return h>1.7?MSK.basket[Math.max(0,q-1)]:MSK.basket[((x+(y>>1))&1)?q:Math.max(0,q-1)];if(m===M.CLAW)return MSK.steel[q];},
+   drawCap(fb,c){const sc=this.sc,R=c.ry;fb.cap(c.x,c.y,R,c.x,this._mouth,1.9*sc,M.CLAW2,4,0,0,1.2);},
+   post(fb){const sc=this.sc,x=this.x,y=this.y-this.h,by=y-1.0*sc;
+     fb.cap(x-2.1*sc,by,1.2*sc,x+2.1*sc,by,1.2*sc,M.LID,3,0,0,0.5);// basket
+     fb.cap(x-0.9*sc,this._top,0.55*sc,x+0.9*sc,this._top,0.55*sc,M.CLAW,3,0,0,0.6);},// burner ring on its head
+   extras(fb){const c=this.capC,sc=this.sc,RP=MSK.rope;for(const sd of[-1,1])for(const k of[0.6,1]){const ax=c.x+sd*1.2*sc*k,ay=this._mouth,bx=this.x+sd*2.6*sc*k,by=this.y-this.h-2.0*sc,n=Math.ceil(Math.hypot(bx-ax,by-ay));
+       for(let i=1;i<n;i++){const X=Math.round(lerp(ax,bx,i/n)),Y=Math.round(lerp(ay,by,i/n));if(fb.mat[Y*fb.w+X]!==M.CLAW2&&fb.mat[Y*fb.w+X]!==M.LID)pset(fb,X,Y,RP);}}}}],
  kraken:[
   {id:'crimson',name:'Deep-sea red',price:40,dot:['#c82a2a','#f0a0a0'],outline:'#1a0404',pal:{kraken:{body:ramp('#3a0808','#6e1414','#a82424','#e05a4a'),belly:ramp('#6a2a2a','#a04a46','#d07a70','#f4b4a8'),spot:ramp('#4a0a0a','#7a1616','#a82020','#d04a40')}}},
   {id:'abyss',name:'Abyss blue',price:40,dot:['#2a5aa8','#8ad0f0'],outline:'#040c1a',pal:{kraken:{body:ramp('#0a1a3a','#163464','#2a5aa8','#5a90d8'),belly:ramp('#2a4a6a','#4a7aa0','#7ab0d0','#b4e0f4'),spot:ramp('#0a2a5a','#14468a','#2a6ac0','#5aa0f0'),flush:ramp('#0a4a5a','#1a8a9a','#38c8d0','#9af0f0')}}},
@@ -5672,6 +5738,17 @@ function w_splash(p){const w=p.world;w.ripples.push({x:p.x,y:p.y,age:0});if(!p.p
 //  glowing spores when petted, ducks under its cap when spooked, and plants itself for naps,
 //  sprouting baby mushrooms around it. The spots on its cap glow softly after dark.
 // =====================================================================
+const MSK={W:hex('#ffffff'),flashC:hex('#fff8c0'),rope:hex('#4a3018'),
+  red:ramp('#5a0a10','#a8141e','#e02a2a','#ff7a6a'),blue:ramp('#0a1a4a','#1a3a8a','#2a5ad0','#6a9aff'),yel:ramp('#7a5a00','#c09a00','#ffd21a','#fff4a0'),navy:ramp('#06103a','#0e1e5e','#1a3088','#3a52b0'),
+  green:ramp('#143a10','#2a7a1e','#4aaa2e','#9ae06a'),dgreen:ramp('#0a2a08','#1a5a14','#2a7a1e','#4a9a30'),belly:ramp('#7a7a30','#c0c070','#eeeaa8','#fffbe0'),
+  steel:ramp('#22262e','#555a68','#9aa2b4','#e8eef8'),leather:ramp('#2a1608','#5a3414','#8a5a28','#b88a4a'),gold:ramp('#5a3a06','#a07010','#e0b030','#fff0a0'),
+  teal:ramp('#0a4a4a','#14807a','#2ab8a8','#8af0e0'),rib:ramp('#5a0610','#a8101e','#e02a3a','#ff8a90'),lace:ramp('#a89a90','#e0d8d0','#fff6ee','#ffffff'),
+  cloud:ramp('#6a7488','#a8b4c8','#dce4f0','#ffffff'),ink:ramp('#06060a','#14141c','#26262e','#44444e'),basket:ramp('#3a2008','#6a4216','#a06c30','#d4a060'),
+  aqua:ramp('#3a5a8e','#6e9ad0','#aed4f2','#eaf8ff'),party:[ramp('#6a0a3a','#c01a6a','#ff4ab0','#ffb0dc'),ramp('#0a3a6a','#1a7ac0','#3ad0ff','#b0f0ff'),ramp('#6a4a00','#c09000','#ffd820','#fff4a0'),ramp('#2a0a5a','#5a1ab0','#9a4aff','#d8b0ff')]};
+// little procedural add-ons for the mushroom skins (frog eyes, plume, shield, bow)
+const MUSH_ITEM={outline:hex('#140a06'),seam:0,color(m,q){return this.C[m][clamp(q,0,3)];},
+  C:{1:MSK.red,3:ramp('#a8a8a0','#e0e0d8','#ffffff','#ffffff'),4:MSK.ink,5:MSK.green,7:ramp('#5a0610','#b0141e','#ff3a3a','#ff9a8a'),8:MSK.gold,9:MSK.rib}};
+function mushItem(fb,fn){freshLayer(fb,()=>{fn();composite(fb,MUSH_ITEM,{sAmt:0.5,sdx:1,sdy:1});});}
 const MUSH_SPOTS=[[-2.4,-1.6,1.0],[0.6,-3.0,1.1],[2.8,-1.2,0.9],[-0.4,-0.3,0.7],[3.9,0.4,0.5],[-4.0,0.2,0.5]];// (u,v,r) in cap units from its centre
 class Mush extends Pet{
   constructor(world,x,y){
@@ -5684,7 +5761,7 @@ class Mush extends Pet{
   headPos(){const c=Math.cos(this.ang),s=Math.sin(this.ang);return{x:this.x+c*2.6*this.sc,y:this.y+s*2.6*this.sc};}
   // the mouth is on the front of the stem; the view is from above and in front, so the face shows unless it's walking away
   mouthScreen(){const sc=this.sc;return{x:this.x+Math.cos(this.ang)*1.6*sc*this.face,y:this.y-this.h-1.8*sc*(1-this.duck*0.8)};}
-  hatAnchor(){const c=this.capC,sc=this.sc,f=this.face;return{x:c.x,y:c.y-c.ry*0.55,a:this.ang,s:1.1,fy:0.5,eye:this.duck<0.5&&f>=0.3?{x:this.x+Math.cos(this.ang)*1.3*sc*f+Math.cos(this.ang)*this.lean*1.2,y:this.y-this.h-2.4*sc+0.3,sp:1.6}:null};}
+  hatAnchor(){const c=this.capC,sc=this.sc,f=this.face;return{x:c.x,y:c.y-c.ry*((swatchOf(this)||{}).hatK||0.55),a:this.ang,s:1.1,fy:0.5,eye:this.duck<0.5&&f>=0.3?{x:this.x+Math.cos(this.ang)*1.3*sc*f+Math.cos(this.ang)*this.lean*1.2,y:this.y-this.h-2.4*sc+0.3,sp:1.6}:null};}
   noise(){return clamp(this.speed/6,0,1)*0.6;}
   goTo(tx,ty,dt,mode,arrive=3){const hd=this.headPos(),d=Math.hypot(tx-hd.x,ty-hd.y),dc=Math.hypot(tx-this.x,ty-this.y),done=d<=arrive||dc<=arrive+3;
     const max=mode==='run'?11:mode==='stalk'?3:mode==='slow'?3.5:6;const diff=wrapA(Math.atan2(ty-this.y,tx-this.x)-this.ang);
@@ -5706,10 +5783,12 @@ class Mush extends Pet{
   syncHeld(){if(this.held){const m=this.mouthScreen();this.held.sx=m.x;this.held.sy=m.y+1;}}
   // spooked: ducks right down under its cap and trembles for a moment
   startle(x,y){if(this.state==='grabbed'||this.state==='fall')return;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.speed=0;
-    this.state='hiding';this.timer=rand(2,3.2);if(!this.preview){SFX.play('pomf');think(this,'!');}}
+    this.state='hiding';this.timer=rand(2,3.2);if(!this.preview){SFX.play((swatchOf(this)||{}).balloon?'balloonFlap':'pomf');think(this,'!');}}
   petMe(){const r=super.petMe();if(r){this.cheer=Math.min(1,this.cheer+0.06);this.sporeT-=0.15;if(this.sporeT<=0){this.sporeT=0.5;this.spores(4);}}return r;}
-  spores(n){const w=this.world,c=this.capC;if(!this.preview&&Math.random()<0.5)SFX.play('spore');
-    for(let i=0;i<n;i++)spawn(w,'spore',c.x+rand(-c.rx,c.rx),c.y+rand(-1,1),{vx:rand(-5,5),vy:-rand(4,9),life:rand(1.8,3),ph:rand(TAU),max:3});}
+  spores(n){const w=this.world,c=this.capC,S=swatchOf(this)||{};if(!this.preview)SFX.play(S.balloon?'burnerWhoosh':Math.random()<0.5?'spore':null);if(S.balloon)this.flare=1;
+    for(let i=0;i<n;i++){const x=S.balloon?this.x+rand(-1,1):c.x+rand(-c.rx,c.rx),y=S.balloon?this._mouth:c.y+rand(-1,1);
+      if(S.spore==='rain'){spawn(w,'crumb',x,this.y+rand(-1,1),{h:this.y-y,vh:rand(15,35),vx:rand(-10,10),vy:rand(-3,3),life:rand(1,1.6),c:hex(pick(['#a8d8ff','#d8f0ff','#7ab8f0']))});continue;}
+      spawn(w,'spore',x,y,{vx:rand(-5,5),vy:-rand(4,9)*(S.spore==='confetti'||S.spore==='pow'?1.5:1),life:rand(1.8,3),ph:rand(TAU),max:3,sk:S.spore||null,c:Math.floor(rand(0,4))});}}
   hitTest(x,y){const c=this.capC;return(Math.abs(x-this.x)<6*this.sc&&y<this.y+2-this.h&&y>c.y-c.ry-2)?0:-1;}
   tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;if(!this.preview)SFX.play('squeak');return true;}
   dragTo(x,y){this.grabX=x;this.grabY=y;}
@@ -5729,24 +5808,34 @@ class Mush extends Pet{
     const bump=this.x<B.x0+6||this.x>B.x1-6||this.y<B.y0+12||this.y>B.y1-4;this.x=clamp(this.x,B.x0+6,B.x1-6);this.y=clamp(this.y,B.y0+12,B.y1-4);
     if(bump&&this.state==='wander')[this.tx,this.ty]=this.randomSpot();
     // waddle: each step is a little squashy hop with a soft pat
-    const moving=this.speed>0.5;if(moving){const was=Math.sin(this.stepPh);this.stepPh+=dt*this.speed*1.7;if((was<0)!==(Math.sin(this.stepPh)<0)){this.sq=0.7;if(!this.preview&&game.world.pet===this)SFX.play('pat');}}
+    const moving=this.speed>0.5;if(moving){const was=Math.sin(this.stepPh);this.stepPh+=dt*this.speed*1.7;if((was<0)!==(Math.sin(this.stepPh)<0)){this.sq=0.7;if(!this.preview&&game.world.pet===this)SFX.play((swatchOf(this)||{}).balloon?'basketCreak':'pat');}}
     else this.stepPh+=(Math.round(this.stepPh/Math.PI)*Math.PI-this.stepPh)*Math.min(1,dt*6);
     this.h=moving?Math.abs(Math.sin(this.stepPh))*1.3:Math.max(0,this.h-dt*10);this.sq=Math.max(0,this.sq-dt*4);
     this.duck+=((this.state==='hiding'?1:0)-this.duck)*Math.min(1,dt*(this.state==='hiding'?14:3));
     this.plant+=((this.state==='sleeping'?1:0)-this.plant)*Math.min(1,dt*2);
     // napping: baby mushrooms sprout in a little ring
-    if(this.state==='sleeping'&&this.plant>0.8&&!this.preview){this.budT=(this.budT||rand(0.8,1.6))-dt;if(this.budT<=0){this.budT=rand(1.2,2.4);sproutShroom(w,this.x,this.y);}}
+    if(this.state==='sleeping'&&this.plant>0.8&&!this.preview){this.budT=(this.budT||rand(0.8,1.6))-dt;if(this.budT<=0){this.budT=rand(1.2,2.4);sproutShroom(w,this.x,this.y,(swatchOf(this)||{}).id);}}
     if(this.state==='sleeping'&&this.timer<=0.05)this.sleepCD=rand(40,70);
     this.chewPh=this.state==='chew'?this.chewPh+dt*12:0;
     // the face shows unless it's heading away from you
     const s=Math.sin(this.ang);this.face+=((s<-0.55?0:1)-this.face)*Math.min(1,dt*8);
-    this.pts[0].x=this.x;this.pts[0].y=this.y;this.updCap();this.syncHeld();}
-  updCap(){const sc=this.sc,sh=lerp(6.6,1.4,this.duck)*(1-this.plant*0.12),st=1+this.sq*0.18-(moving(this)?Math.abs(Math.sin(this.stepPh))*-0.06:0);
+    this.pts[0].x=this.x;this.pts[0].y=this.y;this.updCap();this.syncHeld();this.skinTick(dt,misting);}
+  skinTick(dt,mist){const SW=swatchOf(this)||{},w=this.world,c=this.capC;this.flare=Math.max(0,(this.flare||0)-dt*1.5);
+    if(SW.fx==='rain'){this.flash=Math.max(0,(this.flash||0)-dt*5);this.boltT=(this.boltT??rand(2,5))-dt;
+      if(this.boltT<=0){this.boltT=rand(3,8);this.flash=1;this.boltX=rand(-2,2);}
+      if(this.flash>0.3&&this.flash<0.45&&Math.random()<0.5)this.flash=0.9;// a double flicker
+      this.rainT=(this.rainT||0)-dt*(mist?3:1)*(this.state==='petted'?0.2:1);
+      if(this.rainT<=0&&!this.preview){this.rainT=rand(0.02,0.05);const X=c.x+rand(-c.rx*0.9,c.rx*0.9),Y=c.y+c.ry*0.7;spawn(w,'drop',X,this.y+rand(-1,3),{h:Math.max(1,this.y-Y),vh:-25,life:3,rain:1});}}}
+  updCap(){const SW=swatchOf(this)||{};if(SW.balloon){const sc=this.sc,d=this.duck,top=this.y-this.h-lerp(6.6,1.4,d)*(1-this.plant*0.12)*sc,R=5.0*sc*(1-d*0.3);this._mouth=top-1.3*sc;
+      this.capC={x:this.x+Math.sin(this.t*1.1)*0.4,y:this._mouth-R*1.05,rx:R,ry:R};return;}
+    const sc=this.sc,sh=lerp(6.6,1.4,this.duck)*(1-this.plant*0.12),st=1+this.sq*0.18-(moving(this)?Math.abs(Math.sin(this.stepPh))*-0.06:0);
     this.capC={x:this.x+Math.sin(this.t*1.3)*0.2+Math.cos(this.ang)*this.lean*1.4,y:this.y-this.h-(sh+1.4)*sc/st,rx:4.6*sc*st*(1+this.duck*0.12),ry:3.0*sc/st};}
-  color(m,q,s,l,x,y){const P=PAL.mush,c=this.capC;
+  color(m,q,s,l,x,y){const P=PAL.mush,c=this.capC,V=this.sw&&this.sw.cap?this.sw:null;
+    if(V&&m!==M.CLAW2&&V.body){const r=V.body.call(this,m,q,(x+.5-this.x)/this.sc,(this.y-this.h-(y+.5))/this.sc,x,y,P);if(r!==undefined)return r;}
     switch(m){
       case M.CLAW2:{// the cap: red dome with cream spots, gills showing along the bottom rim
         const sc=this.sc,u=(x+.5-c.x)/sc,v=(y+.5-c.y)/sc;
+        if(V){if(this.wet>0.3&&hash(x*7,y*5)>0.93)return MSK.W;if(!V.full&&v>c.ry/sc*0.55)return V.gill?V.gill.call(this,u,v,q,x,y):P.gill[Math.min(3,q)];return V.cap.call(this,u,v,this.cheer>0.5?Math.min(3,q+1):q,x,y,c,P);}
         if(v>c.ry/sc*0.55)return P.gill[Math.min(3,q)];
         for(const[sx,sy,r]of MUSH_SPOTS){const du=u-sx,dv=v-sy;if(du*du+dv*dv<r*r)return P.spot[Math.min(3,q+(du+dv<-0.3?1:0))];}
         let qq=q;if(this.cheer>0.5)qq=Math.min(3,qq+1);if(this.wet>0.3&&hash(x*7,y*5)>0.9)return P.spot[3];return P.cap[qq];}
@@ -5755,7 +5844,8 @@ class Mush extends Pet{
       case M.TOE:return P.gill[Math.max(0,q-1)];
     }return INK;}
   draw(fb){const sc=this.sc,x=this.x,y=this.y,oy=-this.h,d=this.duck,pl=this.plant,moving_=this.speed>0.5,sp=this.stepPh;
-    const stemH=lerp(6.6,1.4,d)*(1-pl*0.12)*sc,sw=2.5*sc*(1+this.sq*0.15),lean=Math.cos(this.ang)*this.lean*1.2;
+    const stemH=lerp(6.6,1.4,d)*(1-pl*0.12)*sc,sw=2.5*sc*(1+this.sq*0.15),lean=Math.cos(this.ang)*this.lean*1.2,V=this.sw&&this.sw.cap?this.sw:null;
+    this._top=y+oy-stemH;this._hands=[];if(V&&V.pre)V.pre.call(this,fb);
     // feet: little nubs that step alternately
     for(const sd of[-1,1]){const lift=moving_?Math.max(0,Math.sin(sp+(sd>0?Math.PI:0)))*1.2:0,fx=x+sd*1.9*sc+Math.cos(this.ang)*(moving_?Math.sin(sp+(sd>0?Math.PI:0))*0.8:0);
       fb.cap(fx,y-lift*0.3+0.4,1.2*sc,fx+0.6,y-lift*0.3+0.4,1.1*sc,M.TOE,1,0,0,0.2);}
@@ -5763,29 +5853,47 @@ class Mush extends Pet{
     const top=y+oy-stemH,bot=y+oy-0.9*sc;fb.cap(x,bot,sw,x+lean,top+sw*0.35,sw*0.92,M.BODY,2,0,0,0.6);
     for(const sd of[-1,1]){const swing=moving_?Math.sin(sp+(sd>0?0:Math.PI))*0.9:0,cheer=this.cheer>0.5?Math.sin(this.t*9+sd)*1.2:0,ay=lerp(bot,top,0.28),ch=this.state==='chew'?1:0,hx=x+sd*(sw+0.5*sc)*(1-ch*0.45)+swing*0.4+Math.cos(this.ang)*ch*0.8*sc,hy=ay+1.3*sc-cheer*1.4-ch*0.5*sc;// chewing: hands come in to hold the food at mouth height
       // same shape class as the stem so the outline wraps body and arm as one (the stubby arm still pokes out of the silhouette and is shaded a touch darker)
-      fb.cap(x+sd*sw*0.45,ay+0.2*sc,0.75*sc,hx,hy,0.7*sc,M.LIMB,2,0,0,0.85);}
+      fb.cap(x+sd*sw*0.45,ay+0.2*sc,0.75*sc,hx,hy,0.7*sc,M.LIMB,2,0,0,0.85);this._hands[sd<0?0:1]=[hx,hy];}
     // the cap: a wide dome sitting on top (drops right over the body when hiding)
-    const c=this.capC;fb.cap(c.x-c.rx+c.ry,c.y,c.ry,c.x+c.rx-c.ry,c.y,c.ry,M.CLAW2,4,0,0,1.2);fb.cap(c.x,c.y-c.ry*0.45,c.rx*0.7,c.x,c.y-c.ry*0.45,c.rx*0.7,M.CLAW2,4,0,0,1.4);
+    const c=this.capC;if(V&&V.drawCap)V.drawCap.call(this,fb,c);else{fb.cap(c.x-c.rx+c.ry,c.y,c.ry,c.x+c.rx-c.ry,c.y,c.ry,M.CLAW2,4,0,0,1.2);fb.cap(c.x,c.y-c.ry*0.45,c.rx*0.7,c.x,c.y-c.ry*0.45,c.rx*0.7,M.CLAW2,4,0,0,1.4);}
+    if(V&&V.post)V.post.call(this,fb);
   }
   drawExtras(fb){const c=this.capC,sc=this.sc,K=hex('#1a0e08'),x=this.x,d=this.duck,f=this.face,W1=hex('#ffffff'),g=this.glowPx;g.length=0;
     // glowing spot centres (used by glow() at night)
-    for(const[sx,sy,r]of MUSH_SPOTS)if(r>0.7)g.push([c.x+sx*sc,c.y+sy*sc,r]);
+    const SW=this.sw&&this.sw.cap?this.sw:{};for(const[sx,sy,r]of SW.rings||MUSH_SPOTS)if(r>0.7)g.push([c.x+sx*sc,c.y+sy*sc,r]);
+    if(SW.extras)SW.extras.call(this,fb);
     if(this.wet>0.3){pset(fb,c.x-c.rx*0.45,c.y-c.ry*0.55,W1);pset(fb,c.x-c.rx*0.35,c.y-c.ry*0.6,hex('#ffd8d0'));}
     // face on the front of the stem, peeking out under the cap when hiding
-    if(f<0.3||!faceOn(this.kind))return;const fx=x+Math.cos(this.ang)*1.3*sc*f+Math.cos(this.ang)*this.lean*1.2,fy=d>0.5?c.y+c.ry+0.6:this.y-this.h-lerp(2.4,1.2,d)*sc;
+    if(f<0.3||!faceOn(this.kind))return;const fx=x+Math.cos(this.ang)*1.3*sc*f+Math.cos(this.ang)*this.lean*1.2,fy=SW.balloon?this.y-this.h-lerp(SW.faceH,2.3,d)*sc:d>0.5?c.y+c.ry+0.6:this.y-this.h-lerp(SW.faceH||2.4,1.2,d)*sc;
     const asleep=this.state==='sleeping',happy=this.cheer>0.5||this.state==='petted',shut=asleep||this.blink>0;
-    if(d<0.5){const FC=hex('#f6e8cc');for(let yy=-3;yy<=2;yy++)for(let xx=-4;xx<=4;xx++){const X=Math.round(fx)+xx,Y=Math.round(fy)+yy;if(X<0||Y<0||X>=fb.w||Y>=fb.h)continue;const i=Y*fb.w+X;if(fb.mat[i]===M.BODY)fb.px[i]=mixc(fb.px[i],FC,Math.abs(xx)>=4?0.4:0.88);}}
+    const FP=SW.facePatch||[4,-3,2];let EK=K;
+    if(d<0.5||SW.balloon){const FC=hex('#f6e8cc');for(let yy=FP[1];yy<=FP[2];yy++)for(let xx=-FP[0];xx<=FP[0];xx++){const X=Math.round(fx)+xx,Y=Math.round(fy)+yy;if(X<0||Y<0||X>=fb.w||Y>=fb.h)continue;const i=Y*fb.w+X;
+      if(fb.mat[i]===M.BODY)fb.px[i]=mixc(fb.px[i],FC,Math.abs(xx)>=FP[0]||(Math.abs(xx)>=FP[0]-1&&(yy===FP[1]||yy===FP[2]))?0.45:0.9);}}
+    if(SW.faceFx==='mask'&&d<0.5){const MK=hex('#141a3a'),X=Math.round(fx),Y=Math.round(fy);for(let yy=-3;yy<=0;yy++)for(let xx=-4;xx<=4;xx++){if((Math.abs(xx)===4&&yy!==-2)||(yy===0&&Math.abs(xx)<2))continue;pset(fb,X+xx,Y+yy,MK);}EK=W1;}// domino mask, white eyes
+    if(SW.faceFx==='blush'&&d<0.5){const BL=hex('#ff8aa0'),X=Math.round(fx),Y=Math.round(fy)+1;pmix(fb,X-4,Y,BL,0.7);pmix(fb,X+3,Y,BL,0.7);}
     for(const sd of[-1,1]){const ex=Math.round(fx)+(sd<0?-2:1),ey=Math.round(fy);
-      if(asleep){pset(fb,ex-1,ey,K);pset(fb,ex,ey+1,K);pset(fb,ex+1,ey,K);}// sleepy u-shaped eyes
-      else if(happy){pset(fb,ex-1,ey,K);pset(fb,ex,ey-1,K);pset(fb,ex+1,ey,K);}// happy ^ eyes
-      else if(shut){pset(fb,ex,ey-1,K);pset(fb,ex+1,ey-1,K);}
+      if(asleep){pset(fb,ex-1,ey,EK);pset(fb,ex,ey+1,EK);pset(fb,ex+1,ey,EK);}// sleepy u-shaped eyes
+      else if(happy){pset(fb,ex-1,ey,EK);pset(fb,ex,ey-1,EK);pset(fb,ex+1,ey,EK);}// happy ^ eyes
+      else if(shut){pset(fb,ex,ey-1,EK);pset(fb,ex+1,ey-1,EK);}
+      else if(EK!==K){for(const[u,v]of[[0,0],[1,0],[0,-1],[1,-1]])pset(fb,ex+u,ey+v,EK);}
       else{for(const[u,v]of[[0,0],[1,0],[0,-1],[1,-1],[0,-2],[1,-2]])pset(fb,ex+u,ey+v,K);pset(fb,ex+1,ey-2,W1);if(d>0.5)pset(fb,ex,ey-2,W1);}}
     if(d>0.5)return;const mx=Math.round(fx)-1,my=Math.round(fy+1.3*sc);
     if(this.state==='chew'){const o=Math.sin(this.chewPh)>0;pset(fb,mx,my,K);if(o){pset(fb,mx+1,my,K);pset(fb,mx,my+1,K);pset(fb,mx+1,my+1,K);}}
     else if(happy){pset(fb,mx-1,my,K);pset(fb,mx,my+1,K);pset(fb,mx+1,my+1,K);pset(fb,mx+2,my,K);}
     else if(!asleep){pset(fb,mx,my,K);pset(fb,mx+1,my+1,K);pset(fb,mx+2,my,K);}}
-  glow(fb,night){const k=night*0.9+this.cheer*0.4;if(k<0.05)return;for(const[x,y,r]of this.glowPx){const b=k*(0.75+0.25*Math.sin(this.t*1.6+x));padd(fb,x,y,40*b,170*b,120*b);
-    if(r>0.7)for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])padd(fb,x+dx,y+dy,14*b,70*b,50*b);}}
+  glow(fb,night){const SW=this.sw&&this.sw.cap?this.sw:{};if(SW.balloon)this.burnerGlow(fb,night);if(SW.fx==='rain')this.boltGlow(fb,night);
+    const k=night*0.9+this.cheer*0.4;if(k<0.05)return;const gc=SW.glowC;
+    for(const[x,y,r]of this.glowPx){const b=k*(0.75+0.25*Math.sin(this.t*1.6+x)),C=gc?gc():[40,170,120],E=gc?0.38:0.41;padd(fb,x,y,C[0]*b,C[1]*b,C[2]*b);
+      if(r>0.7)for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])padd(fb,x+dx,y+dy,C[0]*E*b,C[1]*E*b,C[2]*E*b);}}
+  // the burner on its head: a little flame that roars up when petted and lights the balloon from inside
+  burnerGlow(fb,night){const x=this.x,y=this._mouth+1.2*this.sc,f=Math.max(this.flare||0,0.4)*(0.85+0.15*Math.sin(this.t*23)),n=Math.round(2+f*4);
+    for(let i=0;i<n;i++){const a=1-i/n,X=x+Math.round(Math.sin(this.t*17+i)*0.6);padd(fb,X,y-i,255*a,(200-i*25)*a,60*a);if(i<n-2)padd(fb,X+1,y-i,200*a,120*a,30*a);}
+    const L=(0.25+night*0.75)*f;for(let yy=-10;yy<=4;yy++)for(let xx=-7;xx<=7;xx++){const X=Math.round(x)+xx,Y=Math.round(y)+yy;if(X<0||Y<0||X>=fb.w||Y>=fb.h)continue;const m=fb.mat[Y*fb.w+X];if(m!==M.CLAW2&&m!==M.BODY&&m!==M.CLAW)continue;
+      const dd=Math.hypot(xx,yy*0.8),a=Math.max(0,1-dd/9)*L*(m===M.CLAW2?1.6:1);if(a>0.02)padd(fb,X,Y,190*a,105*a,30*a);}}
+  // rain cloud: lightning flickers inside the cloud, now and then a tiny bolt
+  boltGlow(fb,night){const f=this.flash||0;if(f<0.05)return;const c=this.capC,b=f*(0.5+night*0.6);
+    for(let yy=-9;yy<=9;yy++)for(let xx=-10;xx<=10;xx++){const X=Math.round(c.x)+xx,Y=Math.round(c.y)+yy,a=Math.max(0,1-Math.hypot(xx,yy*1.2)/10)*b;if(a>0.02)padd(fb,X,Y,200*a,200*a,150*a);}
+    if(f>0.6){let X=Math.round(c.x+this.boltX),Y=Math.round(c.y+c.ry);for(let i=0;i<4;i++){padd(fb,X,Y+i,255,250,180);X+=(i&1)?1:-1;}}}
   statusText(){switch(this.state){
     case 'idle':return 'is standing about, looking cheerful';case 'wander':return 'is waddling around';case 'hiding':return 'ducked under its cap!';
     case 'sleeping':return 'planted itself for a nap (mushrooms are sprouting!)';case 'petted':return 'is puffing happy little spores';case 'grabbed':return 'is dangling, feet kicking';
@@ -5793,16 +5901,44 @@ class Mush extends Pet{
     return super.statusText();}
 }
 function moving(p){return p.speed>0.5;}
-// baby mushrooms: pop up around a napping sprite, stay a while, then shrink away
-function sproutShroom(w,x,y){if(!w.shrooms)w.shrooms=[];if(w.shrooms.length>=10)return;const a=rand(TAU),r=rand(9,15),B=w.bounds;
-  w.shrooms.push({x:clamp(x+Math.cos(a)*r,B.x0,B.x1),y:clamp(y+Math.sin(a)*r*0.7,B.y0,B.y1),t:0,life:rand(40,70),s:rand(0.8,1.25),c:Math.random()<0.25?1:0});
+// themed spore puffs for the mushroom skins
+function sporeFx(fb,p,f){const W1=MSK.W;
+  if(p.sk==='pow'){const C=MSK.yel[3],tw=Math.sin(p.ph*4+p.c)>0;pmix(fb,p.x,p.y,W1,f);for(const[dx,dy]of tw?[[1,0],[-1,0],[0,1],[0,-1]]:[[1,1],[-1,-1],[1,-1],[-1,1]])pmix(fb,p.x+dx,p.y+dy,C,0.8*f);}
+  else if(p.sk==='confetti'){const C=[MSK.rib[2],MSK.teal[3],MSK.gold[2],W1][p.c%4];pmix(fb,p.x,p.y,C,f);if(Math.sin(p.ph*2.5)>0)pmix(fb,p.x+1,p.y,C,f*0.8);}
+  else if(p.sk==='spark'){padd(fb,p.x,p.y,255*f,170*f,50*f);padd(fb,p.x,p.y-1,120*f,60*f,10*f);}
+  else if(p.sk==='smoke'){const a=f*0.45,G=hex('#c8c0b8');pmix(fb,p.x,p.y,G,a);pmix(fb,p.x+1,p.y,G,a*0.7);pmix(fb,p.x,p.y-1,G,a*0.7);pmix(fb,p.x+1,p.y-1,G,a*0.4);}
+  else if(p.sk==='bubble'){const A=MSK.aqua[3];if(p.life<0.25){for(const[dx,dy]of[[1,1],[-1,1],[1,-1],[-1,-1]])pmix(fb,p.x+dx*1.5,p.y+dy*1.5,A,0.7);return;}
+    for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])pmix(fb,p.x+dx,p.y+dy,A,0.75*f);pmix(fb,p.x-1,p.y-1,W1,0.8*f);}}
+// themed baby mushrooms: little ones in the same costume (grow in from small)
+function drawBaby(fb,m,kind,x,y,s,t){const W1=MSK.W,K1=MSK.ink[0],big=s>0.85,cw=big?2:1,h=big?3:2,P=(dx,dy,c)=>pset(fb,x+dx,y-dy,c);
+  // a chubby little mushroom: a 3-wide stem, a 2-row cap and a dome row on top; returns the cap's bottom row
+  const shroom=(stem,cap,stemFn)=>{for(let k=0;k<h;k++)for(const dx of[-1,0,1])P(dx,k,stemFn?stemFn(dx,k)??stem[dx<0?3:2]:stem[dx<0?3:2]);
+    for(let dx=-cw-1;dx<=cw+1;dx++)P(dx,h,cap[Math.abs(dx)===cw+1?1:2]);for(let dx=-cw;dx<=cw;dx++)P(dx,h+1,cap[dx<0?3:2]);for(let dx=-cw+1;dx<=cw-1;dx++)P(dx,h+2,cap[3]);return h;};
+  if(kind==='hero'){const cf=Math.sin(t*5+m.x)>0?1:0;P(-2,0,MSK.red[1]);P(2,0,MSK.red[1]);P(-2,1,MSK.red[2-cf]);P(2,1,MSK.red[1+cf]);// cape
+    shroom(MSK.blue,MSK.red,(dx,k)=>k===h-1?(dx===0?MSK.navy[0]:W1):k===0&&dx===0?MSK.yel[2]:undefined);P(0,h+1,MSK.yel[3]);if(big)P(0,h+2,MSK.yel[2]);}
+  else if(kind==='frog'){shroom(MSK.belly,MSK.green,(dx,k)=>k===h-1?(dx===0?MSK.belly[2]:K1):undefined);const ty=h+(big?3:2);
+    for(const sd of[-1,1]){P(sd*cw,ty,MSK.green[2]);P(sd*cw-sd,ty,W1);P(sd*cw,ty+1,MSK.green[3]);}}
+  else if(kind==='helm'){shroom(MSK.blue,MSK.steel,(dx,k)=>k===h-1?(dx===0?MSK.steel[1]:K1):undefined);P(0,h+1,MSK.steel[3]);for(let dx=-cw-1;dx<=cw+1;dx++)P(dx,h,MSK.gold[2]);
+    const sw=Math.round(Math.sin(t*3+m.x)*0.6);P(0,h+3,MSK.red[2]);P(-1+sw,h+4,MSK.red[3]);P(-2+sw,h+4,MSK.red[1]);P(-2,1,MSK.red[2]);P(-2,2,MSK.gold[2]);}// plume, shield
+  else if(kind==='cloud'){shroom(MSK.yel,MSK.cloud,(dx,k)=>k===h-1?(dx===0?MSK.yel[3]:K1):undefined);P(-cw,h+2,MSK.cloud[3]);P(cw,h+2,MSK.cloud[2]);P(0,h+3,MSK.cloud[3]);
+    for(const dx of[-cw-1,cw+1]){const k=Math.floor((t*6+m.x+dx)%3);P(dx,h-1-k,MSK.aqua[3]);}}// a little rain off the brim
+  else if(kind==='gift'){const hh=big?4:3,hw=big?2:1;for(let dy=0;dy<hh;dy++)for(let dx=-hw;dx<=hw;dx++)P(dx,dy,dx===0||dy===hh-2?MSK.rib[dx<0?3:2]:MSK.teal[dy===hh-1?3:dx<0?3:2]);
+    P(-1,hh,MSK.rib[2]);P(1,hh,MSK.rib[2]);P(-2,hh+1,MSK.rib[3]);P(2,hh+1,MSK.rib[2]);P(0,hh,MSK.rib[1]);}// box with a ribbon and a bow
+  else if(kind==='balloon'){const bob=Math.round(Math.sin(t*1.5+m.x)*0.8),R=big?2:1,cy=(big?7:5)+bob;P(-1,0,MSK.basket[2]);P(0,0,MSK.basket[1]);P(1,0,MSK.basket[2]);P(-1,1,MSK.basket[3]);P(0,1,MSK.basket[2]);P(1,1,MSK.basket[3]);
+    for(let k=2;k<cy-R;k++){P(-1,k,MSK.rope);P(1,k,MSK.rope);}
+    for(let dy=-R;dy<=R+1;dy++)for(let dx=-R;dx<=R;dx++){if(dx*dx+dy*dy>R*R+R)continue;P(dx,cy+dy,dy===-1&&big?MSK.navy[2]:(dx&1)?MSK.lace[dx<0?3:2]:MSK.red[dy>0?3:2]);}}}
+function sproutShroom(w,x,y,sk){if(!w.shrooms)w.shrooms=[];if(w.shrooms.length>=10)return;const a=rand(TAU),r=rand(9,15),B=w.bounds;
+  w.shrooms.push({x:clamp(x+Math.cos(a)*r,B.x0,B.x1),y:clamp(y+Math.sin(a)*r*0.7,B.y0,B.y1),t:0,life:rand(40,70),s:rand(0.8,1.25),c:Math.random()<0.25?1:0,sk});
   if(!(w.pet&&w.pet.preview))SFX.play('bpop');}
-function drawShrooms(fb,w){if(!w.shrooms)return;const P=PAL.mush;
+function drawShrooms(fb,w){if(!w.shrooms)return;
   for(const m of w.shrooms){const g=Math.min(1,m.t/1.2)*Math.min(1,m.life/2),s=m.s*g;if(s<0.2)continue;const x=Math.round(m.x),y=Math.round(m.y),h=Math.round(1+s*1.6),cw=Math.round(1+s*1.3);
-    pdark(fb,x+1,y+1,0.6);for(let k=0;k<h;k++)pset(fb,x,y-k,P.stem[2]);const cy=y-h,col=m.c?P.cap2:P.cap;
+    // babies wear the skin of the sprite that sprouted them
+    const S=swatchById('mush',m.sk),P=S&&S.pal&&S.pal.mush?Object.assign({},PAL.mush,S.pal.mush):PAL.mush;
+    pdark(fb,x+1,y+1,0.6);if(S&&S.baby){drawBaby(fb,m,S.baby,x,y,s,w.t);continue;}for(let k=0;k<h;k++)pset(fb,x,y-k,P.stem[2]);const cy=y-h,col=m.c?P.cap2:P.cap;
     for(let dx=-cw;dx<=cw;dx++)pset(fb,x+dx,cy,col[Math.abs(dx)===cw?1:2]);for(let dx=-cw+1;dx<=cw-1;dx++)pset(fb,x+dx,cy-1,col[dx<0?3:2]);if(cw>1)pset(fb,x,cy-1,P.spot[3]);}}
 function glowShrooms(fb,w,night){if(!w.shrooms||night<0.1)return;for(const m of w.shrooms){const g=Math.min(1,m.t/1.2)*Math.min(1,m.life/2)*night;if(g<0.05)continue;
-  const y=m.y-Math.round(1+m.s*g*1.6)-1;padd(fb,m.x,y,30*g,140*g,100*g);padd(fb,m.x-1,y,10*g,50*g,35*g);padd(fb,m.x+1,y,10*g,50*g,35*g);}}
+  const y=m.y-Math.round(1+m.s*g*1.6)-1,S=swatchById('mush',m.sk),C=S&&S.glowC?S.glowC().map(v=>v*0.8):[30,140,100];
+  padd(fb,m.x,y,C[0]*g,C[1]*g,C[2]*g);for(const dx of[-1,1])padd(fb,m.x+dx,y,C[0]*0.36*g,C[1]*0.36*g,C[2]*0.36*g);}}
 
 // =====================================================================
 //  Moss golem: a blocky stone biped with a square head and glowing eyes. Stomps along swinging
@@ -6397,13 +6533,13 @@ function updateParts(w,dt){
       case 'heart':p.y+=p.vy*dt;p.x+=Math.sin(p.life*6+p.ph)*0.25+p.vx*dt;p.vx*=1-Math.min(1,dt*3);break;
       case 'zzz':p.x+=4*dt;p.y-=6*dt;break;
       case 'stink':p.y+=p.vy*dt;p.x+=Math.sin(p.life*5)*0.15;break;
-      case 'spore':p.ph+=dt*3;p.x+=(p.vx+Math.sin(p.ph)*3)*dt;p.y+=p.vy*dt;p.vx*=1-dt*0.8;p.vy*=1-dt*0.4;break;
+      case 'spore':p.ph+=dt*3;p.x+=(p.vx+Math.sin(p.ph)*3)*dt;p.y+=p.vy*dt;p.vx*=1-dt*0.8;p.vy*=1-dt*0.4;if(p.sk==='confetti'||p.sk==='spark')p.vy+=16*dt;break;
       case 'think':p.y-=(p.life>0.9?12:1.5)*dt;if(p.owner&&p.owner.world&&p.owner.headPos){const h=p.owner.headPos();p.x+=(h.x-p.x)*Math.min(1,dt*8);}break;
       case 'crumb':p.vh-=200*dt;p.h+=p.vh*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.h<0){p.h=0;p.vh=0;p.vx*=.3;p.vy*=.3;}break;
       case 'drop':p.vh-=150*dt;p.h+=p.vh*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
         if(p.h<=0){p.life=0;
           if(waterAt(w,p.x,p.y)>0){if(Math.random()<0.3)w.ripples.push({x:p.x,y:p.y,age:0});}
-          else{wetAt(w,p.x,p.y);if(Math.random()<0.4)spawn(w,'splash',p.x,p.y,{life:0.18});}if(Math.random()<0.15)SFX.play('drip');}break;
+          else{wetAt(w,p.x,p.y);if(Math.random()<0.4)spawn(w,'splash',p.x,p.y,{life:0.18});}if(!p.rain&&Math.random()<0.15)SFX.play('drip');}break;
       case 'mist':p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=1-dt*2;p.vy*=1-dt*2;break;
       case 'fdrop':p.vh-=120*dt;p.h+=p.vh*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.h<=1.8)p.life=0;break;
       case 'smoke':p.y-=7*dt;p.x+=p.vx*dt;p.vx*=1-dt;break;
@@ -8068,7 +8204,7 @@ function renderPlay(){
   if(game.placing&&P.inside){const it=ITEMS[game.placing],g=it.cat==='decor'?new Decor(game.placing,P.x,P.y):new Toy(game.placing,P.x,P.y);
     fb.clearLayer();(g instanceof Decor?drawDecor:drawToy)(fb,g);composite(fb,OBJ_PAINTER,{outline:(Math.floor(w.t*4)&1)?hex('#fff3b0'):hex('#9cd35e')});}
   if(game.held&&!game.cursorUI){const q=game.held;if(q.layered){fb.clearLayer();q.drawL(fb);composite(fb,FOOD_PAINTER);}else q.draw(fb,w.t);}
-  for(const p of w.parts){if(p.type==='drop')pset(fb,p.x,p.y-p.h,drop);else if(p.type==='mist')pmix(fb,p.x,p.y,mistc,clamp(p.life,0,1)*0.6);
+  for(const p of w.parts){if(p.type==='drop'){pset(fb,p.x,p.y-p.h,drop);if(p.rain){pmix(fb,p.x,p.y-p.h-1,drop,0.7);pmix(fb,p.x,p.y-p.h-2,drop,0.35);}}else if(p.type==='mist')pmix(fb,p.x,p.y,mistc,clamp(p.life,0,1)*0.6);
     else if(p.type==='fdrop')pmix(fb,p.x,p.y-p.h,hex('#bfefff'),0.85);
     else if(p.type==='down'){const f=clamp(p.life,0,1);pmix(fb,p.x,p.y-p.h,hex('#fff2a0'),0.9*f);pmix(fb,p.x+1,p.y-p.h,hex('#ffe060'),0.5*f);}
     else if(p.type==='steam'){// a soft vapour puff: swells as it rises, ragged at the edge, brightest on its upper side, fading away
@@ -8115,6 +8251,7 @@ function renderPlay(){
     else if(p.type==='note'){const cs=['#ff7ab4','#7ad4ff','#ffe066','#9cf07a'];sprite(fb,NOTE,Math.round(p.x),Math.round(p.y),{k:hex(cs[p.c||0])});}
     else if(p.type==='ring'){const r=(1-p.life/0.25)*5+1,n=Math.ceil(r*6);for(let i=0;i<n;i++){const a=i/n*TAU;padd(fb,p.x+Math.cos(a)*r,p.y+Math.sin(a)*r,80,90,100);}}
     else if(p.type==='spark')padd(fb,p.x,p.y,70,40,8);
+    else if(p.type==='spore'&&p.sk){const f=clamp(p.life/p.max,0,1)*Math.min(1,(p.max-p.life)*3);sporeFx(fb,p,f);}
     else if(p.type==='spore'){const f=clamp(p.life/p.max,0,1)*Math.min(1,(p.max-p.life)*3),b=f*(0.5+0.8*(1-w.dayness));padd(fb,p.x,p.y,90*b,190*b,120*b);if(b>0.4)for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])padd(fb,p.x+dx,p.y+dy,20*b,60*b,40*b);}
     else if(p.type==='lava'){const f=clamp(p.life/1.2,0,1);pset(fb,p.x,p.y-p.h,mixc(hex('#5a1004'),hex('#ffd060'),f));padd(fb,p.x,p.y-p.h,160*f,60*f,10*f);padd(fb,p.x+1,p.y-p.h,60*f,20*f,4*f);}
     else if(p.type==='num'){const f=clamp(p.life/0.4,0,1);if(f>0.2)drawDigit(fb,p.v,Math.round(p.x-1),Math.round(p.y-2),p.v===6?hex('#ffe066'):p.v===1?hex('#ff6a6a'):hex('#ffffff'));}
