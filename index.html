@@ -2278,7 +2278,9 @@ const swatchById=(kind,id)=>id&&(SWATCHES[kind]||[]).find(s=>s.id===id)||null;
 // which swatch a critter wears: the one being tried on in the menu preview, else the one saved for it
 const swatchOf=pet=>swatchById(pet.kind,pet.skinTry!==undefined?pet.skinTry:save.pets[pet.kind]?.skin);
 function withSkin(pet,fn){const sw=swatchOf(pet);if(pet.baseOutline===undefined)pet.baseOutline=pet.outline;
-  pet.outline=sw&&sw.outline?(sw.ol??=hex(sw.outline)):pet.baseOutline;pet.skinMorph=sw&&sw.morph||null;if(!sw||!sw.pal)return fn();
+  pet.outline=sw&&sw.outline?(sw.ol??=hex(sw.outline)):pet.baseOutline;pet.skinMorph=sw&&sw.morph||null;
+  if(sw&&sw.slime){const cr=pet.cr;pet.cr=sw.sr??=slimeRamp(sw.slime);try{return fn();}finally{pet.cr=cr;}}// slime: one locked colour, whatever it ate
+  if(!sw||!sw.pal)return fn();
   const saved=[];for(const k in sw.pal){const P=PAL[k];for(const kk in sw.pal[k]){saved.push([P,kk,P[kk]]);P[kk]=sw.pal[k][kk];}if(sw.outline){saved.push([P,'outline',P.outline]);P.outline=sw.outline;}}
   // chameleon and dragon mix their colours ahead of time, so redo that with the swatch on (and back again after)
   if(pet.updateColors)pet.updateColors();
@@ -3719,6 +3721,7 @@ class Cuttle extends Kraken{
 // =====================================================================
 const BUNC={top:ramp('#4a1e04','#78380a','#a85816','#d48a34'),crust:ramp('#5e2e0a','#934c14','#c47828','#e8a84c'),crumb:ramp('#9a7a56','#d4b88e','#f0dcb6','#fff6e2'),
   glaze:hex('#fff8e4'),wet:ramp('#8a7458','#bca482','#dccaa6','#f2e6cc')};
+PAL.bun=BUNC;// so swatches can recolour it like the others
 class Bun extends Slime{
   get translucent(){return 0;}
   constructor(world,x,y){super(world,x,y);this.kind='bun';this.mind=mindFor('bun','');this.outline=hex(SPECIES.bun.outline);this.R=8;this.seam=0.8;
@@ -4010,6 +4013,7 @@ class Nudi extends Pet{
 //  steams when misted, and by day dozes as a small ember.
 // =====================================================================
 const WISPA=[hex('#3a1a8a'),hex('#5a3cf0'),hex('#38c8ff'),hex('#bafcff'),hex('#ffffff')],WISPB=[hex('#0e4a5a'),hex('#18a888'),hex('#56f0c0'),hex('#d4ffee'),hex('#ffffff')];
+PAL.wisp={a:WISPA,b:WISPB};// the two flame colours it drifts between
 class Wisp extends Pet{
   constructor(world,x,y){super();this.initCommon(world,'wisp');
     this.x=x;this.y=y;this.ang=0;this.h=8;this.vx=0;this.vy=0;this.speed=0;this.sc=1;this.outline=hex('#0a1240');this.n=1;this.pts=[{x,y}];this.gt=0;
@@ -4076,7 +4080,7 @@ class Wisp extends Pet{
     const c=this.core();this.trail.unshift({x:c.x,y:c.y});if(this.trail.length>16)this.trail.pop();}
   color(){return INK;}
   draw(fb){}// it's all light: drawn in glow(), after the night falls
-  pal(){const k=0.5+0.5*Math.sin(this.hue);return WISPA.map((a,i)=>mixc(a,WISPB[i],k));}
+  pal(){const k=0.5+0.5*Math.sin(this.hue),A=PAL.wisp.a,B=PAL.wisp.b;return A.map((a,i)=>mixc(a,B[i],k));}
   glow(fb,night){const pal=this.pal(),c=this.core(),cx=c.x,cy=c.y,x=this.x,y=this.y,t=this.t,H=this.flameH()+Math.sin(t*11)*0.8,r0=this.flameR()*(1+Math.sin(t*5.3)*0.05),vx=this.vx,vy=this.vy,e=this.ember(),bright=(1-this.dimK()*0.5),W=fb.w;
     const add=(px,py,col,f)=>padd(fb,px,py,((col)&255)*f,((col>>8)&255)*f,((col>>16)&255)*f),flick=0.88+0.08*Math.sin(t*13)+0.05*Math.sin(t*31+1);
     // a flickering pool of light on the ground, rippling a little, and a soft halo; both much stronger at night
@@ -4127,7 +4131,7 @@ class Wisp extends Pet{
 //  when petted, dangles when you pick it up and boings when dropped, goes flat and soggy when misted and
 //  curls up into a fuzzy donut to nap.
 // =====================================================================
-const FUZZC={pink:ramp('#9a1654','#e43888','#ff6eae','#ffb6d8'),eye:ramp('#8e96a2','#d2d8e0','#f2f5f8','#ffffff'),outline:'#1a0812'};
+const FUZZC={pink:ramp('#9a1654','#e43888','#ff6eae','#ffb6d8'),eye:ramp('#8e96a2','#d2d8e0','#f2f5f8','#ffffff'),outline:'#1a0812'};PAL.fuzz=FUZZC;
 class FuzzWorm extends Pet{
   constructor(world,x,y){super();this.initCommon(world,'fuzzworm');
     this.x=x;this.y=y;this.ang=rand(TAU);this.h=0;this.vh=0;this.speed=0;this.sc=1;this.outline=hex(FUZZC.outline);this.n=1;this.pts=[{x,y}];this.gt=0;this.seam=99;
@@ -8024,9 +8028,9 @@ const ui={
         inp.addEventListener('keydown',e=>{if(e.key==='Enter')done(true);else if(e.key==='Escape')done(false);e.stopPropagation();});inp.addEventListener('blur',()=>done(true));});}
     // colours live on their own page, so the critter page stays the same size however many there are
     const SW=SWATCHES[kind];
-    if(SW){const cb=document.createElement('button');cb.className='btn alt pcol';const have=1+(ps?.skins||[]).filter(id=>swatchById(kind,id)).length;
+    let cb=null;if(SW){cb=document.createElement('button');cb.className='btn alt pcol';const have=1+(ps?.skins||[]).filter(id=>swatchById(kind,id)).length;
       cb.innerHTML=`<span class="pcd" style="background:linear-gradient(135deg,${(swatchById(kind,ps?.skin)||{dot:SWATCH_BASE[kind]}).dot.join(' 50%,')} 50%)"></span>Colours · ${have}/${SW.length+1}`;
-      cb.addEventListener('click',()=>{SFX.play('tick');this.petColours(det);});hd.after(cb);}
+      cb.addEventListener('click',()=>{SFX.play('tick');this.petColours(det);});}
     const b=document.createElement('button');b.className='btn pgo'+(own?'':' buy');b.textContent=here?'Here now':ps?`Visit ${ps.name}`:own?'Adopt':`Adopt · ${pr} coins`;b.disabled=here;
     b.addEventListener('click',()=>{
       if(!petOwned(kind)){if(save.coins<pr){SFX.play('nope');b.textContent=`Need ${pr-save.coins} more coins`;setTimeout(()=>{b.textContent=`Adopt · ${pr} coins`;},1600);return;}
@@ -8035,6 +8039,7 @@ const ui={
       if(was)setTimeout(()=>flash(`Welcome! You have ${save.coins} coins. Try the Gacha machines!`),2900);});
     det.appendChild(b);
     {const info=document.createElement('div');info.className='pinfo';pv.after(info);let n=info.nextSibling;while(n&&n!==b){const nx=n.nextSibling;info.appendChild(n);n=nx;}}
+    if(cb)det.insertBefore(cb,b);// pinned just above the visit/adopt button, outside the scrolling text
     {const p=this.livePreview(kind,cv);p.pet.skinTry=undefined;drawPreview(p);this.previews.push(p);}
   },
   // a critter's colours page: the live preview stays put up top, the colour chips scroll underneath,
