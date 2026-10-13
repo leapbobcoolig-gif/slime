@@ -2128,7 +2128,7 @@ class Snake extends Walker{
   rad(i){const r=super.rad(i),V=this.V;if(V&&V.beads&&i>2)return r*(i%2===0?1.08:0.72);if(V&&V.coils&&i>1){const P=this.slP||2,u=(i*this.seg/P)%1;return r*(0.9+0.1*Math.sin(u*Math.PI));}return r;}
   get selfLit(){return!!(this.V&&this.V.glow);}
   update(dt){const S=swatchOf(this)||{},sg=S.seg||this.sp.seg;this.thunder=Math.max(0,(this.thunder||0)-dt*1.6);if(S.fly){const want=this.state==='sleeping'||this.state==='basking'?0.15:1;this.flyK=(this.flyK??want)+(want-(this.flyK??want))*Math.min(1,dt*1.2);}if(this.seg!==sg){this.seg=sg;this.len=(this.n-1)*sg;}super.update(dt);
-    if(S.coils){const want=lerp(1.7,3.2,clamp(Math.abs(this.speed||0)/20,0,1)),was=this.slP||1.7;this.slP=was+(want-was)*Math.min(1,dt*3);if(!this.preview&&was<2.2&&this.slP>=2.2)SFX.play('springStretch');}
+    if(S.coils){const want=lerp(1.7,6.2,clamp(Math.abs(this.speed||0)/16,0,1)),was=this.slP||1.7;this.slP=was+(want-was)*Math.min(1,dt*3);if(!this.preview&&was<3&&this.slP>=3)SFX.play('springStretch');}
     if(S.fx==='shed'){this.shedT=(this.shedT??rand(4,8))-dt;if(this.shedT<=0&&this.state!=='grabbed'){this.shedT=rand(25,45);this.sheds.push({p:this.pts.map((q,i)=>[q.x,q.y,this.rad(i)]),age:0});if(this.sheds.length>2)this.sheds.shift();}
       for(const d of this.sheds)d.age+=dt;this.sheds=this.sheds.filter(d=>d.age<50);}}
   // flying (Shenron): the whole body hovers above the ground and ripples, with a soft shadow on the ground below; he settles down to sleep
@@ -2139,9 +2139,9 @@ class Snake extends Walker{
   draw(fb){const V=this.V,oy=-this.h;if(V&&V.fx==='shed')this.drawSheds(fb);if(V&&V.fly)this.drawFlyShadow(fb);
     this.withLift(()=>{if(V&&V.pre)V.pre.call(this,fb,oy);if(V&&V.coils)this.drawCoils(fb,oy);else super.draw(fb);if(V&&V.post)V.post.call(this,fb,oy);});}
   // the Slinky: a dark hollow core with a coil band across it every so often, slanted like a real spring
-  drawCoils(fb,oy){const P=this.pts,sp=(this.slP||2)*0.55;for(let i=0;i<this.n-1;i++)fb.cap(P[i].x,P[i].y+oy,this.radiusAt(i/(this.n-1))*0.55,P[i+1].x,P[i+1].y+oy,this.radiusAt((i+1)/(this.n-1))*0.55,M.LIMB,1);
-    for(let s=0.2;s<this.len-0.4;s+=sp){const p=this.pointAt(s),r=this.radiusAt(s/this.len)*1.05,nx=-p.fy,ny=p.fx,tl=0.55;
-      fb.cap(p.x+nx*r-p.fx*tl,p.y+ny*r+oy-p.fy*tl,0.72,p.x-nx*r+p.fx*tl,p.y-ny*r+oy+p.fy*tl,0.72,M.BODY,2,s,s);}
+  drawCoils(fb,oy){const P=this.pts,sp=(this.slP||2)*0.55;if(sp<1.5)for(let i=0;i<this.n-1;i++)fb.cap(P[i].x,P[i].y+oy,this.radiusAt(i/(this.n-1))*0.42,P[i+1].x,P[i+1].y+oy,this.radiusAt((i+1)/(this.n-1))*0.42,M.LIMB,1);
+    for(let s=0.2;s<this.len-0.4;s+=sp){const bw=lerp(0.75,0.68,clamp((sp-0.9)/2.5,0,1));const p=this.pointAt(s),r=this.radiusAt(s/this.len)*1.05,nx=-p.fy,ny=p.fx,tl=0.55;
+      fb.cap(p.x+nx*r-p.fx*tl,p.y+ny*r+oy-p.fy*tl,bw,p.x-nx*r+p.fx*tl,p.y-ny*r+oy+p.fy*tl,bw,M.BODY,2,s,s);}
     this.drawEyes(fb,oy);this.drawTongue(fb,oy);}
   get seam(){return this.V&&this.V.coils?0.35:undefined;}
   drawEyes(fb,oy){if(this.V&&this.V.dragon)return;super.drawEyes(fb,oy);}
