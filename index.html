@@ -2170,10 +2170,10 @@ class Salamander extends Walker{
   radiusAt(t){let r=super.radiusAt(t);if(this.fx==='inferno'&&t>0.5){const k=Math.min(1,(t-0.5)/0.12);r*=lerp(1,(1-k)*(1-k)*0.55+0.45*(1-k),1-(this.cool||0));}// inferno: past the hips the tail is fire, not flesh (it comes back as obsidian in water)
     return this.sw&&this.sw.sc?r*this.sw.sc:r;}// inferno is a size up
   // inferno's tail: the tail's own spine from the hips, carried on a little past the old tip; it bends and wiggles with the body
-  flamePath(){const L=this.len,s0=L*0.47,big=(1-this.cool)*(this.state==='sleeping'?0.8:1)*(1+this.flare*0.25),sE=L*(1+0.22*big),out=[];
-    const tip=this.pointAt(L);for(let s=s0;s<=sE;s+=0.5){const p=s<=L?this.pointAt(s):{x:tip.x-tip.fx*(s-L),y:tip.y-tip.fy*(s-L)-(this.h||0)*0,fx:tip.fx,fy:tip.fy};
+  flamePath(){const L=this.len,s0=L*0.5,big=(1-this.cool)*(this.state==='sleeping'?0.8:1)*(1+this.flare*0.25),sE=L*(1+(0.32+0.04*Math.sin(this.t*2.3))*big),out=[];
+    const tip=this.pointAt(L);for(let s=s0;s<=sE;s+=0.5){const p=s<=L?this.pointAt(s):{x:tip.x-tip.fx*(s-L),y:tip.y-tip.fy*(s-L),fx:tip.fx,fy:tip.fy};
       out.push({x:p.x,y:p.y-(this.h||0),fx:p.fx,fy:p.fy,s,u:(s-s0)/(sE-s0)});}
-    out.big=big;return out;}
+    out.big=big;out.r0=super.radiusAt(0.5)*(this.sw.sc||1);return out;}
   get selfLit(){return this.fx==='inferno';}
   update(dt){super.update(dt);if(this.fx==='inferno')this.burn(dt);}
   burn(dt){const wet=(this.swim||0)>0.3?1:0;this.cool+=(wet-this.cool)*Math.min(1,dt*(wet?3:0.8));
@@ -2229,27 +2229,31 @@ class Salamander extends Walker{
       for(const o of[-0.6,0,0.6]){const x=p.x+pc*2-ps*o*2,y=p.y+ps*2+pc*o*2;if(!under(x,y))pmix(fb,x,y,c,0.5*a);}}
     for(const p of this.st){const a=Math.sin(Math.min(1,p.t/p.life)*Math.PI)*0.45,R2=Math.ceil(p.r);for(let yy=-R2;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++){const d=Math.hypot(xx,yy)/p.r;if(d<1)pmix(fb,p.x+xx,p.y+yy,ST,a*(1-d*d));}}
     this.emi=this.gp.map(i=>fb.px[i]);this.fireTail(fb);this.flames(fb);}
-  // the flame tail, drawn like a cartoon flame in the tail's own coordinates (along s, across d): a full round base at the hips,
-  // one tall main point at the tip that whips side to side, and curved tongues with deep notches between them that are born
-  // near the base and travel back toward the tip. Four nested flames, each with its own points: red, orange, yellow, white-hot
-  fireTail(fb){const ft=this.ft||(this.ft=[]);ft.length=0;if(this.cool>0.97)return;const P=this.flamePath(),W=fb.w,big=Math.max(0.35,P.big),sc=this.sw.sc||1;
-    const t=this.t*(this.state==='sleeping'?0.45:1),hot=1-this.cool,n=P.length,S0=P[0].s,SL=P[n-1].s-S0;
-    const wid=v=>sc*big*(3.6+5.2*Math.sin(Math.PI*Math.min(1,v*1.4+0.08)))*Math.pow(Math.max(0,1-v),0.55);
-    const LAY=SAL_FLAME_LAYERS;
-    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const q of P){const w=wid(q.u)*1.5+4;x0=Math.min(x0,q.x-w);x1=Math.max(x1,q.x+w);y0=Math.min(y0,q.y-w);y1=Math.max(y1,q.y+w);}
+  // the flame tail, built like a drawn flame in the tail's own coordinates (u along, d across): a tall main tongue that is the
+  // tail itself plus shorter side tongues that curve outward, with notches between their tips. All of them start together at the hips,
+  // so it joins the body straight on. Each tongue stretches and shrinks and leans on its own (no outline sliding along the tail),
+  // and a soft wave runs down to the tip, which sways most. Four nested copies, each smaller and flickering separately, give the
+  // layers: red with a dark rim, orange, yellow, and a white-hot core
+  fireTail(fb){const ft=this.ft||(this.ft=[]);ft.length=0;if(this.cool>0.97)return;const P=this.flamePath(),W=fb.w,big=Math.max(0.35,P.big);
+    const t=this.t*(this.state==='sleeping'?0.5:1),hot=1-this.cool,n=P.length,S0=P[0].s,SL=P[n-1].s-S0,R0=P.r0*(0.65+0.35*big);
+    // per layer, per tongue: [sideways lean, length, width] in units of the tail and its root width; flicker their lengths and leans
+    const LT=[];for(let L=0;L<4;L++){const sl=[1,0.78,0.56,0.34][L],sw=[1,0.74,0.5,0.28][L],tg=[];
+      for(const[o,len,w,sd]of SAL_TONGUES.slice(0,L?3:5)){const f=vnoise(t*3.2+sd*7.3+L*3.1,sd+L*11),g=vnoise(t*1.6+sd*5.1,sd*3+L*7+50);// inner flames: just the middle and two side tongues
+        tg.push([o*R0*(0.8+0.5*g)*(L?0.7:1),Math.max(0.12,len*sl*(sd===1?0.84+0.3*f:0.72+0.5*f)),w*sw*R0*1.5]);}LT.push(tg);}
+    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const q of P){const w=R0*4.5+3;x0=Math.min(x0,q.x-w);x1=Math.max(x1,q.x+w);y0=Math.min(y0,q.y-w);y1=Math.max(y1,q.y+w);}
     x0=Math.max(0,Math.floor(x0));y0=Math.max(0,Math.floor(y0));x1=Math.min(W-1,Math.ceil(x1));y1=Math.min(fb.h-1,Math.ceil(y1));
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const px=x+0.5,py=y+0.5;let bd=1e9,q=null;
       for(const c of P){const d=(px-c.x)*(px-c.x)+(py-c.y)*(py-c.y);if(d<bd){bd=d;q=c;}}
-      const dx=px-q.x,dy=py-q.y,s=q.s-(dx*q.fx+dy*q.fy),u=(s-S0)/SL;if(u<-0.04||u>1)continue;
-      const d=-dx*q.fy+dy*q.fx-Math.sin(t*4.5-u*5)*u*u*2.6*sc*big,sd=d<0?0:1,ad=Math.abs(d);// the main point whips side to side
-      let k=-1,rim=false;
-      for(let L=3;L>=0;L--){const Y=LAY[L],v=Math.max(0,u)/Y.len;if(v>1)continue;
-        // one curved tongue after another down each side, a deep notch before each; they swell as they travel and flicker
-        const ph=(s-t*Y.sp)/Y.per+sd*0.5+L*0.31,id=Math.floor(ph),saw=ph-id,amp=(0.6+0.4*hash(id*3+L,sd*13+5))*(0.85+0.15*Math.sin(t*8+id*2.1+L));
-        const w=wid(v)*Y.ws*(0.5+1.15*Math.pow(saw,1.7)*amp*(0.35+v*0.9));if(ad<w){k=Y.c;if(L===0&&ad>w-0.9)rim=true;break;}}
-      if(k<0)continue;if(rim)k=1;
-      const c=SAL_FIRE[Math.max(1,Math.round(k-(1-hot)*3))],a=u>0.93?Math.max(0,(1-u)/0.07):1;if(a<=0.05)continue;
-      pmix(fb,x,y,c,a);ft.push(y*W+x,c,a,k/5);}}
+      const dx=px-q.x,dy=py-q.y,s=q.s-(dx*q.fx+dy*q.fy),u=(s-S0)/SL;if(u<0||u>1.05)continue;
+      const d=-dx*q.fy+dy*q.fx-(Math.sin(t*2.6-u*3.5)*1.4+(vnoise(u*2-t*1.1,5)-0.5)*2.2)*Math.pow(u,1.5)*big;// a soft wave down to the swaying tip
+      let k=0;
+      for(let L=3;L>=0&&!k;L--){let best=-1;// how far inside the nearest-to-surface... i.e. the deepest any tongue reaches, in px
+        for(const[o,len,w]of LT[L]){const v=u/len;if(v>1)continue;
+          const hw=w*(0.75+0.65*Math.sin(Math.PI*Math.min(1,v*1.8)))*Math.pow(1-v,0.55);if(hw<1.0)continue;const e=hw-Math.abs(d-o*Math.pow(v,2.2));if(e>best)best=e;}
+        if(best>0)k=L?L+2:best<0.9?1:2;}// the outer flame gets a one-pixel dark rim
+      if(!k)continue;
+      const c=SAL_FIRE[Math.max(1,Math.round(k-(1-hot)*3))];
+      pmix(fb,x,y,c,1);ft.push(y*W+x,c,1,k/5);}}
   flames(fb){for(const p of this.fp){const u=p.t/p.life;if(p.spark){pmix(fb,p.x,p.y,hex('#ffc040'),1-u);continue;}
     const c=SAL_FIRE[u<0.15?5:u<0.35?4:u<0.6?3:u<0.82?2:1],a=u<0.7?0.95:(1-u)/0.3*0.95;pmix(fb,p.x,p.y,c,a);if(p.big&&u<0.5){pmix(fb,p.x+1,p.y,c,a*0.8);pmix(fb,p.x,p.y-1,c,a*0.8);}}}
   glow(fb,night){if(this.fx!=='inferno')return;const hot=1-this.cool,gp=this.gp||[];
@@ -2444,6 +2448,8 @@ const salVoro=(u,v,sz,seed)=>{const cu=Math.floor(u/sz),cv=Math.floor(v/sz);let 
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const X=cu+a,Y=cv+b,px=(X+0.15+hash(X*7+seed,Y*13)*0.7)*sz,py=(Y+0.15+hash(X*5,Y*11+seed)*0.7)*sz,d=Math.hypot(u-px,v-py);
     if(d<d1){d2=d1;d1=d;id=X*131+Y*71;}else if(d<d2)d2=d;}return[d2-d1,id];};// [distance to the cell edge, cell id]
 const SAL_FIRE=['#4a0804','#a01a08','#e84a0c','#ff8a14','#ffc840','#fff4c0'].map(hex);
+// inferno tail tongues: [lean, length, width, seed]: the tall middle one, then side tongues curving out left and right
+const SAL_TONGUES=[[0,1,1,1],[-2.2,0.6,0.85,2],[2.2,0.68,0.85,3],[-1.7,0.38,0.75,4],[1.8,0.34,0.75,5]];
 const SAL_FLAME_LAYERS=[{len:1,ws:1,c:2,per:8.5,sp:11},{len:0.84,ws:0.74,c:3,per:7,sp:13},{len:0.64,ws:0.52,c:4,per:5.5,sp:15},{len:0.4,ws:0.32,c:5,per:4,sp:17}];// inferno tail: nested flames, outer red to white-hot core
 const salFire=h=>SAL_FIRE[h>0.9?5:h>0.74?4:h>0.56?3:h>0.38?2:h>0.2?1:0];
 const fract=a=>a-Math.floor(a);
