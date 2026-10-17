@@ -2232,12 +2232,11 @@ class Salamander extends Walker{
   // the flame tail, built like a drawn flame in the tail's own coordinates (u along, d across): a tall main tongue that is the
   // tail itself plus shorter side tongues that curve outward, with notches between their tips. All of them start together at the hips,
   // so it joins the body straight on. Each tongue stretches and shrinks and leans on its own (no outline sliding along the tail),
-  // and a soft wave runs down to the tip, which sways most. Four nested copies, each smaller and flickering separately, give the
-  // layers: red with a dark rim, orange, yellow, and a white-hot core
+  // and a soft wave runs down to the tip, which sways most. It's filled with the body's own flame texture and outlined like the body
   fireTail(fb){const ft=this.ft||(this.ft=[]);ft.length=0;if(this.cool>0.97)return;const P=this.flamePath(),W=fb.w,big=Math.max(0.35,P.big);
     const t=this.t*(this.state==='sleeping'?0.5:1),hot=1-this.cool,n=P.length,S0=P[0].s,SL=P[n-1].s-S0,R0=P.r0*(0.65+0.35*big);
     // per layer, per tongue: [sideways lean, length, width] in units of the tail and its root width; flicker their lengths and leans
-    const LT=[];for(let L=0;L<4;L++){const sl=[1,0.78,0.56,0.34][L],sw=[1,0.74,0.5,0.28][L],tg=[];
+    const LT=[];for(let L=0;L<1;L++){const sl=[1,0.78,0.56,0.34][L],sw=[1,0.74,0.5,0.28][L],tg=[];
       for(const[o,len,w,sd]of SAL_TONGUES.slice(0,L?3:5)){const f=vnoise(t*3.2+sd*7.3+L*3.1,sd+L*11),g=vnoise(t*1.6+sd*5.1,sd*3+L*7+50);// inner flames: just the middle and two side tongues
         tg.push([o*R0*(0.8+0.5*g)*(L?0.7:1),Math.max(0.12,len*sl*(sd===1?0.84+0.3*f:0.72+0.5*f)),w*sw*R0*1.5]);}LT.push(tg);}
     let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const q of P){const w=R0*4.5+3;x0=Math.min(x0,q.x-w);x1=Math.max(x1,q.x+w);y0=Math.min(y0,q.y-w);y1=Math.max(y1,q.y+w);}
@@ -2246,14 +2245,15 @@ class Salamander extends Walker{
       for(const c of P){const d=(px-c.x)*(px-c.x)+(py-c.y)*(py-c.y);if(d<bd){bd=d;q=c;}}
       const dx=px-q.x,dy=py-q.y,s=q.s-(dx*q.fx+dy*q.fy),u=(s-S0)/SL;if(u<0||u>1.05)continue;
       const d=-dx*q.fy+dy*q.fx-(Math.sin(t*2.6-u*3.5)*1.4+(vnoise(u*2-t*1.1,5)-0.5)*2.2)*Math.pow(u,1.5)*big;// a soft wave down to the swaying tip
-      let k=0;
-      for(let L=3;L>=0&&!k;L--){let best=-1;// how far inside the nearest-to-surface... i.e. the deepest any tongue reaches, in px
-        for(const[o,len,w]of LT[L]){const v=u/len;if(v>1)continue;
-          const hw=w*(0.75+0.65*Math.sin(Math.PI*Math.min(1,v*1.8)))*Math.pow(1-v,0.55);if(hw<1.0)continue;const e=hw-Math.abs(d-o*Math.pow(v,2.2));if(e>best)best=e;}
-        if(best>0)k=L?L+2:best<0.9?1:2;}// the outer flame gets a one-pixel outline, like the body
-      if(!k)continue;
-      const c=k===1?this.rimC||(this.rimC=hex(this.sw.outline)):SAL_FIRE[Math.max(1,Math.round(k-(1-hot)*3))];// rim: the body's own outline colour
-      pmix(fb,x,y,c,1);ft.push(y*W+x,c,1,k/5);}}
+      let best=-1;// how deep inside the flame's outline this pixel is, in px
+      for(const[o,len,w]of LT[0]){const v=u/len;if(v>1)continue;
+        const hw=w*(0.75+0.65*Math.sin(Math.PI*Math.min(1,v*1.8)))*Math.pow(1-v,0.55);if(hw<1.0)continue;const e=hw-Math.abs(d-o*Math.pow(v,2.2));if(e>best)best=e;}
+      if(best<=0)continue;
+      let c;if(best<0.9)c=this.rimC||(this.rimC=hex(this.sw.outline));// a one-pixel outline in the body's own outline colour
+      else{// the body's own living-flame texture carried on into the tail: bright in the middle, darker toward the edges, flickering backward
+        const al=1-Math.min(1,(best-0.9)/(R0*1.2)),N=vnoise(s*0.35-this.t*3.2,(d/R0)*2.2+this.t*0.6);
+        c=salFire(1-al*0.8+(N-0.5)*0.75-0.15-(1-hot)*0.6);}// as bright as the body is at the hips, all the way out
+      pmix(fb,x,y,c,1);ft.push(y*W+x,c,1,1);}}
   flames(fb){for(const p of this.fp){const u=p.t/p.life;if(p.spark){pmix(fb,p.x,p.y,hex('#ffc040'),1-u);continue;}
     const c=SAL_FIRE[u<0.15?5:u<0.35?4:u<0.6?3:u<0.82?2:1],a=u<0.7?0.95:(1-u)/0.3*0.95;pmix(fb,p.x,p.y,c,a);if(p.big&&u<0.5){pmix(fb,p.x+1,p.y,c,a*0.8);pmix(fb,p.x,p.y-1,c,a*0.8);}}}
   glow(fb,night){if(this.fx!=='inferno')return;const hot=1-this.cool,gp=this.gp||[];
