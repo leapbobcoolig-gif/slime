@@ -2169,12 +2169,11 @@ class Salamander extends Walker{
     return super.color(m,q,s,l,x,y);}
   radiusAt(t){let r=super.radiusAt(t);if(this.fx==='inferno'&&t>0.5){const k=Math.min(1,(t-0.5)/0.12);r*=lerp(1,(1-k)*(1-k)*0.55+0.45*(1-k),1-(this.cool||0));}// inferno: past the hips the tail is fire, not flesh (it comes back as obsidian in water)
     return this.sw&&this.sw.sc?r*this.sw.sc:r;}// inferno is a size up
-  // inferno's tail: a spine of points from the hips, carrying on past the old tip and curling upward like a real flame
-  flamePath(){const L=this.len,s0=L*0.47,sE=L*1.3,sc=this.sw.sc||1,t=this.t,oy=this.h||0,big=(1-this.cool)*(this.state==='sleeping'?0.7:1)*(1+this.flare*0.35),out=[];
-    const tip=this.pointAt(L);for(let s=s0;s<=sE;s+=0.6){const u=(s-s0)/(sE-s0),p=s<=L?this.pointAt(s):{x:tip.x-tip.fx*(s-L),y:tip.y-tip.fy*(s-L),fx:tip.fx,fy:tip.fy};
-      const sway=(Math.sin(t*3.1-u*5)*1.3+(vnoise(t*1.7,u*3)-0.5)*2.4)*u*u*big,rise=(9+3*Math.sin(t*1.3))*Math.pow(u,1.6)*big;
-      out.push({x:p.x-p.fy*sway,y:p.y+p.fx*sway-rise-oy,w:sc*(2.9+2.3*Math.sin(Math.PI*u))*Math.pow(1-u,0.65)*Math.max(0.35,big),u});}
-    return out;}
+  // inferno's tail: the tail's own spine from the hips, carried on a little past the old tip; it bends and wiggles with the body
+  flamePath(){const L=this.len,s0=L*0.47,big=(1-this.cool)*(this.state==='sleeping'?0.8:1)*(1+this.flare*0.25),sE=L*(1+0.22*big),out=[];
+    const tip=this.pointAt(L);for(let s=s0;s<=sE;s+=0.5){const p=s<=L?this.pointAt(s):{x:tip.x-tip.fx*(s-L),y:tip.y-tip.fy*(s-L)-(this.h||0)*0,fx:tip.fx,fy:tip.fy};
+      out.push({x:p.x,y:p.y-(this.h||0),fx:p.fx,fy:p.fy,s,u:(s-s0)/(sE-s0)});}
+    out.big=big;return out;}
   get selfLit(){return this.fx==='inferno';}
   update(dt){super.update(dt);if(this.fx==='inferno')this.burn(dt);}
   burn(dt){const wet=(this.swim||0)>0.3?1:0;this.cool+=(wet-this.cool)*Math.min(1,dt*(wet?3:0.8));
@@ -2184,7 +2183,7 @@ class Salamander extends Walker{
     const emit=(s,sd,big)=>{const p=this.pointAt(s),nx=-p.fy*sd,ny=p.fx*sd,r=p.r*(sd?0.85:0);
       fp.push({x:p.x+nx*r,y:p.y+ny*r-oy,vx:-p.fx*rand(6,12)+nx*rand(2,6),vy:-p.fy*rand(6,12)+ny*rand(2,6)-rand(4,9),t:0,life:rand(0.3,0.55)*(big?1.4:1),big});};
     this.eT=(this.eT||0)+dt*70*hot*(1+this.flare*2);
-    while(this.eT>1&&fp.length<160){this.eT--;const r=Math.random();if(r<0.62)emit(rand(4,21),Math.random()<0.5?-1:1,0);else if(r<0.88){const P=this.flamePath(),q=P[Math.floor(rand(0.55,1)*(P.length-1))];fp.push({x:q.x+rand(-1,1)*q.w*0.5,y:q.y,vx:rand(-3,3),vy:-rand(9,16),t:0,life:rand(0.25,0.5)*1.4,big:1});}else emit(rand(21,33),Math.random()<0.5?-1:1,0);}
+    while(this.eT>1&&fp.length<160){this.eT--;const r=Math.random();if(r<0.62)emit(rand(4,21),Math.random()<0.5?-1:1,0);else if(r<0.88){const P=this.flamePath(),q=P[Math.floor(rand(0.7,1)*(P.length-1))];fp.push({x:q.x,y:q.y,vx:-q.fx*rand(8,14)+rand(-2,2),vy:-q.fy*rand(8,14)+rand(-2,2),t:0,life:rand(0.2,0.4),big:1});}/* embers off the tail tip, carried backward */else emit(rand(4,17),Math.random()<0.5?-1:1,0);}
     if(Math.random()<dt*4*hot){if(!this.preview&&Math.random()<0.06)SFX.play('emberPop');const p=this.pointAt(rand(4,30));fp.push({x:p.x+rand(-2,2),y:p.y-oy,vx:rand(-4,4),vy:-rand(10,16),t:0,life:rand(1.2,2),spark:1});}
     for(const p of fp){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.spark)p.vx+=Math.sin(p.t*9+p.life*20)*dt*20;else{p.vx*=1-dt*2;p.vy*=1-dt*1.5;}}
     this.fp=fp.filter(p=>p.t<p.life);
@@ -2230,16 +2229,26 @@ class Salamander extends Walker{
       for(const o of[-0.6,0,0.6]){const x=p.x+pc*2-ps*o*2,y=p.y+ps*2+pc*o*2;if(!under(x,y))pmix(fb,x,y,c,0.5*a);}}
     for(const p of this.st){const a=Math.sin(Math.min(1,p.t/p.life)*Math.PI)*0.45,R2=Math.ceil(p.r);for(let yy=-R2;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++){const d=Math.hypot(xx,yy)/p.r;if(d<1)pmix(fb,p.x+xx,p.y+yy,ST,a*(1-d*d));}}
     this.emi=this.gp.map(i=>fb.px[i]);this.fireTail(fb);this.flames(fb);}
-  // the flame tail, per pixel: a soft field round the flame spine, broken into licking tongues by noise that streams upward
-  fireTail(fb){const ft=this.ft||(this.ft=[]);ft.length=0;if(this.cool>0.97)return;const P=this.flamePath(),W=fb.w,t=this.t,hot=1-this.cool;
-    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const q of P){x0=Math.min(x0,q.x-q.w-3);x1=Math.max(x1,q.x+q.w+3);y0=Math.min(y0,q.y-q.w-5);y1=Math.max(y1,q.y+q.w+3);}
+  // the flame tail, per pixel, in the tail's own coordinates (along s, across d): a flat cartoon flame whose
+  // scalloped edges and inner bands lick backward toward the tip, never up the screen
+  fireTail(fb){const ft=this.ft||(this.ft=[]);ft.length=0;if(this.cool>0.97)return;const P=this.flamePath(),W=fb.w,big=Math.max(0.35,P.big),sc=this.sw.sc||1;
+    const t=this.t*(this.state==='sleeping'?0.45:1),hot=1-this.cool,n=P.length;
+    const wid=u=>sc*big*(3.0+4.6*Math.sin(Math.PI*Math.min(1,u*1.35)))*Math.pow(Math.max(0,1-u),0.5);
+    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const q of P){const w=wid(q.u)*1.4+2;x0=Math.min(x0,q.x-w);x1=Math.max(x1,q.x+w);y0=Math.min(y0,q.y-w);y1=Math.max(y1,q.y+w);}
     x0=Math.max(0,Math.floor(x0));y0=Math.max(0,Math.floor(y0));x1=Math.min(W-1,Math.ceil(x1));y1=Math.min(fb.h-1,Math.ceil(y1));
-    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){let F=-1,U=0;
-      for(const q of P){if(q.w<0.3)continue;const dy=y+0.5-q.y,f=1-Math.hypot(x+0.5-q.x,dy<0?dy*0.45:dy*1.25)/q.w;if(f>F){F=f;U=q.u;}}// licks upward much further than down
-      if(F<-0.9)continue;
-      const n=vnoise(x*0.42+3,(y+t*18)*0.16)*0.6+vnoise(x*0.8+11,(y+t*26)*0.4)*0.4;// tall streaky tongues, streaming up the screen
-      const h=(F*1.05+(n-0.5)*(1.0+U*0.6)-U*0.22+0.02)*(0.25+0.75*hot);if(h<0.16)continue;
-      const c=salFire(Math.min(1,h)),a=h<0.3?(h-0.16)/0.14*0.9:0.97;pmix(fb,x,y,c,a);ft.push(y*W+x,c,a,h);}}
+    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const px=x+0.5,py=y+0.5;let bd=1e9,q=null;
+      for(const c of P){const d=(px-c.x)*(px-c.x)+(py-c.y)*(py-c.y);if(d<bd){bd=d;q=c;}}
+      const dx=px-q.x,dy=py-q.y,s=q.s-(dx*q.fx+dy*q.fy),d=-dx*q.fy+dy*q.fx,u=(s-P[0].s)/(P[n-1].s-P[0].s);
+      if(u<-0.04||u>1)continue;const sd=d<0?0:1;
+      // tongues: a sawtooth down each edge, offset side to side, travelling toward the tip
+      const ph=(s-t*11)/6.5+sd*0.5,id=Math.floor(ph),saw=ph-id,amp=0.55+0.45*hash(id,sd*13+3)+0.15*Math.sin(t*9+id*2.3),lick=Math.pow(saw,2.2)*amp;
+      const w=wid(Math.max(0,u))*(0.62+1.0*lick*(0.4+u*0.8));if(w<0.4)continue;
+      const r=Math.abs(d)/w;if(r>1)continue;
+      // flat bands that follow the same licking edge: white-yellow core, orange, red rim, dark edge
+      const ph2=ph+0.35,inner=r+0.18*(ph2-Math.floor(ph2))-0.09+u*0.25;
+      const k=r>0.9?1:inner<0.3?5:inner<0.5?4:inner<0.72?3:2;
+      const c=SAL_FIRE[Math.max(1,Math.round(k-(1-hot)*3))],a=u>0.88?Math.max(0,(1-u)/0.12):1;if(a<=0.05)continue;
+      pmix(fb,x,y,c,a);ft.push(y*W+x,c,a,k/5);}}
   flames(fb){for(const p of this.fp){const u=p.t/p.life;if(p.spark){pmix(fb,p.x,p.y,hex('#ffc040'),1-u);continue;}
     const c=SAL_FIRE[u<0.15?5:u<0.35?4:u<0.6?3:u<0.82?2:1],a=u<0.7?0.95:(1-u)/0.3*0.95;pmix(fb,p.x,p.y,c,a);if(p.big&&u<0.5){pmix(fb,p.x+1,p.y,c,a*0.8);pmix(fb,p.x,p.y-1,c,a*0.8);}}}
   glow(fb,night){if(this.fx!=='inferno')return;const hot=1-this.cool,gp=this.gp||[];
