@@ -26,7 +26,7 @@ Skins are bought from the swatch row in the Critters menu. Each critter gets one
 ### Vivid
 - Themed and imaginative (Ballerina, Kimono, Tuxedo, Toy bricks…). Not natural-looking materials (wood, stone, marble), not real-world breads, not plain recolours.
 - Don't reuse a theme another critter already has.
-- **No shape changes.**
+- **No shape changes.** Surface texture that makes the silhouette (fluff, fur, spines) counts as shape: a fluffy critter stays fluffy, so no turning it smooth, plastic, wooden or metal. Paint it, knit it or dress it instead.
 - **Adds no effects of any kind**: no new glows, particles, puffs, animations, sounds or behaviours. Before proposing a vivid, check each idea: "does the base critter already do this?" If not, it doesn't belong in a vivid.
 - **Only restyles what the critter already has.** If the base critter has an effect (glow, spore puffs, babies, flowers, runes, gills, tongue, swallow lump), the skin gives that existing thing a themed look. It never adds one the base doesn't have.
 - Small costume pieces are fine (a bow, a plume, a cape), and they may have a minor effect of their own: a cape flapping, a plume swaying, a candle flame glowing. Anything bigger, like smoke or steam puffs, belongs to Special.
