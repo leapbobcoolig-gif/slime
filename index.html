@@ -2365,7 +2365,8 @@ class Salamander extends Walker{
     // scorched footprints wherever a foot comes down on land
     for(const L of this.legs){if(L.wasStep&&!L.stepping&&hot>0.5&&!this.preview&&this.h<1){this.scorch.push({x:L.fx,y:L.fy,a:Math.atan2(L.fy-L.ay,L.fx-L.ax),life:7});SFX.play('fireStep');}L.wasStep=L.stepping;}
     for(const p of this.scorch)p.life-=dt;this.scorch=this.scorch.filter(p=>p.life>0);}
-  draw(fb){if(this.fx==='xray'){if(!this.bgs||this.bgs.length!==fb.px.length)this.bgs=new Uint32Array(fb.px.length);this.bgs.set(fb.px);}// glass: remember what's behind it
+  draw(fb){if(this.fx==='inferno')this.outline=mixc(SAL_EMBER,this.sw.ol??=hex(this.sw.outline),this.cool||0);// lit: an ember-red outline that glows; doused: obsidian
+    if(this.fx==='xray'){if(!this.bgs||this.bgs.length!==fb.px.length)this.bgs=new Uint32Array(fb.px.length);this.bgs.set(fb.px);}// glass: remember what's behind it
     super.draw(fb);}
   drawExtras(fb){const fx=this.fx;if(!fx)return;const W=fb.w,mat=fb.mat;
     if(fx!=='xray'){const g=this.gp||(this.gp=[]);g.length=0;for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++){const m=mat[y*W+x];if(m&&m!==M.EYE&&m!==M.PUPIL)g.push(y*W+x);}}
@@ -2420,20 +2421,21 @@ class Salamander extends Walker{
       for(const[o,len,w]of LT[0]){const v=u/len;if(v>1)continue;
         const hw=w*(0.75+0.65*Math.sin(Math.PI*Math.min(1,v*1.8)))*Math.pow(1-v,0.55);if(hw<1.0)continue;const e=hw-Math.abs(d-o*Math.pow(v,2.2));if(e>best)best=e;}
       if(best<=0)continue;
-      let c;if(best<0.9)c=this.rimC||(this.rimC=hex(this.sw.outline));// a one-pixel outline in the body's own outline colour
+      let c,a=1;if(best<0.9){c=SAL_FIRE[2];a=(0.45+0.35*vnoise(s*0.6-this.t*6,d*0.8))*(0.4+0.6*hot);}// the very edge: a soft flickering glow fading into the air, never dark
       else{// the body's own living-flame texture carried on into the tail: bright in the middle, darker toward the edges, flickering backward
         const al=1-Math.min(1,(best-0.9)/(R0*1.2)),N=vnoise(s*0.35-this.t*3.2,(d/R0)*2.2+this.t*0.6);
-        c=salFire(1-al*0.8+(N-0.5)*0.75-0.15-(1-hot)*0.6);}// as bright as the body is at the hips, all the way out
-      pmix(fb,x,y,c,1);ft.push(y*W+x,c,1,1);}}
+        const h=1-al*0.8+(N-0.5)*0.75-0.15;c=salFire(hot>0.5?0.3+Math.max(0,h)*0.72:h-(1-hot)*0.6);}// the body's flame texture squeezed into the bright end: all its mottling, never darker than orange-red
+      pmix(fb,x,y,c,a);ft.push(y*W+x,c,a,1);}}
   flames(fb){for(const p of this.fp){const u=p.t/p.life;if(p.spark){pmix(fb,p.x,p.y,hex('#ffc040'),1-u);continue;}
     const c=SAL_FIRE[u<0.15?5:u<0.35?4:u<0.6?3:u<0.82?2:1],a=u<0.7?0.95:(1-u)/0.3*0.95;pmix(fb,p.x,p.y,c,a);if(p.big&&u<0.5){pmix(fb,p.x+1,p.y,c,a*0.8);pmix(fb,p.x,p.y-1,c,a*0.8);}}}
-  glow(fb,night){if(this.fx!=='inferno')return;const hot=1-this.cool,gp=this.gp||[];
-    const k=(0.25+night*0.8)*(0.15+0.85*hot)*(0.88+0.12*vnoise(this.t*5,3)+this.flare*0.4);
-    bodyLight(fb,{x:this.pts[6].x,y:this.pts[6].y,h:this.h||0},gp,{k,hi:hex('#ff9a30'),lo:hex('#c04a10'),skip:new Set(gp)});
+  glow(fb,night){if(this.fx!=='inferno')return;const hot=1-this.cool,gp=this.gp||[],ft=this.ft||[];
+    // the light hugs the whole flame, body and tail, and pools on the ground under it; it flickers with the fire
+    const all=gp.slice();for(let j=0;j<ft.length;j+=4)all.push(ft[j]);const mid=this.pts[Math.floor(this.n*0.6)];
+    const k=(0.35+night*1.1)*(0.15+0.85*hot)*(0.85+0.15*vnoise(this.t*5,3)+this.flare*0.4);
+    bodyLight(fb,{x:(this.pts[6].x+mid.x)/2,y:(this.pts[6].y+mid.y)/2,h:this.h||0},all,{k,hi:hex('#ffb040'),lo:hex('#d0500e'),skip:new Set(all)});
     // it's the light source: its flames keep their own colour at night (doused obsidian stays dark, its cracks still glow)
     const E=this.emi||[];gp.forEach((i,j)=>{const c=E[j];if(c===undefined)return;const a=Math.min(1,Math.max(0,Math.max(c&255,c>>8&255,c>>>16&255)/255*1.5-0.25));if(a>0)fb.px[i]=mixc(fb.px[i],c,a);});
-    const ft=this.ft||[];for(let j=0;j<ft.length;j+=4){const i=ft[j];fb.px[i]=mixc(fb.px[i],ft[j+1],ft[j+2]);}// the flame tail keeps its own colour too
-    for(let j=0;j<ft.length;j+=12){const i=ft[j],x=i%fb.w,y=(i/fb.w)|0,a=Math.min(1,ft[j+3])*0.12*(0.3+night*0.7)*hot;for(const[dx,dy]of[[-2,0],[2,0],[0,-2],[0,2]])padd(fb,x+dx,y+dy,255*a,130*a,40*a);}
+    for(let j=0;j<ft.length;j+=4){const i=ft[j];fb.px[i]=mixc(fb.px[i],ft[j+1],ft[j+2]);}// the flame tail keeps its own colour too
     this.flames(fb);for(const p of this.fp){if(p.spark)continue;const a=(1-p.t/p.life)*0.35*(0.4+night*0.6)*hot;padd(fb,p.x,p.y,255*a,140*a,40*a);}}
 }
 
@@ -2621,6 +2623,7 @@ const salVoro=(u,v,sz,seed)=>{const cu=Math.floor(u/sz),cv=Math.floor(v/sz);let 
 const SAL_FIRE=['#4a0804','#a01a08','#e84a0c','#ff8a14','#ffc840','#fff4c0'].map(hex);
 // inferno tail tongues: [lean, length, width, seed]: the tall middle one, then side tongues curving out left and right
 const SAL_TONGUES=[[0,1,1,1],[-2.2,0.6,0.85,2],[2.2,0.68,0.85,3],[-1.7,0.38,0.75,4],[1.8,0.34,0.75,5]];
+const SAL_EMBER=hex('#a8200a');// the inferno's outline while it burns
 const SAL_FLAME_LAYERS=[{len:1,ws:1,c:2,per:8.5,sp:11},{len:0.84,ws:0.74,c:3,per:7,sp:13},{len:0.64,ws:0.52,c:4,per:5.5,sp:15},{len:0.4,ws:0.32,c:5,per:4,sp:17}];// inferno tail: nested flames, outer red to white-hot core
 const salFire=h=>SAL_FIRE[h>0.9?5:h>0.74?4:h>0.56?3:h>0.38?2:h>0.2?1:0];
 const fract=a=>a-Math.floor(a);
