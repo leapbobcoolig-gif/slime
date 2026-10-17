@@ -1023,6 +1023,10 @@ const SFX=(()=>{
     dragonRumble:()=>{noise(0.9,{filter:'bandpass',freq:200,to:90,q:0.8,gain:0.07,attack:0.1});tone(55,0.9,{type:'sawtooth',to:40,gain:0.04});},// a deep dragon growl
     thunderCrack:()=>{noise(1.5,{filter:'bandpass',freq:1100,to:110,q:0.5,gain:0.12,attack:0.005});tone(48,1.3,{type:'sine',to:34,gain:0.07});},// thunder rolling in
     whiskerSwish:()=>{noise(0.32,{filter:'bandpass',freq:2600,to:1200,q:2,gain:0.035,attack:0.06});},// whiskers swishing
+    // rubber ducky: a squeeze-toy squeak, a squeaky wobble when it's happy, a hollow plastic bonk when it lands
+    duckSqueak:()=>{tone(900,0.09,{type:'triangle',to:1500,gain:0.06});tone(1500,0.07,{delay:0.07,type:'triangle',to:1100,gain:0.04});},
+    duckWobble:()=>{for(let k=0;k<3;k++)tone(950+k*120,0.08,{delay:k*0.11,type:'triangle',to:1500+k*150,gain:0.05});},
+    duckBonk:()=>{tone(420,0.08,{type:'sine',to:260,gain:0.12});noise(0.04,{filter:'bandpass',freq:900,q:3,gain:0.06});},
     springBoing:()=>{tone(220,0.35,{type:'triangle',to:520,gain:0.05});tone(520,0.25,{delay:0.12,type:'triangle',to:300,gain:0.03});},// a springy boing
     coilClatter:()=>{for(let i=0;i<5;i++)tone(1700+i*130,0.03,{delay:i*0.035,type:'square',gain:0.014});},// coils clattering together
     springStretch:()=>{tone(300,0.4,{type:'sawtooth',to:900,gain:0.02});noise(0.3,{filter:'bandpass',freq:3000,q:3,gain:0.015});},// the spring stretching out
@@ -1168,7 +1172,7 @@ const SFX=(()=>{
   const BUS_OF={};
   'tick ui tap sparkle levelup coin coinburst whoosh close beep nope bloop achieve yay reveal0 reveal1 reveal2 reveal3 insert ratchet clunk pop rattle chest ask place scoop unhook hang clack pluck tink2'.split(' ').forEach(n=>BUS_OF[n]='ui');
   'plip bpop drip splash ocean burble rumble wind whirr toot tune musicbox flutter boing bell boop blow zap squeak2 lightsOn lightsOff tink'.split(' ').forEach(n=>BUS_OF[n]='world');
-  const GAP={dragonRumble:2,thunderCrack:4,whiskerSwish:0.8,springBoing:0.4,coilClatter:0.6,springStretch:1.2,burnerWhoosh:1,basketCreak:0.35,balloonFlap:1,clockTick:0.2,clockTock:0.2,gearStep:0.15,steamPuff:1,windRatchet:0.16,windDown:3,windBell:3,foxYip:0.6,foxChime:1,foxWhoosh:0.8,gummyBoing:0.25,gummySquelch:0.4,sugarCrunch:0.6,reefBloom:3,fishScatter:1,fishNibble:0.25,gingerLand:0.25,chimneyPuff:2,musicBox:5,shutterClack:1,doorCreak:1.5,cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
+  const GAP={duckSqueak:0.12,duckWobble:0.8,duckBonk:0.3,dragonRumble:2,thunderCrack:4,whiskerSwish:0.8,springBoing:0.4,coilClatter:0.6,springStretch:1.2,burnerWhoosh:1,basketCreak:0.35,balloonFlap:1,clockTick:0.2,clockTock:0.2,gearStep:0.15,steamPuff:1,windRatchet:0.16,windDown:3,windBell:3,foxYip:0.6,foxChime:1,foxWhoosh:0.8,gummyBoing:0.25,gummySquelch:0.4,sugarCrunch:0.6,reefBloom:3,fishScatter:1,fishNibble:0.25,gingerLand:0.25,chimneyPuff:2,musicBox:5,shutterClack:1,doorCreak:1.5,cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
   function play(name,arg){
     if(!ac||muted||!S[name])return;const now=ac.currentTime;
     if(last[name]!==undefined&&now-last[name]<(GAP[name]??0.03))return;last[name]=now;
@@ -3193,6 +3197,88 @@ const SWATCH_BASE={frog:['#56c23b','#ea3b2b'],dart:['#509cff','#0e1636'],salaman
 // Higher tiers. Vivid: a themed look with its own pattern (paint() colours the body from body coordinates, so the
 // pattern bends and swims with it). Special: colours plus an effect. Mythic: changes the critter's shape and behaviour too.
 const TIER_PRICE={vivid:120,special:350,mythic:800};
+// ---- chick skins: they paint the chick by part (s: 0 body, 1 fluffy edge, 2 tail tuft, 3 wings, 4 head, 5 head tuft, 6+ costume pieces) ----
+const CK={
+  mint:ramp('#5aa88a','#86d0b0','#b4ecd2','#e4fff2'),pink:ramp('#c86a8e','#ec96b4','#ffc2d6','#fff0f6'),lilac:ramp('#8a72b8','#b49ee0','#d8c8f8','#f6f0ff'),butter:ramp('#c8a440','#ecd070','#fff0a8','#fffbe0'),
+  white:ramp('#b8b2a8','#dcd8d0','#f6f4ee','#ffffff'),red:ramp('#7a0e12','#b81c22','#e43a3a','#ff8a80'),ink:ramp('#0c0c10','#18181e','#26262e','#3a3a44'),
+  cream:ramp('#b0a07e','#d8caa6','#f2e8cc','#fffaee'),cran:ramp('#5a0e1a','#8e1a2c','#be2c40','#e66a78'),gold:ramp('#7a5208','#b88214','#e8b830','#fff0a0'),
+  cowpink:ramp('#b05a6a','#e08898','#ffb4c0','#ffe0e6'),seed:ramp('#5a5030','#7a7048','#9c9466','#c4bc90'),fluff:ramp('#c8ccc4','#e4e8e2','#f8faf6','#ffffff')};
+Object.assign(CK,{straw:ramp('#7a0a14','#b8142a','#e8344a','#ff8a96'),leaf:ramp('#1e4a12','#2e7a1e','#4ea83a','#9ad870'),seedy:ramp('#a07a10','#d8b030','#f8e070','#fff8c0'),
+  tgreen:ramp('#0e2e1a','#184a2a','#24663a','#3e8a56'),tnavy:ramp('#080e24','#0e1838','#18244e','#283a6e'),tred:ramp('#6a0a0e','#a01418','#d02a2a','#f06a5a'),tyel:ramp('#8a6a08','#c09818','#e8c840','#fff090'),
+  fur:ramp('#7a4e1a','#b07a34','#d8a45a','#f4d496'),furD:ramp('#4a2a0e','#6e4418','#8e5c24','#b07c3c'),feath:ramp('#a89c88','#d4cab6','#f2ece0','#ffffff'),tawny:ramp('#2e1808','#4e2c12','#74441e','#a0683a'),gbeak:ramp('#8a5a08','#c88a14','#f0b830','#ffe080')});
+Object.assign(CK,{duckY:ramp('#c88a00','#f0b400','#ffd81a','#fff6a0'),duckO:ramp('#a03a00','#e05a08','#ff7a10','#ffb070')});
+const ckPart=s=>Math.floor(s+1e-4);
+// a soft pastel dye pattern in body coordinates: bands with a zigzag and dots, blotchy like a hand-dyed egg
+function eggDye(u,v,q,seed){const bands=[CK.mint,CK.pink,CK.lilac,CK.butter],w=2.6,n=vnoise(u*0.5+seed,v*0.5)*0.9,k=(u+20+n)/w,bi=Math.floor(k),fr=k-bi;
+  const zig=Math.abs(fr-0.5-0.22*(Math.abs(((v*0.55+bi*0.3)%2+2)%2-1)*2-1));if(zig<0.1)return CK.white[Math.min(3,q+1)];
+  const cu=Math.floor(u/1.7),cv=Math.floor(v/1.7);if(hash(cu*5+bi,cv*9+seed)>0.84&&Math.hypot(u-(cu+0.5)*1.7,v-(cv+0.5)*1.7)<0.5)return CK.white[3];
+  return bands[((bi%4)+4)%4][q];}
+// chunky knit: a V-stitch texture, cream with a cranberry band of snowflakes across the chest and zigzags either side
+// chunky knit: a V-stitch texture on cream, a wide cranberry band across the chest with a row of cream dots, and thin stripes either side
+function knit(u,v,q){const cu=Math.floor(u/1.0),cv=Math.floor(v/1.2),fu=u-cu,fv=v/1.2-cv,vst=Math.abs(fv-0.5)*2<(fu<0.5?1-fu*2:fu*2-1)+0.4,qq=Math.max(0,Math.min(3,q+(vst?0:-1)));
+  const a=Math.abs(u-0.2);if(a<1.6)return(a<0.55&&((cv&1)===0)?CK.cream:CK.cran)[qq];if(a>2.4&&a<3.1)return CK.cran[qq];return CK.cream[qq];}
+SWATCHES.chick.push(
+  {id:'easter',name:'Easter Egg',tier:'vivid',dot:['#b4ecd2','#ffc2d6'],outline:'#4a3a5a',
+   chick:{paint(m,q,s,l,x,y){if(m!==M.BODY)return;const p=ckPart(s);
+       if(p===4||p===5){const[u,v]=this.loc(x,y,true);return eggDye(u+11,v,q,7);}
+       const[u,v]=this.loc(x,y,false);return eggDye(u,v,q,3);}}},
+  {id:'cow',name:'Cow Print',tier:'vivid',dot:['#f6f4ee','#18181e'],outline:'#141418',pal:{chick:{beak:ramp('#a04a5a','#d07888','#ffaab8','#ffe0e6')}},
+   chick:{paint(m,q,s,l,x,y){if(m!==M.BODY)return;const p=ckPart(s),hd=p===4||p===5,[u,v]=this.loc(x,y,hd);
+       if(hd)return(Math.hypot(u-0.6,v+1.8)<1.7||p===5?CK.ink:CK.white)[q];
+       return(vnoise(u*0.3+2,v*0.3+5)>0.64?CK.ink:CK.white)[q];}}},
+  // strawberry: red fluff speckled with little yellow seeds; its own head tuft turns leafy green
+  {id:'strawberry',name:'Strawberry',tier:'vivid',dot:['#e8344a','#4ea83a'],outline:'#3a0408',
+   chick:{paint(m,q,s,l,x,y){if(m!==M.BODY)return;const p=ckPart(s);if(p===5)return CK.leaf[q];
+       const hd=p===4,[u,v]=this.loc(x,y,hd),gs=1.9,cu=Math.floor(u/gs),cv=Math.floor((v+(cu&1)*0.95)/gs),ou=(cu+0.5)*gs,ov=(cv+0.5)*gs-(cu&1)*0.95;
+       if(Math.hypot(u-ou,v-ov)<0.45&&hash(cu*7+(hd?3:0),cv*5)>0.25)return CK.seedy[Math.min(3,q+1)];
+       if(hd&&u<-1.6)return CK.leaf[q];// green leaves where the head meets the body, like a strawberry's top
+       return CK.straw[q];}}},
+  // tartan: a woven plaid through the fluff: green and navy checks with thin red and yellow lines
+  {id:'tartan',name:'Tartan',tier:'vivid',dot:['#24663a','#18244e'],outline:'#060a14',
+   chick:{paint(m,q,s,l,x,y){if(m!==M.BODY)return;const p=ckPart(s),hd=p===4||p===5,[u,v]=this.loc(x,y,hd);
+       const P=6,band=t=>{const f=((t%P)+P)%P;return f<2.2?2:f>3.6&&f<4.1?3:f>5.0&&f<5.4?4:0;},a=band(u+(hd?9:0)),b=band(v);
+       if(a===3||b===3)return CK.tred[q];if(a===4||b===4)return CK.tyel[q];
+       const twill=((Math.floor(x)+Math.floor(y))&1)?0:1;// a little diagonal weave
+       if(a===2&&b===2)return CK.tnavy[Math.max(0,q-1)];if(a===2||b===2)return(twill?CK.tnavy:CK.tgreen)[q];return CK.tgreen[q];}}},
+  {id:'dandelion',name:'Dandelion',tier:'special',fx:'seeds',dot:['#f8faf6','#9c9466'],outline:'#5a5a50',
+   chick:{paint(m,q,s,l,x,y){if(m!==M.BODY)return;const p=ckPart(s),hd=p===4||p===5,[u,v]=this.loc(x,y,hd),r=Math.hypot(u,v),a=Math.atan2(v,u);
+       if(!hd&&r<1.4)return CK.seed[q];
+       if((this.bald||0)>0&&hash(x*7,y*3)<this.bald*0.45)return CK.seed[Math.max(0,q-1)];
+       const streak=hash(Math.floor(a*9+(hd?50:0)),3)>0.5&&Math.abs(((a*9)%1+1)%1-0.5)<0.12;
+       return CK.fluff[streak?Math.max(0,q-1):q];},
+     tick(dt){const S=this.seeds||(this.seeds=[]),rate=(this.flap>0.4?14:0)+(this.speed>14?6:0)+(this.shake>0.3?30:0)+(this.state==='petted'?5:0);
+       this.seedT=(this.seedT||0)+dt*rate;while(this.seedT>1&&S.length<60){this.seedT--;const a=rand(TAU),r=rand(2,5);S.push({x:this.x+Math.cos(a)*r,y:this.y-this.h+Math.sin(a)*r*0.7,z:rand(2,6),vx:rand(-3,3)+4,vz:rand(3,7),t:0,life:rand(4,6),ph:rand(TAU)});this.bald=Math.min(0.6,(this.bald||0)+0.006);}
+       this.bald=Math.max(0,(this.bald||0)-dt*0.03);
+       for(const p of S){p.t+=dt;p.x+=(p.vx+Math.sin(p.t*1.3+p.ph)*4)*dt;p.vz-=dt*1.5;p.vz=Math.max(-1.2,p.vz);p.z+=p.vz*dt;p.y+=Math.sin(p.t*0.9+p.ph)*dt*2;}
+       this.seeds=S.filter(p=>p.t<p.life&&p.z>-1);},
+     extras(fb){const W=hex('#ffffff'),D=hex('#7a7048');for(const p of this.seeds||[]){const a=Math.min(1,(p.life-p.t)/1.2)*0.95,x=p.x,y=p.y-p.z;
+       pmix(fb,x,y+1.2,D,a);pmix(fb,x,y,W,a*0.8);for(const[dx,dy]of[[-1,-1],[1,-1],[0,-1.4]])pmix(fb,x+dx,y+dy,W,a);}}}},
+  // rubber ducky, seen from above: an oval moulded body, a round head overlapping its front, a flat wide bill pointing forward,
+  // a little tail point at the back and moulded wing bumps on its sides. Flat glossy plastic: one flat colour, a darker rim
+  // and a crisp white shine on each part (its own shading, not the fluffy per-pixel lighting). It waddles and squeaks.
+  // Parts in s: 20 body, 21 tail, 22 wing bumps, 23 head, 24 bill
+  {id:'duck',name:'Rubber Ducky',tier:'mythic',fx:'duck',dot:['#ffd21a','#ff7a10'],outline:'#6a4400',snd:{peep:'duckSqueak',peeps:'duckWobble',cheep:'duckWobble',land:'duckBonk'},
+   chick:{paint(m,q,s,l,x,y){const p=ckPart(s),P=this._dp&&this._dp[p];if(!P)return;
+       const px=x+0.5,py=y+0.5,dx=P.bx-P.ax,dy=P.by-P.ay,L2=dx*dx+dy*dy||1e-9;let t=((px-P.ax)*dx+(py-P.ay)*dy)/L2;t=Math.max(0,Math.min(1,t));
+       const r=P.ar+(P.br-P.ar)*t,d=Math.hypot(px-(P.ax+dx*t),py-(P.ay+dy*t))/r,R=p===24?CK.duckO:CK.duckY;
+       const hx=P.hx,hy=P.hy,hd=Math.hypot(px-hx,(py-hy)*1.2);
+       if(hd<P.hr*0.55)return CK.white[3];if(hd<P.hr)return R[3];// the shine
+       if(d>0.8)return R[1];return R[2];},// flat plastic with a darker rim
+     draw(fb){const t=this.t,g=this.state==='grabbed'||this.state==='fall',mv=Math.min(1,this.speed/6),rock=Math.sin(this.step*2)*0.7*mv+Math.sin(t*40)*this.shake*0.8,
+       W=(u,v)=>this.W(u,v+rock),DP=this._dp={};this.inner=CK.duckY[0];// the moulded edge between head and body: a deeper yellow, not the outline
+       const part=(id,a,b,ar,br,cls,bias,sx=-0.42,sy=-0.5,hr=0.42)=>{const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,rr=Math.max(ar,br);
+         DP[id]={ax:a[0],ay:a[1],bx:b[0],by:b[1],ar,br,hx:mx+sx*rr,hy:my+sy*rr,hr:hr*rr};fb.cap(a[0],a[1],ar,b[0],b[1],br,M.BODY,cls,id,id,bias);};
+       part(21,W(-3.4,0),W(-9.0,0),4.8,1.0,2,0.5,0.2,-0.4,0.3);// the body tapers back to a tail point: a wide teardrop
+       part(20,W(-2.2,0),W(-0.6,0),5.8,5.8,2,0.6,-0.45,-0.55,0.3);// wide round body
+       const lift=this.flap*Math.max(0,Math.sin(t*30));for(const sd of[-1,1])part(22,W(-1.6,sd*(4.4+lift*0.6)),W(-4.4,sd*(3.9+lift*1.2)),1.7,1.2,2,1.0,-0.3,-0.45,0.35);// moulded wing bumps on its sides
+       const hu=this.hu()-1.6,HW=(u,v)=>this.HW(u,v+rock*1.2);
+       part(23,HW(hu,0),HW(hu,0),4.5-this.tuck*0.3,4.5-this.tuck*0.3,3,1.6,-0.35,-0.45,0.42);// a big round head over the front halfthis._hc=[DP[23].ax,DP[23].ay];this._bc=[(DP[20].ax+DP[20].bx)/2,(DP[20].ay+DP[20].by)/2];// head
+       if(this.tuck<0.7)part(24,HW(hu+3.9,0),HW(hu+5.6,0),1.3,1.6+this.peep*0.3,4,1.8,-0.2,-0.4,0.3);// a small flat bill peeking out the front
+       this.eyes=[-1,1].map(sd=>HW(hu+1.8,sd*2.6));},
+     // a little squeak every few waddle steps
+     tick(dt){const st=Math.floor(this.step*2/Math.PI);if(st!==this.lastSq&&this.speed>4){this.lastSq=st;if(!this.preview&&st%4===0)SFX.play('duckSqueak');}}}}
+);
+
 SWATCHES.axolotl.push(
   {id:'camo',name:'Camo',tier:'vivid',dot:['#4a5a2a','#7a5a34'],outline:'#0e1208',
     pal:{axo:{belly:ramp('#2e3a16','#46561e','#62742c','#82943e'),gill:ramp('#1e2a10','#33461c','#4e6a2a','#6e8a3e'),fin:ramp('#3a4424','#5a663a','#7e8a56','#a4ae7a'),eye:ramp('#0a0a06','#16160e','#24241a','#343428')}},
@@ -5735,14 +5821,14 @@ class Chick extends Pet{
     this.faceToward(p.x,p.y,dt*2);this.peck=Math.sin(Math.min(1,T.t/0.16)*Math.PI);if(T.t>0.08&&T.t<0.2){const m=this.mouthScreen();if(Math.hypot(p.x-m.x,(p.y-p.h)-m.y)<5){p.caught=true;this.held=p;this.tg=null;catchFx(this,p);if(!this.preview)SFX.play('peck');return 'caught';}}
     if(T.t>0.5){this.tg=null;this.goTo(p.x,p.y,dt,'walk',1);return 'miss';}return null;}
   syncHeld(){if(this.held){const m=this.mouthScreen();this.held.sx=m.x;this.held.sy=m.y;}}
-  finishEating(){super.finishEating();if(!this.preview){this.flap=1;this.vh=26;this.h=0.1;SFX.play('cheep');}}
+  finishEating(){super.finishEating();if(!this.preview){this.flap=1;this.vh=26;this.h=0.1;SFX.play(this.snd('cheep'));}}
   startle(x,y){if(this.state==='grabbed'||this.state==='fall')return;if(this.held)this.finishEating();this.tg=null;this.prey=null;
     const a=Math.atan2(this.y-y,this.x-x),B=this.world.bounds;this.ang=a;this.tx=clamp(this.x+Math.cos(a)*40,B.x0+6,B.x1-6);this.ty=clamp(this.y+Math.sin(a)*40,B.y0+6,B.y1-6);this.state='wander';this.pace='run';this.timer=1.4;this.flap=1;this.vh=30;this.h=0.1;
-    if(!this.preview){SFX.play('peeps');think(this,'!');this.fluff(5);}}
+    if(!this.preview){SFX.play(this.snd('peeps'));think(this,'!');this.fluff(5);}}
   fluff(n){const w=this.world;for(let i=0;i<n;i++)spawn(w,'down',this.x+rand(-4,4),this.y+rand(-3,3),{h:rand(3,8),vx:rand(-6,6),vy:rand(-4,4),ph:rand(TAU),life:rand(1.2,2)});}
-  petMe(){const r=super.petMe();if(r&&!this.preview){this.pT=(this.pT||0)-1/60;if(this.pT<=0){this.pT=rand(0.9,1.6);SFX.play('cheep');this.flap=Math.max(this.flap,0.6);}}return r;}
+  petMe(){const r=super.petMe();if(r&&!this.preview){this.pT=(this.pT||0)-1/60;if(this.pT<=0){this.pT=rand(0.9,1.6);SFX.play(this.snd('cheep'));this.flap=Math.max(this.flap,0.6);}}return r;}
   hitTest(x,y){const[cx,cy]=this.W(0,0);return Math.hypot(x-cx,y-cy)<8?0:-1;}
-  tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;if(!this.preview)SFX.play('peeps');return true;}
+  tryGrab(x,y){if(this.hitTest(x,y)<0)return false;if(this.held)this.finishEating();this.tg=null;this.prey=null;this.state='grabbed';this.grabX=x;this.grabY=y;this.gt=0;if(!this.preview)SFX.play(this.snd('peeps'));return true;}
   dragTo(x,y){this.grabX=x;this.grabY=y;}
   release(){if(this.state!=='grabbed')return;this.state='fall';this.vh=0;}
   update(dt){const w=this.world;this.t+=dt;this.blinkT-=dt;if(this.blinkT<0){this.blink=0.12;this.blinkT=rand(2,5);}if(this.blink>0)this.blink-=dt;
@@ -5750,8 +5836,8 @@ class Chick extends Pet{
     this.tuck+=((this.state==='sleeping'?1:0)-this.tuck)*Math.min(1,dt*3);
     // misting: it hates getting wet and gives itself a big shake
     const P=game.pointer,misted=!this.preview&&game.tool==='mist'&&P.down&&P.inside&&Math.hypot(P.x-this.x,P.y-this.y)<30;if(misted)this.wet=Math.min(1,this.wet+dt*2);else if(this.wet>0.4&&this.shake<=0){this.shake=1;this.wet=0;if(!this.preview){SFX.play('shakeoff');this.fluff(3);for(let i=0;i<6;i++)spawn(w,'drop',this.x,this.y,{h:4,vh:rand(10,30),vx:rand(-30,30),vy:rand(-20,20),life:1});w.stats.happy=Math.max(0,w.stats.happy-3);}}else this.wet=Math.max(0,this.wet-dt*0.2);
-    if(this.state==='grabbed'){this.gt+=dt;this.h+=(10-this.h)*Math.min(1,dt*8);this.x=this.grabX;this.y=this.grabY+this.h;this.flap=Math.max(this.flap,0.8);this.step+=dt*20;this.peepT-=dt*3;if(this.peepT<=0){this.peepT=rand(0.5,1);if(!this.preview)SFX.play('peep');this.peep=1;}this.pts[0].x=this.x;this.pts[0].y=this.y;return;}
-    if(this.state==='fall'){this.vh-=240*dt;this.h+=this.vh*dt;this.flap=1;if(this.h<=0){this.h=0;this.vh=0;this.state='idle';this.timer=1;if(!this.preview){SFX.play('land');dust(w,this.x,this.y,4);this.fluff(2);}}this.pts[0].x=this.x;this.pts[0].y=this.y;return;}
+    if(this.state==='grabbed'){this.gt+=dt;this.h+=(10-this.h)*Math.min(1,dt*8);this.x=this.grabX;this.y=this.grabY+this.h;this.flap=Math.max(this.flap,0.8);this.step+=dt*20;this.peepT-=dt*3;if(this.peepT<=0){this.peepT=rand(0.5,1);if(!this.preview)SFX.play(this.snd('peep'));this.peep=1;}this.pts[0].x=this.x;this.pts[0].y=this.y;return;}
+    if(this.state==='fall'){this.vh-=240*dt;this.h+=this.vh*dt;this.flap=1;if(this.h<=0){this.h=0;this.vh=0;this.state='idle';this.timer=1;if(!this.preview){SFX.play(this.snd('land'));dust(w,this.x,this.y,4);this.fluff(2);}}this.pts[0].x=this.x;this.pts[0].y=this.y;return;}
     if(this.h>0||this.vh>0){this.vh-=200*dt;this.h+=this.vh*dt;if(this.h<=0){this.h=0;this.vh=0;}}
     this.brain(dt);this.headAim(dt);
     // a little trotting gait: feet step, the head bobs back and forth like a real chick
@@ -5762,27 +5848,33 @@ class Chick extends Pet{
       if(this.pk>0){this.pk+=dt;this.peck=Math.max(this.peck,Math.sin(Math.min(1,this.pk/0.18)*Math.PI));if(this.pk>0.18){this.pk=0;const m=this.mouthScreen();if(!this.preview)spawn(w,'dust',m.x,m.y+1,{vx:rand(-6,6),vy:rand(-3,3),life:0.25});}}
       this.scratchT-=dt;if(this.scratchT<=0){this.scratchT=rand(7,14);this.scratch=1;if(!this.preview){SFX.play('scratch');const[bx,by]=this.W(-5,0);dust(w,bx,by+this.h,5);}}}
     if(this.state==='chew'){this.peck=0.4+0.4*Math.max(0,Math.sin(this.t*14));}
-    if(this.isActive()&&this.state!=='sleeping'){this.peepT-=dt*(w.stats.fed<30?2:1);if(this.peepT<=0){this.peepT=rand(2.5,6);this.peep=1;if(!this.preview)SFX.play('peep');}}
+    if(this.isActive()&&this.state!=='sleeping'){this.peepT-=dt*(w.stats.fed<30?2:1);if(this.peepT<=0){this.peepT=rand(2.5,6);this.peep=1;if(!this.preview)SFX.play(this.snd('peep'));}}
     const B=w.bounds;this.x+=Math.cos(this.ang)*this.speed*dt;this.y+=Math.sin(this.ang)*this.speed*dt;this.x=clamp(this.x,B.x0+6,B.x1-6);this.y=clamp(this.y,B.y0+6,B.y1-6);
-    this.pts[0].x=this.x;this.pts[0].y=this.y;this.syncHeld();}
-  color(m,q,s,l,x,y){const C=CHICKC;switch(m){
+    this.pts[0].x=this.x;this.pts[0].y=this.y;this.syncHeld();const sw=swatchOf(this);if(sw&&sw.chick&&sw.chick.tick)sw.chick.tick.call(this,dt);}
+  // body-relative coordinates of a pixel (u forward, v to the side), around the body or the head
+  loc(x,y,head){const c=head?this._hc:this._bc;if(!c)return[0,0];const a=this.ang+(head?this.hA:0),dx=x+0.5-c[0],dy=y+0.5-c[1],ca=Math.cos(a),sn=Math.sin(a);return[dx*ca+dy*sn,-dx*sn+dy*ca];}
+  get skin(){const sw=this.sw;return sw&&sw.chick?sw.chick:null;}
+  snd(n){const S=swatchOf(this);return S&&S.snd&&S.snd[n]||n;}// skins can swap its sounds (the rubber ducky squeaks)
+  color(m,q,s,l,x,y){const C=CHICKC,K=this.skin;if(K&&K.paint){const r=K.paint.call(this,m,q,s,l,x,y);if(r!==undefined)return r;}switch(m){
     case M.BODY:{if(this.wet>0.3&&hash(x*3,y*5)>0.6)return C.down[Math.max(0,q-1)];const h=hash(x*5,y*3);if(h>0.9)return C.down[Math.min(3,q+1)];if(h<0.06)return C.down[Math.max(0,q-1)];return C.down[q];}
     case M.TOE:case M.CLAW:return C.beak[q];}return INK;}
-  draw(fb){const W=(u,v)=>this.W(u,v),t=this.t,g=this.state==='grabbed'||this.state==='fall',puff=this.tuck*0.5+(this.wet>0.3?-0.4:0),sh=Math.sin(t*40)*this.shake*1.2;
+  draw(fb){const K=this.skin;this.inner=undefined;if(K&&K.draw)return K.draw.call(this,fb);
+    const W=(u,v)=>this.W(u,v),t=this.t,g=this.state==='grabbed'||this.state==='fall',puff=this.tuck*0.5+(this.wet>0.3?-0.4:0),sh=Math.sin(t*40)*this.shake*1.2;
     // little orange feet, stepping (or kicking back when scratching, dangling when held)
     for(const sd of[-1,1]){const st=g?Math.sin(t*20+sd)*0.8:Math.sin(this.step*2+(sd>0?0:Math.PI))*Math.min(1,this.speed/6)-(this.scratch>0&&sd>0?Math.max(0,Math.sin(t*22))*3*this.scratch:0);
       const[fx,fy]=W(0.8+st*2.2,sd*2.6);fb.cap(fx,fy+(g?3:0),0.55,fx,fy+(g?3:0),0.55,M.TOE,1);for(let k=-1;k<=1;k++){const a=this.ang+k*0.5;fb.cap(fx,fy+(g?3:0),0.4,fx+Math.cos(a)*2,fy+(g?3:0)+Math.sin(a)*2,0.35,M.TOE,1);}}
     // round fluffy body, fluffy edge, tail tuft, stubby wings (they flutter when it's happy)
-    const[bx,by]=W(-1.2,sh*0.4);fb.cap(bx,by,5.4+puff,bx,by,5.4+puff,M.BODY,2,0,0,0.6);
-    for(let i=0;i<16;i++){const a=i/16*TAU,r=5.2+puff+hash(i*7,3)*0.6+(this.wet>0.3?-0.3:0),[px,py]=[bx+Math.cos(a)*r,by+Math.sin(a)*r];fb.cap(px,py,1.0,px,py,1.0,M.BODY,2,0,0,0.1);}
-    {const[a0,a1]=W(-6.4,sh*0.6);fb.cap(a0,a1,1.3,a0,a1,1.3,M.BODY,2,0,0,0.2);}
-    const fl=Math.sin(t*34)*this.flap;for(const sd of[-1,1]){const[w0,w1]=W(-0.8,sd*4.6+sh*0.4),[w2,w3]=W(-3.4-this.flap*0.4,sd*(5.4+Math.max(0,fl)*1.1+this.flap*0.5)+sh*0.4);fb.cap(w0,w1,1.6,w2,w3,1.2+this.flap*0.2,M.BODY,2,0,0,0.9);}
+    const[bx,by]=W(-1.2,sh*0.4);this._bc=[bx,by];fb.cap(bx,by,5.4+puff,bx,by,5.4+puff,M.BODY,2,0,0,0.6);
+    // parts are tagged in s for skins: 0 body, 1 fluffy edge, 2 tail tuft, 3 wings (3..4 root to tip), 4 head, 5 head tuft
+    for(let i=0;i<16;i++){const a=i/16*TAU,r=5.2+puff+hash(i*7,3)*0.6+(this.wet>0.3?-0.3:0),[px,py]=[bx+Math.cos(a)*r,by+Math.sin(a)*r];fb.cap(px,py,1.0,px,py,1.0,M.BODY,2,1,1,0.1);}
+    {const[a0,a1]=W(-6.4,sh*0.6);fb.cap(a0,a1,1.3,a0,a1,1.3,M.BODY,2,2,2,0.2);}
+    const fl=Math.sin(t*34)*this.flap;for(const sd of[-1,1]){const[w0,w1]=W(-0.8,sd*4.6+sh*0.4),[w2,w3]=W(-3.4-this.flap*0.4,sd*(5.4+Math.max(0,fl)*1.1+this.flap*0.5)+sh*0.4);fb.cap(w0,w1,1.6,w2,w3,1.2+this.flap*0.2,M.BODY,2,3,3.99,0.9);}
     // head (bobs while walking, dips to peck, tucks back to sleep), fuzzy tuft on top, beak
-    const HW=(u,v)=>this.HW(u,v),hu=this.hu(),[hx,hy]=HW(hu,sh);fb.cap(hx,hy,3.6-this.tuck*0.4,hx,hy,3.6-this.tuck*0.4,M.BODY,2,0,0,1.2);
-    for(let i=0;i<3;i++){const[px,py]=HW(hu-0.6+i*0.6,(i-1)*0.9+sh);fb.cap(px,py-2.6+Math.abs(i-1)*0.6,0.7,px,py-3.4,0.5,M.BODY,2,0,0,1.4);}
+    const HW=(u,v)=>this.HW(u,v),hu=this.hu(),[hx,hy]=HW(hu,sh);this._hc=[hx,hy];fb.cap(hx,hy,3.6-this.tuck*0.4,hx,hy,3.6-this.tuck*0.4,M.BODY,2,4,4,1.2);
+    for(let i=0;i<3;i++){const[px,py]=HW(hu-0.6+i*0.6,(i-1)*0.9+sh);fb.cap(px,py-2.6+Math.abs(i-1)*0.6,0.7,px,py-3.4,0.5,M.BODY,2,5,5,1.4);}
     const op=this.peep*0.7;if(this.tuck<0.7)for(const sd of(op>0.1?[-1,1]:[0])){const[b0,b1]=HW(hu+2.8,sd*op+sh),[b2,b3]=HW(hu+5.0,sd*op*1.6+sh);fb.cap(b0,b1,1.1,b2,b3,0.3,M.CLAW,3,0,0,1.4);}
-    this.eyes=[-1,1].map(sd=>HW(hu+0.9,sd*2.0+sh));}
-  drawExtras(fb){const K=hex('#100a06');if(!this.eyes)return;const shut=this.blink>0||this.tuck>0.5||this.state==='petted'&&Math.sin(this.t*3)>0.3;
+    this.eyes=[-1,1].map(sd=>HW(hu+0.9,sd*2.0+sh));if(this.skin&&this.skin.post)this.skin.post.call(this,fb,{W,HW,bx,by,hx,hy,hu,sh,g});}
+  drawExtras(fb){const K=hex('#100a06');if(this.skin&&this.skin.extras)this.skin.extras.call(this,fb);if(!this.eyes)return;const shut=this.blink>0||this.tuck>0.5||this.state==='petted'&&Math.sin(this.t*3)>0.3;
     for(const[ex,ey]of this.eyes){const ix=Math.round(ex-0.5),iy=Math.round(ey-0.5);if(shut){pset(fb,ix,iy+1,K);pset(fb,ix+1,iy+1,K);continue;}pset(fb,ix,iy,K);pset(fb,ix+1,iy,K);pset(fb,ix,iy+1,K);pset(fb,ix+1,iy+1,K);pset(fb,ix,iy,hex('#ffffff'));}}
   statusText(){if(this.shake>0.3)return 'is shaking itself dry. Hmph!';if(this.state==='grabbed')return 'is peeping and flapping its little wings';if(this.tuck>0.5)return 'is napping with its head tucked into its fluff';
     if(this.state==='chew')return `is gobbling ${PREY_NAME[this.held?.type]||'something'}`;if(this.scratch>0.3)return 'is scratching around in the dirt';
