@@ -2250,9 +2250,9 @@ class Salamander extends Walker{
       for(let L=3;L>=0&&!k;L--){let best=-1;// how far inside the nearest-to-surface... i.e. the deepest any tongue reaches, in px
         for(const[o,len,w]of LT[L]){const v=u/len;if(v>1)continue;
           const hw=w*(0.75+0.65*Math.sin(Math.PI*Math.min(1,v*1.8)))*Math.pow(1-v,0.55);if(hw<1.0)continue;const e=hw-Math.abs(d-o*Math.pow(v,2.2));if(e>best)best=e;}
-        if(best>0)k=L?L+2:best<0.9?1:2;}// the outer flame gets a one-pixel dark rim
+        if(best>0)k=L?L+2:best<0.9?1:2;}// the outer flame gets a one-pixel outline, like the body
       if(!k)continue;
-      const c=SAL_FIRE[Math.max(1,Math.round(k-(1-hot)*3))];
+      const c=k===1?this.rimC||(this.rimC=hex(this.sw.outline)):SAL_FIRE[Math.max(1,Math.round(k-(1-hot)*3))];// rim: the body's own outline colour
       pmix(fb,x,y,c,1);ft.push(y*W+x,c,1,k/5);}}
   flames(fb){for(const p of this.fp){const u=p.t/p.life;if(p.spark){pmix(fb,p.x,p.y,hex('#ffc040'),1-u);continue;}
     const c=SAL_FIRE[u<0.15?5:u<0.35?4:u<0.6?3:u<0.82?2:1],a=u<0.7?0.95:(1-u)/0.3*0.95;pmix(fb,p.x,p.y,c,a);if(p.big&&u<0.5){pmix(fb,p.x+1,p.y,c,a*0.8);pmix(fb,p.x,p.y-1,c,a*0.8);}}}
