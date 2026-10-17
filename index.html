@@ -2229,25 +2229,26 @@ class Salamander extends Walker{
       for(const o of[-0.6,0,0.6]){const x=p.x+pc*2-ps*o*2,y=p.y+ps*2+pc*o*2;if(!under(x,y))pmix(fb,x,y,c,0.5*a);}}
     for(const p of this.st){const a=Math.sin(Math.min(1,p.t/p.life)*Math.PI)*0.45,R2=Math.ceil(p.r);for(let yy=-R2;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++){const d=Math.hypot(xx,yy)/p.r;if(d<1)pmix(fb,p.x+xx,p.y+yy,ST,a*(1-d*d));}}
     this.emi=this.gp.map(i=>fb.px[i]);this.fireTail(fb);this.flames(fb);}
-  // the flame tail, per pixel, in the tail's own coordinates (along s, across d): a flat cartoon flame whose
-  // scalloped edges and inner bands lick backward toward the tip, never up the screen
+  // the flame tail, drawn like a cartoon flame in the tail's own coordinates (along s, across d): a full round base at the hips,
+  // one tall main point at the tip that whips side to side, and curved tongues with deep notches between them that are born
+  // near the base and travel back toward the tip. Four nested flames, each with its own points: red, orange, yellow, white-hot
   fireTail(fb){const ft=this.ft||(this.ft=[]);ft.length=0;if(this.cool>0.97)return;const P=this.flamePath(),W=fb.w,big=Math.max(0.35,P.big),sc=this.sw.sc||1;
-    const t=this.t*(this.state==='sleeping'?0.45:1),hot=1-this.cool,n=P.length;
-    const wid=u=>sc*big*(3.0+4.6*Math.sin(Math.PI*Math.min(1,u*1.35)))*Math.pow(Math.max(0,1-u),0.5);
-    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const q of P){const w=wid(q.u)*1.4+2;x0=Math.min(x0,q.x-w);x1=Math.max(x1,q.x+w);y0=Math.min(y0,q.y-w);y1=Math.max(y1,q.y+w);}
+    const t=this.t*(this.state==='sleeping'?0.45:1),hot=1-this.cool,n=P.length,S0=P[0].s,SL=P[n-1].s-S0;
+    const wid=v=>sc*big*(3.6+5.2*Math.sin(Math.PI*Math.min(1,v*1.4+0.08)))*Math.pow(Math.max(0,1-v),0.55);
+    const LAY=SAL_FLAME_LAYERS;
+    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const q of P){const w=wid(q.u)*1.5+4;x0=Math.min(x0,q.x-w);x1=Math.max(x1,q.x+w);y0=Math.min(y0,q.y-w);y1=Math.max(y1,q.y+w);}
     x0=Math.max(0,Math.floor(x0));y0=Math.max(0,Math.floor(y0));x1=Math.min(W-1,Math.ceil(x1));y1=Math.min(fb.h-1,Math.ceil(y1));
     for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const px=x+0.5,py=y+0.5;let bd=1e9,q=null;
       for(const c of P){const d=(px-c.x)*(px-c.x)+(py-c.y)*(py-c.y);if(d<bd){bd=d;q=c;}}
-      const dx=px-q.x,dy=py-q.y,s=q.s-(dx*q.fx+dy*q.fy),d=-dx*q.fy+dy*q.fx,u=(s-P[0].s)/(P[n-1].s-P[0].s);
-      if(u<-0.04||u>1)continue;const sd=d<0?0:1;
-      // tongues: a sawtooth down each edge, offset side to side, travelling toward the tip
-      const ph=(s-t*11)/6.5+sd*0.5,id=Math.floor(ph),saw=ph-id,amp=0.55+0.45*hash(id,sd*13+3)+0.15*Math.sin(t*9+id*2.3),lick=Math.pow(saw,2.2)*amp;
-      const w=wid(Math.max(0,u))*(0.62+1.0*lick*(0.4+u*0.8));if(w<0.4)continue;
-      const r=Math.abs(d)/w;if(r>1)continue;
-      // flat bands that follow the same licking edge: white-yellow core, orange, red rim, dark edge
-      const ph2=ph+0.35,inner=r+0.18*(ph2-Math.floor(ph2))-0.09+u*0.25;
-      const k=r>0.9?1:inner<0.3?5:inner<0.5?4:inner<0.72?3:2;
-      const c=SAL_FIRE[Math.max(1,Math.round(k-(1-hot)*3))],a=u>0.88?Math.max(0,(1-u)/0.12):1;if(a<=0.05)continue;
+      const dx=px-q.x,dy=py-q.y,s=q.s-(dx*q.fx+dy*q.fy),u=(s-S0)/SL;if(u<-0.04||u>1)continue;
+      const d=-dx*q.fy+dy*q.fx-Math.sin(t*4.5-u*5)*u*u*2.6*sc*big,sd=d<0?0:1,ad=Math.abs(d);// the main point whips side to side
+      let k=-1,rim=false;
+      for(let L=3;L>=0;L--){const Y=LAY[L],v=Math.max(0,u)/Y.len;if(v>1)continue;
+        // one curved tongue after another down each side, a deep notch before each; they swell as they travel and flicker
+        const ph=(s-t*Y.sp)/Y.per+sd*0.5+L*0.31,id=Math.floor(ph),saw=ph-id,amp=(0.6+0.4*hash(id*3+L,sd*13+5))*(0.85+0.15*Math.sin(t*8+id*2.1+L));
+        const w=wid(v)*Y.ws*(0.5+1.15*Math.pow(saw,1.7)*amp*(0.35+v*0.9));if(ad<w){k=Y.c;if(L===0&&ad>w-0.9)rim=true;break;}}
+      if(k<0)continue;if(rim)k=1;
+      const c=SAL_FIRE[Math.max(1,Math.round(k-(1-hot)*3))],a=u>0.93?Math.max(0,(1-u)/0.07):1;if(a<=0.05)continue;
       pmix(fb,x,y,c,a);ft.push(y*W+x,c,a,k/5);}}
   flames(fb){for(const p of this.fp){const u=p.t/p.life;if(p.spark){pmix(fb,p.x,p.y,hex('#ffc040'),1-u);continue;}
     const c=SAL_FIRE[u<0.15?5:u<0.35?4:u<0.6?3:u<0.82?2:1],a=u<0.7?0.95:(1-u)/0.3*0.95;pmix(fb,p.x,p.y,c,a);if(p.big&&u<0.5){pmix(fb,p.x+1,p.y,c,a*0.8);pmix(fb,p.x,p.y-1,c,a*0.8);}}}
@@ -2443,6 +2444,7 @@ const salVoro=(u,v,sz,seed)=>{const cu=Math.floor(u/sz),cv=Math.floor(v/sz);let 
   for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const X=cu+a,Y=cv+b,px=(X+0.15+hash(X*7+seed,Y*13)*0.7)*sz,py=(Y+0.15+hash(X*5,Y*11+seed)*0.7)*sz,d=Math.hypot(u-px,v-py);
     if(d<d1){d2=d1;d1=d;id=X*131+Y*71;}else if(d<d2)d2=d;}return[d2-d1,id];};// [distance to the cell edge, cell id]
 const SAL_FIRE=['#4a0804','#a01a08','#e84a0c','#ff8a14','#ffc840','#fff4c0'].map(hex);
+const SAL_FLAME_LAYERS=[{len:1,ws:1,c:2,per:8.5,sp:11},{len:0.84,ws:0.74,c:3,per:7,sp:13},{len:0.64,ws:0.52,c:4,per:5.5,sp:15},{len:0.4,ws:0.32,c:5,per:4,sp:17}];// inferno tail: nested flames, outer red to white-hot core
 const salFire=h=>SAL_FIRE[h>0.9?5:h>0.74?4:h>0.56?3:h>0.38?2:h>0.2?1:0];
 const fract=a=>a-Math.floor(a);
 const SWATCHES={
