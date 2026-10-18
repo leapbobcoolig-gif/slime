@@ -627,7 +627,7 @@ body.fun-hud .gtoast.out{transform:none;translate:-50% -10px;opacity:0}
   <div class="srow"><label>Tuck food tray<small>The food tray tucks away while you carry or pick a food. Tap the little tab to bring it back.</small></label><button class="sw" id="setTrayTuck" aria-label="Tuck food tray"></button></div>
   </div>
   <div class="srow sfoot" id="resetRow"><label>Reset save<small>Coins, items and bonds start over.</small></label><button class="btn alt danger" id="resetBtn" style="flex:none">Reset</button></div>
-  <div class="srow" id="unlockRow" hidden><label>Unlock everything<small>Secret menu! Every critter, hat, toy, tool and decoration.</small></label><button class="btn" id="unlockBtn" style="flex:none">Unlock all</button></div>
+  <div class="srow" id="unlockRow" hidden><label>Unlock everything<small>Secret menu! Every critter, hat, toy, tool, decoration, colour and tank.</small></label><button class="btn" id="unlockBtn" style="flex:none">Unlock all</button></div>
 </div></div>
 
 <script>
@@ -6660,10 +6660,12 @@ class Chick extends Pet{
     // like a duckling, it often trots after the hand
     if(!this.preview&&P.inside&&Math.random()<0.2){this.tx=P.x;this.ty=P.y;this.pace='walk';this.state='wander';this.timer=4;return;}
     if(Math.random()<0.45){this.state='idle';this.timer=rand(2,5);return;}[this.tx,this.ty]=this.randomSpot();this.pace=Math.random()<0.25?'run':'walk';this.state='wander';this.timer=8;}
-  canStrike(p){const m=this.mouthScreen(),d=Math.hypot(p.x-m.x,(p.y-p.h)-m.y);return d<7&&(p.h<3||(p.inHand&&p.h<12));}
-  startStrike(p){this.tg={t:0,p};}
+  // food held out on the tweezers or the hand floats above its beak, so it hops up to peck it
+  canStrike(p){const m=this.mouthScreen(),fy=p.y-p.h,d=Math.hypot(p.x-m.x,fy-m.y);if(d<7&&p.h<3)return true;
+    return !!p.inHand&&p.h<12&&Math.abs(p.x-m.x)<6&&m.y-fy>-3&&m.y-fy<12;}
+  startStrike(p){this.tg={t:0,p};const gap=this.mouthScreen().y-(p.y-p.h);if(p.inHand&&gap>2&&this.h<0.5){this.vh=Math.sqrt(2*200*(gap+1));this.h=0.1;this.flap=1;}}
   updateStrike(dt){const T=this.tg;if(!T)return 'miss';const p=T.p;T.t+=dt;if(p.dead||p.caught){this.tg=null;return 'miss';}
-    this.faceToward(p.x,p.y,dt*2);this.peck=Math.sin(Math.min(1,T.t/0.16)*Math.PI);if(T.t>0.08&&T.t<0.2){const m=this.mouthScreen();if(Math.hypot(p.x-m.x,(p.y-p.h)-m.y)<5){p.caught=true;this.held=p;this.tg=null;catchFx(this,p);if(!this.preview)SFX.play('peck');return 'caught';}}
+    const held=!!p.inHand;this.faceToward(p.x,p.y,dt*2);this.peck=Math.sin(Math.min(1,T.t/0.16)*Math.PI);if(T.t>0.08&&T.t<(held?0.45:0.2)){const m=this.mouthScreen();if(Math.hypot(p.x-m.x,(p.y-p.h)-m.y)<(held?7:5)){p.caught=true;this.held=p;this.tg=null;catchFx(this,p);if(!this.preview)SFX.play('peck');return 'caught';}}
     if(T.t>0.5){this.tg=null;this.goTo(p.x,p.y,dt,'walk',1);return 'miss';}return null;}
   syncHeld(){if(this.held){const m=this.mouthScreen();this.held.sx=m.x;this.held.sy=m.y;}}
   finishEating(){super.finishEating();if(!this.preview){this.flap=1;this.vh=26;this.h=0.1;SFX.play(this.snd('cheep'));}}
@@ -10838,7 +10840,7 @@ const ui={
     $('unlockBtn').addEventListener('click',()=>{
       for(const[id,it]of Object.entries(ITEMS))save.inv[id]=(it.cat==='hat'||it.cat==='tool')?1:Math.max(save.inv[id]||0,3);
       for(const k of ROSTER)if(!save.owned.includes(k))save.owned.push(k);
-      save.allSkins=true;// every colour, every tier
+      save.allSkins=true;save.allTanks=true;// every colour, every tier, every tank (and its song)
       markDirty();writeSave();SFX.play('levelup');this.renderTray();const b=$('unlockBtn');b.textContent='Unlocked!';b.disabled=true;
       flash('Everything unlocked! Check your Bag.');});
     this.refreshLight();
