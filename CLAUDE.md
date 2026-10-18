@@ -48,7 +48,8 @@ Skins are bought from the swatch row in the Critters menu. Each critter gets one
 - **Free tanks:** Terrarium, Paludarium, Aquarium. Each critter keeps the ones that suit it.
 - **Themed tanks** (300 coins each, bought once for every critter that fits): Sun Dune, Bayou, Coral Reef, Flower Field, Enchanted Grove.
   - Each runs on a base tank's rules (land, pool or all water) and bakes its own scenery on top (`THEMES` module).
-  - Each lists the critters that fit it (`TANKS[id].who`).
+  - Who fits is plain physics (`TANKS[id].kind` → `TANK_KIND`): land tanks take any critter that can live on land (amphibians too), the Bayou takes swimmers (amphibians, the kraken, sea critters), the Coral Reef takes open-water critters (sea critters and the kraken). No hand-picked theme lists.
+  - Themed tanks are alive: wind in the grass, swaying flowers, butterflies, blowing sand, footstep puffs, a rolling tumbleweed, dragonflies, spore puffs, reef bubbles (`THEMES.update` / `drawUnder` / `drawOver`).
   - Buying one adds its song to the music shuffle (`songOwned`): Warm Windowsill, Bayou Drift, Sea Glass, Dandelion Wind, Odd Bodies.
 - New scenery is laid out on purpose (composition): one main feature a third of the way in, a leading line, bigger things framing the edges, an open middle, and things grouped in families. Nothing overlaps anything else.
 - Every sprite has an outline in a deep shade of its own colour (the critter rule), never near-black. New painters name it with `olOf`.
