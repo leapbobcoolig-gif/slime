@@ -1027,6 +1027,11 @@ const SFX=(()=>{
     duckSqueak:()=>{tone(900,0.09,{type:'triangle',to:1500,gain:0.06});tone(1500,0.07,{delay:0.07,type:'triangle',to:1100,gain:0.04});},
     duckWobble:()=>{for(let k=0;k<3;k++)tone(950+k*120,0.08,{delay:k*0.11,type:'triangle',to:1500+k*150,gain:0.05});},
     duckBonk:()=>{tone(420,0.08,{type:'sine',to:260,gain:0.12});noise(0.04,{filter:'bandpass',freq:900,q:3,gain:0.06});},
+    // ancient sea scorpion: carapace clicks, a paddle swish, bubble pops and a splash
+    seaClick:()=>{noise(0.012,{filter:'bandpass',freq:3200,q:5,gain:0.05});tone(1800,0.01,{type:'square',gain:0.012});},
+    paddleSwish:()=>{noise(0.22,{filter:'lowpass',freq:900,gain:0.05});},
+    bubblePop:()=>{tone(620,0.05,{type:'sine',to:1500,gain:0.04});},
+    seaSplash:()=>{noise(0.25,{filter:'highpass',freq:1500,gain:0.09});tone(320,0.12,{to:140,gain:0.06});for(let k=0;k<4;k++)tone(900+k*250,0.04,{delay:0.05+k*0.04,type:'sine',to:1600,gain:0.02});},
     springBoing:()=>{tone(220,0.35,{type:'triangle',to:520,gain:0.05});tone(520,0.25,{delay:0.12,type:'triangle',to:300,gain:0.03});},// a springy boing
     coilClatter:()=>{for(let i=0;i<5;i++)tone(1700+i*130,0.03,{delay:i*0.035,type:'square',gain:0.014});},// coils clattering together
     springStretch:()=>{tone(300,0.4,{type:'sawtooth',to:900,gain:0.02});noise(0.3,{filter:'bandpass',freq:3000,q:3,gain:0.015});},// the spring stretching out
@@ -1172,7 +1177,7 @@ const SFX=(()=>{
   const BUS_OF={};
   'tick ui tap sparkle levelup coin coinburst whoosh close beep nope bloop achieve yay reveal0 reveal1 reveal2 reveal3 insert ratchet clunk pop rattle chest ask place scoop unhook hang clack pluck tink2'.split(' ').forEach(n=>BUS_OF[n]='ui');
   'plip bpop drip splash ocean burble rumble wind whirr toot tune musicbox flutter boing bell boop blow zap squeak2 lightsOn lightsOff tink'.split(' ').forEach(n=>BUS_OF[n]='world');
-  const GAP={duckSqueak:0.12,duckWobble:0.8,duckBonk:0.3,dragonRumble:2,thunderCrack:4,whiskerSwish:0.8,springBoing:0.4,coilClatter:0.6,springStretch:1.2,burnerWhoosh:1,basketCreak:0.35,balloonFlap:1,clockTick:0.2,clockTock:0.2,gearStep:0.15,steamPuff:1,windRatchet:0.16,windDown:3,windBell:3,foxYip:0.6,foxChime:1,foxWhoosh:0.8,gummyBoing:0.25,gummySquelch:0.4,sugarCrunch:0.6,reefBloom:3,fishScatter:1,fishNibble:0.25,gingerLand:0.25,chimneyPuff:2,musicBox:5,shutterClack:1,doorCreak:1.5,cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
+  const GAP={seaClick:0.08,paddleSwish:0.5,bubblePop:0.35,seaSplash:1,duckSqueak:0.12,duckWobble:0.8,duckBonk:0.3,dragonRumble:2,thunderCrack:4,whiskerSwish:0.8,springBoing:0.4,coilClatter:0.6,springStretch:1.2,burnerWhoosh:1,basketCreak:0.35,balloonFlap:1,clockTick:0.2,clockTock:0.2,gearStep:0.15,steamPuff:1,windRatchet:0.16,windDown:3,windBell:3,foxYip:0.6,foxChime:1,foxWhoosh:0.8,gummyBoing:0.25,gummySquelch:0.4,sugarCrunch:0.6,reefBloom:3,fishScatter:1,fishNibble:0.25,gingerLand:0.25,chimneyPuff:2,musicBox:5,shutterClack:1,doorCreak:1.5,cubeLand:0.3,fireCrackle:0.9,fireStep:0.25,emberPop:0.5,eyeBlink:0.6,phantomEye:1,whispers:8,gasPuff:1.2,toxBubble:3,orbChime:1.5,spiritSwirl:1,spiritHum:6,spiritSplash:1,step:0.03,drip:0.03,chew:0.08,heart:0.1,catch:0.1,tap:0.05,cstep:0.018,suck:0.05,tick:0.05,hiss:0.8,snap:0.08,squelch:0.4,sss:0.45,tstep:0.1,stomp:0.12,chomp:0.1,coin:0.04,ratchet:0.05,blow:0.08,bpop:0.04,zap:0.3};
   function play(name,arg){
     if(!ac||muted||!S[name])return;const now=ac.currentTime;
     if(last[name]!==undefined&&now-last[name]<(GAP[name]??0.03))return;last[name]=now;
@@ -3279,6 +3284,129 @@ SWATCHES.chick.push(
      tick(dt){const st=Math.floor(this.step*2/Math.PI);if(st!==this.lastSq&&this.speed>4){this.lastSq=st;if(!this.preview&&st%4===0)SFX.play('duckSqueak');}}}}
 );
 
+// ---- scorpion skins. Parts: M.BODY plates s 10..16 (l across), carapace s 99..101; M.LIMB legs (s 0..14 along);
+// M.CLAW pincers (s 0 arms/palm, 20..25 fingers); M.CLAW2 tail segments (s = 0..4); M.TOE sting bulb; M.LID barb; M.PUPIL eyes ----
+const SK={red:ramp('#4a0408','#86101a','#c42a2a','#f06a5a'),gold:ramp('#6a4a08','#a87a14','#e0b430','#fff0a0'),lac:ramp('#08080a','#141418','#24242c','#6a6a7a'),
+  lapis:ramp('#0a1440','#16266e','#2a44a8','#5a7ae0'),ink:ramp('#040406','#0a0a10','#14141c','#22222e'),bone:ramp('#a8a49a','#d8d4ca','#f4f2ea','#ffffff'),
+  pink:ramp('#8a1a5a','#d02a8a','#ff5ab8','#ffb0e0'),teal:ramp('#0a6a6a','#14a8a0','#2ae0d0','#a0fff4'),mari:ramp('#a04a00','#e07a08','#ffa828','#ffd890'),
+  npink:ramp('#5a0a3a','#b81a78','#ff3aaa','#ffb4e4'),ncyan:ramp('#064a5a','#0ea0c0','#2ae4ff','#b4f8ff'),char:ramp('#08080c','#101016','#1a1a22','#282832'),
+  sand:ramp('#8a6428','#c09048','#e2b86a','#f8dca0'),sandD:ramp('#6a4a1c','#9a7034','#c0904c','#e0b470'),
+  stone:ramp('#3a362c','#5e584a','#848070','#aaa694'),stoneD:ramp('#26241e','#3e3a30','#5a5446','#787260'),moss:ramp('#2a3a1a','#425a26','#5e7a36','#86a050')};
+const skPlate=s=>s>=10&&s<17?s-10:-1;
+// where in its plate a body pixel sits (0 = front seam .. 1 = back seam), from body coordinates
+const skPlateFrac=u=>{const f=(1.54-u)/1.08;return f-Math.floor(f);};
+SWATCHES.scorpion.push(
+  // samurai armour: red lacquer plates edged in gold and laced with black cord at the seams; black lacquer claws and legs
+  {id:'samurai',name:'Samurai Armor',tier:'vivid',dot:['#c42a2a','#e0b430'],outline:'#0a0204',
+   scorp:{glowC:[78,8,14],
+     paint(m,q,s,l,x,y){const al=Math.abs(l);
+       if(m===M.BODY){if(s>=99)return s>=100.5?SK.gold[Math.min(3,q+1)]:SK.red[q];
+         if(al>0.76)return SK.gold[q];const[u,v]=this.loc(x,y),f=skPlateFrac(u);if(f<0.2&&Math.abs(Math.abs(v)-1.1)<0.35)return SK.ink[1];// cord lacing
+         return SK.red[q];}
+       if(m===M.CLAW2)return al>0.72?SK.gold[q]:SK.red[q];
+       if(m===M.LIMB||m===M.CLAW)return SK.lac[q];if(m===M.TOE)return SK.gold[q];if(m===M.LID)return SK.lac[Math.max(0,q-1)];}}},
+  // pharaoh: lapis and gold bands across the plates like a royal headdress, gold claws with lapis marks, a gold sting
+  {id:'pharaoh',name:'Pharaoh',tier:'vivid',dot:['#2a44a8','#e0b430'],outline:'#060a1c',
+   scorp:{glowC:[96,74,14],
+     paint(m,q,s,l,x,y){const al=Math.abs(l);
+       if(m===M.BODY){if(s>=99)return al<0.35?SK.lapis[q]:SK.gold[q];const[u]=this.loc(x,y),band=Math.floor((u+20)/0.54)&1;return(band?SK.lapis:SK.gold)[q];}
+       if(m===M.CLAW2)return(s&1?SK.lapis:SK.gold)[q];
+       if(m===M.CLAW){if(s<20&&hash(Math.floor(x/2),Math.floor(y/2))>0.82)return SK.lapis[1];return SK.gold[q];}// little marks like hieroglyphs
+       if(m===M.LIMB)return SK.gold[q];if(m===M.TOE)return SK.gold[Math.min(3,q+1)];if(m===M.LID)return SK.lapis[q];}}},
+  // sugar skull: black with painted flowers on every plate, white dots round the rims, confetti-dotted claws,
+  // and the head plate painted as a white skull: big black eye sockets ringed with petals, a little nose, a row of teeth
+  {id:'sugarskull',name:'Sugar Skull',tier:'vivid',dot:['#14141c','#ff5ab8'],outline:'#020204',
+   scorp:{glowC:[62,14,74],
+     paint(m,q,s,l,x,y){const al=Math.abs(l),FL=[SK.pink,SK.teal,SK.mari];
+       if(m===M.BODY){const[u,v]=this.loc(x,y);
+         if(s>=99){if(s>=100.5)return(x&1?SK.ink[1]:SK.bone[Math.max(2,q)]);// teeth along the front edge
+           for(const sd of[-1,1]){const r=Math.hypot(u-3.05,v-sd*0.85);if(r<0.62)return SK.ink[0];if(r<0.86)return(sd<0?SK.pink:SK.teal)[3];}// big eye sockets, petal rims
+           if(Math.abs(v)<0.3&&u>3.55&&u<3.95)return SK.ink[1];// nose
+           if(Math.abs(v)<0.35&&Math.abs(u-2.35)<0.3)return SK.mari[3];// a marigold dot on the forehead
+           return SK.bone[q];}
+         const k=skPlate(s),f=skPlateFrac(u);
+         if(al>0.78)return(Math.floor((u+20)*2.2)&1?SK.bone:SK.ink)[q];// white dots round the rim
+         const cv=(k&1?1:-1)*1.05,d=Math.hypot((f-0.5)*1.08,v-cv);if(d<0.35)return SK.mari[3];if(d<0.95)return FL[k%3][Math.max(2,q)];// a bright flower on each plate
+         return SK.ink[q];}
+       if(m===M.CLAW||m===M.LIMB||m===M.CLAW2){if(hash(Math.floor(x/2)*3,Math.floor(y/2)*5)>0.8)return FL[Math.floor(hash(x,y)*3)][Math.max(1,q)];return SK.ink[q];}
+       if(m===M.TOE)return SK.pink[q];if(m===M.LID)return SK.bone[q];if(m===M.PUPIL)return SK.ink[0];}}},
+  // neon sign: a dark body with pink and cyan tube lines tracing its plates, claws, legs and tail; at night the tubes glow steadily
+  {id:'neon',name:'Neon Sign',tier:'vivid',dot:['#ff3aaa','#2ae4ff'],outline:'#020206',
+   scorp:{glowC:[6,6,14],
+     paint(m,q,s,l,x,y){const al=Math.abs(l),tube=(R,c)=>{(this._tube||(this._tube=new Map())).set(y*this._fw+x,c);return R[Math.max(2,q)];},P=[90,10,60],C=[10,70,96];
+       if(m===M.BODY){if(s>=99)return al>0.62?tube(SK.ncyan,C):SK.char[q];if(al>0.76)return tube(SK.npink,P);const[u]=this.loc(x,y);if(skPlateFrac(u)<0.12)return tube(SK.ncyan,C);return SK.char[q];}
+       if(m===M.CLAW)return al>0.55?tube(SK.ncyan,C):SK.char[q];
+       if(m===M.CLAW2)return al>0.6?tube(SK.npink,P):SK.char[q];
+       if(m===M.LIMB)return tube(SK.npink,P);if(m===M.TOE)return tube(SK.ncyan,C);if(m===M.LID)return tube(SK.npink,P);}}},
+  // shifting sands: packed golden sand; grains trickle from its joints and sting as it moves, and a puff bursts off its tail when it strikes
+  {id:'sands',name:'Shifting Sands',tier:'special',fx:'sand',dot:['#e2b86a','#9a7034'],outline:'#3a2408',
+   scorp:{glowC:[84,46,8],
+     paint(m,q,s,l,x,y){const g=hash(x*7.3,y*3.1),R=g>0.86?SK.sandD:SK.sand,qq=Math.max(0,Math.min(3,q+(g<0.12?1:0)));
+       if(m===M.BODY&&s<99){const[u,v]=this.loc(x,y);if(Math.sin(u*4.2+v*1.6)>0.82)return SK.sandD[q];}// wind ripples across the back
+       if(m===M.PUPIL)return;return R[qq];},
+     tick(dt){const G=this.grains||(this.grains=[]),mv=Math.min(1,this.speed/8);
+       const emit=(u,v,z,n)=>{for(let i=0;i<n;i++){const[x,y]=this.W(u+rand(-0.5,0.5),v+rand(-0.5,0.5));G.push({x,y,z:z+rand(0,1),vx:rand(-3,3),vy:rand(-2,2),vz:rand(0,4),t:0,life:rand(2.5,4)});}};
+       this.gT=(this.gT||0)+dt*(12+mv*55);while(this.gT>1&&G.length<420){this.gT--;const L=this.legs[Math.floor(Math.random()*this.legs.length)];
+         if(Math.random()<0.65&&L){const sd=Math.random()<0.5?-1:1,uu=rand(-4,2),[x,y]=this.W(uu,sd*3.2),c=Math.cos(this.ang),sn=Math.sin(this.ang),ox=-sn*sd,oy=c*sd;G.push({x,y,z:1.5+(this.h||0),vx:ox*rand(3,8),vy:oy*rand(3,8),vz:rand(0,2),t:0,life:rand(5,8)});}// spilling from the joints along its sides
+         else if(this._tail)G.push({x:this._tail[0]+rand(-0.5,0.5),y:this._tail[1]+4,z:4,vx:rand(-1,1),vy:rand(-0.5,0.5),vz:0,t:0,life:rand(3,5)});}// and off the sting
+       if(this.stingT>0.38&&!this.puffed){this.puffed=1;if(this._tail)for(let i=0;i<60;i++){const a=rand(TAU),sp=rand(6,20);G.push({x:this._tail[0],y:this._tail[1]+3,z:4,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp*0.7,vz:rand(6,16),t:0,life:rand(1.5,3),puff:1});}}
+       if(this.stingT<=0)this.puffed=0;
+       for(const p of G){p.t+=dt;if(p.z>0){p.vz-=30*dt;p.z+=p.vz*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.z<=0){p.z=0;p.vx=p.vy=0;}}else{p.x+=Math.sin(p.t*2+p.life*9)*dt*1.5;}}// settled grains slowly blow about
+       this.grains=G.filter(p=>p.t<p.life);},
+     // falling grains streak a little; settled ones sit on the ground with a tiny shadow, so the trail reads on any floor
+     under(fb){const A=hex('#f6dc9c'),B=hex('#d0a058'),S=hex('#3a2a14');for(const p of this.grains||[])if(p.z<=0.5){const a=Math.min(1,(p.life-p.t)/1.5)*0.95,c=(p.x*7|0)%2?A:B;pmix(fb,p.x+1,p.y+1,S,a*0.35);pmix(fb,p.x,p.y,c,a);}},// settled grains lie under it
+     extras(fb){const A=hex('#f6dc9c'),B=hex('#d0a058');for(const p of this.grains||[])if(p.z>0.5){const a=Math.min(1,(p.life-p.t)/1.5)*(p.puff?0.8:0.95),c=(p.x*7|0)%2?A:B;pmix(fb,p.x,p.y-p.z,c,a);pmix(fb,p.x,p.y-p.z-1,c,a*0.5);}}}},
+  // ancient sea scorpion: a prehistoric eurypterid that brings the ancient sea with it. A broad head shield with compound eyes, a flat
+  // segmented body to a long tail spike, two big paddle legs that row, small walking legs and little front pincers, in fossil stone and moss.
+  // Effects: sunlit caustic light sliding over its shell, ripple rings where its paddles stroke, bubbles rising from its sides,
+  // a splash of droplets when it strikes, and at night a pulsing sea-green glow with drifting plankton sparkles
+  {id:'searpion',name:'Ancient Sea Scorpion',tier:'mythic',fx:'sea',dot:['#848070','#5e7a36'],outline:'#141410',snd:{cstep:'seaClick',scuttle:'seaClick',land:'seaSplash'},
+   scorp:{glowC:[16,76,58],
+     paint(m,q,s,l,x,y){const al=Math.abs(l),moss=vnoise(x*0.35,y*0.35)>0.6;let c;
+       if(m===M.BODY){if(s>=99)c=(al>0.7?SK.stoneD:moss?SK.moss:SK.stone)[q];
+         else if(s>=40&&s<41)c=(al>0.6?SK.stoneD:SK.moss)[q];else if(s>=41&&s<42)c=SK.stoneD[q];else if(s>=42&&s<43)return SK.ink[Math.min(3,q+1)];
+         else c=al>0.78?SK.stoneD[q]:(moss?SK.moss:SK.stone)[q];}
+       else if(m===M.LIMB||m===M.CLAW)c=SK.stoneD[Math.min(3,q+1)];else return;
+       // caustics: bright net lines of underwater light drifting over the shell
+       const t=this.t,[e]=salVoro(x*0.8+Math.sin(t*0.7+y*0.2)*1.2,y*0.8+t*1.6,3.0,7);if(e<0.45)return mixc(c,hex('#e4fff0'),0.8*(1-e/0.45));return c;},
+     tick(dt){const sea=this.sea||(this.sea={rip:[],bub:[],drop:[],pl:[]}),t=this.t,walk=clamp(this.speed/10,0,1),ph=Math.sin(t*(3+walk*5));
+       // a ripple at each paddle tip on every stroke
+       if(this._pads&&Math.sign(ph)!==Math.sign(this.lastPh||0)&&walk>0.05){for(const p of this._pads)sea.rip.push({x:p[0],y:p[1]+1,t:0,life:1.4});if(!this.preview)SFX.play('paddleSwish');}this.lastPh=ph;
+       // bubbles from the slits along its sides
+       this.bT=(this.bT||0)+dt*(2.5+walk*3);while(this.bT>1){this.bT--;const sd=Math.random()<0.5?-1:1,[x,y]=this.W(rand(-6,-1),sd*2.8);sea.bub.push({x,y,z:1,vz:rand(5,9),t:0,life:rand(1,1.8),ph:rand(TAU)});if(!this.preview&&Math.random()<0.25)SFX.play('bubblePop');}
+       // a splash off the spike when it strikes
+       if(this.stingT>0.38&&!this.splashed&&this._tail){this.splashed=1;if(!this.preview)SFX.play('seaSplash');for(let i=0;i<22;i++){const a=rand(TAU),sp=rand(8,22);sea.drop.push({x:this._tail[0],y:this._tail[1]+3,z:3,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp*0.7,vz:rand(8,18),t:0,life:2.2});}}if(this.stingT<=0)this.splashed=0;
+       if(sea.pl.length<16&&Math.random()<dt*6){const[x,y]=this.W(rand(-12,8),rand(-9,9));sea.pl.push({x,y,t:0,life:rand(2,4),ph:rand(TAU)});}// plankton for the night
+       for(const r of sea.rip)r.t+=dt;for(const b of sea.bub){b.t+=dt;b.z+=b.vz*dt;b.x+=Math.sin(b.t*9+b.ph)*dt*3;}
+       for(const d of sea.drop){d.t+=dt;if(d.z>0){d.vz-=40*dt;d.z+=d.vz*dt;d.x+=d.vx*dt;d.y+=d.vy*dt;if(d.z<=0){d.z=0;d.land=d.t;}}}for(const p of sea.pl){p.t+=dt;p.x+=Math.sin(p.t+p.ph)*dt*1.5;p.y+=Math.cos(p.t*0.7+p.ph)*dt;}
+       sea.rip=sea.rip.filter(r=>r.t<r.life);sea.bub=sea.bub.filter(b=>b.t<b.life);sea.drop=sea.drop.filter(d=>d.t<d.life);sea.pl=sea.pl.filter(p=>p.t<p.life);},
+     // ripples and wet splats are on the ground, under it
+     under(fb){const S=this.sea;if(!S)return;const R=hex('#cfeee6'),WET=hex('#1a2622');
+       for(const r of S.rip){const k=r.t/r.life,rad=1+k*6,a=(1-k)*0.6;for(let i=0;i<20;i++){const an=i/20*TAU;pmix(fb,r.x+Math.cos(an)*rad,r.y+Math.sin(an)*rad*0.55,R,a);}}
+       for(const d of S.drop)if(d.z<=0){const a=Math.max(0,1-(d.t-d.land)/1.5)*0.45;pmix(fb,d.x,d.y,WET,a);pmix(fb,d.x+1,d.y,WET,a*0.6);}},
+     // droplets in the air and bubbles are over it
+     extras(fb){const S=this.sea;if(!S)return;const B=hex('#e8fff8'),D=hex('#9ad8d0');
+       for(const d of S.drop)if(d.z>0)pmix(fb,d.x,d.y-d.z,D,0.9);
+       for(const b of S.bub){const y=b.y-b.z,end=b.life-b.t<0.12;if(end){for(const[dx,dy]of[[0,0],[1,0],[-1,0],[0,1],[0,-1]])pmix(fb,b.x+dx,y+dy,B,0.8);}else{pmix(fb,b.x,y,B,0.85);pmix(fb,b.x+1,y,D,0.4);pmix(fb,b.x,y-1,D,0.4);}}},
+     // at night: a slow bioluminescent pulse over the body, and plankton twinkling round it
+     glowFx(fb,night){const k=(night-0.25)/0.75,W=fb.w,pu=0.5+0.5*Math.sin(this.t*1.4);for(const i of this.glowPx)padd(fb,i%W,(i/W)|0,4*k*pu,40*k*pu,32*k*pu);
+       for(const p of (this.sea&&this.sea.pl)||[]){const a=Math.sin(Math.PI*p.t/p.life)*k*(0.6+0.4*Math.sin(p.t*6+p.ph));padd(fb,p.x,p.y,60*a,220*a,190*a);padd(fb,p.x+1,p.y,20*a,80*a,70*a);padd(fb,p.x-1,p.y,20*a,80*a,70*a);}},
+     draw(fb0){const sc=this.sc,fb={cap:(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r)},t=this.t,V=(u,v,z=0)=>{const p=this.W(u,v);p[1]-=z*sc;return p;},walk=clamp(this.speed/10,0,1),th=this.threat;
+       // small walking legs
+       for(const L of this.legs){const oy=-this.h,[kx,ky,ex,ey]=ik2(L.ax,L.ay+oy,L.fx,L.fy+oy-(L.lift||0)*1.4,L.len*0.8,L.len*0.8,L.bend);fb.cap(L.ax,L.ay+oy,0.6,kx,ky-0.8*sc,0.45,M.LIMB,1,0,6);fb.cap(kx,ky-0.8*sc,0.45,ex,ey,0.3,M.LIMB,1,6,14);}
+       // two big paddle legs that row
+       const row=Math.sin(t*(3+walk*5))*(0.25+walk*0.6);for(const sd of[-1,1]){const r0=V(0.6,sd*2.6,0.4),a=sd*(1.9+row*sd),mid=V(0.6+Math.cos(a)*3.2,sd*2.6+Math.sin(a)*3.2,0.5),pad=V(0.6+Math.cos(a)*6.2,sd*2.6+Math.sin(a)*6.2,0.6);
+         fb.cap(r0[0],r0[1],0.7,mid[0],mid[1],0.65,M.LIMB,1,0,6,0.5);fb.cap(mid[0],mid[1],0.9,pad[0],pad[1],1.7,M.BODY,1,40,40,0.6);(this._pads||(this._pads=[]))[sd<0?0:1]=pad;}
+       // body: 7 broad flat segments, then 5 narrow tail segments straight back, and the long spike (raised a little when threatened)
+       const W7=[3.5,3.6,3.5,3.3,3.0,2.6,2.2];for(let k=0;k<7;k++){const u=-0.4-k*1.1,a=V(u+0.4,0),b=V(u-0.4,0);fb.cap(a[0],a[1],W7[k],b[0],b[1],W7[k],M.BODY,2,10+k,10+k,0.6-k*0.06);}
+       const sw=Math.sin(t*0.9)*0.6*(1-walk);let prev=V(-7.6,0,0.2);for(let k=0;k<5;k++){const u=-8.4-k*1.25,nx=V(u,sw*(k+1)/5,0.2+th*k*0.5);fb.cap(prev[0],prev[1],1.6-k*0.15,nx[0],nx[1],1.45-k*0.15,M.BODY,2,17+k,17+k,0.3-k*0.04);prev=nx;}
+       const tip=V(-17.2,sw*1.4,0.2+th*3);fb.cap(prev[0],prev[1],0.8,tip[0],tip[1],0.2,M.BODY,2,41,41,0.4);this._tail=tip;
+       // a broad head shield with two compound eyes, and little pincers at the front
+       const h0=V(3.4,0),h1=V(1.0,0);fb.cap(h0[0],h0[1],3.0,h1[0],h1[1],3.8,M.BODY,3,99,99,1.0);
+       for(const sd of[-1,1]){const e=V(2.6,sd*1.7,0.2);fb.cap(e[0],e[1],0.75,e[0],e[1],0.75,M.BODY,3,42,42,1.6);
+         const op=this.open,b0=V(5.6,sd*0.8),b1=V(7.2,sd*(1.0+op*0.8));fb.cap(b0[0],b0[1],0.5,b1[0],b1[1],0.3,M.CLAW,1,0,0,0.8);}}}}
+);
+
 SWATCHES.axolotl.push(
   {id:'camo',name:'Camo',tier:'vivid',dot:['#4a5a2a','#7a5a34'],outline:'#0e1208',
     pal:{axo:{belly:ramp('#2e3a16','#46561e','#62742c','#82943e'),gill:ramp('#1e2a10','#33461c','#4e6a2a','#6e8a3e'),fin:ramp('#3a4424','#5a663a','#7e8a56','#a4ae7a'),eye:ramp('#0a0a06','#16160e','#24241a','#343428')}},
@@ -4513,12 +4641,12 @@ class Spider extends Pet{
     return null;
   }
   startle(x,y){if(this.state==='grabbed'||this.state==='fall')return;if(this.held)this.finishEating();
-    this.tg=null;this.prey=null;this.state='threat';this.threatT=1.5;this.sx=x;this.sy=y;if(!this.preview)SFX.play('scuttle');}
+    this.tg=null;this.prey=null;this.state='threat';this.threatT=1.5;this.sx=x;this.sy=y;if(!this.preview)SFX.play(this.snd('scuttle'));}
   update(dt){
     this.t+=dt;
     if(this.state==='grabbed'){this.grabStep(dt);this.syncHeld();return;}
     if(this.state==='fall'){this.vh-=320*dt;this.h+=this.vh*dt;
-      if(this.h<=0){this.h=0;this.vh=0;SFX.play('land');dust(this.world,this.x,this.y,5);this.state='idle';this.timer=1;}
+      if(this.h<=0){this.h=0;this.vh=0;SFX.play(this.snd('land'));dust(this.world,this.x,this.y,5);this.state='idle';this.timer=1;}
       this.tuck+=(0-this.tuck)*Math.min(1,dt*6);this.updateLegs(dt,false);return;}
     this.burst-=dt;if(this.burst<=0){this.burstOn=!this.burstOn;this.burst=this.burstOn?rand(0.8,2):rand(0.4,1.4);}
     if(this.state==='threat'){this.threatT-=dt;this.stop(dt);this.threat+=(1-this.threat)*Math.min(1,dt*10);
@@ -4552,7 +4680,7 @@ class Spider extends Pet{
         const tx=L.rx+c*stride*0.5,ty=L.ry+sn*stride*0.5,lp=((this.gp-L.grp*0.5-(3-L.i)*0.035)%1+1)%1,sw=0.46;
         if(lp<sw&&(L.swing||lp/sw<0.3)){if(!L.swing){L.swing=true;L.sx=L.fx;L.sy=L.fy;L.u0=lp/sw;}
           const u=clamp((lp/sw-L.u0)/(1-L.u0),0,1),e=ease(u);L.fx=lerp(L.sx,tx,e);L.fy=lerp(L.sy,ty,e);L.lift=Math.sin(Math.PI*u);}
-        else if(lp>=sw||!L.swing){if(L.swing){L.swing=false;L.fx=tx;L.fy=ty;if(!this.preview)SFX.play('cstep');}L.lift=0;
+        else if(lp>=sw||!L.swing){if(L.swing){L.swing=false;L.fx=tx;L.fy=ty;if(!this.preview)SFX.play(this.snd('cstep'));}L.lift=0;
           if(Math.hypot(L.fx-L.rx,L.fy-L.ry)>stride*1.6){L.fx=lerp(L.fx,L.rx,Math.min(1,dt*6));L.fy=lerp(L.fy,L.ry,Math.min(1,dt*6));}}
         continue;}
       if(L.swing){L.swing=false;L.stepping=true;L.st=0;L.sx=L.fx;L.sy=L.fy;L.dur=0.16;}
@@ -4636,6 +4764,7 @@ class Scorpion extends Spider{
   mouthScreen(){const[x,y]=this.W(5.6,0);return{x,y};}
   hatAnchor(){const[x,y]=this.W(2.9,0);return{x,y:y-1,a:this.ang,s:0.8};}
   hitTest(x,y){const[cx,cy]=this.W(0,0);return Math.hypot(x-cx,y-cy)<8.5*this.sc?0:-1;}
+  snd(n){const S=swatchOf(this);return S&&S.snd&&S.snd[n]||n;}// skins can swap its sounds
   updateStrike(dt){const r=super.updateStrike(dt);if(r==='caught'){this.stingT=0.45;this.open=0;}return r;}
   update(dt){
     if(this.preview&&!this._pv){this._pv=1;this.ang=-2.6;this.updateLegs(0,false);for(const L of this.legs){L.fx=L.rx;L.fy=L.ry;L.kx=null;}}
@@ -4646,8 +4775,12 @@ class Scorpion extends Spider{
     let want=this.threat>0.3?1:hunting?0.75:this.state==='chew'?0.12+0.1*Math.sin(this.chewPh*9):this.pinch>0?(this.pinch>0.2?0.9:0):0.3;
     if(this.stingT>0)want=0;
     this.open+=(want-this.open)*Math.min(1,dt*(want<this.open?22:8));
+    const sw=swatchOf(this);if(sw&&sw.scorp&&sw.scorp.tick)sw.scorp.tick.call(this,dt);
   }
-  color(m,q,s,l,x,y){const P=PAL.scorp,hr=hash(x*5.1,y*3.7);
+  get skin(){const sw=this.sw;return sw&&sw.scorp?sw.scorp:null;}
+  // body-relative coordinates of a pixel (u forward, v to the side; raised parts like the tail are only roughly placed)
+  loc(x,y){const c=Math.cos(this.ang),sn=Math.sin(this.ang),dx=x+0.5-this.x,dy=y+0.5-(this.y-this.h);return[(dx*c+dy*sn)/this.sc,(-dx*sn+dy*c)/this.sc];}
+  color(m,q,s,l,x,y){const K=this.skin;if(K&&K.paint){const r=K.paint.call(this,m,q,s,l,x,y);if(r!==undefined)return r;}const P=PAL.scorp,hr=hash(x*5.1,y*3.7);
     switch(m){
       case M.BODY:if(s>=99)return s>=100.5&&q>0?P.back[Math.min(3,q+1)]:P.back[q];
         if(Math.abs(l)>0.7)return P.straw[Math.max(0,q-1)];
@@ -4659,7 +4792,7 @@ class Scorpion extends Spider{
       case M.LID:return P.barb[Math.max(0,q-1)];
       case M.PUPIL:return P.barb[0];
     }return INK;}
-  draw(fb0){
+  draw(fb0){this._tube=null;this._fw=fb0.w;const K=this.skin;if(K&&K.under)K.under.call(this,fb0);if(K&&K.draw)return K.draw.call(this,fb0);// under: ground marks the body then covers
     const sc=this.sc,fb={cap:(ax,ay,ar,bx,by,br,...r)=>fb0.cap(ax,ay,ar*sc,bx,by,br*sc,...r)};
     const th=this.threat,t=this.t,V=(u,v,z=0)=>{const p=this.W(u,v);p[1]-=z*sc;return p;};
     // legs: thin straw legs, knees bowed away from the body
@@ -4671,7 +4804,7 @@ class Scorpion extends Spider{
       fb.cap(ax,ay,0.85,kx,kyu,0.62,M.LIMB,1,0,6.4);fb.cap(kx,kyu,0.62,ex,ey,0.38,M.LIMB,1,6.4,14);}
     // mesosoma: 7 overlapping plates, dark olive with pale margins, tapering to the tail
     const br=1+Math.sin(t*1.6)*0.02,PW=[2.6,2.8,2.95,2.95,2.8,2.5,2.1];
-    for(let k=0;k<7;k++){const u=1.0-k*1.08,[a0,a1]=V(u+0.35,0),[b0,b1]=V(u-0.35,0);fb.cap(a0,a1,PW[k]*br,b0,b1,PW[k]*br,M.BODY,2,0,0,0.6-k*0.08);}
+    for(let k=0;k<7;k++){const u=1.0-k*1.08,[a0,a1]=V(u+0.35,0),[b0,b1]=V(u-0.35,0);fb.cap(a0,a1,PW[k]*br,b0,b1,PW[k]*br,M.BODY,2,10+k,10+k,0.6-k*0.08);}// plates are tagged 10..16 for skins
     // carapace with a paler front edge
     {const[a0,a1]=V(4.2,0),[b0,b1]=V(2.0,0);fb.cap(a0,a1,1.8,b0,b1,2.35,M.BODY,2,101,99,0.9);}
     for(const sd of[-1,1]){const[e0,e1]=V(3.0,sd*0.5);fb.cap(e0,e1,0.42,e0,e1,0.42,M.PUPIL,2,0,0,2.2);}
@@ -4702,13 +4835,14 @@ class Scorpion extends Spider{
   drawExtras(fb){// remember our pixels for the night glow; a glint on the eyes
     const W=fb.w,g=this.glowPx;g.length=0;for(let y=fb.by0;y<=fb.by1;y++)for(let x=fb.bx0;x<=fb.bx1;x++)if(fb.mat[y*W+x])g.push(y*W+x);
     // dark seams between the back plates (only where the plate itself shows)
-    const seen=new Set();for(let k=1;k<7;k++){const u=1.0-k*1.08+0.54;for(let v=-2.2;v<=2.2;v+=0.3){const[x,y]=this.W(u,v),i=Math.floor(y)*W+Math.floor(x);
+    const seen=new Set();if(!(this.skin&&this.skin.draw))for(let k=1;k<7;k++){const u=1.0-k*1.08+0.54;for(let v=-2.2;v<=2.2;v+=0.3){const[x,y]=this.W(u,v),i=Math.floor(y)*W+Math.floor(x);
       if(i>=0&&i<fb.mat.length&&fb.mat[i]===M.BODY&&fb.cls[i]===2&&!seen.has(i)){seen.add(i);pdark(fb,x,y,0.62);}}}
-    const[e0,e1]=this.W(3.1,-0.4);pset(fb,e0,e1-0.5,hex('#e8e0c0'));
+    const[e0,e1]=this.W(3.1,-0.4);if(!(this.skin&&this.skin.draw))pset(fb,e0,e1-0.5,hex('#e8e0c0'));if(this.skin&&this.skin.extras)this.skin.extras.call(this,fb);
   }
   // real scorpions fluoresce blue-green under UV; at night ours does too
-  glow(fb,night){if(night<0.25||this.preview)return;const k=(night-0.25)/0.75,W=fb.w,p=0.85+0.15*Math.sin(this.t*1.7);
-    for(const i of this.glowPx)padd(fb,i%W,(i/W)|0,10*k*p,70*k*p,64*k*p);}
+  // each skin can tint it (glowC), and the neon one lights its tubes brighter (this._tube: pixel -> colour)
+  glow(fb,night){if(night<0.25||this.preview)return;const k=(night-0.25)/0.75,W=fb.w,p=0.85+0.15*Math.sin(this.t*1.7),K=this.skin,G=K&&K.glowC||[10,70,64],T=this._tube;
+    for(const i of this.glowPx){const g=T&&T.get(i)||G;padd(fb,i%W,(i/W)|0,g[0]*k*p,g[1]*k*p,g[2]*k*p);}if(K&&K.glowFx)K.glowFx.call(this,fb,night);}
 }
 
 // =====================================================================
