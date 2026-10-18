@@ -43,7 +43,19 @@ Skins are bought from the swatch row in the Critters menu. Each critter gets one
 - Should still feel like a **skin**, not a new game mechanic. Keep its behaviour close to the critter's own.
 - Gets its own sound effects (add each to the SFX table and give it a `GAP` entry).
 
+## Tanks
+- Every critter has a **Tanks** page beside Colours in the Critters menu (it replaced the old "Lives in" toggle).
+- **Free tanks:** Terrarium, Paludarium, Aquarium. Each critter keeps the ones that suit it.
+- **Themed tanks** (300 coins each, bought once for every critter that fits): Sun Dune, Bayou, Coral Reef, Flower Field, Enchanted Grove.
+  - Each runs on a base tank's rules (land, pool or all water) and bakes its own scenery on top (`THEMES` module).
+  - Each lists the critters that fit it (`TANKS[id].who`).
+  - Buying one adds its song to the music shuffle (`songOwned`): Warm Windowsill, Bayou Drift, Sea Glass, Dandelion Wind, Odd Bodies.
+- New scenery is laid out on purpose (composition): one main feature a third of the way in, a leading line, bigger things framing the edges, an open middle, and things grouped in families. Nothing overlaps anything else.
+- Every sprite has an outline in a deep shade of its own colour (the critter rule), never near-black. New painters name it with `olOf`.
+- Logs and hides show only the end facing the viewer (the lower one on screen), cut square, with the hollow on hides (`THEMES.logEnd`).
+
 ## Testing
 Smoke tests live outside the repo in the session scratchpad. Run them with `NPM_G=$(npm root -g) node X.js`:
 - `roster.js`, `live.js`, `mythlive.js` for the critters and skins;
-- `sndtest.js` for the sounds.
+- `sndtest.js` for the sounds;
+- `tanks.js` for the tanks (every fitting critter in every themed tank, reef taps, bayou pads, the Tanks page), `muscheck.js` for the songs.

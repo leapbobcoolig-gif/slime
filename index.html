@@ -361,7 +361,7 @@ body.fun-hud .modal .pdet{background:#3a2412;box-shadow:inset 0 0 0 2px #6a4826,
 .ptag img{width:13px;height:13px}.ptag.price{background:#2a1608;color:#ffe08a;box-shadow:inset 0 0 0 2px #c8901e,0 2px 0 rgba(0,0,0,.45)}.ptag.free{background:#8fcf5a;color:#14200c}.ptag.here{left:6px;right:auto;background:#ffd870;color:#3a2006}
 .chips{display:flex;gap:5px;flex-wrap:wrap;min-height:0}.chips:empty{display:none}
 .pdet>*{flex-shrink:0}.pinfo{display:flex;flex-direction:column;gap:9px}.pinfo>*{flex-shrink:0}.pcol{flex:none;justify-content:center;display:flex;align-items:center;gap:8px;padding:7px 10px}.pcd{width:16px;height:16px;border-radius:50%;border:2px solid #060a07;flex:none}
-.pcolh{display:flex;align-items:center;gap:10px}.pcolh .btn{flex:none;padding:5px 10px;font-size:13px}.pcolh b{font-family:var(--display);font-size:12px;color:#ffe6b0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pbtns{display:flex;gap:6px;flex:none}.pbtns>.btn{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.pcolh{display:flex;align-items:center;gap:10px}.pcolh .btn{flex:none;padding:5px 10px;font-size:13px}.pcolh b{font-family:var(--display);font-size:12px;color:#ffe6b0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tierh{font-family:var(--display);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#a8c890;display:flex;align-items:center;gap:6px}.tierh::after{content:'';flex:1;height:2px;background:#4a3420}.tierh.v{color:#8ab8f0}.tierh.s{color:#c89af0}.tierh.m{color:#ffb86a}
 .sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:6px}
 .scard{font:inherit;background:#24160a;border:0;border-radius:7px;box-shadow:inset 0 0 0 2px #5a3c22;padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;cursor:pointer;color:inherit}
@@ -672,7 +672,7 @@ const parseTune=str=>{const out=[];str.replace(/\n/g,'').split('|').forEach((bar
 
 // each mood and each menu is its own arrangement of the same song; menus are shared by every track and follow its chords
 const STEMS=['pad','keys','bass','melody','sparkle','lead','perc','tperc','bounce','nkeys','nbass','glass','whine','spiano','vinyl','rain','air',
-  'hats','mkeys','pluck','animals','chip','cbass','cnoise','brass','bells','toms','wbass','clock','chimes','sticks','harm','fill','clar','waves'];
+  'hats','mkeys','pluck','animals','chip','cbass','cnoise','brass','bells','toms','wbass','clock','chimes','sticks','harm','fill','clar','waves','sadlead','sadbed','drone','strings','horns','gliss','bugs'];
 const mix=o=>Object.assign(Object.fromEntries(STEMS.map(k=>[k,0])),{wet:0.3,lp:12000},o);
 const CHILL_MENUS={
   menu:mix({hats:0.8,mkeys:1,nbass:0.7,wet:0.22,lp:9000}),
@@ -758,23 +758,30 @@ D5 - - - B4 - - -|C#5 - - - B4 - G#4 -|A4 - - - F#4 - - -|F4 - - - - - - -`},
       critters:mix({pluck:1,animals:1,waves:0.45,nbass:0.5,hats:0.35,wet:0.4,lp:11000}),
       gacha:mix({chip:1,cbass:1,cnoise:1,wet:0.15,lp:14000}),
       goals:mix({brass:1,melody:0.8,bells:0.7,toms:1,nbass:0.7,wet:0.35,lp:13000})},
-    calls:['bloop','snap','bpop','swish','tok','burble'],callGap:1}};
+    calls:['bloop','snap','bpop','swish','tok','burble'],callGap:1},
+  dry:{"name": "Warm Windowsill", "style": "dry", "bpm": 76, "swing": 0.3, "spb": 8, "sub": 2, "bars": 32, "mslot": 1, "echo": 0.05, "chords": ["Fmaj7", "Dm9", "Gm9", "C13", "Am7", "Dm9", "Gm9", "C13", "Fmaj7", "Dm9", "Gm9", "C13", "Am7", "D7", "Gm7", "C7", "Bbmaj7", "Bbm6", "Am7", "D7", "Gm9", "Gm9", "Bbm6", "C13", "Fmaj7", "Dm9", "Gm9", "C13", "Am7", "D7", "Gm9", "C13"], "voice": {"Fmaj7": ["F2", "A3", "C4", "E4"], "Dm9": ["D2", "F3", "C4", "E4"], "Gm9": ["G2", "Bb3", "F4", "A4"], "C13": ["C2", "Bb3", "E4", "A4"], "Am7": ["A2", "G3", "C4", "E4"], "D7": ["D2", "F#3", "C4", "E4"], "Gm7": ["G2", "F3", "Bb3", "D4"], "C7": ["C2", "E3", "Bb3", "D4"], "Bbmaj7": ["Bb1", "D3", "A3", "F4"], "Bbm6": ["Bb1", "Db4", "F4", "G4"]}, "root": {"Fmaj7": "F2", "Dm9": "D2", "Gm9": "G2", "C13": "C2", "Am7": "A2", "D7": "D2", "Gm7": "G2", "C7": "C2", "Bbmaj7": "Bb1", "Bbm6": "Bb1"}, "scale": ["F", "G", "A", "Bb", "C", "D", "E"], "melody": "C5 - A4 C5 - D5 C5 -|A4 - - - . F4 G4 A4|Bb4 - G4 Bb4 - C5 Bb4 -|A4 - - - . . G4 A4|C5 - A4 C5 - E5 D5 C5|D5 - - - . A4 C5 D5|F5 - E5 D5 - C5 Bb4 -|A4 - G4 - . . . .|C5 - A4 C5 - D5 C5 -|A4 - - - . F4 G4 A4|Bb4 - G4 Bb4 - C5 Bb4 -|A4 - - - . . G4 A4|C5 - A4 C5 - E5 G5 -|F#5 - - - E5 - D5 -|Bb4 - D5 - C5 - Bb4 -|A4 - - - G4 - - .|D5 - - - F5 - A5 -|G5 - - - F5 - Db5 -|E5 - - - - - C5 D5|E5 - F#5 - A5 - - -|Bb5 - A5 - G5 - F5 -|D5 - - - - - . .|F5 - - - Db5 - Bb4 -|A4 - - - G4 - - -|C5 - A4 C5 - D5 C5 -|A4 - - - . F4 G4 A4|Bb4 - G4 Bb4 - C5 Bb4 -|A4 - - - . . G4 A4|C5 - A4 C5 - E5 D5 C5|D5 - - - . A4 C5 D5|Bb4 - A4 G4 - F4 G4 -|A4 - - - - - . .", "sad": {"chords": ["Dm9", "Dm9", "Bbmaj7", "Bbmaj7", "Gm9", "Gm9", "A7sus", "A7", "Dm9", "Dm9", "Bbmaj7", "Gm9", "Em7b5", "A7", "Dm9", "Dm9", "Dm9", "Dm9", "Bbmaj7", "Bbmaj7", "Gm9", "Gm9", "A7sus", "A7", "Dm9", "Dm9", "Bbmaj7", "Gm9", "Em7b5", "A7", "Dm9", "Dm9"], "voice": {"Dm9": ["D2", "F3", "C4", "E4"], "Bbmaj7": ["Bb1", "D3", "A3", "F4"], "Gm9": ["G2", "Bb3", "F4", "A4"], "A7sus": ["A1", "D3", "G3", "E4"], "A7": ["A1", "C#3", "G3", "E4"], "Em7b5": ["E2", "D3", "G3", "Bb3"]}, "root": {"Dm9": "D2", "Bbmaj7": "Bb1", "Gm9": "G2", "A7sus": "A1", "A7": "A1", "Em7b5": "E2"}, "melody": "A3 - - - D4 - E4 -|F4 - - - E4 - D4 -|D4 - - - - - C4 D4|F4 - - - - - . .|G4 - - - F4 - D4 -|Bb3 - - - C4 - D4 -|E4 - - - D4 - - -|C#4 - - - - - . .|A3 - - - D4 - E4 -|F4 - - - G4 - A4 -|A4 - - - F4 - D4 -|Bb3 - - - D4 - F4 -|G4 - - - D4 - E4 -|C#4 - - - E4 - - -|D4 - - - - - - -|. . . . . . . .|A3 - - - D4 - E4 -|F4 - - - E4 - D4 -|D4 - - - - - C4 D4|F4 - - - - - . .|G4 - - - F4 - D4 -|Bb3 - - - C4 - D4 -|E4 - - - D4 - - -|C#4 - - - - - . .|A3 - - - D4 - E4 -|F4 - - - G4 - A4 -|A4 - - - F4 - D4 -|Bb3 - - - D4 - F4 -|G4 - - - D4 - E4 -|C#4 - - - E4 - - -|D4 - - - - - - -|. . . . . . . ."}, "calls": ["flick", "hiss", "scuttle", "sss", "clatter", "thwip"], "callGap": 0.9, "callLvl": 2.2,"mix":{content:mix({"keys": 1.196, "bass": 1.196, "melody": 1.196, "perc": 0.957, "clar": 0.957, "wet": 0.1, "lp": 9000}),thriving:mix({"keys": 1.2, "bass": 1.2, "melody": 1.2, "perc": 1.08, "clar": 0.96, "tperc": 1.08, "harm": 0.72, "sparkle": 0.72, "wet": 0.12, "lp": 11000}),night:mix({"nkeys": 0.848, "nbass": 0.509, "air": 0.509, "wet": 0.3, "lp": 4500}),sad:mix({"sadlead": 1, "sadbed": 0.8, "nbass": 0.5, "air": 0.3, "wet": 0.2, "lp": 5000})},"menus":{menu:mix({"mkeys": 1, "hats": 0.8, "nbass": 0.5, "wet": 0.1, "lp": 9000}),settings:mix({"chimes": 1.429, "clock": 1.143, "air": 0.715, "wet": 0.2, "lp": 8000}),critters:mix({"pluck": 0.833, "animals": 0.833, "nbass": 0.333, "wet": 0.15, "lp": 11000}),gacha:mix({"chip": 1.153, "cbass": 1.153, "cnoise": 1.153, "wet": 0.1, "lp": 12000}),goals:mix({"brass": 1.146, "bells": 0.917, "toms": 1.146, "nbass": 0.573, "wet": 0.2, "lp": 12000})}},
+  swamp:{"name": "Bayou Drift", "style": "swamp", "bpm": 58, "swing": 0, "spb": 12, "sub": 3, "bars": 24, "mslot": 1, "chords": ["A7", "A7", "A7", "A7", "D7", "D7", "A7", "A7", "E7", "D7", "A7", "E7", "A7", "D7", "A7", "A7", "D7", "D7", "A7", "F#7", "Bm7", "E7", "A7", "E7"], "voice": {"A7": ["A2", "E3", "G3", "C#4"], "D7": ["D3", "F#3", "A3", "C4"], "E7": ["E2", "B2", "D3", "G#3"], "F#7": ["F#2", "C#3", "E3", "A#3"], "Bm7": ["B2", "F#3", "A3", "D4"]}, "root": {"A7": "A1", "D7": "D2", "E7": "E2", "F#7": "F#1", "Bm7": "B1"}, "scale": ["A", "B", "C#", "D", "E", "F#", "G"], "melody": "E5 - - - - - C#5 - - A4 - -|C5 - E5 C#5 - - A4 - - - - -|. . . . . . . . . . . .|. . . . . . G4 - A4 C5 - C#5|D5 - - - - - F#5 - - D5 - -|C5 - D5 F5 - - E5 - - C5 - -|A4 - - - - - - - - . . .|. . . . . . E5 - G5 A5 - -|G#5 - - - - - G5 - E5 - D5 -|F#5 - - - D5 - - - C5 - - -|C#5 - - - A4 - - - - . . .|. . . . . . B4 - D5 E5 - -|A5 - - - - - G5 - E5 - - -|F#5 - - - - - D5 - - C5 - -|C#5 - - - E5 - - - A4 - - -|. . . . . . . . . . . .|A4 - C5 D5 - - F#5 - - A5 - -|G5 - F#5 - D5 - C5 - - - - -|C#5 - - - - - - - - . . .|A#4 - - C#5 - - E5 - - F#5 - -|D5 - - - - - B4 - - A4 - -|G#4 - - B4 - - D5 - - - - -|C#5 - - - - - A4 - - - - -|. . . . . . G#4 - B4 - E5 -", "sad": {"chords": ["Am7", "Am7", "Am7", "Am7", "Dm7", "Dm7", "Am7", "Am7", "E7", "Dm7", "Am7", "E7", "Am7", "Am7", "Am7", "Am7", "Dm7", "Dm7", "Am7", "Am7", "E7", "Dm7", "Am7", "E7"], "voice": {"Am7": ["A2", "E3", "G3", "C4"], "Dm7": ["D3", "F3", "A3", "C4"], "E7": ["E2", "B2", "D3", "G#3"]}, "root": {"Am7": "A1", "Dm7": "D2", "E7": "E2"}, "melody": "E5 - - - - - D5 - C5 - - -|A4 - - - - - - - - . . .|C5 - - D5 - - E5 - - G5 - -|E5 - - - - - - - - . . .|F5 - - - E5 - D5 - - - - -|C5 - - - A4 - - - - . . .|C5 - - - - - B4 - A4 - - -|. . . . . . . . . . . .|B4 - - - - - D5 - - E5 - -|D5 - - - C5 - - - A4 - - -|A4 - - - - - - - - . . .|. . . . . . G#4 - - B4 - -|E5 - - - - - D5 - C5 - - -|A4 - - - - - - - - . . .|C5 - - D5 - - E5 - - G5 - -|E5 - - - - - - - - . . .|F5 - - - E5 - D5 - - - - -|C5 - - - A4 - - - - . . .|C5 - - - - - B4 - A4 - - -|. . . . . . . . . . . .|B4 - - - - - D5 - - E5 - -|D5 - - - C5 - - - A4 - - -|A4 - - - - - - - - . . .|. . . . . . G#4 - - B4 - -"}, "calls": ["croak", "chirp", "plip", "trill", "thwip", "squelch"], "callGap": 0.8, "callLvl": 1.6,"mix":{content:mix({"keys": 1.05, "bass": 1.05, "melody": 1.05, "perc": 0.84, "fill": 0.735, "pad": 0.158, "wet": 0.5, "lp": 9000}),thriving:mix({"keys": 0.93, "bass": 0.93, "melody": 0.93, "perc": 0.93, "fill": 0.558, "horns": 0.93, "tperc": 0.837, "wet": 0.5, "lp": 11000}),night:mix({"nkeys": 1.13, "bugs": 0.8, "nbass": 0.678, "pad": 0.452, "wet": 0.6, "lp": 3500}),sad:mix({"sadlead": 1.11, "sadbed": 1.11, "rain": 0.666, "nbass": 0.555, "wet": 0.55, "lp": 4000})},"menus":{menu:mix({"mkeys": 0.96, "hats": 0.96, "nbass": 0.48, "wet": 0.45, "lp": 8000}),settings:mix({"chimes": 0.769, "bugs": 0.538, "rain": 0.231, "clar": 0.461, "clock": 0.308, "wet": 0.5, "lp": 7000}),critters:mix({"pluck": 1.222, "animals": 2.222, "clar": 1.333, "bugs": 0.667, "wet": 0.4, "lp": 11000}),gacha:mix({"chip": 1.14, "cbass": 1.14, "cnoise": 1.14, "sticks": 1.14, "wet": 0.3, "lp": 12000}),goals:mix({"horns": 1.2, "brass": 1.2, "bells": 0.96, "toms": 1.2, "wet": 0.35, "lp": 12000})}},
+  sea:{"name": "Sea Glass", "style": "sea", "bpm": 76, "swing": 0, "spb": 16, "sub": 4, "bars": 32, "mslot": 2, "echo": 0.35, "chords": ["Dmaj9", "Gmaj9", "Dmaj9", "Gmaj9", "Bm9", "Gmaj9", "Em9", "A13sus", "Dmaj9", "Gmaj9", "Dmaj9", "F#m7", "Bm9", "Gmaj9", "Em9", "A13", "Gmaj9", "Gmaj9", "F#m7", "F#m7", "Em9", "Em9", "Gm6", "A13sus", "Dmaj9", "Gmaj9", "Dmaj9", "Gmaj9", "Bm9", "Gm6", "Dmaj9", "Dmaj9"], "voice": {"Dmaj9": ["D3", "F#3", "A3", "E4"], "Gmaj9": ["G2", "D3", "F#3", "A3"], "Bm9": ["B2", "D3", "A3", "C#4"], "Em9": ["E3", "G3", "D4", "F#4"], "A13sus": ["A2", "D3", "G3", "B3"], "F#m7": ["F#2", "A3", "C#4", "E4"], "A13": ["A2", "C#3", "G3", "F#4"], "Gm6": ["G2", "Bb3", "D4", "E4"]}, "root": {"Dmaj9": "D2", "Gmaj9": "G1", "Bm9": "B1", "Em9": "E2", "A13sus": "A1", "F#m7": "F#1", "A13": "A1", "Gm6": "G1"}, "scale": ["D", "E", "F#", "G", "A", "B", "C#"], "melody": "F#5 - - E5 F#5 - A5 -|B5 - - A5 F#5 - - -|F#5 - - E5 F#5 - D6 -|C#6 - - B5 A5 - - -|D5 - - C#5 D5 - F#5 -|A5 - - G5 F#5 - E5 -|G5 - - F#5 E5 - D5 -|E5 - - - - - . .|F#5 - - E5 F#5 - A5 -|B5 - - A5 F#5 - - -|F#5 - - E5 F#5 - D6 -|E6 - - C#6 A5 - - -|D6 - - C#6 B5 - F#5 -|A5 - - B5 A5 - F#5 -|E5 - F#5 - G5 - B5 -|A5 - - - - - . .|B4 - D5 - F#5 - A5 -|G5 - - - F#5 - D5 -|A4 - C#5 - E5 - A5 -|F#5 - - - E5 - C#5 -|G4 - B4 - D5 - F#5 -|E5 - - - D5 - B4 -|Bb4 - - - D5 - E5 -|E5 - - - - - . .|F#5 - - E5 F#5 - A5 -|B5 - - A5 F#5 - - -|F#5 - - E5 F#5 - D6 -|C#6 - - B5 A5 - - -|D5 - - C#5 D5 - F#5 -|Bb5 - - A5 G5 - E5 -|F#5 - - - E5 - C#5 -|D5 - - - - - . .", "sad": {"chords": ["Bm9", "Bm9", "Gmaj7", "Gmaj7", "Em9", "Em9", "F#7sus", "F#7", "Bm9", "Bm9", "Gmaj7", "Gmaj7", "Em9", "F#7sus", "Bm9", "Bm9", "Bm9", "Bm9", "Gmaj7", "Gmaj7", "Em9", "Em9", "F#7sus", "F#7", "Bm9", "Bm9", "Gmaj7", "Gmaj7", "Em9", "F#7sus", "Bm9", "Bm9"], "voice": {"Bm9": ["B1", "D3", "A3", "C#4"], "Gmaj7": ["G1", "D3", "F#3", "B3"], "Em9": ["E2", "G3", "D4", "F#4"], "F#7sus": ["F#1", "B2", "E3", "C#4"], "F#7": ["F#1", "A#2", "E3", "C#4"]}, "root": {"Bm9": "B1", "Gmaj7": "G1", "Em9": "E2", "F#7sus": "F#1", "F#7": "F#1"}, "melody": "F#4 - - - - - - -|B4 - - - A4 - - -|D5 - - - - - - -|B4 - - - - - - -|E4 - - - G4 - - -|F#4 - - - - - E4 -|C#5 - - - - - - -|A#4 - - - - - - -|F#4 - - - - - - -|D5 - - - C#5 - - -|B4 - - - - - D5 -|F#5 - - - - - - -|G5 - - - E5 - - -|C#5 - - - - - - -|B4 - - - - - - -|. . . . . . . .|F#4 - - - - - - -|B4 - - - A4 - - -|D5 - - - - - - -|B4 - - - - - - -|E4 - - - G4 - - -|F#4 - - - - - E4 -|C#5 - - - - - - -|A#4 - - - - - - -|F#4 - - - - - - -|D5 - - - C#5 - - -|B4 - - - - - D5 -|F#5 - - - - - - -|G5 - - - E5 - - -|C#5 - - - - - - -|B4 - - - - - - -|. . . . . . . ."}, "calls": ["bloop", "bpop", "snap", "swish", "tok", "burble", "fishNibble"], "callGap": 0.9, "callLvl": 2.5,"mix":{content:mix({"keys": 1, "bass": 1, "melody": 1, "perc": 0.6, "pad": 0.35, "wet": 0.6, "lp": 9000}),thriving:mix({"keys": 1.121, "bass": 1.121, "melody": 1.121, "perc": 0.785, "pad": 0.336, "harm": 0.673, "sparkle": 0.785, "tperc": 0.785, "wet": 0.6, "lp": 11000}),night:mix({"pad": 1.266, "nbass": 0.633, "wet": 0.75, "lp": 2500}),sad:mix({"sadlead": 0.815, "pad": 0.652, "nbass": 0.407, "wet": 0.65, "lp": 3200})},"menus":{menu:mix({"mkeys": 1.25, "nbass": 0.625, "pad": 0.25, "wet": 0.5, "lp": 8000}),settings:mix({"pad": 0.588, "chimes": 1.176, "clock": 0.941, "wet": 0.7, "lp": 6000}),critters:mix({"pluck": 1.579, "animals": 1.579, "pad": 0.395, "wet": 0.5, "lp": 11000}),gacha:mix({"chip": 1.27, "cbass": 1.27, "cnoise": 1.27, "wet": 0.3, "lp": 12000}),goals:mix({"gliss": 2.115, "bells": 1.692, "toms": 2.115, "pad": 0.635, "wet": 0.5, "lp": 12000})}},
+  wind:{"name": "Dandelion Wind", "style": "wind", "bpm": 78, "swing": 0.14, "spb": 16, "sub": 4, "bars": 32, "mslot": 2, "chords": ["Gmaj7", "F#m7", "Em7", "Dmaj7", "Gmaj7", "F#m7", "Em7", "Dmaj7", "Gmaj7", "F#m7", "Em7", "Dmaj7", "Gmaj7", "F#m7", "Em7", "Dmaj7", "Bm7", "Gmaj7", "Em7", "A7sus", "Bm7", "Gmaj7", "Em7", "A7sus", "Gmaj7", "F#m7", "Em7", "Dmaj7", "Gmaj7", "F#m7", "Em7", "Dmaj7"], "voice": {"Gmaj7": ["G2", "D3", "F#3", "B3"], "F#m7": ["F#2", "C#3", "E3", "A3"], "Em7": ["E2", "B2", "D3", "G3"], "Dmaj7": ["D2", "A2", "C#3", "F#3"], "Bm7": ["B2", "F#3", "A3", "D4"], "A7sus": ["A2", "D3", "E3", "G3"]}, "root": {"Gmaj7": "G2", "F#m7": "F#2", "Em7": "E2", "Dmaj7": "D2", "Bm7": "B1", "A7sus": "A1"}, "scale": ["D", "E", "F#", "G", "A", "B", "C#"], "melody": "D4 - F#4 - A4 - B4 -|A4 - - - - - E4 F#4|G4 - - F#4 E4 - D4 -|F#4 - - - - - . .|D4 - F#4 - A4 - B4 -|C#5 - - - A4 - - -|B4 - - A4 G4 - E4 -|F#4 - - - - - . .|D4 - F#4 - A4 - B4 -|A4 - - - - - E4 F#4|G4 - - F#4 E4 - D4 -|F#4 - - - - - . .|D4 - F#4 - A4 - B4 -|C#5 - - - A4 - - -|B4 - - A4 G4 - E4 -|F#4 - - - - - . .|F#4 - - - D4 - F#4 -|B4 - - - A4 - G4 -|G4 - - - E4 - G4 -|A4 - - - - - . .|F#4 - - - D4 - F#4 -|D5 - - - B4 - A4 -|B4 - - - G4 - E4 -|E4 - - - - - . .|D4 - F#4 - A4 - B4 -|A4 - - - - - E4 F#4|G4 - - F#4 E4 - D4 -|F#4 - - - - - . .|D4 - F#4 - A4 - B4 -|C#5 - - - A4 - - -|B4 - - A4 G4 - E4 -|F#4 - - - - - . .", "sad": {"chords": ["C#m9", "C#m9", "Amaj7", "Amaj7", "F#m9", "F#m9", "G#7sus", "G#7", "C#m9", "C#m9", "Amaj7", "Amaj7", "F#m9", "G#7sus", "C#m9", "C#m9", "C#m9", "C#m9", "Amaj7", "Amaj7", "F#m9", "F#m9", "G#7sus", "G#7", "C#m9", "C#m9", "Amaj7", "Amaj7", "F#m9", "G#7sus", "C#m9", "C#m9"], "voice": {"C#m9": ["C#3", "G#3", "B3", "D#4"], "Amaj7": ["A2", "E3", "G#3", "C#4"], "F#m9": ["F#2", "C#3", "E3", "G#3"], "G#7sus": ["G#2", "C#3", "D#3", "F#3"], "G#7": ["G#2", "C3", "D#3", "F#3"]}, "root": {"C#m9": "C#2", "Amaj7": "A1", "F#m9": "F#1", "G#7sus": "G#1", "G#7": "G#1"}, "melody": "G#4 - - - E4 - - -|D#4 - - - - - B3 -|C#4 - - - E4 - G#4 -|G#4 - - - - - - -|A4 - - - G#4 - F#4 -|C#4 - - - - - - -|C#4 - - - D#4 - - -|C4 - - - - - - -|G#4 - - - E4 - - -|B4 - - - G#4 - - -|A4 - - - E4 - C#4 -|B3 - - - - - - -|A4 - - - G#4 - - -|F#4 - - - - - D#4 -|E4 - - - - - - -|. . . . . . . .|G#4 - - - E4 - - -|D#4 - - - - - B3 -|C#4 - - - E4 - G#4 -|G#4 - - - - - - -|A4 - - - G#4 - F#4 -|C#4 - - - - - - -|C#4 - - - D#4 - - -|C4 - - - - - - -|G#4 - - - E4 - - -|B4 - - - G#4 - - -|A4 - - - E4 - C#4 -|B3 - - - - - - -|A4 - - - G#4 - - -|F#4 - - - - - D#4 -|E4 - - - - - - -|. . . . . . . ."}, "calls": ["peeps", "buzz", "cheep", "squeak", "bunhop", "peeps"], "callGap": 0.8, "callLvl": 2.5,"mix":{content:mix({"keys": 1.111, "clar": 0.667, "bass": 1.0, "melody": 1.111, "perc": 0.778, "vinyl": 0.444, "drone": 0.444, "air": 0.444, "wet": 0.35, "lp": 6500}),thriving:mix({"keys": 1.212, "clar": 0.727, "bass": 1.091, "melody": 1.212, "perc": 0.97, "vinyl": 0.485, "drone": 0.485, "air": 0.364, "harm": 0.727, "tperc": 0.727, "wet": 0.35, "lp": 7500}),night:mix({"drone": 1.583, "air": 1.266, "nkeys": 0.95, "nbass": 0.633, "vinyl": 0.475, "wet": 0.6, "lp": 3500}),sad:mix({"sadlead": 2.895, "sadbed": 2.316, "air": 1.737, "vinyl": 0.868, "wet": 0.45, "lp": 4500})},"menus":{menu:mix({"mkeys": 1.393, "nbass": 0.557, "air": 0.418, "wet": 0.35, "lp": 9000}),settings:mix({"air": 1.29, "drone": 0.903, "wet": 0.5, "lp": 8000}),critters:mix({"pluck": 1.853, "animals": 1.853, "air": 0.556, "wet": 0.35, "lp": 11000}),gacha:mix({"chip": 1.127, "sticks": 1.127, "cbass": 1.127, "wet": 0.3, "lp": 11000}),goals:mix({"brass": 1.358, "bells": 1.086, "toms": 1.358, "wet": 0.45, "lp": 11000})}},
+  odd:{"name": "Odd Bodies", "style": "odd", "bpm": 96, "swing": 0.15, "spb": 16, "sub": 4, "bars": 32, "mslot": 2, "echo": 0.25, "chords": ["Gmaj7", "Abmaj7", "Gmaj7", "Ebmaj7", "Cmaj7", "Bmaj7", "Bbmaj7", "D7", "Gmaj7", "Abmaj7", "Gmaj7", "Ebmaj7", "Cmaj7", "Bmaj7", "Bbmaj7", "D7", "Em7", "Ebmaj7", "Dm7", "Dbmaj7", "Cmaj7", "Bm7", "Am7", "D7", "Gmaj7", "Abmaj7", "Gmaj7", "Ebmaj7", "Cmaj7", "Bmaj7", "Bbmaj7", "D7"], "voice": {"Gmaj7": ["G2", "B3", "D4", "F#4"], "Abmaj7": ["Ab2", "C4", "Eb4", "G4"], "Ebmaj7": ["Eb2", "G3", "Bb3", "D4"], "Cmaj7": ["C3", "E3", "G3", "B3"], "Bmaj7": ["B2", "D#3", "F#3", "A#3"], "Bbmaj7": ["Bb2", "D3", "F3", "A3"], "D7": ["D3", "F#3", "A3", "C4"], "Em7": ["E2", "G3", "B3", "D4"], "Dm7": ["D3", "F3", "A3", "C4"], "Dbmaj7": ["Db3", "F3", "Ab3", "C4"], "Bm7": ["B2", "D3", "F#3", "A3"], "Am7": ["A2", "E3", "G3", "C4"]}, "root": {"Gmaj7": "G1", "Abmaj7": "Ab1", "Ebmaj7": "Eb2", "Cmaj7": "C2", "Bmaj7": "B1", "Bbmaj7": "Bb1", "D7": "D2", "Em7": "E2", "Dm7": "D2", "Dbmaj7": "Db2", "Bm7": "B1", "Am7": "A1"}, "scale": ["G", "A", "B", "C", "D", "E", "F#"], "melody": "G4 . B4 . D5 . . B4|C5 . . . G4 . Eb4 .|G4 . B4 . D5 . F#5 .|D5 - . . Bb4 . G4 .|E5 . . C5 . G4 . E4|D#5 . . B4 . F#4 . .|D5 . . Bb4 . F4 . A4|A4 . C5 . F#4 . . .|G4 . B4 . D5 . . B4|C5 . . . G4 . Eb4 .|G4 . B4 . D5 . F#5 .|D5 - . . Bb4 . G4 .|E5 . . C5 . G4 . E4|D#5 . . B4 . F#4 . .|D5 . . Bb4 . F4 . A4|A4 . C5 . F#4 . . .|B4 . G4 . E4 . G4 .|Bb4 . G4 . Eb4 . G4 .|A4 . F4 . D4 . F4 .|Ab4 . F4 . Db4 . F4 .|E5 . . D5 . C5 . G4|D5 . . B4 . A4 . F#4|C5 . . A4 . E4 . G4|F#4 . A4 . C5 . . .|G4 . B4 . D5 . . B4|C5 . . . G4 . Eb4 .|G4 . B4 . D5 . F#5 .|D5 - . . Bb4 . G4 .|E5 . . C5 . G4 . E4|D#5 . . B4 . F#4 . .|D5 . . Bb4 . F4 . A4|A4 . C5 . F#4 . . .", "sad": {"chords": ["Em7", "Cmaj7", "Am7", "B7", "Em7", "Cmaj7", "Am7", "B7", "Em7", "Cmaj7", "Am7", "B7", "Em7", "Cmaj7", "Am7", "B7", "Em7", "Cmaj7", "Am7", "B7", "Em7", "Cmaj7", "Am7", "B7", "Em7", "Cmaj7", "Am7", "B7", "Em7", "Cmaj7", "Am7", "B7"], "voice": {"Em7": ["E2", "G3", "B3", "D4"], "Cmaj7": ["C3", "E3", "G3", "B3"], "Am7": ["A2", "E3", "G3", "C4"], "B7": ["B1", "D#3", "A3", "F#4"]}, "root": {"Em7": "E2", "Cmaj7": "C2", "Am7": "A1", "B7": "B1"}, "melody": "E4 . G4 . B4 . . .|E4 . . . G4 . . .|A4 . C5 . B4 . A4 .|D#4 - . . F#4 . . .|E4 . G4 . B4 . . .|C5 . B4 . G4 . . .|A4 . G4 . E4 . C4 .|B3 . D#4 . F#4 . . .|E4 . G4 . B4 . . .|E4 . . . G4 . . .|A4 . C5 . B4 . A4 .|D#4 - . . F#4 . . .|E4 . G4 . B4 . . .|C5 . B4 . G4 . . .|A4 . G4 . E4 . C4 .|B3 . D#4 . F#4 . . .|E4 . G4 . B4 . . .|E4 . . . G4 . . .|A4 . C5 . B4 . A4 .|D#4 - . . F#4 . . .|E4 . G4 . B4 . . .|C5 . B4 . G4 . . .|A4 . G4 . E4 . C4 .|B3 . D#4 . F#4 . . .|E4 . G4 . B4 . . .|E4 . . . G4 . . .|A4 . C5 . B4 . A4 .|D#4 - . . F#4 . . .|E4 . G4 . B4 . . .|C5 . B4 . G4 . . .|A4 . G4 . E4 . C4 .|B3 . D#4 . F#4 . . ."}, "calls": ["chime", "boop", "absorb", "squelch", "windBell", "boop"], "callGap": 1, "callLvl": 2.2,"mix":{content:mix({"bass": 1.429, "keys": 1.0, "melody": 1.429, "perc": 1.143, "fill": 1.0, "wet": 0.25, "lp": 11000}),thriving:mix({"bass": 1.519, "keys": 1.063, "melody": 1.519, "perc": 1.367, "fill": 1.063, "harm": 0.911, "tperc": 1.063, "wet": 0.25, "lp": 12000}),night:mix({"nkeys": 3.276, "bass": 1.638, "perc": 0.983, "wet": 0.35, "lp": 6000}),sad:mix({"sadlead": 1.897, "sadbed": 1.518, "wet": 0.3, "lp": 7000})},"menus":{menu:mix({"mkeys": 2.833, "hats": 2.266, "wet": 0.25, "lp": 10000}),settings:mix({"chimes": 5.217, "clock": 3.13, "wet": 0.35, "lp": 8000}),critters:mix({"pluck": 1.667, "animals": 1.667, "wet": 0.3, "lp": 10000}),gacha:mix({"chip": 1.311, "cbass": 1.311, "cnoise": 1.311, "wet": 0.25, "lp": 12000}),goals:mix({"brass": 2.115, "bells": 1.692, "toms": 2.115, "wet": 0.3, "lp": 12000})}}
+};
 for(const T of Object.values(TRACKS))Object.assign(T.mix,T.menus||CHILL_MENUS);
 function contextName(c){const night=c.day<0.35,sad=c.mood==='grumpy'||c.happy<30;
   if(c.menu)return c.menu==='settings'||c.menu==='critters'||c.menu==='gacha'||c.menu==='goals'?c.menu:'menu';
   return night?'night':sad?'sad':c.mood==='thriving'?'thriving':'content';}
 
 function makeTrack(C,out,nbuf,T){
+  const KEEP=[];
   const G={},lvl={},on={},inp=C.createGain(),lp=C.createBiquadFilter(),wet=C.createGain(),verb=C.createConvolver(),dly=C.createDelay(1),fb=C.createGain(),dlyOut=C.createGain();
   lp.type='lowpass';lp.frequency.value=12000;lp.Q.value=0.4;inp.connect(lp);lp.connect(out);
   const L=C.sampleRate*4,ir=C.createBuffer(2,L,C.sampleRate);for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<L;i++){const t=i/L;d[i]=(Math.random()*2-1)*Math.pow(1-t,3.2)*(i<C.sampleRate*0.02?i/(C.sampleRate*0.02):1);}}
   verb.buffer=ir;wet.gain.value=0.3;verb.connect(wet);wet.connect(inp);
-  const s16=60/T.bpm/4;dly.delayTime.value=s16*3;fb.gain.value=0.3;dly.connect(fb);fb.connect(dly);dly.connect(dlyOut);dlyOut.gain.value=0.3;dlyOut.connect(inp);dlyOut.connect(verb);
-  const send={pad:0.5,keys:0.3,bass:0.03,melody:0.6,sparkle:0.6,lead:0.4,perc:0.12,tperc:0.12,spiano:0.5,bounce:0.35,nkeys:0.6,nbass:0.05,glass:0.9,whine:0.7,hats:0.08,mkeys:0.3,pluck:0.4,animals:0.6,chip:0.15,cbass:0.03,cnoise:0.05,brass:0.5,bells:0.7,toms:0.4,vinyl:0,rain:0.15,air:0.3,wbass:0.03,clock:0.05,chimes:0.9,sticks:0.1,harm:0.6,fill:0.35,clar:0.45,waves:0.2};
-  const echo=['melody','glass','lead','bells','whine'];
+  const s16=60/T.bpm/(T.sub||4);dly.delayTime.value=s16*3;fb.gain.value=0.3;dly.connect(fb);fb.connect(dly);dly.connect(dlyOut);dlyOut.gain.value=T.echo??0.3;dlyOut.connect(inp);dlyOut.connect(verb);
+  const send={pad:0.5,keys:0.3,bass:0.03,melody:0.6,sparkle:0.6,lead:0.4,perc:0.12,tperc:0.12,spiano:0.5,bounce:0.35,nkeys:0.6,nbass:0.05,glass:0.9,whine:0.7,hats:0.08,mkeys:0.3,pluck:0.4,animals:0.6,chip:0.15,cbass:0.03,cnoise:0.05,brass:0.5,bells:0.7,toms:0.4,vinyl:0,rain:0.15,air:0.3,wbass:0.03,clock:0.05,chimes:0.9,sticks:0.1,harm:0.6,fill:0.35,clar:0.45,waves:0.2,sadlead:0.5,sadbed:0.4,drone:0.12,strings:0.5,horns:0.25,gliss:0.6,bugs:0.15};
+  const echo=['melody','glass','lead','bells','whine'].concat(T.echoStems||[]);
   for(const k of STEMS){G[k]=C.createGain();G[k].gain.value=0;G[k].connect(inp);const sv=C.createGain();sv.gain.value=send[k];G[k].connect(sv);sv.connect(verb);if(echo.includes(k)){const sd=C.createGain();sd.gain.value=0.4;G[k].connect(sd);sd.connect(dly);}lvl[k]=0;on[k]=0;}
   // a gentle tremolo for the Rhodes and the vibraphone (Rainy Window)
-  const trem=(dest,rate,depth)=>{const g=C.createGain(),lf=C.createOscillator(),lg=C.createGain();g.gain.value=1-depth;lf.frequency.value=rate;lg.gain.value=depth;lf.connect(lg);lg.connect(g.gain);lf.start();g.connect(dest);return g;};
+  const trem=(dest,rate,depth)=>{const g=C.createGain(),lf=C.createOscillator(),lg=C.createGain();g.gain.value=1-depth;lf.frequency.value=rate;lg.gain.value=depth;lf.connect(lg);lg.connect(g.gain);lf.start();KEEP.push(lf);g.connect(dest);return g;};
   const rhK=trem(G.keys,4.2,0.22),rhN=trem(G.nkeys,3.4,0.25),vibT=trem(G.melody,5.6,0.3),vibP=trem(G.pluck,5.6,0.3),harmT=trem(G.harm,5.6,0.3);
   const inR=(f,lo)=>{while(f>=lo*2)f/=2;while(f<lo)f*=2;return f;};// fold a note into the octave above lo
   const mel=parseTune(T.melody),smel=parseTune(T.sad.melody),cmel=T.counter?parseTune(T.counter):[];
@@ -833,15 +840,230 @@ function makeTrack(C,out,nbuf,T){
     chop:(dest,fs,t)=>{const fl=C.createBiquadFilter();fl.type='lowpass';fl.frequency.value=1800;fl.connect(dest);for(const f of fs)osc(fl,'square',f,t,0.04,0.004,0.11);},
     rim:(dest,t,v=1)=>{nz(dest,t,0.07*v,0.03,1800,'bandpass',6);osc(dest,'triangle',820,t,0.03*v,0.001,0.03);},
     bongo:(dest,t,hi,v=1)=>{const f=hi?420:300,o=osc(dest,'sine',f,t,0.07*v,0.002,0.12);o.frequency.exponentialRampToValueAtTime(f*0.8,t+0.1);},
+    // ======== Theme Lab instruments ========
+    // a held note with a shaped envelope: the building block for the bowed and blown sounds below
+    held:(dest,type,f,t,d,v,att,rel,o={})=>{const os=C.createOscillator(),g=C.createGain();os.type=type;os.frequency.setValueAtTime(f*(o.from||1),t);if(o.from)os.frequency.exponentialRampToValueAtTime(f,t+(o.slide||0.08));os.detune.value=o.det||0;
+      if(o.vib){const lf=C.createOscillator(),lg=C.createGain();lf.frequency.value=o.vib;lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(0,t+(o.vdel??0.25));lg.gain.linearRampToValueAtTime(f*(o.vd||0.006),t+Math.max((o.vdel??0.25)+0.05,d));lf.connect(lg);lg.connect(os.frequency);lf.start(t);lf.stop(t+d+rel+0.05);}
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(v,t+att);g.gain.setValueAtTime(v,t+Math.max(att+0.01,d));g.gain.exponentialRampToValueAtTime(0.0001,t+d+rel);let out=os;
+      if(o.lp){const fl=C.createBiquadFilter();fl.type='lowpass';fl.frequency.value=o.lp;fl.Q.value=o.q||0.7;os.connect(fl);out=fl;}
+      if(o.bp){const fl=C.createBiquadFilter();fl.type='bandpass';fl.frequency.value=o.bp;fl.Q.value=o.bq||1.5;out.connect(fl);out=fl;}
+      out.connect(g);g.connect(dest);os.start(t);os.stop(t+d+rel+0.05);return os;},
+    // --- Sunbaked Stones: dry, close, still. A duduk-like reed, an oud, a breathy ney for the sad version, a snake-charmer pungi for the gachapon
+    oud:(dest,f,t,v=1,d=0.7)=>{const o=C.createOscillator(),fl=C.createBiquadFilter(),g=C.createGain();o.type='sawtooth';o.frequency.setValueAtTime(f*0.97,t);o.frequency.exponentialRampToValueAtTime(f,t+0.05);fl.type='lowpass';fl.Q.value=2;fl.frequency.setValueAtTime(Math.min(8000,f*7),t);fl.frequency.exponentialRampToValueAtTime(Math.max(300,f*1.6),t+0.25);
+      env(g,t,0.045*v,0.003,d);o.connect(fl);fl.connect(g);g.connect(dest);o.start(t);o.stop(t+d+0.05);osc(dest,'triangle',f,t,0.035*v,0.003,d*0.7);},
+    duneMel:(f,t,d,dest=G.melody,v=1)=>{I.held(dest,'sawtooth',f,t,d,0.013*v,0.09,0.25,{from:0.94,slide:0.14,vib:5.2,vd:0.008,vdel:0.35,lp:1100,bp:720,bq:0.9});I.held(dest,'sine',f,t,d,0.011*v,0.08,0.25,{from:0.94,slide:0.14});},
+    duneSad:(f,t,d,dest=G.sadlead)=>{I.held(dest,'sine',f,t,d,0.021,0.18,0.5,{from:0.97,slide:0.2,vib:4.6,vd:0.01,vdel:0.5});nz(dest,t,0.02,Math.max(0.2,d),f*1.4,'bandpass',1.2);nz(dest,t+d*0.5,0.012,Math.max(0.2,d*0.5),f*2.1,'bandpass',2);},
+    duneChip:(f,t,d)=>{I.held(G.chip,'square',f,t,Math.max(0.12,d*0.9),0.042,0.01,0.06,{vib:7,vd:0.012,vdel:0.04,bp:1400,bq:3.5});},
+    drone:(dest,f,t,d,v=1)=>{const fl=C.createBiquadFilter(),g=C.createGain(),lf=C.createOscillator(),lg=C.createGain();fl.type='lowpass';fl.frequency.value=650;fl.Q.value=0.5;lf.frequency.value=0.18;lg.gain.value=4;lf.connect(lg);lf.start(t);lf.stop(t+d+1.6);
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.016*v,t+1.5);g.gain.setValueAtTime(0.016*v,t+d);g.gain.exponentialRampToValueAtTime(0.0001,t+d+1.5);fl.connect(g);g.connect(dest);
+      for(const[r,det]of[[1,-5],[1,5],[1.5,0],[2,2]]){const o=C.createOscillator();o.type='sawtooth';o.frequency.value=f*r;o.detune.value=det;lg.connect(o.detune);o.connect(fl);o.start(t);o.stop(t+d+1.6);}},
+    fdrum:(dest,t,low,v=1)=>{v*=1.6;if(low){const o=osc(dest,'sine',85,t,0.13*v,0.004,0.3);o.frequency.exponentialRampToValueAtTime(60,t+0.25);}else{nz(dest,t,0.05*v,0.05,1800,'bandpass',2.5);osc(dest,'sine',320,t,0.02*v,0.002,0.05);}},
+    tek:(dest,t,v=1)=>{nz(dest,t,0.06*v,0.03,3200,'bandpass',3);osc(dest,'sine',540,t,0.02*v,0.001,0.03);},
+    rattle:(dest,t,v=1)=>{for(let i=0;i<3;i++)nz(dest,t+i*0.012+Math.random()*0.008,0.02*v,0.02,5500,'bandpass',3);},
+    zill:(dest,t,v=1)=>{osc(dest,'sine',3150,t,0.02*v,0.001,0.6);osc(dest,'sine',4720,t,0.01*v,0.001,0.4);},
+    // --- Bayou Drift: wet, lazy, humid. Harmonica, a tremolo guitar with slapback echo, a tuba, brushes, a slide guitar for the sad version, a jug band for the gachapon
+    swampMel:(f,t,d,dest=G.melody,v=1)=>{const bend=Math.random()<0.4;I.held(dest,'square',f,t,d,0.027*v,0.04,0.15,{from:bend?0.944:0.99,slide:bend?0.16:0.03,vib:5.8,vd:0.006,vdel:0.3,lp:2400,bp:1500,bq:0.8});I.held(dest,'sawtooth',f*2,t,d,0.01*v,0.05,0.15,{from:bend?0.944:0.99,slide:bend?0.16:0.03,lp:3000});nz(dest,t,0.008*v,0.06,f*3,'bandpass',2);},
+    tg:(dest,f,t,v=1,d=0.5)=>{for(const[dl,k]of[[0,1],[0.11,0.35]]){const tt=t+dl,g=C.createGain(),lf=C.createOscillator(),lg=C.createGain(),tr=C.createGain();lf.frequency.value=5.5;lg.gain.value=0.45;tr.gain.value=0.55;lf.connect(lg);lg.connect(tr.gain);lf.start(tt);lf.stop(tt+d+0.1);
+      osc(tr,'triangle',f,tt,0.075*v*k,0.004,d);osc(tr,'sine',f*2,tt,0.02*v*k,0.004,d*0.5);tr.connect(dest);}},
+    tuba:(dest,f,t,d,v=1)=>{I.held(dest,'sawtooth',f,t,d,0.05*v,0.03,0.08,{lp:380,q:1.2});osc(dest,'sine',f,t,0.06*v,0.02,d);},
+    swampSad:(f,t,d,dest=G.sadlead)=>{const p=I._slide||f;I._slide=f;I.held(dest,'triangle',f,t,d,0.025,0.03,0.4,{from:p/f,slide:0.18,vib:5,vd:0.01,vdel:0.25,lp:2200});I.held(dest,'sine',f*2,t,d*0.6,0.006,0.03,0.2,{from:p/f,slide:0.18});},
+    jaw:(dest,t,v=1)=>{const o=C.createOscillator(),fl=C.createBiquadFilter(),g=C.createGain();o.type='sawtooth';o.frequency.value=98;fl.type='bandpass';fl.Q.value=9;fl.frequency.setValueAtTime(350,t);fl.frequency.exponentialRampToValueAtTime(1700,t+0.12);fl.frequency.exponentialRampToValueAtTime(600,t+0.35);env(g,t,0.09*v,0.004,0.4);o.connect(fl);fl.connect(g);g.connect(dest);o.start(t);o.stop(t+0.45);},
+    wash:(dest,t,v=1)=>{for(let i=0;i<4;i++)nz(dest,t+i*0.015,0.09*v,0.018,4200,'bandpass',4);},
+    swampChip:(f,t,d)=>{I.held(G.chip,'sawtooth',f,t,Math.max(0.15,d*0.95),0.06,0.03,0.08,{vib:6.5,vd:0.008,vdel:0.05,bp:950,bq:2});nz(G.chip,t,0.01,Math.max(0.12,d*0.8),1800,'bandpass',4);},
+    banjo:(dest,f,t,v=1)=>{const o=C.createOscillator(),fl=C.createBiquadFilter(),g=C.createGain();o.type='sawtooth';o.frequency.value=f;fl.type='lowpass';fl.Q.value=3;fl.frequency.setValueAtTime(Math.min(9000,f*10),t);fl.frequency.exponentialRampToValueAtTime(Math.max(400,f*2),t+0.12);env(g,t,0.065*v,0.002,0.32);o.connect(fl);fl.connect(g);g.connect(dest);o.start(t);o.stop(t+0.36);},
+    sax:(dest,f,t,d,v=1)=>I.held(dest,'sawtooth',f,t,d,0.03*v,0.04,0.12,{from:0.97,slide:0.06,vib:5.5,vd:0.006,vdel:0.2,lp:900,q:1.5}),
+    bone:(dest,f,t,d,v=1)=>I.held(dest,'sawtooth',f,t,d,0.03*v,0.07,0.15,{lp:700,q:1}),
+    // --- Deep Blue Drift: weightless. A chorused glass lead, a harp waltz, tremolo strings, a sub swell, a low cello for the sad version, a sunken calliope for the gachapon
+    deepMel:(f,t,d,dest=G.melody,v=1)=>{for(const det of[-7,7])I.held(dest,'sine',f,t,d,0.0105*v,0.35,1.1,{det,vib:3.2,vd:0.003,vdel:0.4});I.held(dest,'sine',f*2,t,d*0.7,0.003*v,0.4,0.8,{det:4});},
+    harp:(dest,f,t,v=1)=>{osc(dest,'triangle',f,t,0.04*v,0.003,1.6);osc(dest,'sine',f*2,t,0.01*v,0.002,0.6);},
+    strings:(dest,fs,t,d,v=1,trem=6)=>{const g=C.createGain(),lf=C.createOscillator(),lg=C.createGain(),fl=C.createBiquadFilter();fl.type='lowpass';fl.frequency.value=1500;lf.frequency.value=trem;lg.gain.value=trem?0.35:0;g.gain.value=0.65;lf.connect(lg);lg.connect(g.gain);lf.start(t);lf.stop(t+d+1.6);fl.connect(g);g.connect(dest);
+      for(const f of fs)for(const det of[-8,0,8])I.held(fl,'sawtooth',f,t,d,0.0105*v,1.0,1.4,{det});},
+    sub:(dest,f,t,d,v=1)=>I.held(dest,'sine',f,t,d,0.035*v,0.4,0.6),
+    ping:(dest,f,t,v=1)=>{osc(dest,'sine',f,t,0.03*v,0.002,2.6);osc(dest,'sine',f*2.01,t,0.006*v,0.002,0.8);},
+    deepSad:(f,t,d,dest=G.sadlead)=>I.held(dest,'sawtooth',f/2,t,d,0.03,0.3,0.6,{vib:4.8,vd:0.007,vdel:0.35,lp:900,q:0.8}),
+    deepChip:(f,t,d)=>{for(const[r,v]of[[1,0.016],[2,0.006]])I.held(G.chip,'square',f*r,t,Math.max(0.12,d*0.9),v,0.02,0.1,{vib:6,vd:0.01,vdel:0.02,lp:2600});},
+    gliss:(dest,t,from,n,v=1)=>{let i=SCALE.findIndex(x=>x>=from*0.99);for(let k=0;k<n;k++)I.harp(dest,SCALE[Math.min(SCALE.length-1,i+k)],t+k*0.055,v*(0.6+0.4*k/n));},
+    // --- Clover Field: pastoral. A flute and an oboe in thirds over a drone, a rocking guitar, horn calls, bird-like trills, a barrel organ for the gachapon
+    cloverMel:(f,t,d,dest=G.melody,v=1)=>{I.held(dest,'sine',f,t,d,0.015*v,0.04,0.18,{vib:5.2,vd:0.005,vdel:0.25});I.held(dest,'triangle',f,t,d,0.004*v,0.04,0.15);nz(dest,t,0.008*v,0.05,f*2,'bandpass',3);},
+    oboe:(dest,f,t,d,v=1)=>I.held(dest,'sawtooth',f,t,d,0.032*v,0.06,0.15,{vib:5.6,vd:0.006,vdel:0.2,lp:3200,bp:1150,bq:1.1}),
+    cloverHarm:(f,t,d)=>I.oboe(G.harm,f,t,d,0.9),
+    cloverSad:(f,t,d)=>I.oboe(G.sadlead,f,t,d,1.4),
+    musette:(dest,f,t,d,v=1)=>{for(const r of[1,1.5])I.held(dest,'sawtooth',f*r,t,d,0.012*v,1.2,1.2,{lp:520});},
+    tabor:(dest,t,v=1)=>{v*=3;nz(dest,t,0.04*v,0.06,900,'bandpass',1.5);const o=osc(dest,'sine',180,t,0.05*v,0.002,0.1);o.frequency.exponentialRampToValueAtTime(120,t+0.08);},
+    horn:(dest,f,t,d,v=1)=>I.held(dest,'sawtooth',f,t,d,0.035*v,0.15,0.3,{lp:850,q:0.8,vib:4.5,vd:0.003,vdel:0.4}),
+    trill:(dest,f,t,v=1)=>{const f2=SCALE.find(x=>x>f*1.01)||f*1.12;for(let k=0;k<7;k++)osc(dest,'sine',k%2?f2:f,t+k*0.045,0.016*v,0.004,0.06);},
+    pizz:(dest,f,t,v=1)=>{osc(dest,'triangle',f,t,0.04*v,0.002,0.22);osc(dest,'sine',f*2,t,0.01*v,0.002,0.1);},
+    mbox:(dest,f,t,v=1)=>{osc(dest,'sine',f,t,0.03*v,0.002,1.1);osc(dest,'sine',f*4.02,t,0.006*v,0.001,0.2);},
+    cloverChip:(f,t,d)=>{const g=C.createGain(),lf=C.createOscillator(),lg=C.createGain();lf.frequency.value=7;lg.gain.value=0.3;g.gain.value=0.7;lf.connect(lg);lg.connect(g.gain);lf.start(t);lf.stop(t+d+0.2);g.connect(G.chip);for(const[ty,det]of[['square',-6],['sawtooth',6]])I.held(g,ty,f,t,Math.max(0.1,d*0.85),0.022,0.015,0.06,{det,lp:2400});},
+    wblock:(dest,t,hi,v=1)=>{osc(dest,'sine',hi?1250:900,t,0.05*v,0.001,0.05);nz(dest,t,0.02*v,0.015,hi?2500:1800,'bandpass',5);},
+    // --- Glowcap Grove: enchanted, in 5/4. A celesta, a harp, a humming choir, fairy glints, a music box winding down for the sad version, a toy glockenspiel for the gachapon
+    glowMel:(f,t,d,dest=G.melody,v=1)=>{osc(dest,'sine',f,t,0.045*v,0.004,1.4);osc(dest,'sine',f*4,t,0.008*v,0.002,0.4);osc(dest,'sine',f*2,t,0.01*v,0.003,0.7);},
+    choir:(dest,fs,t,d,v=1)=>{for(const f of fs){const o=C.createOscillator(),f1=C.createBiquadFilter(),f2=C.createBiquadFilter(),g=C.createGain(),g2=C.createGain(),lf=C.createOscillator(),lg=C.createGain();o.type='sawtooth';o.frequency.value=f;lf.frequency.value=4.5+Math.random();lg.gain.value=f*0.006;lf.connect(lg);lg.connect(o.frequency);
+      f1.type='bandpass';f1.frequency.value=420;f1.Q.value=4;f2.type='bandpass';f2.frequency.value=950;f2.Q.value=6;g2.gain.value=0.35;o.connect(f1);o.connect(f2);f1.connect(g);f2.connect(g2);g2.connect(g);
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.05*v,t+0.9);g.gain.setValueAtTime(0.05*v,t+d);g.gain.exponentialRampToValueAtTime(0.0001,t+d+1.6);g.connect(dest);o.start(t);lf.start(t);o.stop(t+d+1.7);lf.stop(t+d+1.7);}},
+    glint:(dest,t,v=1)=>{const f=2400+Math.random()*2400,o=osc(dest,'sine',f,t,0.012*v,0.002,0.25);o.frequency.exponentialRampToValueAtTime(f*1.5,t+0.2);},
+    glowSad:(f,t,d)=>{osc(G.sadlead,'sine',f,t,0.052,0.002,1.8);osc(G.sadlead,'sine',f*4.02,t,0.005,0.001,0.3);osc(G.sadlead,'sine',f*1.003,t+0.004,0.01,0.002,1.4);},
+    glowChip:(f,t,d)=>{osc(G.chip,'sine',f*2,t,0.075,0.001,0.6);osc(G.chip,'sine',f*2*2.76,t,0.02,0.001,0.15);},
+    // each song's tune on the achievements bells
+    duneBell:(f,t)=>I.oud(G.bells,f,t,1,0.6),swampBell:(f,t)=>I.held(G.bells,'sawtooth',f,t,0.3,0.08,0.02,0.1,{bp:1300,bq:3,from:0.97,slide:0.04}),deepBell:(f,t)=>I.ping(G.bells,f,t,0.8),cloverBell:(f,t)=>{osc(G.bells,'sine',f*2,t,0.03,0.001,0.9);osc(G.bells,'sine',f*2*2.76,t,0.01,0.001,0.25);},glowBell:(f,t)=>I.glowMel(f,t,0,G.bells,0.8),
+    bub:(dest,t)=>{const n=2+Math.floor(Math.random()*3);for(let i=0;i<n;i++){const f=300+Math.random()*250,o=osc(dest,'sine',f,t+i*0.12,0.09,0.003,0.1);o.frequency.exponentialRampToValueAtTime(f*2.4,t+i*0.12+0.09);}},
+    // ======== Theme Lab round 3 ========
+    // --- Warm Windowsill: close, dry and wooden. A marimba hook (rolled on long notes), nylon guitar, an upright bass, a low alto flute, dry vibes, congas
+    marimba:(dest,f,t,v=1)=>{osc(dest,'sine',f,t,0.07*v,0.002,0.55);osc(dest,'sine',f*3.93,t,0.011*v,0.001,0.07);osc(dest,'sine',f*9.2,t,0.003*v,0.001,0.02);},
+    // a Wurlitzer electric piano: a sine body, a reedy square "bark" that opens with how hard it's struck, a little tine, through a gentle tremolo
+    wbus:(dest,rate=4.6,depth=0.18)=>{const m=I._wb||(I._wb=new Map()),k=dest;if(!m.has(k))m.set(k,trem(dest,rate,depth));return m.get(k);},
+    wurli:(dest,f,t,v=1,d=1.2)=>{const o=C.createOscillator(),fl=C.createBiquadFilter(),g=C.createGain();o.type='square';o.frequency.value=f;fl.type='lowpass';fl.Q.value=0.8;fl.frequency.setValueAtTime(Math.min(6000,f*(2.5+3*v)),t);fl.frequency.exponentialRampToValueAtTime(Math.max(300,f*1.4),t+Math.max(0.2,d*0.6));
+      env(g,t,0.011*v,0.004,d);o.connect(fl);fl.connect(g);g.connect(dest);o.start(t);o.stop(t+d+0.05);osc(dest,'sine',f,t,0.045*v,0.004,d);osc(dest,'sine',f*7,t,0.003*v,0.001,0.05);},
+    dryMel:(f,t,d,dest=G.melody,v=1)=>I.wurli(I.wbus(dest),f,t,v,Math.max(0.7,d+0.35)),
+    aflute:(dest,f,t,d,v=1)=>{I.held(dest,'triangle',f,t,d,0.024*v,0.09,0.3,{vib:d>0.4?4.8:0,vd:0.004,vdel:0.3,lp:1800});nz(dest,t,0.006*v,Math.min(d,0.3),f*2,'bandpass',2);},
+    upright:(dest,f,t,d,v=1)=>{osc(dest,'sine',f,t,0.075*v,0.008,Math.max(0.3,d));osc(dest,'triangle',f,t,0.022*v,0.005,Math.max(0.15,d*0.5));nz(dest,t,0.015*v,0.03,f*4,'bandpass',2);},
+    shaker:(dest,t,v=1)=>nz(dest,t,0.02*v,0.05,7500,'bandpass',1.5),
+    conga:(dest,t,hi,v=1)=>{const f=hi?330:220,o=osc(dest,'sine',f,t,0.09*v,0.002,0.18);o.frequency.setValueAtTime(f*1.3,t);o.frequency.exponentialRampToValueAtTime(f,t+0.03);nz(dest,t,0.02*v,0.02,2000,'bandpass',2);},
+    dvib:(dest,f,t,v=1,d=1.4)=>{osc(dest,'sine',f,t,0.05*v,0.003,d);osc(dest,'sine',f*4,t,0.005*v,0.002,0.2);},
+    dryHarm:(f,t)=>I.dvib(G.harm,f,t,0.6,0.9),
+    drySad:(f,t,d)=>I.held(G.sadlead,'square',f,t,d,0.022,0.07,0.3,{vib:d>0.4?4.5:0,vd:0.004,vdel:0.35,lp:Math.max(500,f*2.6),q:0.6}),
+    dryChip:(f,t,d)=>I.wurli(I.wbus(G.chip,5.6,0.3),f*2,t,1.15,Math.max(0.35,d+0.15)),
+    dryBell:(f,t)=>I.dvib(G.bells,f*2,t,1,1.2),
+    // --- Sea Glass: a liquid synth arpeggio (its filter sways slowly, like light through water), a round bass, a bubbly lead, a whale-song for the sad version, a toy piano for the gachapon
+    lpluck:(dest,f,t,v=1,d=0.9)=>{const fl=C.createBiquadFilter(),g=C.createGain(),cut=1100+800*Math.sin(t*0.6);fl.type='lowpass';fl.Q.value=5;fl.frequency.setValueAtTime(cut*1.8,t);fl.frequency.exponentialRampToValueAtTime(cut*0.5,t+d);env(g,t,0.034*v,0.003,d);fl.connect(g);g.connect(dest);
+      for(const det of[-7,7]){const o=C.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=det;o.connect(fl);o.start(t);o.stop(t+d+0.05);}},
+    seaMel:(f,t,d,dest=G.melody,v=1)=>{for(const det of[-6,6])I.held(dest,'sine',f,t,d,0.016*v,0.02,0.35,{det,from:0.9,slide:0.05,vib:d>0.4?4:0,vd:0.004,vdel:0.3});I.held(dest,'triangle',f*2,t,Math.min(d,0.25),0.004*v,0.01,0.15);},
+    seaHarm:(f,t,d)=>I.seaMel(f,t,d,G.harm,0.55),
+    rbass:(dest,f,t,d,v=1)=>{osc(dest,'sine',f,t,0.08*v,0.01,d);osc(dest,'triangle',f,t,0.03*v,0.01,d*0.5);},
+    seaSad:(f,t,d)=>{const p=I._wh||f;I._wh=f;const sl=Math.min(0.6,d*0.5);I.held(G.sadlead,'sine',f,t,d,0.035,0.25,0.8,{from:p/f,slide:sl,vib:3,vd:0.006,vdel:0.4});I.held(G.sadlead,'triangle',f/2,t,d,0.012,0.3,0.8,{from:p/f,slide:sl,lp:700});},
+    seaChip:(f,t,d)=>{osc(G.chip,'sine',f*2,t,0.05,0.001,0.35);osc(G.chip,'sine',f*4,t,0.012,0.001,0.12);osc(G.chip,'sine',f*2*5.1,t,0.004,0.001,0.04);},
+    seaBell:(f,t)=>{osc(G.bells,'sine',f*2,t,0.035,0.002,1.6);osc(G.bells,'sine',f*2*2.4,t,0.008,0.002,0.4);},
+    blip:(dest,t,v=1)=>{const f=500+Math.random()*400,o=osc(dest,'sine',f,t,0.05*v,0.002,0.07);o.frequency.exponentialRampToValueAtTime(f*2.2,t+0.06);},
+    // --- Clover Hill: a fingerpicked steel-string guitar, a bouncy clarinet, a flute answering, a felt piano, glockenspiel, a whistled gachapon tune
+    acg:(dest,f,t,v=1,d=0.9)=>{const o=C.createOscillator(),fl=C.createBiquadFilter(),g=C.createGain();o.type='sawtooth';o.frequency.value=f;fl.type='lowpass';fl.Q.value=1.2;fl.frequency.setValueAtTime(Math.min(10000,f*14),t);fl.frequency.exponentialRampToValueAtTime(Math.max(400,f*2.2),t+0.18);
+      env(g,t,0.022*v,0.002,d);o.connect(fl);fl.connect(g);g.connect(dest);o.start(t);o.stop(t+d+0.05);osc(dest,'triangle',f,t,0.018*v,0.002,d*0.7);},
+    hillMel:(f,t,d,dest=G.melody,v=1)=>I.held(dest,'square',f,t,Math.max(0.1,d*0.85),0.02*v,0.025,0.1,{vib:d>0.35?5:0,vd:0.004,vdel:0.25,lp:Math.min(4000,f*4),q:0.5}),
+    felt:(dest,f,t,v=1,d=1.6)=>{osc(dest,'sine',f,t,0.05*v,0.006,d);osc(dest,'triangle',f,t,0.012*v,0.004,d*0.4);osc(dest,'sine',f*2,t,0.01*v,0.004,d*0.3);},
+    hillSad:(f,t,d)=>I.felt(G.sadlead,f,t,1.1,Math.max(1.2,d+0.6)),
+    glock:(dest,f,t,v=1)=>{osc(dest,'sine',f,t,0.03*v,0.001,0.8);osc(dest,'sine',f*2.76,t,0.008*v,0.001,0.2);},
+    hillChip:(f,t,d)=>{I.held(G.chip,'sine',f*2,t,Math.max(0.1,d*0.85),0.035,0.02,0.08,{from:0.97,slide:0.04,vib:d>0.3?6:0,vd:0.008,vdel:0.12});nz(G.chip,t,0.004,Math.max(0.08,d*0.6),f*4,'bandpass',3);},
+    hillBell:(f,t)=>I.glock(G.bells,f*2,t,1),
+    // --- Fairy Ring: an ocarina, a bouncing harp, pizzicato, a celesta answering, a music box for the gachapon
+    fairyMel:(f,t,d,dest=G.melody,v=1)=>{const L=Math.max(0.1,d*0.9);I.held(dest,'sine',f,t,L,0.022*v,0.03,0.12,{vib:d>0.35?5.5:0,vd:0.005,vdel:0.2});I.held(dest,'triangle',f,t,L,0.006*v,0.03,0.1);nz(dest,t,0.006*v,0.05,f*2.5,'bandpass',2.5);},
+    fairySad:(f,t,d)=>I.glowMel(f,t,0,G.sadlead,1.1),
+    fairyChip:(f,t,d)=>I.mbox(G.chip,f*2,t,1.3),
+    fairyBell:(f,t)=>I.glowMel(f*2,t,0,G.bells,0.8),
+    ting:(dest,t,v=1)=>{osc(dest,'sine',5200,t,0.008*v,0.001,0.4);osc(dest,'sine',7300,t,0.003*v,0.001,0.25);},
+    // --- Bayou Drift: a resonator guitar for the critters menu, sliding up into each note
+    dobro:(dest,f,t,v=1,d=0.8)=>{const o=C.createOscillator(),fl=C.createBiquadFilter(),g=C.createGain();o.type='sawtooth';o.frequency.setValueAtTime(f*0.97,t);o.frequency.exponentialRampToValueAtTime(f,t+0.06);fl.type='bandpass';fl.Q.value=1.6;fl.frequency.setValueAtTime(Math.min(6000,f*6),t);fl.frequency.exponentialRampToValueAtTime(Math.max(500,f*2),t+0.25);
+      env(g,t,0.2*v,0.002,d);o.connect(fl);fl.connect(g);g.connect(dest);o.start(t);o.stop(t+d+0.05);osc(dest,'sine',f*2,t,0.03*v,0.002,d*0.6);},
+    // --- Dandelion Wind: an open-tuned acoustic guitar left ringing, a soft dark lead that glides between notes, gusts of wind, slow swells
+    owG:(dest,f,t,v=1,d=2.6)=>{const o=C.createOscillator(),fl=C.createBiquadFilter(),g=C.createGain();o.type='sawtooth';o.frequency.value=f;fl.type='lowpass';fl.Q.value=0.9;fl.frequency.setValueAtTime(Math.min(8000,f*9),t);fl.frequency.exponentialRampToValueAtTime(Math.max(300,f*1.5),t+0.4);
+      env(g,t,0.016*v,0.003,d);o.connect(fl);fl.connect(g);g.connect(dest);o.start(t);o.stop(t+d+0.05);osc(dest,'triangle',f,t,0.016*v,0.003,d*0.8);},
+    glideLead:(key,dest,f,t,d,v,lp)=>{const p=I[key]||f;I[key]=f;const fr=Math.abs(Math.log(p/f))<0.7?p/f:1;I.held(dest,'triangle',f,t,d,0.022*v,0.08,0.4,{from:fr,slide:0.14,vib:d>0.5?4.2:0,vd:0.004,vdel:0.4,lp});I.held(dest,'sine',f/2,t,d,0.008*v,0.1,0.4,{from:fr,slide:0.14});nz(dest,t,0.004*v,Math.min(d,0.4),f*2,'bandpass',1.5);},
+    windMel:(f,t,d,dest=G.melody,v=1)=>I.glideLead('_wm',dest,f,t,d,v,1200),
+    windHarm:(f,t,d)=>I.glideLead('_wh2',G.harm,f,t,d,0.6,1300),
+    windSad:(f,t,d)=>I.owG(G.sadlead,f,t,1.4,Math.max(1.6,d+0.8)),
+    windChip:(f,t,d)=>I.pno(G.chip,f,t,0.9,Math.max(0.5,d+0.3)),
+    windBell:(f,t)=>I.pno(G.bells,f,t,0.8,1.6),
+    gust:(dest,t,d,v=1)=>{const src=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();src.buffer=nbuf;src.loop=true;f.type='bandpass';f.Q.value=0.8;f.frequency.setValueAtTime(400,t);f.frequency.linearRampToValueAtTime(1300,t+d*0.45);f.frequency.linearRampToValueAtTime(500,t+d);
+      g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(0.03*v,t+d*0.45);g.gain.linearRampToValueAtTime(0.0001,t+d);src.connect(f);f.connect(g);g.connect(dest);src.start(t,Math.random()*0.5);src.stop(t+d+0.05);},
+    // a reversed-sounding swell: it breathes in slowly and cuts off
+    swell:(dest,t,d,v=1,f=0)=>{const src=C.createBufferSource(),fl=C.createBiquadFilter(),g=C.createGain();src.buffer=nbuf;src.loop=true;fl.type='bandpass';fl.Q.value=0.7;fl.frequency.setValueAtTime(1500,t);fl.frequency.exponentialRampToValueAtTime(5500,t+d);
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.03*v,t+d);g.gain.linearRampToValueAtTime(0.0001,t+d+0.06);src.connect(fl);fl.connect(g);g.connect(dest);src.start(t,Math.random()*0.5);src.stop(t+d+0.1);
+      if(f){const o=C.createOscillator(),og=C.createGain();o.type='sine';o.frequency.value=f;og.gain.setValueAtTime(0.0001,t);og.gain.exponentialRampToValueAtTime(0.04*v,t+d);og.gain.linearRampToValueAtTime(0.0001,t+d+0.06);o.connect(og);og.connect(dest);o.start(t);o.stop(t+d+0.1);}},
+    // --- Echo Pools: a glassy electric piano dripping through a long echo, a hollow lead, water drops
+    poolPiano:(dest,f,t,v=1)=>{osc(dest,'sine',f,t,0.035*v,0.003,1.4);osc(dest,'sine',f*2,t,0.006*v,0.002,0.5);osc(dest,'sine',f*5.04,t,0.0025*v,0.001,0.12);},
+    // a soft wordless voice: a pure tone with a gentle vibrato, gliding a little into each note, an "oo" formant on top
+    poolsMel:(f,t,d,dest=G.melody,v=1)=>{const p=I._sp||f;I._sp=f;const fr=Math.abs(Math.log(p/f))<0.5?p/f:1;I.held(dest,'sine',f,t,d,0.03*v,0.12,0.5,{from:fr,slide:0.12,vib:d>0.4?4.8:0,vd:0.005,vdel:0.3});I.held(dest,'triangle',f,t,d,0.012*v,0.12,0.5,{from:fr,slide:0.12,lp:900,bp:420,bq:1.2});},
+    poolsSad:(f,t,d)=>I.pno(G.sadlead,f,t,0.75,Math.max(2,d+1.2)),
+    poolsChip:(f,t,d)=>I.fmBell(G.chip,f,t,1.2),
+    poolsBell:(f,t)=>I.fmBell(G.bells,f,t,1),
+    drop:(dest,t,v=1)=>{const f=900+Math.random()*1400,o=osc(dest,'sine',f,t,0.03*v,0.002,0.12);o.frequency.exponentialRampToValueAtTime(f*1.8,t+0.08);},
+    // a soft piano: a few slightly stretched partials (the high ones die faster), a touch of chorus, a felt hammer
+    pno:(dest,f,t,v=1,d=1.8)=>{const fl=C.createBiquadFilter();fl.type='lowpass';fl.Q.value=0.5;fl.frequency.setValueAtTime(Math.min(9000,f*(4+6*v)),t);fl.frequency.exponentialRampToValueAtTime(Math.max(400,f*2),t+d*0.7);fl.connect(dest);
+      for(const[n,a,dk]of[[1,0.05,1],[2,0.02,0.7],[3,0.009,0.5],[4,0.005,0.35],[5,0.0025,0.25]])osc(fl,'sine',f*n*(1+0.0004*n*n),t,a*v,0.002,d*dk);
+      osc(fl,'sine',f*1.0015,t,0.012*v,0.002,d*0.9);nz(fl,t,0.008*v,0.02,Math.min(6000,f*3),'bandpass',1.5);},
+    // a glassy two-operator FM bell: bright as it's struck, then a pure, slowly fading tone
+    fmBell:(dest,f,t,v=1,d=2.4)=>{const c=C.createOscillator(),m=C.createOscillator(),mg=C.createGain(),g=C.createGain();c.frequency.value=f;m.frequency.value=f*3.5;mg.gain.setValueAtTime(f*1.6,t);mg.gain.exponentialRampToValueAtTime(f*0.04,t+0.9);m.connect(mg);mg.connect(c.frequency);
+      env(g,t,0.02*v,0.003,d);c.connect(g);g.connect(dest);c.start(t);m.start(t);c.stop(t+d+0.05);m.stop(t+d+0.05);},
+    // a theremin: a pure tone that glides between notes with a wide, slow-blooming vibrato
+    thrm:(dest,f,t,d,v=1)=>{const p=I._th||f;I._th=f;const fr=Math.abs(Math.log(p/f))<0.8?p/f:1;I.held(dest,'sine',f,t,d,0.03*v,0.3,0.8,{from:fr,slide:0.3,vib:5.5,vd:0.012,vdel:0.15});I.held(dest,'triangle',f,t,d,0.006*v,0.3,0.8,{from:fr,slide:0.3,lp:1800});},
+    // --- Sunny Slope: a clean electric guitar, slightly chorused, every note plucked and left to fade
+    egtr:(dest,f,t,v=1,d=0.7)=>{const fl=C.createBiquadFilter(),g=C.createGain();fl.type='lowpass';fl.Q.value=1;fl.frequency.setValueAtTime(Math.min(7000,f*6),t);fl.frequency.exponentialRampToValueAtTime(Math.max(500,f*2),t+0.15);env(g,t,0.018*v,0.003,d);fl.connect(g);g.connect(dest);
+      for(const det of[-6,6]){const o=C.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=det;o.connect(fl);o.start(t);o.stop(t+d+0.05);}osc(dest,'triangle',f,t,0.02*v,0.003,d*0.8);},
+    slopeMel:(f,t,d)=>I.egtr(G.melody,f,t,1.7,0.7),
+    slopeHarm:(f,t,d)=>I.egtr(G.harm,f,t,0.55,0.6),
+    slopeSad:(f,t,d)=>I.pno(G.sadlead,f,t,0.8,1.4),
+    slopeChip:(f,t,d)=>I.egtr(G.chip,f,t,1.1,0.45),
+    slopeBell:(f,t)=>I.pno(G.bells,f,t,0.9,1.2),
+    // --- Starlit Hollow: a handpan, a steel tongue drum, a wooden slit drum, a frame drum, a rainstick, bamboo chimes
+    // handpan: a struck steel note. A sine fundamental, a few cents of beating, its tuned octave and compound fifth (each
+    // fading faster), and a soft thumb thud at the strike; it rings out on its own
+    handpan:(dest,f,t,v=1,d=2.5)=>{osc(dest,'sine',f,t,0.05*v,0.004,d);osc(dest,'sine',f*1.003,t,0.012*v,0.004,d*0.9);osc(dest,'sine',f*2,t,0.018*v,0.003,d*0.6);osc(dest,'sine',f*3,t,0.008*v,0.003,d*0.35);
+      nz(dest,t,0.025*v,0.05,Math.min(900,f*1.5),'lowpass',0.7);osc(dest,'sine',f/2,t,0.012*v,0.002,0.08);},
+    // tongue drum: rounder and woodier, a weak inharmonic partial and a soft mallet tick
+    tongue:(dest,f,t,v=1,d=1.2)=>{osc(dest,'sine',f,t,0.05*v,0.003,d);osc(dest,'sine',f*2.8,t,0.006*v,0.002,d*0.3);nz(dest,t,0.008*v,0.01,3000,'bandpass',2);},
+    // slit drum: a hollow wooden "tok", low lip or high lip
+    slit:(dest,t,hi,v=1)=>{const f=hi?260:170,o=osc(dest,'sine',f,t,0.08*v,0.002,0.14);o.frequency.setValueAtTime(f*1.15,t);o.frequency.exponentialRampToValueAtTime(f,t+0.02);nz(dest,t,0.02*v,0.02,f*4,'bandpass',3);},
+    // rainstick: a slow cascade of tiny seed clicks that thins out
+    rainstick:(dest,t,d=1.5,v=1)=>{for(let i=0;i<40;i++)nz(dest,t+d*(i/40)+Math.random()*0.03,(0.04+Math.random()*0.03)*v*(1-0.5*i/40),0.012,4000+Math.random()*4000,'bandpass',3);},
+    // bamboo wind chimes: a few hollow wooden knocks
+    bamboo:(dest,t,v=1)=>{const n=2+Math.floor(Math.random()*3);let tt=t;for(let i=0;i<n;i++){const f=350+Math.random()*500;osc(dest,'sine',f,tt,0.03*v,0.002,0.25);nz(dest,tt,0.01*v,0.02,f*2,'bandpass',4);tt+=0.08+Math.random()*0.15;}},
+    hollowMel:(f,t,d)=>I.handpan(G.melody,f,t,1.1),
+    hollowHarm:(f,t,d)=>I.tongue(G.harm,f,t,0.6),
+    hollowSad:(f,t,d)=>I.handpan(G.sadlead,f,t,1.1,3),
+    hollowChip:(f,t,d)=>I.handpan(G.chip,f,t,1),
+    hollowBell:(f,t)=>I.handpan(G.bells,f,t,0.9),
+    // ======== round 10: wacky fantasy ========
+    // --- Shroom Funk: a rubbery slap bass (pops on the octave), a clavinet through an envelope wah, a SNES-style brass lead, a snappy kit
+    slapBass:(dest,f,t,v=1,pop=false,d=0.28)=>{const o=C.createOscillator(),fl=C.createBiquadFilter(),g=C.createGain();o.type='sawtooth';o.frequency.value=f;fl.type='lowpass';fl.Q.value=3;fl.frequency.setValueAtTime(Math.min(8000,f*(pop?16:9)),t);fl.frequency.exponentialRampToValueAtTime(Math.max(150,f*1.5),t+0.12);
+      env(g,t,0.04*v,0.003,d);o.connect(fl);fl.connect(g);g.connect(dest);o.start(t);o.stop(t+d+0.05);osc(dest,'sine',f,t,0.045*v,0.003,d);if(pop)nz(dest,t,0.03*v,0.015,3500,'bandpass',2);},
+    clav:(dest,f,t,v=1,d=0.14)=>{const o=C.createOscillator(),fl=C.createBiquadFilter(),g=C.createGain();o.setPeriodicWave(pulse);o.frequency.value=f;fl.type='bandpass';fl.Q.value=3.5;fl.frequency.setValueAtTime(2600,t);fl.frequency.exponentialRampToValueAtTime(700,t+d);
+      env(g,t,0.6*v,0.002,d);o.connect(fl);fl.connect(g);g.connect(dest);o.start(t);o.stop(t+d+0.05);},
+    sfLead:(dest,f,t,d,v=1)=>{const L=Math.max(0.1,d*0.9);I.held(dest,'sawtooth',f,t,L,0.04*v,0.015,0.06,{from:0.94,slide:0.05,vib:L>0.35?5.5:0,vd:0.006,vdel:0.15,lp:1900,q:1.2});I.held(dest,'square',f,t,L,0.02*v,0.015,0.06,{from:0.94,slide:0.05,lp:1500,det:8});},
+    ksnare:(dest,t,v=1)=>{nz(dest,t,0.09*v,0.12,1900,'bandpass',0.9);osc(dest,'triangle',190,t,0.05*v,0.002,0.07);},
+    cowbell:(dest,t,v=1)=>{for(const f of[540,800])osc(dest,'square',f,t,0.01*v,0.002,0.18);},
+    funkMel:(f,t,d)=>I.sfLead(G.melody,f,t,d),
+    funkHarm:(f,t,d)=>I.sfLead(G.harm,f,t,d,0.6),
+    funkSad:(f,t,d)=>I.sfLead(G.sadlead,f,t,d,1),
+    funkChip:(f,t,d)=>I.clav(G.chip,f,t,1.6,Math.max(0.12,d)),
+    funkBell:(f,t)=>I.sfLead(G.bells,f,t,0.25,1),
+    // --- Crunch Cave: a bit-crusher (a stepped waveshaper), a tape wobble, a pulse-wave lead, fast chip arpeggios, a triangle bass
+    crushBus:(dest,bits=5)=>{const m=I._cb||(I._cb=new Map());if(m.has(dest))return m.get(dest);const pre=C.createGain(),sh=C.createWaveShaper(),post=C.createGain(),n=1024,c=new Float32Array(n),L=Math.pow(2,bits-1);
+      for(let i=0;i<n;i++){const x=i/(n-1)*2-1;c[i]=Math.round(x*L)/L;}sh.curve=c;pre.gain.value=10;post.gain.value=0.1;pre.connect(sh);sh.connect(post);post.connect(dest);m.set(dest,pre);return pre;},
+    wob:()=>{if(!I._wob){const lf=C.createOscillator(),g=C.createGain();lf.frequency.value=0.7;g.gain.value=9;lf.connect(g);lf.start();KEEP.push(lf);I._wob=g;}return I._wob;},
+    pulseLead:(dest,f,t,d,v=1,duty)=>{const o=C.createOscillator(),g=C.createGain();if(duty==='sq')o.type='square';else o.setPeriodicWave(pulse);o.frequency.setValueAtTime(f*(d>0.25?0.97:1),t);if(d>0.25)o.frequency.exponentialRampToValueAtTime(f,t+0.04);I.wob().connect(o.detune);
+      if(d>0.35){const lf=C.createOscillator(),lg=C.createGain();lf.frequency.value=6;lg.gain.setValueAtTime(0,t);lg.gain.linearRampToValueAtTime(0,t+0.18);lg.gain.linearRampToValueAtTime(f*0.012,t+d);lf.connect(lg);lg.connect(o.frequency);lf.start(t);lf.stop(t+d+0.1);}
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.065*v,t+0.006);g.gain.setValueAtTime(0.065*v,t+Math.max(0.01,d*0.85));g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.04);o.connect(g);g.connect(dest);o.start(t);o.stop(t+d+0.1);},
+    chipArp:(dest,fs,t,dur,v=1,rate=0.045)=>{const o=C.createOscillator(),g=C.createGain();o.type='square';let k=0;for(let x=0;x<dur;x+=rate)o.frequency.setValueAtTime(fs[k++%fs.length],t+x);
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.02*v,t+0.005);g.gain.setValueAtTime(0.02*v,t+dur*0.8);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+0.05);},
+    triBass:(dest,f,t,d,v=1)=>{const o=C.createOscillator(),g=C.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.035*v,t+0.004);g.gain.setValueAtTime(0.035*v,t+d*0.85);g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.03);o.connect(g);g.connect(dest);o.start(t);o.stop(t+d+0.06);},
+    crunchMel:(f,t,d)=>I.pulseLead(I.crushBus(G.melody),f,t,d,1),
+    crunchHarm:(f,t,d)=>I.pulseLead(I.crushBus(G.harm),f,t+s16*3,d,0.5,'sq'),
+    crunchSad:(f,t,d)=>I.pulseLead(I.crushBus(G.sadlead),f,t,d,0.9),
+    crunchChip:(f,t,d)=>I.pulseLead(I.crushBus(G.chip,4),f,t,d,1,'sq'),
+    crunchBell:(f,t)=>I.pulseLead(I.crushBus(G.bells),f,t,0.25,1,'sq'),
+    // --- Odd Bodies: a honky sax, an organ, bongos, "ba"/"doo" vocal blips, a slide whistle
+    honkSax:(dest,f,t,d,v=1)=>{const L=Math.max(0.1,d*0.85);I.held(dest,'sawtooth',f,t,L,0.07*v,0.02,0.07,{from:0.92,slide:0.06,vib:L>0.3?6:0,vd:0.008,vdel:0.12,lp:2200,bp:1000,bq:1.4});},
+    organ:(dest,f,t,d=0.25,v=1)=>{for(const[r,a]of[[1,0.05],[2,0.03],[3,0.015]])osc(dest,'sine',f*r,t,a*v,0.004,d);},
+    bongo:(dest,t,hi,v=1)=>{const f=hi?420:300,o=osc(dest,'sine',f,t,0.08*v,0.002,0.12);o.frequency.setValueAtTime(f*1.25,t);o.frequency.exponentialRampToValueAtTime(f,t+0.015);nz(dest,t,0.015*v,0.012,3000,'bandpass',3);},
+    vblip:(dest,f,t,v=1,doo=false)=>{const o=C.createOscillator(),f1=C.createBiquadFilter(),f2=C.createBiquadFilter(),g=C.createGain(),g2=C.createGain();o.type='sawtooth';o.frequency.setValueAtTime(f*1.03,t);o.frequency.exponentialRampToValueAtTime(f,t+0.05);
+      f1.type='bandpass';f1.Q.value=5;f1.frequency.value=doo?320:750;f2.type='bandpass';f2.Q.value=6;f2.frequency.value=doo?800:1150;g2.gain.value=0.5;o.connect(f1);o.connect(f2);f1.connect(g);f2.connect(g2);g2.connect(g);env(g,t,0.25*v,0.01,0.13);g.connect(dest);o.start(t);o.stop(t+0.2);},
+    slideWh:(dest,t,up=true,d=0.35,v=1)=>{const o=C.createOscillator(),g=C.createGain(),lf=C.createOscillator(),lg=C.createGain();o.type='sine';o.frequency.setValueAtTime(up?420:900,t);o.frequency.exponentialRampToValueAtTime(up?900:420,t+d);lf.frequency.value=7;lg.gain.value=12;lf.connect(lg);lg.connect(o.frequency);
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.025*v,t+0.03);g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.05);o.connect(g);g.connect(dest);o.start(t);lf.start(t);o.stop(t+d+0.1);lf.stop(t+d+0.1);},
+    oddMel:(f,t,d)=>{I.honkSax(I.crushBus(G.melody,7),f,t,d);I.organ(G.melody,f,t,Math.max(0.15,d*0.8),0.5);},
+    oddHarm:(f,t,d)=>I.honkSax(G.harm,f,t,d,0.55),
+    oddSad:(f,t,d)=>I.honkSax(G.sadlead,f,t,d,0.9),
+    oddChip:(f,t,d)=>I.vblip(G.chip,f,t,1.2,d>0.3),
+    oddBell:(f,t)=>I.organ(G.bells,f,t,0.4,1.4),
     crackle:t=>{const src=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();src.buffer=nbuf;f.type='highpass';f.frequency.value=3000;env(g,t,0.012+Math.random()*0.02,0.001,0.006);src.connect(f);f.connect(g);g.connect(G.vinyl);src.start(t,Math.random()*0.9);src.stop(t+0.02);},
     drip:t=>{const f=1400+Math.random()*1800,o=osc(G.rain,'sine',f,t,0.008+Math.random()*0.01,0.002,0.06);o.frequency.exponentialRampToValueAtTime(f*1.6,t+0.05);}};
   // beds that run all the time on their own stem: record hiss, rain on glass, a soft wind
-  const bed=(dest,type,freq,q,v)=>{const src=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();src.buffer=nbuf;src.loop=true;f.type=type;f.frequency.value=freq;f.Q.value=q;g.gain.value=v;src.connect(f);f.connect(g);g.connect(dest);src.start();return g;};
+  const bed=(dest,type,freq,q,v)=>{const src=C.createBufferSource(),f=C.createBiquadFilter(),g=C.createGain();src.buffer=nbuf;src.loop=true;f.type=type;f.frequency.value=freq;f.Q.value=q;g.gain.value=v;src.connect(f);f.connect(g);g.connect(dest);src.start();KEEP.push(src);return g;};
   bed(G.vinyl,'bandpass',5000,0.4,0.006);
   bed(G.rain,'bandpass',2400,0.5,0.022);bed(G.rain,'lowpass',500,0.3,0.03);
-  {const w=bed(G.air,'lowpass',520,0.6,0.02),lf=C.createOscillator(),lg=C.createGain();lf.frequency.value=0.09;lg.gain.value=0.014;lf.connect(lg);lg.connect(w.gain);lf.start();}
+  {const w=bed(G.air,'lowpass',520,0.6,0.02),lf=C.createOscillator(),lg=C.createGain();lf.frequency.value=0.09;lg.gain.value=0.014;lf.connect(lg);lg.connect(w.gain);lf.start();KEEP.push(lf);}
   // waves washing in and out on the shore
-  for(const[ty,fq,v]of[['lowpass',650,0.03],['bandpass',2800,0.006]]){const w=bed(G.waves,ty,fq,0.5,v),lf=C.createOscillator(),lg=C.createGain();lf.frequency.value=0.08;lg.gain.value=v*0.95;lf.connect(lg);lg.connect(w.gain);lf.start();}
+  for(const[ty,fq,v]of[['lowpass',650,0.03],['bandpass',2800,0.006]]){const w=bed(G.waves,ty,fq,0.5,v),lf=C.createOscillator(),lg=C.createGain();lf.frequency.value=0.08;lg.gain.value=v*0.95;lf.connect(lg);lg.connect(w.gain);lf.start();KEEP.push(lf);}
+  // night crickets for the swamp: three crickets on their own lazy clocks, each chirp a few quick 4-5 kHz pulses
+  const CRK=[[4300,0.85,-0.6],[4750,1.15,0.5],[5100,1.6,0]].map(([f,gap,p])=>{const pn=C.createStereoPanner();pn.pan.value=p;pn.connect(G.bugs);return{f,gap,pn,n:0};});
+  const crickets=(t,d)=>{for(const c of CRK){if(c.n<t-1)c.n=t+Math.random()*c.gap;while(c.n<t+d){const np=3+Math.floor(Math.random()*2);for(let i=0;i<np;i++)osc(c.pn,'sine',c.f,c.n+i*0.032,0.07,0.003,0.016);c.n+=c.gap*(0.85+Math.random()*0.3);}}};
   // little critter calls for the critters menu: the game's own critter sounds (the same recipes as the SFX table),
   // scheduled into this stem. Each song only calls its own kind of critter
   const A=G.animals,cg=C.createGain(),cj=()=>1+(Math.random()-.5)*0.1,crand=(a,b)=>a+Math.random()*(b-a);cg.gain.value=0.5*(T.callLvl||1);cg.connect(A);
@@ -869,18 +1091,28 @@ function makeTrack(C,out,nbuf,T){
     tok:t=>{ctone(t,360,0.09,{type:'triangle',to:250,gain:0.16});ctone(t,720,0.05,{gain:0.04});},
     bpop:t=>{ctone(t,1300,0.045,{to:380,gain:0.07});cnoise(t,0.02,{freq:4200,gain:0.06});},
     swish:t=>cnoise(t,0.12,{freq:1400,to:4200,q:1.5,gain:0.12}),
+    flick:t=>{ctone(t,2400,0.02,{gain:0.03});ctone(t,2650,0.02,{delay:0.05,gain:0.03});},
+    hiss:t=>cnoise(t,0.55,{freq:5200,q:0.7,gain:0.1,attack:0.06}),
+    plip:t=>ctone(t,850,0.08,{to:1500,gain:0.1}),
+    fishNibble:t=>{ctone(t,crand(1900,2400),0.03,{type:'sine',to:1500,gain:0.03});cnoise(t,0.015,{filter:'bandpass',freq:3000,q:4,gain:0.04});},
+    squeak:t=>{ctone(t,1150,0.1,{type:'triangle',to:1900,gain:0.07});ctone(t,1750,0.09,{delay:0.08,type:'triangle',to:1250,gain:0.05});},
+    bunhop:t=>{ctone(t,220,0.14,{type:'sine',to:420,gain:0.12});ctone(t,110,0.08,{type:'triangle',to:80,gain:0.08});},
+    chime:t=>{for(const[f,d]of[[1568,0],[2093,0.07],[2637,0.14]])ctone(t,f,0.22,{delay:d,gain:0.022});},
+    absorb:t=>{ctone(t,880,0.18,{to:1760,gain:0.03});ctone(t,1320,0.2,{delay:0.06,to:2640,gain:0.02});},
+    boop:t=>ctone(t,520,0.13,{type:'sine',to:290,gain:0.09}),
+    windBell:t=>{ctone(t,1760,0.9,{gain:0.05});ctone(t,2637,0.6,{delay:0.01,gain:0.022});},
     burble:t=>{for(let k=0;k<4;k++)ctone(t,crand(500,900),0.05,{delay:k*crand(0.05,0.11),to:crand(1100,1600),gain:0.018});}};
   const CALL_NAMES=T.calls||['peeps','buzz','sss','cheep','scuttle','clatter'],callGap=T.callGap||1;let nextCall=0,lastCall='';
   const N=n=>NB(n),style=T.style;
-  function step(k,t){const bar=Math.floor(k/16)%16,s=k%16,sadOn=lvl.whine>0,sc=T.sad.chords[bar],sch=T.sad.voice[sc],cn=T.chords[bar],ch=T.voice[cn],nxt=T.chords[(bar+1)%16],r=N(T.root[cn]);
-    t+=(s%2)?s16*T.swing:0;const ei=s>>1,on8=!(s&1);
-    if(on.pad&&s===0)I.pad((sadOn?sch:ch).map(N),t,s16*15);
+  function step(k,t){const SPB=T.spb||16,NBR=T.bars||16,MS=T.mslot||2,bar=Math.floor(k/SPB)%NBR,s=k%SPB,sadOn=lvl.whine>0||lvl.sadlead>0,sc=T.sad.chords[bar],sch=T.sad.voice[sc],cn=T.chords[bar],ch=T.voice[cn],nxt=T.chords[(bar+1)%NBR],r=N(T.root[cn]);
+    t+=(s%2)?s16*T.swing:0;const ei=s>>1,on8=!(s&1),onM=s%MS===0,em=Math.floor(s/MS);
+    if(on.pad&&s===0)I.pad((sadOn?sch:ch).map(N),t,s16*(SPB-1));
     // the tune, on each track's own instrument (and on the whistle, bells and chiptune when those are playing)
-    if(on8)for(const[b,i,f,Ln]of mel)if(b===bar&&i===ei){
-      if(on.melody){if(style==='chill')I.kal(f,t);else if(style==='rain')I.vib(f,t);else I.pan(f,t);}
-      if(on.harm)I.vibTo(harmT,below3(f),t,0.7);// thriving vibes: a harmony a third below
-      if(on.lead)I.lead(f,t,s16*2.6);if(on.bells&&style!=='rain'&&style!=='tide')I.bell(f,t);
-      if(on.chip){I.chip(f,t,s16*0.9);I.chip(f*2,t+s16,s16*0.6,0.5);}}
+    if(onM)for(const[b,i,f,Ln]of mel)if(b===bar&&i===em){
+      if(on.melody){if(style==='chill')I.kal(f,t);else if(style==='rain')I.vib(f,t);else if(I[style+'Mel'])I[style+'Mel'](f,t,Ln*s16*MS);else I.pan(f,t);}
+      if(on.harm){if(I[style+'Harm'])I[style+'Harm'](below3(f),t,Ln*s16*MS);else I.vibTo(harmT,below3(f),t,0.7);}// thriving vibes: a harmony a third below
+      if(on.lead)I.lead(f,t,s16*2.6);if(on.bells){if(style==='chill')I.bell(f,t);else if(I[style+'Bell'])I[style+'Bell'](f,t);}
+      if(on.chip){if(I[style+'Chip'])I[style+'Chip'](f,t,Ln*s16*MS);else{I.chip(f,t,s16*0.9);I.chip(f*2,t+s16,s16*0.6,0.5);}}}
     if(style==='chill'){
       // day: offbeat electric piano stabs and a bouncy bass line
       if(on.keys){if(s===0)ch.forEach((n,i)=>ep(G.keys,N(n)*2,t+i*0.02,0.6,0.9));if(s===6||s===14)[1,2,3].forEach((j,i)=>ep(G.keys,N(ch[j])*2,t+i*0.01,0.75,0.28));if(s===10)[0,2].forEach((j,i)=>ep(G.keys,N(ch[j])*2,t+i*0.01,0.6,0.22));}
@@ -924,6 +1156,453 @@ function makeTrack(C,out,nbuf,T){
       if(on.brass&&(s===0||s===2||s===4)){const j=s/2+1;I.trumpet(inR(N(ch[j]),392),t,s===4?s16*7:s16*1.6);}
       if(on.bells&&(s===12||s===14))I.vibTo(G.bells,inR(N(ch[s===12?3:2]),523),t,0.8);
       if(on.toms&&bar%4===3&&s>=8)I.brush(G.toms,t,0.35+(s-8)*0.1);
+    }else if(style==='dune'){
+      // a low drone on D that never moves, slowly wavering like heat haze
+      if(on.drone&&s===0&&bar%4===0)I.drone(G.drone,N('D2'),t,s16*62,0.9);
+      // day: an oud, sparse and unhurried, with a little turn at the end of each phrase
+      if(on.keys){const p={0:[r*2,1],6:[r*3,0.55],8:[r*2,0.75],12:[N(ch[3]),0.6]}[s];if(p)I.oud(G.keys,p[0],t,p[1],0.9);if(bar%4===3&&(s===13||s===14||s===15)){const b=SCALE.findIndex(x=>x>=r*4*0.99);I.oud(G.keys,SCALE[b+[1,0,1][s-13]],t,0.4,0.25);}}
+      if(on.bass&&s===0&&bar%2===0)osc(G.bass,'sine',r,t,0.11,0.05,s16*28);
+      // a soft heartbeat on a frame drum, a seed rattle now and then
+      if(on.perc){if(s===0)I.fdrum(G.perc,t,true,0.8);if(s===10)I.fdrum(G.perc,t,false,0.5);if(s===14&&bar%2)I.rattle(G.perc,t,0.8);}
+      // thriving: a darbuka in a maqsum rhythm, finger cymbals, a kanun running down the scale at the ends of phrases
+      if(on.tperc){if(s===0||s===8)I.fdrum(G.tperc,t,true,0.7);if(s===2||s===6||s===12)I.tek(G.tperc,t,s===6?0.9:0.6);if(s===4&&bar%2===0)I.zill(G.tperc,t,0.7);}
+      if(on.sparkle&&bar%4===3&&s>=8){const b=SCALE.findIndex(x=>x>=inR(r,523)*1.99);I.oud(G.sparkle,SCALE[Math.max(0,b-(s-8))],t,0.35,0.3);}
+      // night: the oud's high harmonics ringing out slowly over the drone, a cold wind
+      if(on.nkeys){if((s===0||s===10)&&bar%2===0)osc(G.nkeys,'sine',inR(N(ch[s?3:2]),784),t,0.04,0.003,2.5);if(s===4&&bar%2===1)osc(G.nkeys,'sine',inR(N(ch[1]),1046),t,0.03,0.003,2.5);}
+      // sad: a lone ney over the drone, the oud's low string tolling now and then
+      if(on.sadbed&&s===0&&bar%2===0)I.oud(G.sadbed,N(sch[0]),t,0.6,1.8);
+      // menus. Bag: a caravan resting: the oud strumming tremolo on the chord, a slow camel-gait drum
+      if(on.mkeys&&(s===0||s===8))for(let i=0;i<6;i++)I.oud(G.mkeys,inR(N(ch[1+(i%3)]),220),t+i*0.07,0.8-i*0.08,0.3);
+      if(on.hats){if(s===0||s===6)I.fdrum(G.hats,t,true,s?0.6:0.9);if(s===4||s===12)I.tek(G.hats,t,0.5);}
+      // settings: midday stillness: the drone, a single pluck every other bar, sand trickling
+      if(on.chimes&&s===0&&bar%2===1)I.oud(G.chimes,inR(N(ch[2]),392),t,0.6,2.4);
+      if(on.clock&&Math.random()<0.2)nz(G.clock,t+Math.random()*s16,0.12+Math.random()*0.12,0.03,6000+Math.random()*3000,'bandpass',4);
+      // critters: a kanun picking through the chord
+      if(on.pluck&&s%2===0){const e=s>>1,seq=[0,2,1,3,2,1,3,2];I.oud(G.pluck,inR(N(ch[seq[e]]),262)*(e%2?2:1),t,e%2?0.75:1.1,0.4);}
+      // gachapon: a bazaar stall: a snake-charmer's pungi takes the tune over a darbuka, finger cymbals and a tambourine
+      if(on.cbass){if(s===0||s===8)I.fdrum(G.cbass,t,true,1);if(s===2||s===6||s===12)I.tek(G.cbass,t,0.8);if(s%2===1)I.tek(G.cbass,t,0.25);}
+      if(on.cnoise){if(s===4||s===12)I.zill(G.cnoise,t,0.8);if(s%2===0)nz(G.cnoise,t,0.012,0.04,7000,'bandpass',2);}
+      // achievements: an oasis: a bright reed fanfare up the chord, the tune on oud, a frame-drum roll
+      if(on.brass&&(s===0||s===4||s===8)){const j=s/4+1;I.duneMel(inR(N(ch[j]),523),t,s===8?s16*7:s16*3.5,G.brass,1.4);}
+      if(on.toms){if(s===0)I.fdrum(G.toms,t,true);if(bar%4===3&&s>=8)I.fdrum(G.toms,t,s%2===0,0.5+(s-8)*0.07);}
+    }else if(style==='swamp'){
+      // day (12/8, three steps a beat): a tremolo guitar playing a lazy boogie, root and fifth then the sixth, long-short
+      if(on.keys&&s%3!==1){const beat=Math.floor(s/3),sh=s%3===2;I.tg(G.keys,r*2,t,sh?0.4:0.6,sh?0.18:0.4);I.tg(G.keys,r*2*[1.5,1.5,1.68,1.68][beat],t,sh?0.35:0.55,sh?0.18:0.4);}
+      // a tuba walking up the chord, brushes on a slow shuffle
+      if(on.bass&&s%3===0){const beat=s/3;I.tuba(G.bass,r*[1,1.26,1.5,1.68][beat],t,s16*2.2,beat?0.8:1);}
+      if(on.perc){if(s===0||s===6)I.kick(G.perc,t,0.09);if(s===3||s===9)I.brush(G.perc,t,0.8);if(s%3!==1)nz(G.perc,t,s%3===0?0.012:0.007,0.1,6200,'bandpass',1.5);}
+      // the guitar answering the harmonica in the gaps with a blues lick
+      if(on.fill&&bar%4>=2&&s%3===0){const L=bar%4===2?[1.782,1.498,1.189,1]:[1,1.189,1.335,1.498];I.tg(G.fill,r*4*L[s/3],t,1,0.35);}
+      // thriving: a horn section (baritone sax and trombone) riffing, a washboard, a jaw harp at the end of each line
+      if(on.horns&&bar%4<2){if(s===0||s===6){I.sax(G.horns,r*2,t,s16*2,1);I.bone(G.horns,r*2*1.498,t,s16*2,0.8);}if(s===9)I.sax(G.horns,r*2*1.782,t,s16*1.5,0.8);}
+      if(on.tperc){if(s%3!==1)I.wash(G.tperc,t,s%3===0?1:0.6);if(s===9&&bar%4===3)I.jaw(G.tperc,t,0.8);}
+      // night: the swamp after dark: slow tremolo chords swelling, crickets, a deep bass
+      if(on.nkeys&&s===0&&bar%2===0)ch.forEach((n,i)=>I.tg(G.nkeys,N(n)*2,t+i*0.05,0.5,2.6));
+      // sad: a slide guitar crying over minor tremolo chords, rain on the water
+      if(on.sadbed&&(s===0||s===6))sch.forEach((n,i)=>I.tg(G.sadbed,N(n)*2,t+i*0.03,s?0.35:0.5,1.6));
+      if(on.rain&&Math.random()<0.15)I.drip(t+Math.random()*s16);
+      // menus. Bag: the front porch: slow slide chords, a foot stomping, a jaw harp now and then
+      if(on.mkeys&&(s===0||s===6))ch.slice(1).forEach((n,i)=>I.held(G.mkeys,'triangle',N(n)*2,t+i*0.02,s16*5,0.012,0.02,0.4,{from:0.97,slide:0.1}));
+      if(on.hats){if(s===0||s===6)I.kick(G.hats,t,0.12);if(s===9&&bar%2===1)I.jaw(G.hats,t,0.7);}
+      // settings: the porch at dusk: a slow tremolo chord now and then over a soft bass note, crickets, rain dripping off the eaves,
+      // a harmonica far off down the water, mud bubbling
+      if(on.chimes){if(s===0&&bar%2===0)ch.slice(1).forEach((n,i)=>I.tg(G.chimes,N(n)*2,t+i*0.06,0.32,2.8));if(s===0)osc(G.chimes,'sine',r,t,0.06,0.03,s16*10);}
+      if(on.clar&&!lvl.pluck&&s===0&&bar%4===1)I.swampMel(inR(N(ch[3]),523),t,s16*8,G.clar,0.5);
+      if(on.clock&&Math.random()<0.04){const tt=t+Math.random()*s16,f=90+Math.random()*60,o=osc(G.clock,'sine',f,tt,0.16,0.005,0.12);o.frequency.exponentialRampToValueAtTime(f*2.2,tt+0.1);}
+      // critters: a resonator guitar fingerpicking lazily (thumb on the root and fifth, a chord note sliding in between),
+      // the harmonica answering every few bars, with room left for the frogs and snails
+      if(on.pluck){if(s===0||s===6)I.dobro(G.pluck,r*2*(s?1.5:1),t,0.9,0.7);if(s===3||s===9)I.dobro(G.pluck,inR(N(ch[s===3?2:3]),330),t,0.6,0.5);if(s===11&&bar%2===0)I.dobro(G.pluck,inR(N(ch[1]),330)*2,t,0.45,0.4);}
+      if(on.clar&&lvl.pluck>0&&bar%4===3&&(s===6||s===8))I.swampMel(inR(N(ch[s===6?3:2]),523),t,s16*(s===6?2:3),G.clar,0.55);
+      // gachapon: a jug band: a kazoo takes the tune, a jug blows the bass, a washboard and a banjo
+      if(on.cbass&&s%3===0){I.held(G.cbass,'sine',r*(s%6?1.5:1),t,s16*1.6,0.025,0.04,0.1,{from:0.92,slide:0.06});nz(G.cbass,t,0.008,0.1,300,'bandpass',2);}
+      if(on.cnoise&&s%3!==1)I.wash(G.cnoise,t,s%3===0?1:0.6);
+      if(on.sticks&&(s===3||s===9))ch.slice(1).forEach((n,i)=>I.banjo(G.sticks,inR(N(n),262),t+i*0.015,0.6));
+      // achievements: a fish fry: a little brass band: trombone and sax riffs, a tuba, the tune on muted trumpet, a snare roll
+      if(on.horns&&(s===0||s===6||s===9)){I.bone(G.horns,inR(N(ch[1]),196),t,s16*2,1);I.sax(G.horns,inR(N(ch[2]),262),t,s16*2,0.7);}
+      if(on.brass&&s%3===0)I.tuba(G.brass,r*[1,1.26,1.5,1.26][s/3],t,s16*2,0.55);
+      if(on.toms){if(s===3||s===9)nz(G.toms,t,0.2,0.08,1900,'bandpass',1);if(bar%4===3&&s>=6)nz(G.toms,t,0.12+(s-6)*0.016,0.06,2000,'bandpass',1);}
+    }else if(style==='deep'){
+      // day (3/4): a harp rocking through a slow waltz, low root on one, the chord rising on two and three
+      if(on.keys){const p={0:[r*2,1],4:[N(ch[1])*2,0.6],6:[N(ch[2])*2,0.55],8:[N(ch[3])*2,0.6],10:[N(ch[2])*2,0.45]}[s];if(p)I.harp(G.keys,p[0],t,p[1]);}
+      // tremolo strings and a sub bass swelling in every two bars; no drums at all
+      if(on.strings&&s===0&&bar%2===0)I.strings(G.strings,ch.slice(1).map(N),t,s16*22,0.8);
+      if(on.bass&&s===0&&bar%2===0)I.sub(G.bass,r,t,s16*22);
+      // thriving: harp glissandos sweeping up at each section, bubbles shimmering high, a soft pulse on one
+      if(on.gliss&&s===0&&bar%8===0)I.gliss(G.gliss,t,inR(r,262),14,0.7);
+      if(on.sparkle&&s%2===1&&Math.random()<0.4){const f=inR(N(ch[1+Math.floor(Math.random()*3)]),1568),o=osc(G.sparkle,'sine',f,t,0.012,0.002,0.15);o.frequency.setValueAtTime(f*0.9,t);o.frequency.exponentialRampToValueAtTime(f,t+0.03);}
+      if(on.perc&&s===0)I.sub(G.perc,r*2,t,s16*1.5,0.6);
+      // night: the abyss: a dark pad, low strings, glints of light drifting past
+      if(on.nkeys&&Math.random()<0.12)I.ping(G.nkeys,inR(N(ch[1+Math.floor(Math.random()*3)]),1046),t+Math.random()*s16,0.8);
+      // sad: a cold current: a low cello over still minor strings
+      if(on.sadbed&&s===0&&bar%2===0)I.strings(G.sadbed,sch.slice(1).map(N),t,s16*22,0.9,0);
+      // menus. Bag: kelp drift: the harp alone, slower
+      if(on.mkeys&&(s===0||s===6))I.harp(G.mkeys,s?inR(N(ch[2]),392):r*2,t,s?1.1:1.6);
+      // settings: the deep: near silence, a slow ping, a few bubbles rising
+      if(on.chimes&&s===0&&bar%2===1)I.ping(G.chimes,inR(N(ch[1+Math.floor(Math.random()*3)]),784),t,0.8);
+      if(on.clock&&Math.random()<0.06)I.bub(G.clock,t+Math.random()*s16);
+      // critters: the reef: the harp walking the chord
+      if(on.pluck&&s%2===0){const e=s>>1,seq=[0,2,1,3,2,1];I.harp(G.pluck,inR(N(ch[seq[e]]),392),t,e%3?0.6:0.9);}
+      // gachapon: a sunken carousel: a calliope takes the tune over an oom-pah-pah, bubbles
+      if(on.cbass&&s===0)I.tuba(G.cbass,r*2,t,s16*3,0.8);
+      if(on.cnoise){if(s===4||s===8)ch.slice(1).forEach(n=>I.held(G.cnoise,'square',inR(N(n),330),t,s16*2,0.006,0.01,0.08,{lp:1800,vib:6,vd:0.006,vdel:0}));if(Math.random()<0.05)I.bub(G.cnoise,t);}
+      // achievements: treasure: a harp sweeping up, the strings swelling, the tune on chimes, deep drum hits
+      if(on.gliss&&s===0&&bar%4===0)I.gliss(G.gliss,t,inR(r,262),16,1.6);
+      if(on.brass&&s===0&&bar%2===0)I.strings(G.brass,ch.map(n=>N(n)*2),t,s16*22,1.6,0);
+      if(on.toms&&s===0&&bar%2===0)I.sub(G.toms,r*2,t,s16*3,1);
+    }else if(style==='clover'){
+      // an open-fifth drone, like a musette under the field
+      if(on.drone&&s===0&&bar%4===0)I.musette(G.drone,N('G2'),t,s16*22,1);
+      // day (6/8, an eighth a step): a guitar rocking through the chord
+      if(on.keys){const seq=[0,1,2,3,2,1];I.nylon(G.keys,N(ch[seq[s]]),t,s===0?1.3:0.8,0.6);}
+      if(on.bass&&s===0)osc(G.bass,'sine',r,t,0.11,0.02,s16*5);
+      if(on.perc){if(s===0)I.tabor(G.perc,t,0.9);if(s===3)I.tabor(G.perc,t,0.5);}
+      // thriving: pizzicato strings, bird-like trills from the flute, a tambourine, horn calls in the middle section
+      if(on.bounce&&(s===0||s===2||s===3||s===5))I.pizz(G.bounce,inR(N(ch[{0:0,2:2,3:1,5:3}[s]]),392),t,s%3===0?0.9:0.6);
+      if(on.sparkle&&s===4&&bar%4===3)I.trill(G.sparkle,inR(N(ch[3]),1568),t,1);
+      if(on.tperc){if(s===3)I.tamb(G.tperc,t,0.015);if(s===5)I.tamb(G.tperc,t,0.008);}
+      if(on.horns&&s===0&&bar%2===0&&(bar>=16&&bar<24||lvl.keys===0&&bar%8===2)){I.horn(G.horns,inR(N(ch[1]),196),t,s16*10,1);I.horn(G.horns,inR(N(ch[2]),262),t,s16*10,0.8);}
+      // night: a music-box lullaby
+      if(on.nkeys&&(s===0||s===3)){const seq=[0,2,1,3];I.mbox(G.nkeys,inR(N(ch[seq[(bar*2+s/3)%4]]),784),t,1.6);}
+      // sad: an oboe alone over still strings
+      if(on.sadbed&&s===0&&bar%2===0)I.strings(G.sadbed,sch.slice(1).map(N),t,s16*11,0.8,0);
+      // menus. Bag: a picnic: a hurdy-gurdy's drone and nasal tune, a little tabor
+      if(on.mkeys){if(s===0)I.held(G.mkeys,'sawtooth',N('G3'),t,s16*5.5,0.02,0.05,0.1,{lp:900,bp:600,bq:1});if(s===0||s===3||s===4){const j={0:2,3:1,4:3}[s];I.held(G.mkeys,'sawtooth',inR(N(ch[j]),392),t,s16*(s===4?1.8:2.8),0.025,0.02,0.08,{lp:2400,bp:1100,bq:1.2,vib:6,vd:0.004,vdel:0.1});}}
+      if(on.hats){if(s===0)I.tabor(G.hats,t,0.8);if(s===3)I.tabor(G.hats,t,0.4);}
+      // critters: pizzicato walking the chord
+      if(on.pluck){const seq=[0,1,2,3,2,1];I.pizz(G.pluck,inR(N(ch[seq[s]]),262)*(s%2?2:1),t,s%3===0?2.4:1.6);}
+      // gachapon: the county fair: a barrel organ takes the tune, a tuba oom-pahs, woodblocks
+      if(on.cbass&&(s===0||s===3))I.tuba(G.cbass,s?r*3:r*2,t,s16*1.5,0.5);
+      if(on.cnoise){if(s===1||s===2||s===4||s===5)ch.slice(1).forEach(n=>I.held(G.cnoise,'square',inR(N(n),262),t,s16*0.6,0.005,0.005,0.04,{lp:2000}));if(s===2||s===5)I.wblock(G.cnoise,t,s===5,0.8);}
+      // achievements: ribbon day: two horns in thirds call up the chord, a snare, the tune on glockenspiel
+      if(on.brass&&(s===0||s===3)&&bar%2===0){const j=s?2:1;I.horn(G.brass,inR(N(ch[j]),262),t,s16*(s?3:2.5),1.2);I.horn(G.brass,inR(N(ch[j-1]),220),t,s16*(s?3:2.5),0.9);}
+      if(on.toms){if(s===0||s===3)nz(G.toms,t,0.15,0.08,2000,'bandpass',1);if(bar%4===3)nz(G.toms,t+s16*0.5,0.075,0.05,2200,'bandpass',1);}
+    }else if(style==='glow'){
+      // day (5/4, an eighth a step): a harp grouped 3+3+2+2, so the bar never quite settles
+      if(on.keys){const seq=[0,1,2,0,2,3,1,3,2,1],f=s===0?r*2:inR(N(ch[seq[s]]),262)*(s>=3&&s<=7?2:1);I.harp(G.keys,f,t,[0,3,6,8].includes(s)?0.9:0.55);}
+      if(on.strings&&s===0)I.choir(G.strings,ch.slice(1).map(n=>inR(N(n),220)),t,s16*9);
+      if(on.bass&&s===0)osc(G.bass,'sine',r,t,0.1,0.04,s16*9);
+      // thriving: pizzicato, fairy glints, tiny bells
+      if(on.bounce&&[0,3,6,8].includes(s))I.pizz(G.bounce,inR(N(ch[[0,2,1,3][[0,3,6,8].indexOf(s)]]),392),t,s?0.6:0.9);
+      if(on.sparkle&&Math.random()<0.12)I.glint(G.sparkle,t+Math.random()*s16);
+      if(on.tperc&&s%2===1)nz(G.tperc,t,0.008,0.05,10000);
+      // night: moonlight: a celesta drifting on a whole-tone scale (no home key at all), the choir underneath
+      if(on.nkeys&&Math.random()<0.3){const WT=['E','F#','G#','A#','C','D'];I.glowMel(N(WT[Math.floor(Math.random()*6)]+(Math.random()<0.5?5:6)),t+Math.random()*s16,0,G.nkeys,0.7);}
+      // sad: the music box winding down, a low choir under it
+      if(on.sadbed&&s===0&&bar%2===0)I.choir(G.sadbed,sch.slice(0,3).map(n=>inR(N(n),165)),t,s16*19,0.8);
+      // menus. Bag: a lantern hollow: the harp, slowly
+      if(on.mkeys&&(s===0||s===3||s===6))I.harp(G.mkeys,s===0?r*2:inR(N(ch[s/3+1]),262),t,s?1.1:1.6);
+      // settings: fireflies: whole-tone glints in the dark
+      if(on.chimes&&Math.random()<0.1){const WT=['E','F#','G#','A#','C','D'];I.glowMel(N(WT[Math.floor(Math.random()*6)]+6),t+Math.random()*s16,0,G.chimes,0.8);}
+      // critters: a toadstool ring: the harp walking the chord
+      if(on.pluck){const seq=[0,1,2,3,2,1,2,3,2,1];I.harp(G.pluck,inR(N(ch[seq[s]]),262)*(s%2?2:1),t,s%5===0?1:0.6);}
+      // gachapon: a toy shop: a toy glockenspiel takes the tune, pizzicato oom-pah, a wind-up ratchet and a magic sweep every four bars
+      if(on.cbass&&(s===0||s===5))I.pizz(G.cbass,s?r*3:r*2,t,3.5);
+      if(on.cnoise){if(s===2||s===4||s===7||s===9)I.pizz(G.cnoise,inR(N(ch[1+s%3]),392),t,1.4);if(s===0&&bar%4===3)for(let i=0;i<8;i++)nz(G.cnoise,t+i*0.03,0.02,0.015,3000+i*300,'bandpass',6);if(s===8&&bar%4===3)I.gliss(G.cnoise,t,inR(r,523),10,0.5);}
+      // achievements: a wish granted: the choir swells, the harp sweeps up, the tune on celesta, a soft timpani
+      if(on.gliss&&s===0&&bar%4===0)I.gliss(G.gliss,t,inR(r,262),16,0.9);
+      if(on.toms){if(s===0)I.tom(t,82,0.15);if(bar%4===3&&s>=6)I.tom(t,82,0.05+(s-6)*0.015);}
+    }else if(style==='dry'){
+      // day (swung eighths, a step an eighth): nylon guitar comping a lazy bossa: thumb on the root and fifth, the chord brushed on the offbeats
+      if(on.keys){if(s===0)I.nylon(G.keys,r*2,t,1.1,0.9);if(s===4)I.nylon(G.keys,r*3,t,0.8,0.7);if(s===1||s===3||s===6)ch.slice(1).forEach((n,i)=>I.nylon(G.keys,inR(N(n),220),t+i*0.012,s===3?0.75:0.55,s===3?0.6:0.3));}
+      // an upright bass: root, fifth, then a step into the next chord
+      if(on.bass){if(s===0)I.upright(G.bass,r,t,s16*3);if(s===4)I.upright(G.bass,r*1.5,t,s16*2.5,0.85);if(s===7){const nr=N(T.root[nxt]);I.upright(G.bass,nr*(nr>r?0.944:1.059),t,s16*0.9,0.7);}}
+      // brushes on 2 and 4, a shaker on the eighths, a soft kick
+      if(on.perc){if(s===0)I.kick(G.perc,t,0.06);if(s===2||s===6)I.brush(G.perc,t,0.7);I.shaker(G.perc,t,s%2?0.6:1);}
+      // the alto flute doubles the tune an octave down in the middle section
+      if(on.clar&&bar>=16&&bar<24)for(const[b,i,f,Ln]of mel)if(b===bar&&i===s)I.aflute(G.clar,f/2,t,Ln*s16);
+      // thriving: congas, dry vibes ringing the chord at the top of each bar (and a third under the tune)
+      if(on.tperc){if(s===2)I.conga(G.tperc,t,true,0.6);if(s===6||s===7)I.conga(G.tperc,t,false,s===6?0.8:0.6);if(s===3)I.conga(G.tperc,t,true,0.35);}
+      if(on.sparkle&&s===0)ch.slice(1).forEach((n,i)=>I.dvib(G.sparkle,inR(N(n),392),t+i*0.04,0.6,2));
+      // night: a warm night breeze, dry vibes rolling the chord slowly, a single note answering
+      if(on.nkeys){if(s===0)ch.slice(1).forEach((n,i)=>I.dvib(G.nkeys,inR(N(n),330),t+i*0.09,0.7,3));if(s===5&&bar%2===1)I.dvib(G.nkeys,inR(N(ch[3]),660),t,0.5,2.5);}
+      // sad: a low bass clarinet over soft nylon chords
+      if(on.sadbed&&(s===0||s===5))sch.slice(1).forEach((n,i)=>I.nylon(G.sadbed,inR(N(n),196),t+i*0.03,s?0.4:0.6,1.4));
+      // menus. Bag: the guitar alone with a shaker
+      if(on.mkeys){if(s===0)I.nylon(G.mkeys,r*2,t,0.9,0.9);if(s===1||s===3||s===6)ch.slice(1).forEach((n,i)=>I.nylon(G.mkeys,inR(N(n),220),t+i*0.012,s===3?0.65:0.5,0.4));}
+      if(on.hats){I.shaker(G.hats,t,s%2?0.6:1);if(s===2||s===6)I.brush(G.hats,t,0.5);}
+      // settings: siesta: a slow ceiling fan ticking, a vibes note every other bar, a warm breeze
+      if(on.chimes&&s===0&&bar%2===0)I.dvib(G.chimes,inR(N(ch[1+bar/2%3]),392),t,0.8,3);
+      if(on.clock&&s%2===0){osc(G.clock,'sine',540,t,0.03,0.002,0.04);nz(G.clock,t,0.025,0.02,1600,'bandpass',3);}
+      // critters: the Wurlitzer walking the chord, soft and low
+      if(on.pluck){const seq=[0,1,2,3,2,1,3,2];I.wurli(I.wbus(G.pluck),inR(N(ch[seq[s]]),196),t,s%2?0.5:0.7,0.6);}
+      // gachapon: the Wurlitzer takes the tune up high, a bit brighter, over a bouncing upright bass, a shaker and congas
+      if(on.cbass&&s%2===0)I.upright(G.cbass,r*[1,1.5,2,1.5][s/2],t,s16*1.2,0.9);
+      if(on.cnoise){I.shaker(G.cnoise,t,s%2?0.7:1);if(s===3||s===7)I.conga(G.cnoise,t,s===3,0.6);}
+      // achievements: two muted trumpets climbing the chord, the tune on vibes, a conga roll every four bars
+      if(on.brass&&bar%2===0&&(s===0||s===2||s===4)){I.trumpet(inR(N(ch[1+s/2]),392),t,s16*(s===4?3.5:1.8));}
+      if(on.toms){if(s===0)I.conga(G.toms,t,false,0.9);if(bar%4===3&&s>=4)I.conga(G.toms,t,s%2===0,0.5+(s-4)*0.1);}
+    }else if(style==='sea'){
+      // day: a liquid synth arpeggio rising and falling through the chord in eighths, its filter swaying like light through water
+      if(on.keys&&s%2===0){const seq=[0,1,2,3,4,3,2,1],j=seq[s>>1],f=j===4?N(ch[1])*4:N(ch[j])*2;I.lpluck(G.keys,f,t,s===0?1:0.7);}
+      // a round bass, gently syncopated
+      if(on.bass){if(s===0)I.rbass(G.bass,r,t,s16*5);if(s===6)I.rbass(G.bass,r*1.5,t,s16*3,0.8);if(s===10)I.rbass(G.bass,r*2,t,s16*1.5,0.6);if(s===14){const nr=N(T.root[nxt]);I.rbass(G.bass,nr*(nr>r?0.944:1.059),t,s16*1.5,0.6);}}
+      // a soft muffled kick and a shaker
+      if(on.perc){if(s===0||s===10)I.kick(G.perc,t,0.07);if(s%2===0)nz(G.perc,t,s%4===2?0.012:0.007,0.05,5000,'bandpass',1.2);}
+      // thriving: bubbles rising, a sixteenth shaker, the lead doubled softly a third below
+      if(on.sparkle&&Math.random()<0.05)I.bub(G.sparkle,t);
+      if(on.tperc){nz(G.tperc,t,s%4===2?0.01:0.005,0.03,7000,'bandpass',2);if(s===4||s===12)I.snap(G.tperc,t,0.3);}
+      // night: deep water: just the dark pad (the shared pad) and the deep bass
+      // menus. Bag: the arpeggio alone, in quarter notes
+      if(on.mkeys&&s%4===0){const seq=[0,2,1,3];I.lpluck(G.mkeys,N(ch[seq[s/4]])*2,t,s===0?1:0.7,1.4);}
+      // settings: the aquarium at rest: a slow ping now and then, bubbles
+      if(on.chimes&&s===0&&bar%2===1)I.ping(G.chimes,inR(N(ch[1+Math.floor(Math.random()*3)]),660),t,0.8);
+      if(on.clock&&Math.random()<0.05)I.bub(G.clock,t+Math.random()*s16);
+      // critters: the arpeggio walking the chord, a little quieter
+      if(on.pluck&&s%2===0){const seq=[0,2,1,3,2,1,3,2];I.lpluck(G.pluck,N(ch[seq[s>>1]])*2,t,s%4===0?0.85:0.6,0.6);}
+      // gachapon: a toy piano takes the tune over a bouncing bass, with bubbles popping on the offbeats
+      if(on.cbass&&s%2===0)I.rbass(G.cbass,r*(s%4?2:1),t,s16*1.4,0.8);
+      if(on.cnoise){if(s%4===2)I.blip(G.cnoise,t,0.8);if(s%2===0)nz(G.cnoise,t,0.008,0.03,7000,'bandpass',2);}
+      // achievements: the arpeggio sweeping up the scale, the tune on glassy bells, soft drum hits
+      if(on.gliss&&s===0&&bar%4===0){let i=SCALE.findIndex(x=>x>=inR(r,196)*0.99);for(let k2=0;k2<14;k2++)I.lpluck(G.gliss,SCALE[Math.min(SCALE.length-1,i+k2)],t+k2*0.06,0.5+k2*0.04,0.5);}
+      if(on.toms){if(s===0&&bar%2===0)I.tom(t,90,0.12);if(bar%4===3&&s>=12)I.tom(t,110,0.06);}
+    }else if(style==='hill'){
+      // day: a fingerpicked guitar (thumb alternating root and fifth on the beats, fingers on the offbeats), a felt piano on the one and the and-of-two
+      if(on.keys){if(s%4===0)I.acg(G.keys,N(ch[s%8?1:0]),t,1,0.8);if(s%4===2)I.acg(G.keys,N(ch[s%8===2?2:3]),t,0.7,0.6);if(s===0)I.acg(G.keys,N(ch[3])*2,t+0.01,0.45,0.6);}
+      if(on.clar&&(s===0||s===6))ch.slice(1).forEach((n,i)=>I.felt(G.clar,inR(N(n),262),t+i*0.015,s?0.4:0.6,s?0.8:1.4));
+      // pizzicato bass: root, fifth, a step into the next chord
+      if(on.bass){if(s===0)I.pizz(G.bass,r,t,2.2);if(s===8)I.pizz(G.bass,r*1.5,t,1.8);if(s===14){const nr=N(T.root[nxt]);I.pizz(G.bass,nr*(nr>r?0.944:1.059),t,1.3);}}
+      // a soft kick, a shaker, a little rim on the backbeat
+      if(on.perc){if(s===0||s===8)I.kick(G.perc,t,0.06);if(s%2===0)I.shaker(G.perc,t,s%4===2?0.7:1);if(s===4||s===12)I.wblock(G.perc,t,true,0.35);}
+      // the flute answering the clarinet in its gaps
+      if(on.fill&&s%2===0)for(const[b,i,f,Ln]of cmel)if(b===bar&&i===em)I.cloverMel(f,t,Ln*s16*2,G.fill,0.9);
+      // thriving: a glockenspiel doubling the tune high, handclaps, a tambourine, pizzicato strings bouncing on the offbeats
+      if(on.sparkle&&s%2===0)for(const[b,i,f]of mel)if(b===bar&&i===em)I.glock(G.sparkle,f*2,t,0.6);
+      if(on.tperc){if(s===4||s===12)I.clap(G.tperc,t);if(s%2===1)I.tamb(G.tperc,t,0.008);}
+      if(on.bounce&&s%4===2)I.pizz(G.bounce,inR(N(ch[1+(s>>2)%3]),392),t,0.7);
+      // night: guitar harmonics ringing a lullaby, a soft pad, a breeze
+      if(on.nkeys&&(s===0||s===6||s===12)){const seq=[3,2,1],f=inR(N(ch[seq[s/6]]),523)*2;osc(G.nkeys,'sine',f,t,0.03,0.003,2.2);osc(G.nkeys,'sine',f*2,t,0.004,0.002,0.4);}
+      // sad: a slow felt piano alone
+      if(on.sadbed&&(s===0||s===8))sch.slice(1).forEach((n,i)=>I.felt(G.sadbed,inR(N(n),196),t+i*0.05,s?0.35:0.5,2.2));
+      // menus. Bag: the guitar picking alone
+      if(on.mkeys){if(s%4===0)I.acg(G.mkeys,N(ch[s%8?1:0]),t,0.9,0.8);if(s%4===2)I.acg(G.mkeys,N(ch[s%8===2?2:3]),t,0.6,0.6);}
+      if(on.hats&&s%2===0)I.shaker(G.hats,t,s%4===2?0.6:0.9);
+      // settings: a sunny porch: a felt piano note every other bar, a breeze
+      if(on.chimes&&s===0&&bar%2===0)I.felt(G.chimes,inR(N(ch[1+bar/2%3]),523),t,0.9,2.6);
+      if(on.chimes&&s===8&&bar%4===1)I.felt(G.chimes,inR(N(ch[3]),784),t,0.5,2);
+      // critters: the guitar walking the chord
+      if(on.pluck&&s%2===0){const seq=[0,1,2,3,2,1,3,2];I.acg(G.pluck,N(ch[seq[s>>1]])*(s>>1&1?2:1),t,s%4===0?0.9:0.6,0.5);}
+      // gachapon: a whistled tune over a strummed ukulele, a pizzicato bass and a tambourine
+      if(on.sticks&&[0,4,6,10,12,14].includes(s))ch.slice(1).forEach((n,i)=>I.nylon(G.sticks,inR(N(n),392),t+i*(s%4?-0.008:0.01)+0.03,s%4===0?0.55:0.35,0.25));
+      if(on.cbass&&s%4===0)I.pizz(G.cbass,r*(s%8?1.5:1),t,2);
+      if(on.cnoise){if(s===4||s===12)I.tamb(G.cnoise,t,0.016);if(s%2===0)I.shaker(G.cnoise,t,0.6);}
+      // achievements: horns holding the chord, the tune on glockenspiel, a clap roll every four bars
+      if(on.brass&&s===0&&bar%2===0){I.horn(G.brass,inR(N(ch[1]),262),t,s16*14,1);I.horn(G.brass,inR(N(ch[2]),330),t,s16*14,0.8);}
+      if(on.toms){if(s===0)I.clap(G.toms,t);if(bar%4===3&&s>=8&&s%2===0)I.clap(G.toms,t);}
+    }else if(style==='fairy'){
+      // day: a harp bouncing in eighths (root, fifth, the chord, back to the fifth), pizzicato on the backbeat, a celesta answering at the ends of phrases
+      if(on.keys&&s%2===0){const seq=[0,1,2,1,3,1,2,1],j=seq[s>>1];I.harp(G.keys,N(ch[j])*2,t,s%4===0?0.85:0.55);}
+      if(on.bass&&(s===0||s===8))I.pizz(G.bass,r*2*(s?1.5:1),t,2.2);
+      if(on.bounce&&(s===4||s===12))ch.slice(1).forEach((n,i)=>I.pizz(G.bounce,inR(N(n),392),t+i*0.01,0.8));
+      if(on.perc){if(s===0&&bar%2===0)I.ting(G.perc,t,1);if(s%4===2)nz(G.perc,t,0.006,0.04,8000,'bandpass',2);}
+      if(on.fill&&s%2===0)for(const[b,i,f]of cmel)if(b===bar&&i===em)I.glowMel(f,t,0,G.fill,0.8);
+      // thriving: fairy glints and tiny bells on the offbeats
+      if(on.sparkle&&Math.random()<0.08)I.glint(G.sparkle,t+Math.random()*s16);
+      if(on.tperc&&s%4===2)I.ting(G.tperc,t,0.6);
+      // night: a hushed harp in slow quarter notes, a glint now and then
+      if(on.nkeys){if(s%4===0){const seq=[0,2,1,3];I.harp(G.nkeys,N(ch[seq[s/4]])*2,t,0.5);}if(Math.random()<0.03)I.glint(G.nkeys,t,0.6);}
+      // sad: a celesta alone, the harp's low notes under it
+      if(on.sadbed&&(s===0||s===8))I.harp(G.sadbed,N(T.sad.root[sc])*2*(s?1.5:1),t,0.7);
+      // menus. Bag: the harp alone with a tiny bell
+      if(on.mkeys&&s%2===0){const seq=[0,1,2,1,3,1,2,1];I.harp(G.mkeys,N(ch[seq[s>>1]])*2,t,s%4===0?0.7:0.45);}
+      if(on.hats&&s===0)I.ting(G.hats,t,0.8);
+      // settings: a mossy hollow: a slow harp note each bar, glints, night air
+      if(on.chimes&&s===0)I.harp(G.chimes,inR(N(ch[1+bar%3]),523),t,0.8);
+      if(on.clock&&Math.random()<0.04)I.glint(G.clock,t+Math.random()*s16,0.8);
+      // critters: pizzicato walking the chord
+      if(on.pluck&&s%2===0){const seq=[0,1,2,3,2,1,3,2];I.pizz(G.pluck,inR(N(ch[seq[s>>1]]),262)*(s>>1&1?2:1),t,s%4===0?2:1.4);}
+      // gachapon: a music box plays the tune over a pizzicato oom-pah and a winding tick
+      if(on.cbass){if(s===0||s===8)I.pizz(G.cbass,r*2*(s?1.5:1),t,3);if(s===4||s===12)ch.slice(1).forEach(n=>I.pizz(G.cbass,inR(N(n),330),t,1.4));}
+      if(on.cnoise&&s%2===0)nz(G.cnoise,t,0.01,0.012,4500,'bandpass',6);
+      // achievements: a harp sweep, the tune on celesta, a soft timpani
+      if(on.gliss&&s===0&&bar%4===0)I.gliss(G.gliss,t,inR(r,262),16,0.9);
+      if(on.toms){if(s===0&&bar%2===0)I.tom(t,73,0.14);if(bar%4===3&&s>=8&&s%2===0)I.tom(t,73,0.05+(s-8)*0.01);}
+    }else if(style==='wind'){
+      // day: lo-fi. An acoustic guitar picking slowly through the chord, low; a soft piano on the one and the and-of-two
+      if(on.keys&&s%2===0){const seq=[0,1,2,3,2,1,2,3];I.owG(G.keys,N(ch[seq[s>>1]]),t,s===0?0.85:0.55,1.6);}
+      if(on.clar&&(s===0||s===6))ch.slice(1).forEach((n,i)=>I.pno(G.clar,inR(N(n),165),t+i*0.015,s?0.35:0.5,s?0.7:1.5));
+      // a round bass on the one and a nudge on the and-of-three
+      if(on.bass){if(s===0)I.rbass(G.bass,r,t,s16*6);if(s===10)I.rbass(G.bass,r,t,s16*3,0.6);if(s===14)I.rbass(G.bass,r*1.5,t,s16*1.5,0.5);}
+      // soft lo-fi drums, a little swung: kick, a brushed snare on two and four, quiet hats; vinyl crackle underneath
+      if(on.perc){if(s===0||s===10)I.kick(G.perc,t,0.07);if(s===4||s===12)I.brush(G.perc,t,0.8);if(s%2===0)nz(G.perc,t,s%4===2?0.008:0.005,0.03,6500,'bandpass',1.2);if(s===7||s===15)nz(G.perc,t,0.004,0.03,6500,'bandpass',1.2);}
+      // a warm pad swelling over two bars, gusts of wind every few bars
+      if(on.drone&&s===0&&bar%2===0)I.pad(ch.map(N),t,s16*26,G.drone,1000,0.04,3);
+      if(on.air&&s===0&&bar%4===1)I.gust(G.air,t,s16*24,1);
+      // thriving: a shaker, and a second voice under the tune
+      if(on.tperc&&s%2===1)I.shaker(G.tperc,t,0.5);
+      // night: the pad and the wind, a soft guitar harmonic now and then
+      if(on.nkeys&&s===8&&bar%2===1){const f=inR(N(ch[2]),330);osc(G.nkeys,'sine',f,t,0.025,0.004,3);}
+      // sad: the guitar alone, slow chords under its tune
+      if(on.sadbed&&s%4===0)I.owG(G.sadbed,N(sch[[0,2,1,3][s/4]]),t,0.5,2.2);
+      // menus. Bag: the guitar alone
+      if(on.mkeys&&s%2===0){const seq=[0,1,2,3,2,1,2,3];I.owG(G.mkeys,N(ch[seq[s>>1]]),t,s===0?0.85:0.55,1.6);}
+      // critters: the guitar picking, softer
+      if(on.pluck&&s%2===0){const seq=[0,2,1,3,2,1,3,2];I.owG(G.pluck,N(ch[seq[s>>1]]),t,s%4===0?0.8:0.55,1.4);}
+      // gachapon: the piano plays the tune over a bouncy bass, rim clicks and a shaker
+      if(on.sticks){if(s===4||s===12)I.wblock(G.sticks,t,true,0.4);if(s%2===0)I.shaker(G.sticks,t,s%4?0.6:1);}
+      if(on.cbass&&[0,6,8,14].includes(s))I.rbass(G.cbass,r*[1,1.5,1,1.5][[0,6,8,14].indexOf(s)],t,s16*1.8,s%8===0?0.9:0.6);
+      // achievements: the pad swelling, the tune on piano, a soft gong-like swell every four bars
+      if(on.brass&&s===0&&bar%2===0)I.pad(ch.map(N),t,s16*26,G.brass,1400,0.05,1.5);
+      if(on.toms&&s===0&&bar%4===0){osc(G.toms,'sine',N(T.root[cn]),t,0.1,0.01,3);I.swell(G.toms,t,s16*2,0.3);}
+    }else if(style==='pools'){
+      // day: a soft low piano rippling through the chord in eighths, through a long echo; a low choir, a deep sub, the dark pad (shared)
+      if(on.keys&&s%2===0){const seq=[0,2,1,3,2,1,3,2];I.pno(G.keys,N(ch[seq[s>>1]]),t,s%4===0?0.5:0.35,1.8);}
+      if(on.strings&&s===0&&bar%2===0)I.choir(G.strings,ch.slice(1).map(n=>inR(N(n),165)),t,s16*28,0.6);
+      if(on.drone&&s===0)I.sub(G.drone,r,t,s16*15,0.8);
+      // a low glass bell on the chord at the top of every other bar
+      if(on.fill&&s===0&&bar%2===0)I.fmBell(G.fill,inR(N(ch[1]),196),t,0.7,3);
+      // soft lo-fi drums in half time, a little swung, with crackle
+      if(on.perc){if(s===0||s===10)I.kick(G.perc,t,0.06);if(s===8)I.brush(G.perc,t,0.7);if(s%4===2)nz(G.perc,t,0.005,0.03,6000,'bandpass',1.2);}
+      // thriving: a shaker joins
+      if(on.tperc&&s%2===1)I.shaker(G.tperc,t,0.45);
+      // night: the choir and the sub, the piano in slow quarter notes
+      if(on.nkeys&&s%4===0){const seq=[0,2,1,3];I.pno(G.nkeys,N(ch[seq[s/4]]),t,0.3,2.2);}
+      // menus. Bag: the rippling piano alone
+      if(on.mkeys&&s%2===0){const seq=[0,2,1,3,2,1,3,2];I.pno(G.mkeys,N(ch[seq[s>>1]]),t,s%4===0?0.5:0.35,1.8);}
+      // critters: the piano in quarter notes, with the fantasy critters
+      if(on.pluck&&s%4===0){const seq=[0,2,1,3];I.pno(G.pluck,N(ch[seq[s/4]]),t,0.45,1.8);}
+      // gachapon: the tune on the low glass bell over a slow pulse
+      if(on.cbass&&s%4===0)I.sub(G.cbass,r*2,t,s16*2,s===0?1:0.6);
+      if(on.cnoise&&s%4===2)nz(G.cnoise,t,0.03,0.03,2500,'bandpass',4);
+      // achievements: the choir swelling, the tune on the bell, a breath-in before each phrase
+      if(on.brass&&s===0&&bar%2===0)I.choir(G.brass,ch.slice(1).map(n=>inR(N(n),196)),t,s16*28,0.8);
+      if(on.toms&&bar%4===3&&s===8)I.swell(G.toms,t,s16*8,0.6,inR(N(T.root[nxt]),110));
+    }else if(style==='slope'){
+      // day: soft piano chords, short (on the one, the and-of-two, and a little push before four), under the guitar tune
+      if(on.keys&&(s===0||s===6||s===11))ch.slice(1).forEach((n,i)=>I.pno(G.keys,inR(N(n),175),t+i*0.012,s===0?0.35:0.25,s===0?0.9:0.5));
+      // a round bass: root, a step up to the fifth, a pickup into the next chord
+      if(on.bass){if(s===0)I.rbass(G.bass,r,t,s16*3,0.75);if(s===6)I.rbass(G.bass,r*1.5,t,s16*2,0.45);if(s===10)I.rbass(G.bass,r,t,s16*2,0.55);if(s===14){const nr=N(T.root[nxt]);I.rbass(G.bass,nr*(nr>r?0.944:1.059),t,s16*1.5,0.55);}}
+      // swung lo-fi drums: kick, brushed snare on two and four, quiet hats, crackle underneath
+      if(on.perc){if(s===0||s===10)I.kick(G.perc,t,0.07);if(s===4||s===12)I.brush(G.perc,t,0.8);if(s%2===0)nz(G.perc,t,s%4===2?0.008:0.005,0.03,6500,'bandpass',1.2);if(s===7||s===15)nz(G.perc,t,0.004,0.03,6500,'bandpass',1.2);}
+      if(on.air&&s===0&&bar%4===1)I.gust(G.air,t,s16*24,1);
+      // thriving: a shaker, and the guitar doubled a third below
+      if(on.tperc&&s%2===1)I.shaker(G.tperc,t,0.5);
+      // night: the piano picking slowly through the chord, the wind
+      if(on.nkeys&&s%4===0){const seq=[0,2,1,3];I.pno(G.nkeys,N(ch[seq[s/4]]),t,0.35,1.6);}
+      // sad: the piano alone, its tune over short low chords
+      if(on.sadbed&&(s===0||s===8))sch.slice(1).forEach((n,i)=>I.pno(G.sadbed,inR(N(n),147),t+i*0.02,0.35,1.2));
+      // menus. Bag: the guitar strumming short chords, quiet hats
+      if(on.mkeys&&(s===0||s===6||s===10))ch.slice(1).forEach((n,i)=>I.egtr(G.mkeys,inR(N(n),196),t+i*0.015,s===0?0.7:0.5,0.4));
+      if(on.hats&&s%2===0)nz(G.hats,t,s%4===2?0.009:0.006,0.03,6500,'bandpass',1.2);
+      // settings: the wind, a piano note every other bar
+      if(on.chimes&&s===0&&bar%2===0)I.pno(G.chimes,inR(N(ch[1+bar/2%3]),262),t,0.5,1.6);
+      // critters: the guitar picking through the chord
+      if(on.pluck&&s%2===0){const seq=[0,1,2,3,2,1,3,2];I.egtr(G.pluck,inR(N(ch[seq[s>>1]]),175),t,s%4===0?0.7:0.5,0.5);}
+      // gachapon: the guitar plays the tune over a bouncy bass, rim clicks and a shaker
+      if(on.sticks){if(s===4||s===12)I.wblock(G.sticks,t,true,0.4);if(s%2===0)I.shaker(G.sticks,t,s%4?0.6:1);}
+      if(on.cbass&&[0,6,8,14].includes(s))I.rbass(G.cbass,r*[1,1.5,1,1.5][[0,6,8,14].indexOf(s)],t,s16*1.8,s%8===0?0.9:0.6);
+      // achievements: the guitar strumming the chord, the tune on piano, soft toms at the end of every four bars
+      if(on.brass&&(s===0||s===6))ch.slice(1).forEach((n,i)=>I.egtr(G.brass,inR(N(n),196),t+i*0.02,0.8,0.6));
+      if(on.toms){if(s===0&&bar%2===0)I.tom(t,110,0.12);if(bar%4===3&&(s===10||s===12||s===14))I.tom(t,[150,125,105][(s-10)/2],0.09);}
+    }else if(style==='hollow'){
+      // day: a steel tongue drum rippling through the chord in eighths, through a long echo, under the handpan tune
+      if(on.keys&&s%2===0){const seq=[0,2,1,3,2,1,3,2];I.tongue(G.keys,N(ch[seq[s>>1]]),t,s%4===0?0.45:0.3);}
+      // a soft frame drum on the one, a low handpan ding on the root at the half bar
+      if(on.bass){if(s===0)I.fdrum(G.bass,t,true,0.6);if(s===8)I.handpan(G.bass,r*2,t,0.5,2);}
+      // a wooden slit-drum groove (low on one and the and-of-two, high on three and four), a rainstick every four bars
+      if(on.perc){if(s===0||s===6)I.slit(G.perc,t,false,s?0.6:0.8);if(s===8||s===12)I.slit(G.perc,t,true,0.6);if(s===14)I.slit(G.perc,t,true,0.3);if(bar%4===3&&s===8)I.rainstick(G.perc,t,1.5,0.8);}
+      // thriving: a second tongue drum a third under the tune, more slit drum
+      if(on.tperc){if(s===3||s===11)I.slit(G.tperc,t,true,0.45);if(s===10)I.slit(G.tperc,t,false,0.4);}
+      // night: the tongue drum in slow quarter notes, bamboo chimes knocking now and then
+      if(on.nkeys&&s%4===0){const seq=[0,2,1,3];I.tongue(G.nkeys,N(ch[seq[s/4]]),t,0.35,1.6);}
+      if(on.clock&&Math.random()<0.015)I.bamboo(G.clock,t+Math.random()*s16,0.8);
+      // sad: the handpan alone, a soft low handpan note each half bar
+      if(on.sadbed&&(s===0||s===8))I.handpan(G.sadbed,N(T.sad.root[sc])*2*(s?1.5:1),t,0.5,2.5);
+      // menus. Bag: the tongue drum alone
+      if(on.mkeys&&s%2===0){const seq=[0,2,1,3,2,1,3,2];I.tongue(G.mkeys,N(ch[seq[s>>1]]),t,s%4===0?0.45:0.3);}
+      // settings: a rainstick every other bar, bamboo chimes, one handpan note a bar
+      if(on.hats&&s===0&&bar%2===0)I.rainstick(G.hats,t,1.8,0.8);
+      if(on.chimes&&s===0)I.handpan(G.chimes,inR(N(ch[1+bar%3]),262),t,0.6);
+      // critters: the tongue drum walking the chord
+      if(on.pluck&&s%2===0){const seq=[0,1,2,3,2,1,3,2];I.tongue(G.pluck,inR(N(ch[seq[s>>1]]),220),t,s%4===0?0.6:0.45);}
+      // gachapon: the handpan plays the tune over a quick slit-drum groove and a frame drum
+      if(on.cbass&&(s===0||s===8))I.fdrum(G.cbass,t,true,s?0.5:0.7);
+      if(on.cnoise){const g={0:[0,0.7],3:[1,0.5],6:[0,0.6],8:[1,0.6],10:[0,0.5],12:[1,0.6],14:[1,0.35]}[s];if(g)I.slit(G.cnoise,t,!!g[0],g[1]);}
+      // achievements: a handpan roll up the chord, the tune on handpan, a frame-drum roll every four bars
+      if(on.gliss&&s===0&&bar%4===0)[...ch,ch[1]].forEach((n,i)=>I.handpan(G.gliss,N(n)*(i>3?2:1),t+i*0.09,0.6,2));
+      if(on.toms){if(s===0&&bar%2===0)I.fdrum(G.toms,t,true,0.8);if(bar%4===3&&s>=8&&s%2===0)I.fdrum(G.toms,t,true,0.35+(s-8)*0.05);}
+    }else if(style==='funk'){
+      // day: a rubbery slap bass (thumb on the root, pops on the octave, ghost notes between), a step into the next chord
+      if(on.bass){const B={0:[1,1,0],3:[1,0.3,0],6:[2,0.8,1],8:[1,0.9,0],10:[1.5,0.7,0],11:[1,0.25,0],14:[2,0.8,1]}[s];if(B)I.slapBass(G.bass,r*B[0],t,B[1],!!B[2]);if(s===15){const nr=N(T.root[nxt]);I.slapBass(G.bass,nr*(nr>r?0.944:1.059),t,0.6,false,0.12);}}
+      // a clavinet chopping the offbeats through an envelope wah
+      if(on.keys&&[2,7,10,14].includes(s))ch.slice(1).forEach(n=>I.clav(G.keys,inR(N(n),262),t,s===7?0.6:0.8));
+      // drums: kick, a snappy snare on two and four with ghost notes, hats (open on the last), a cowbell every other bar
+      if(on.perc){if(s===0||s===7||s===10)I.kick(G.perc,t,0.1);if(s===4||s===12)I.ksnare(G.perc,t,1);if(s===9||s===15)I.ksnare(G.perc,t,0.25);if(s%2===0)I.hat(G.perc,t,s%4?0.012:0.018,s===14);if(s===0&&bar%2===0)I.cowbell(G.perc,t,0.8);}
+      // thriving: a second horn line a third under, congas
+      if(on.tperc&&[3,7,11,14].includes(s))I.conga(G.tperc,t,s!==14,0.6);
+      // night: the clav softly, the bass and drums turned down
+      if(on.nkeys&&(s===2||s===10))ch.slice(1).forEach(n=>I.clav(G.nkeys,inR(N(n),220),t,0.5,0.18));
+      // sad: grumpy, not crying: a sulky lead over a plodding slap bass
+      if(on.sadbed&&(s===0||s===6||s===10))I.slapBass(G.sadbed,N(T.sad.root[sc]),t,s?0.6:0.9,false,0.3);
+      // menus. Bag: clav chops, a kick and hats
+      if(on.mkeys&&[2,7,10,14].includes(s))ch.slice(1).forEach(n=>I.clav(G.mkeys,inR(N(n),262),t,0.7));
+      if(on.hats){if(s===0||s===10)I.kick(G.hats,t,0.08);if(s%2===0)I.hat(G.hats,t,0.012,s===14);}
+      // settings: one soft clav chord a bar, a hat ticking
+      if(on.chimes&&s===2)ch.slice(1).forEach(n=>I.clav(G.chimes,inR(N(n),220),t,0.5,0.2));
+      if(on.clock&&s%4===0)I.hat(G.clock,t,0.01,false);
+      // critters: the slap bass walking the chord
+      if(on.pluck&&s%2===0){const seq=[0,1,2,3,2,1,3,2];I.slapBass(G.pluck,inR(N(ch[seq[s>>1]]),110),t,0.6,s%4===2,0.2);}
+      // gachapon: the hook on clav over a funk drum break and the slap bass
+      if(on.cbass){const B={0:[1,1,0],3:[1,0.3,0],6:[2,0.8,1],8:[1,0.9,0],10:[1.5,0.7,0],14:[2,0.8,1]}[s];if(B)I.slapBass(G.cbass,r*B[0],t,B[1],!!B[2]);}
+      if(on.cnoise){if([0,3,8,10].includes(s))I.kick(G.cnoise,t,0.1);if(s===4||s===12)I.ksnare(G.cnoise,t,1);if([6,9,15].includes(s))I.ksnare(G.cnoise,t,0.3);I.hat(G.cnoise,t,s%2?0.008:0.014,false);}
+      // achievements: horn hits, the tune on the lead, a snare roll every four bars
+      if(on.brass&&bar%2===0&&(s===0||s===6))ch.slice(1).forEach(n=>I.sfLead(G.brass,inR(N(n),262),t,s16*(s?2:3),0.8));
+      if(on.toms&&bar%4===3&&s>=8)I.ksnare(G.toms,t,0.3+(s-8)*0.08);
+    }else if(style==='crunch'){
+      const X=b=>I.crushBus(b);
+      // day: chip chord arpeggios shimmering on each half bar, all through the bit-crusher
+      if(on.keys&&(s===0||s===8))I.chipArp(X(G.keys),ch.slice(1).map(n=>inR(N(n),262)),t,s16*7,1);
+      // a triangle bass bouncing root, fifth, octave, fifth
+      if(on.bass&&s%4===0)I.triBass(X(G.bass),r*[1,1.5,2,1.5][s/4],t,s16*2.5,s===0?1:0.75);
+      // noise-channel drums with a crunchy kick
+      if(on.perc){if(s===0||s===10)I.kick(X(G.perc),t,0.12);if(s===4||s===12)nz(X(G.perc),t,0.08,0.09,1500,'highpass');if(s%2===0)nz(X(G.perc),t,s%4?0.02:0.03,0.025,8000);}
+      // thriving: an echo copy of the lead three sixteenths behind (the old NES trick), and sixteenth hats
+      if(on.tperc&&s%2===1)nz(X(G.tperc),t,0.015,0.02,9000);
+      // night: soft single chip notes picking through the chord, a quiet bass
+      if(on.nkeys&&s%4===0){const seq=[0,2,1,3];I.pulseLead(X(G.nkeys),inR(N(ch[seq[s/4]]),262),t,s16*2,0.6,'sq');}
+      // sad: a thin, sulky pulse over the triangle bass
+      if(on.sadbed&&s%4===0)I.triBass(X(G.sadbed),N(T.sad.root[sc])*(s%8?1.5:1),t,s16*3,0.8);
+      // menus. Bag: the arpeggios and the bass, quietly
+      if(on.mkeys){if(s===0||s===8)I.chipArp(X(G.mkeys),ch.slice(1).map(n=>inR(N(n),262)),t,s16*7,0.8);if(s%4===0)I.triBass(X(G.mkeys),r*[1,1.5,2,1.5][s/4],t,s16*2.5,0.6);}
+      // settings: a little blip a bar, a soft tick
+      if(on.chimes&&s===0)I.pulseLead(X(G.chimes),inR(N(ch[1+bar%3]),392),t,s16*1.5,0.6,'sq');
+      if(on.clock&&s%4===0)nz(X(G.clock),t,0.015,0.02,8000);
+      // critters: a chip line walking the chord
+      if(on.pluck&&s%2===0){const seq=[0,1,2,3,2,1,3,2];I.pulseLead(X(G.pluck),inR(N(ch[seq[s>>1]]),262),t,s16*1.2,0.6,'sq');}
+      // gachapon: the tune on a crunchier square lead over a bouncing bass and busy drums
+      if(on.cbass&&s%2===0)I.triBass(X(G.cbass),r*[1,2][(s>>1)%2],t,s16*1.5,0.8);
+      if(on.cnoise){if(s%8===0||s===6)I.kick(X(G.cnoise),t,0.12);if(s===4||s===12)nz(X(G.cnoise),t,0.08,0.09,1500,'highpass');nz(X(G.cnoise),t,s%2?0.012:0.025,0.02,8000);}
+      // achievements: a long rising arpeggio fanfare, the tune, a noise roll
+      if(on.brass&&s===0&&bar%2===0)I.chipArp(X(G.brass),[...ch.slice(1),ch[1]].map((n,i)=>inR(N(n),262)*(i>2?2:1)),t,s16*14,1.2,0.06);
+      if(on.toms&&bar%4===3&&s>=8)nz(X(G.toms),t,0.04+(s-8)*0.006,0.06,1500,'highpass');
+    }else if(style==='odd'){
+      // day: a bouncy tuba (root, a fifth on the and-of-two, root, a step into the next chord)
+      if(on.bass){if(s===0)I.tuba(G.bass,r,t,s16*2,0.55);if(s===6)I.tuba(G.bass,r*1.5,t,s16*1.2,0.4);if(s===8)I.tuba(G.bass,r,t,s16*2,0.5);if(s===14){const nr=N(T.root[nxt]);I.tuba(G.bass,nr*(nr>r?0.944:1.059),t,s16*1.2,0.4);}}
+      // an organ stabbing the lurching block chords on the offbeats
+      if(on.keys&&(s===4||s===10||s===12))ch.slice(1).forEach(n=>I.organ(G.keys,inR(N(n),220),t,0.18,s===10?0.6:0.9));
+      // bongos, a woodblock, a soft kick
+      if(on.perc){if(s===0||s===8)I.kick(G.perc,t,0.07);const b={2:[1,0.7],3:[0,0.5],10:[1,0.6],11:[1,0.4],14:[0,0.6]}[s];if(b)I.bongo(G.perc,t,!!b[0],b[1]);if(s===6)I.wblock(G.perc,t,true,0.5);}
+      // "ba ba doo" vocal blips answering the tune, a jaw-harp boing and a slide whistle at the ends of phrases
+      if(on.fill){if(bar%2===1&&(s===8||s===10||s===12))I.vblip(G.fill,inR(N(ch[[1,2,3][(s-8)/2]]),220),t,0.8,s===12);if(bar%4===3&&s===14)I.jaw(G.fill,t,0.6);if(bar%8===7&&s===4)I.slideWh(G.fill,t,true,0.4,0.7);}
+      // thriving: handclaps, and a second sax a third under
+      if(on.tperc&&(s===4||s===12))I.clap(G.tperc,t);
+      // night: a soft organ chord a bar, the tuba, quiet bongos
+      if(on.nkeys&&s===4)ch.slice(1).forEach(n=>I.organ(G.nkeys,inR(N(n),220),t,0.3,0.6));
+      // sad: a grumpy sax over a plodding tuba
+      if(on.sadbed&&(s===0||s===8))I.tuba(G.sadbed,N(T.sad.root[sc])*(s?1.5:1),t,s16*2.5,0.8);
+      // menus. Bag: organ stabs and bongos
+      if(on.mkeys&&(s===4||s===12))ch.slice(1).forEach(n=>I.organ(G.mkeys,inR(N(n),220),t,0.18,0.8));
+      if(on.hats){const b={2:[1,0.6],3:[0,0.4],10:[1,0.5],14:[0,0.5]}[s];if(b)I.bongo(G.hats,t,!!b[0],b[1]);}
+      // settings: a "doo" now and then, a woodblock ticking
+      if(on.chimes&&s===0&&bar%2===0)I.vblip(G.chimes,inR(N(ch[1+bar/2%3]),220),t,0.6,true);
+      if(on.clock&&s%4===0)I.wblock(G.clock,t,s%8===0,0.35);
+      // critters: the organ walking the chord
+      if(on.pluck&&s%2===0){const seq=[0,1,2,3,2,1,3,2];I.organ(G.pluck,inR(N(ch[seq[s>>1]]),196),t,0.2,0.8);}
+      // gachapon: the tune sung in "ba"s and "doo"s over the tuba and bongos
+      if(on.cbass&&[0,6,8,14].includes(s))I.tuba(G.cbass,r*[1,1.5,1,1.5][[0,6,8,14].indexOf(s)],t,s16*1.2,0.8);
+      if(on.cnoise){const b={0:[0,0.6],2:[1,0.7],3:[1,0.4],6:[0,0.6],8:[0,0.6],10:[1,0.7],11:[1,0.4],14:[0,0.6]}[s];if(b)I.bongo(G.cnoise,t,!!b[0],b[1]);}
+      // achievements: two saxes hitting the chord, the tune on organ, a bongo roll and a slide whistle
+      if(on.brass&&bar%2===0&&(s===0||s===6))ch.slice(2).forEach(n=>I.honkSax(G.brass,inR(N(n),262),t,s16*(s?2:3),0.7));
+      if(on.toms){if(bar%4===3&&s>=8)I.bongo(G.toms,t,s%2===0,0.4+(s-8)*0.05);if(bar%4===3&&s===12)I.slideWh(G.toms,t,true,0.4,0.6);}
     }else if(style==='tide'){
       // day: organ chops on the offbeats, a deep dub bass, a one-drop beat (kick and rim together on three)
       if(on.keys&&(s===2||s===6||s===10||s===14))I.chop(G.keys,[1,2,3].map(j=>N(ch[j])*2),t);
@@ -970,8 +1649,11 @@ function makeTrack(C,out,nbuf,T){
     // shared by every track: night bass and chimes, the sad lead and piano, the menus
     if(on.nbass&&s===0)osc(G.nbass,'sine',sadOn?N(T.sad.root[sc]):r,t,0.15,0.04,s16*13);
     if(on.glass&&(s===0||s===6||s===12)){const n=ch[[3,2,1][s/6]];I.glass(N(n)*4,t);}
+    // each song's own sad lead plays the sad tune
+    if(on.sadlead&&onM&&I[style+'Sad'])for(const[b,i,f,Ln]of smel)if(b===bar&&i===em)I[style+'Sad'](f,t,Ln*s16*MS);
     if(on.whine&&on8)for(const[b,i,f,Ln]of smel)if(b===bar&&i===ei){const first=i===0&&bar%4===0,d=Ln*s16*2;I.whine(first?above(f):f*0.94,f,t,d,first?Math.min(0.5,d*0.4):0.08);}
     if(on.spiano){if(s===0)sch.forEach((n,i)=>ep(G.spiano,N(n)*2,t+i*0.04,0.7,1.8));if(s===8)for(const[b,i,f]of smel)if(b===bar&&i===0)ep(G.spiano,f/2,t,0.6,1.4);}
+    if(on.bugs)crickets(t,s16);
     if(on.vinyl&&Math.random()<0.35)I.crackle(t+Math.random()*s16);}
   let k=0,next=0,cur=null,endK=null;
   return{stems:G,filter:lp,bpm:T.bpm,bars:16,
@@ -984,8 +1666,10 @@ function makeTrack(C,out,nbuf,T){
     // start the song again from bar 1 (used when the playlist brings a track in)
     restart(now){k=0;next=now+0.05;endK=null;},
     // play to the end of the current 16-bar loop, then stop scheduling; done() once that last bar has played
-    finish(){endK=k>0&&k%256===0?k:Math.ceil(Math.max(1,k)/256)*256;},
+    finish(){const L=(T.spb||16)*(T.bars||16);endK=k>0&&k%L===0?k:Math.ceil(Math.max(1,k)/L)*L;},
     done(now){return endK!==null&&k>=endK&&now>=next;},
+    // stop everything this engine runs on its own and cut it off, so a song nobody is hearing costs nothing
+    dispose(){endK=0;for(const x of KEEP)try{x.stop();}catch(e){}try{lp.disconnect();}catch(e){}},
     get step(){return k;}};}
 // =====================================================================
 const SFX=(()=>{
@@ -1263,11 +1947,11 @@ const SFX=(()=>{
   // the playlist: a song plays about 5 minutes (time spent in menus doesn't count), then plays to the end of its loop,
   // its last notes ring out and fade, a short pause, and a different song starts from bar 1
   let musK=null,plLen=300,onTrack=null;const engs={},tgain={},pl={phase:'play',t:0,last:0};
-  const pickOther=()=>{const ks=Object.keys(TRACKS).filter(k=>k!==musK);return ks[Math.floor(Math.random()*ks.length)];};
-  function startTrack(k){const now=ac.currentTime;musK=k;if(!engs[k]){tgain[k]=ac.createGain();tgain[k].connect(duckG);engs[k]=makeTrack(ac,tgain[k],nbuf,TRACKS[k]);}
+  const pickOther=()=>{const ks=Object.keys(TRACKS).filter(k=>k!==musK&&songOwned(k));return ks[Math.floor(Math.random()*ks.length)];};
+  function startTrack(k){const now=ac.currentTime;for(const j of Object.keys(engs))if(j!==k&&j!==musK){engs[j].dispose();tgain[j].disconnect();delete engs[j];delete tgain[j];}musK=k;if(!engs[k]){tgain[k]=ac.createGain();tgain[k].connect(duckG);engs[k]=makeTrack(ac,tgain[k],nbuf,TRACKS[k]);}
     mus=engs[k];mus.restart(now);const g=tgain[k].gain;g.cancelScheduledValues(now);g.setValueAtTime(0.0001,now);g.setTargetAtTime(1,now,0.2);pl.phase='play';pl.t=0;if(onTrack)onTrack(k);}
   // the music player's next button: a quick fade, then the next song in order from bar 1
-  function next(){if(!ac||!duckG)return;const now=ac.currentTime;if(musK)tgain[musK].gain.setTargetAtTime(0,now,0.15);const ks=Object.keys(TRACKS);startTrack(ks[(ks.indexOf(musK)+1)%ks.length]);}
+  function next(){if(!ac||!duckG)return;const now=ac.currentTime;if(musK)tgain[musK].gain.setTargetAtTime(0,now,0.15);const ks=Object.keys(TRACKS).filter(songOwned);startTrack(ks[(ks.indexOf(musK)+1)%ks.length]);}
   function music(ctx){if(!ac||!musicOn)return;const now=ac.currentTime;
     if(!duckG){duckG=ac.createGain();duckG.connect(musicBus);pl.last=now;startTrack(pickOther());}
     const dt=Math.min(0.25,Math.max(0,now-pl.last));pl.last=now;
@@ -1363,22 +2047,24 @@ function composite(fb,painter,o={}){
       let tx=x+sdx,ty=y+sdy;if(SF){const r=SF(x,y);tx=x+r[0];ty=y+r[1];}// shadow offset can vary per pixel (e.g. with the water depth underneath)
       if(tx<0||tx>=w||ty<0||ty>=h)continue;const j=ty*w+tx;if(st[j]===sid)continue;st[j]=sid;sOut[j]=shade(sOut[j],f);}
   }
-  const ol=o.outline!==undefined?o.outline:painter.outline,seam=painter.seam||0;
+  const ol=o.outline!==undefined?o.outline:painter.outline,seam=painter.seam||0,olOf=o.outline===undefined&&painter.olOf;
   const x0=Math.max(0,fb.bx0-1),x1=Math.min(w-1,fb.bx1+1),y0=Math.max(0,fb.by0-1),y1=Math.min(h-1,fb.by1+1);
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
     const i=y*w+x,m=mat[i];
     if(!m){
-      if((x>0&&mat[i-1])||(x<w-1&&mat[i+1])||(y>0&&mat[i-w])||(y<h-1&&mat[i+w]))out[i]=ol;
+      if((x>0&&mat[i-1])||(x<w-1&&mat[i+1])||(y>0&&mat[i-w])||(y<h-1&&mat[i+w])){
+        // painters with their own outline rule take the deepest shade of whatever the outline wraps (the critter rule)
+        if(olOf){let bm=0,bc=-1;for(const j of[x>0?i-1:-1,x<w-1?i+1:-1,y>0?i-w:-1,y<h-1?i+w:-1])if(j>=0&&mat[j]&&cls[j]>bc){bc=cls[j];bm=mat[j];}out[i]=painter.olOf(bm,x,y);}else out[i]=ol;}
       continue;
     }
     const c=cls[i],k=key[i];
-    let ring=false;
+    let ring=false,rm=0;
     for(let q=0;q<4&&!ring;q++){
       const j=q===0?(x>0?i-1:-1):q===1?(x<w-1?i+1:-1):q===2?(y>0?i-w:-1):(y<h-1?i+w:-1);
       if(j<0||!mat[j])continue;
-      if(cls[j]>c||(seam&&cls[j]===c&&key[j]-k>seam))ring=true;
+      if(cls[j]>c||(seam&&cls[j]===c&&key[j]-k>seam)){ring=true;rm=mat[j];}
     }
-    if(ring){out[i]=painter.inner!==undefined?painter.inner:ol;continue;}
+    if(ring){out[i]=olOf?painter.olOf(rm,x,y):painter.inner!==undefined?painter.inner:ol;continue;}
     const nx=fb.nx[i],ny=fb.ny[i],nz=Math.sqrt(Math.max(0,1-nx*nx-ny*ny));
     let q=Math.floor((nx*LX+ny*LY+nz*LZ)*3.4+BAYER[(y&3)*4+(x&3)]);q=q<0?0:q>3?3:q;
     out[i]=painter.color(m,q,fb.ss[i],fb.ll[i],x,y);
@@ -7264,7 +7950,7 @@ function bakeAqua(world,S,bg,ov){
   const hd=world.hide,c=Math.cos(hd.ang),sn=Math.sin(hd.ang);
   S.cap(hd.x-c*hd.len/2,hd.y-sn*hd.len/2,hd.r*0.8,hd.x+c*hd.len/2,hd.y+sn*hd.len/2,hd.r,M.LOG,1,0,hd.len);
   S.cap(hd.x+c*hd.len*0.1,hd.y+sn*hd.len*0.1,hd.r*0.45,hd.x+c*hd.len*0.1-sn*12,hd.y+sn*hd.len*0.1+c*12,hd.r*0.3,M.LOG,1,0,12);
-  composite(S,STATIC_PAINTER,{out:ov,shadowOut:bg,sAmt:.5,sdx:3,sdy:4});S.clearLayer();
+  {const bgPre=bg.slice();composite(S,STATIC_PAINTER,{out:ov,shadowOut:bg,sAmt:.5,sdx:3,sdy:4});S.clearLayer();THEMES.logEnd(ov,hd.x-c*hd.len/2,hd.y-sn*hd.len/2,hd.x+c*hd.len/2,hd.y+sn*hd.len/2,hd.r*0.8,hd.r,true,{bg,bgPre,sdx:3,sdy:4});}
 }
 // ---- Aquarium: all water. A rippled sand floor that slopes down from the glass, rocks, corals,
 //      a starfish or two, shells, a sunken branch and an air stone bubbling away in the corner ----
@@ -7299,7 +7985,7 @@ function bakeSea(world,S,bg,ov){
   S.cap(hd.x+c*hd.len*0.15,hd.y+sn*hd.len*0.15,hd.r*0.45,hd.x+c*hd.len*0.15+sn*11,hd.y+sn*hd.len*0.15-c*11,hd.r*0.3,M.LOG,1,0,11);
   const brM=new Uint8Array(N);for(let i=0;i<N;i++)if(S.mat[i]===M.LOG)for(const j of[i,i-1,i+1,i-W,i+W])if(j>=0&&j<N)brM[j]=1;
   const as=world.air;S.cap(as.x,as.y,2.4,as.x,as.y,2.4,M.ROCK,1);
-  composite(S,STATIC_PAINTER,{out:bot,sAmt:.55,sdx:1,sdy:2});S.clearLayer();
+  {const botPre=bot.slice();composite(S,STATIC_PAINTER,{out:bot,sAmt:.55,sdx:1,sdy:2});S.clearLayer();THEMES.logEnd(bot,hd.x-c*hd.len/2,hd.y-sn*hd.len/2,hd.x+c*hd.len/2,hd.y+sn*hd.len/2,hd.r*0.8,hd.r,true,{pre:botPre,bg:bot,bgPre:botPre,sdx:1,sdy:2,mat:brM});}
   // depth: a sandy slope along the glass, deepest in the middle
   R.depth=new Float32Array(N);const DEEP=hex('#0c4a86'),MID=hex('#1a86c0'),SHAL=hex('#3cbce2');
   for(let y=TANK.y0;y<TANK.y1;y++)for(let x=TANK.x0;x<TANK.x1;x++){const i=y*W+x,ed=Math.min(x-TANK.x0,y-TANK.y0,TANK.x1-1-x,TANK.y1-1-y);
@@ -7347,7 +8033,7 @@ function bakeWorld(world){
   // hide log (overlay, shadow onto bg)
   const hd=world.hide,c=Math.cos(hd.ang),s=Math.sin(hd.ang);
   S.cap(hd.x-c*hd.len/2,hd.y-s*hd.len/2,hd.r,hd.x+c*hd.len/2,hd.y+s*hd.len/2,hd.r,M.LOG,1,0,hd.len);
-  composite(S,STATIC_PAINTER,{out:ov,shadowOut:bg,sAmt:.5,sdx:3,sdy:4});S.clearLayer();
+  {const bgPre=bg.slice();composite(S,STATIC_PAINTER,{out:ov,shadowOut:bg,sAmt:.5,sdx:3,sdy:4});S.clearLayer();THEMES.logEnd(ov,hd.x-c*hd.len/2,hd.y-s*hd.len/2,hd.x+c*hd.len/2,hd.y+s*hd.len/2,hd.r,hd.r,true,{bg,bgPre,sdx:3,sdy:4});}
   }
   R.bg=bg;R.ov=ov;R.ovIdx=[];for(let i=0;i<N;i++)if(ov[i])R.ovIdx.push(i);
   // frame
@@ -7376,7 +8062,468 @@ function bakeWorld(world){
   }
   world.plants=world.sea?[makePlant('pothos',306,14,1.75,3.05,6,30,60)]:world.tank==='aqua'?[makePlant('pothos',306,14,1.75,3.05,6,30,60),makePlant('fern',308,170,-3.0,-1.7,8,20,34),makePlant('reed',214,96,-2.6,0.6,9,12,20),makePlant('reed',74,30,-0.4,3.4,7,10,16),makePlant('rosette',270,92,0,TAU,8,10,14)]
     :[makePlant('pothos',306,14,1.75,3.05,6,30,60),makePlant('fern',12,168,-1.5,0.05,9,22,40),makePlant('rosette',262,142,0,TAU,9,11,16)];
+  R.EM=null;R.spores=null;if(world.theme&&THEMES.BAKE[world.theme])THEMES.BAKE[world.theme](world);
 }
+
+// =====================================================================
+//  Themed tanks (bought from a critter's Tanks page): Sun Dune, Bayou, Coral Reef, Flower Field, Enchanted Grove.
+//  Each sits on one of the three base tanks for its rules (land, pool or all water) and bakes its own scenery on top.
+// =====================================================================
+const THEMES=(()=>{
+
+let _s=1;const srand=s=>{_s=s>>>0||1;};const rr=()=>{_s=(_s+0x6D2B79F5)>>>0;let t=_s;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;};
+const rn=(a,b)=>a+rr()*(b-a),rp=L=>L[Math.floor(rr()*L.length)];
+const TM={SUC:83,SSTONE:70,BWOOD:71,CAP:72,GCAP:73,STEMW:74,SHELF:75,FAN:76,SPONGE:77,CORY:78,CORP:79,CYP:80,FCAP:81,TCAP:82,
+  TABLE:85,BLUE:86,RUBB:87,POLYP:88,LEATH:89,PET_Y:90,PET_P:91,PET_W:92,SEEDC:93,FLEAF:94,PET_O:95,BRAIN2:96};
+const TP={sstone:ramp('#4e2410','#84462a','#b8703e','#e2a670'),bwood:ramp('#5a5044','#8a8070','#b9b09c','#e4ddc8'),
+  cap:ramp('#5a0e10','#9e1e20','#d63a2a','#ff7454'),gcap:ramp('#0e3a4a','#1a7a8a','#3ac4c8','#a4fff0'),stemw:ramp('#6e6050','#a8987e','#d8ccb2','#f8f0dc'),
+  shelf:ramp('#4a2a10','#8a5420','#c48a3a','#ecc070'),fan:ramp('#4a0e4e','#8a1e78','#d23c9e','#ff9ad4'),sponge:ramp('#6a2a06','#b8580e','#f08a22','#ffc464'),
+  cory:ramp('#6a5206','#b8920e','#f0cc2a','#fff294'),corp:ramp('#40145a','#7a2c9a','#b45ad8','#e6a8ff'),cyp:ramp('#26180e','#43301c','#64482c','#8a6a44'),
+  fcap:ramp('#6a5a48','#a8967c','#ddd0b4','#fff8e8'),tcap:ramp('#4a1a52','#7c3088','#b456b8','#f096e0'),suc:ramp('#2a3a2e','#486654','#729a7a','#a8ccaa'),
+  table:ramp('#1a4a52','#22827e','#3cbca2','#9af0d0'),blue:ramp('#14286e','#2450b8','#4a8af0','#b0dcff'),rubb:ramp('#3e3044','#5e4a62','#846a84','#ae92a8'),
+  polyp:ramp('#1e4a24','#3a8a34','#6ac84a','#c4f68a'),leath:ramp('#6a5a3a','#a8946a','#d8c89a','#f8eed0'),brain2:ramp('#5a3a0a','#a86a1a','#e8a440','#ffdc8a'),
+  pety:ramp('#8a5a04','#d89a0a','#ffc828','#fff07a'),petp:ramp('#8a2a5a','#d04a8a','#ff86ba','#ffd0e6'),petw:ramp('#8a8a80','#c8c8be','#efefe6','#ffffff'),
+  peto:ramp('#8a2a06','#d24a10','#ff7a2a','#ffbc80'),seedc:ramp('#1a0e06','#3a2210','#5e3a1a','#8a5a2a'),fleaf:ramp('#1e3a14','#2e5a1e','#44802a','#68a83a')};
+const THEME_PAINTER={outline:hex('#120c08'),seam:0.9,color(m,q,s,l,x,y){
+  switch(m){
+    case TM.SSTONE:{const b=Math.floor((y*0.95+x*0.22+vnoise(x*.09,y*.09)*5)/2.4);if(b%3===0)q=Math.max(0,q-1);if(hash(x*5,y*3)>0.9)q=Math.min(3,q+1);return TP.sstone[q];}
+    case TM.BWOOD:{const g=l*4.6+vnoise(s*.2,l*3)*1.4,f=g-Math.floor(g);if(f<0.2)q=Math.max(0,q-1);return TP.bwood[q];}
+    case TM.CAP:{return spotAt(x,y)?TP.stemw[Math.max(2,q)]:TP.cap[q];}
+    case TM.TCAP:{return spotAt(x,y)?TP.stemw[Math.max(2,q)]:TP.tcap[q];}
+    case TM.SUC:{const g=Math.abs(l)<0.2&&s>0.5;return TP.suc[g?Math.min(3,q+1):q];}
+    case TM.GCAP:return TP.gcap[q];
+    case TM.STEMW:return TP.stemw[q];
+    case TM.FCAP:return TP.fcap[q];
+    case TM.SHELF:{const r=Math.sin(s*2.2);return TP.shelf[r>0.7?Math.min(3,q+1):q];}
+    case TM.FAN:{const g=(Math.abs(Math.sin(x*1.7+y*0.5))<0.4||Math.abs(Math.sin(y*1.6-x*0.4))<0.35);return TP.fan[g?q:Math.max(0,q-1)];}
+    case TM.SPONGE:{if(hash(x*7,y*5)>0.8)q=Math.max(0,q-1);return TP.sponge[q];}
+    case TM.CORY:{if(hash(x*5,y*7)>0.8)q=Math.min(3,q+1);return TP.cory[q];}
+    case TM.BLUE:{if(hash(x*5,y*7)>0.82)q=Math.min(3,q+1);return TP.blue[q];}
+    case TM.CORP:{const g=Math.sin(x*1.2+Math.sin(y*0.8)*2.4)+Math.sin(y*1.1+Math.sin(x*0.9)*2);return TP.corp[Math.abs(g)<0.45?Math.max(0,q-1):q];}
+    case TM.BRAIN2:{const g=Math.sin(x*1.3+Math.sin(y*0.9)*2.2)+Math.sin(y*1.2+Math.sin(x*0.8)*2);return TP.brain2[Math.abs(g)<0.45?Math.max(0,q-1):q];}
+    case TM.TABLE:{const a=Math.atan2(l,s);const rib=Math.abs(Math.sin(s*1.6+vnoise(x*.3,y*.3)*2))<0.25;return TP.table[rib?Math.max(0,q-1):q];}
+    case TM.RUBB:{if(hash(x*3,y*5)>0.85)q=Math.max(0,q-1);if(q>=2&&vnoise(x*.4+3,y*.4)>0.7)return TP.polyp[q-1];return TP.rubb[q];}
+    case TM.POLYP:{return TP.polyp[(hash(x,y*3)>0.5&&q>0)?q-1:q];}
+    case TM.LEATH:{const fold=Math.abs(Math.sin(s*2.4))<0.3;return TP.leath[fold?Math.max(0,q-1):q];}
+    case TM.PET_Y:return TP.pety[q];case TM.PET_P:return TP.petp[q];case TM.PET_W:return TP.petw[q];case TM.PET_O:return TP.peto[q];
+    case TM.SEEDC:{return TP.seedc[(Math.sin(x*2.1+y*1.3)>0.3)?Math.min(3,q+1):q];}
+    case TM.FLEAF:{const vein=Math.abs(l)<0.12;return TP.fleaf[vein?Math.min(3,q+1):q];}
+    case TM.CYP:{const g=x*0.8+vnoise(x*.2,y*.3)*3,f=g-Math.floor(g);if(f<0.25)q=Math.max(0,q-1);if(q>=2&&vnoise(x*.25+5,y*.25)>0.66)return PAL.moss[q];return TP.cyp[q];}
+  }
+  return STATIC_PAINTER.color(m,q,s,l,x,y);}};
+
+THEME_PAINTER.olOf=function(m,x,y){return shade(this.color(m,0,0,0,x,y),0.58);};
+const spotAt=(x,y)=>{const cx=Math.floor(x/5),cy=Math.floor(y/5);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const gx=cx+a,gy=cy+b;if(hash(gx*7+1,gy*13)>0.5)continue;const px=gx*5+hash(gx,gy*3)*5,py=gy*5+hash(gx*5,gy)*5,r=0.8+hash(gx*3,gy*7)*1.0;if(Math.hypot(x+.5-px,y+.5-py)<r)return true;}return false;};
+const inT=(x,y)=>x>=TANK.x0&&x<TANK.x1&&y>=TANK.y0&&y<TANK.y1;
+const edgeAO=(c,x,y,k=10)=>{const e=Math.min(x-TANK.x0,y-TANK.y0,TANK.x1-1-x,TANK.y1-1-y);return e<k?shade(c,Math.floor((0.55+0.45*Math.max(0,e)/k)*8+bay(x,y))/8):c;};
+function rockC(S,cx,cy,sc,mat,n,cls=1){for(let i=0;i<n;i++){const a=i/n*TAU+rn(-.3,.3),r=sc*rn(.3,.7),r2=sc*rn(.55,.85);const x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r*.75;S.cap(x,y,r2,x,y,r2,mat,cls);}S.cap(cx,cy,sc*.8,cx,cy,sc*.8,mat,cls);}
+// a rock family: one big stone, a couple of smaller ones leaning on it, and a few pebbles spilling away on the downhill side
+function rockFamily(S,cx,cy,sc,mat,dir=0.6){rockC(S,cx,cy,sc,mat,6);const d=[Math.cos(dir),Math.sin(dir)];rockC(S,cx+d[0]*sc*1.25,cy+d[1]*sc*0.9,sc*0.55,mat,4);rockC(S,cx-d[1]*sc*1.1,cy+d[0]*sc*0.8,sc*0.38,mat,3);
+  for(let k=0;k<5;k++){const t=sc*(1.7+k*0.55),x=cx+d[0]*t+rn(-2,2),y=cy+d[1]*t*0.8+rn(-2,2),r=rn(0.8,1.5);S.cap(x,y,r,x,y,r,mat,1);}}
+function finish(world,bg,ov){R.bg=bg;R.ov=ov;R.ovIdx=[];for(let i=0;i<N;i++)if(ov[i])R.ovIdx.push(i);}
+function tuft(f,x,y,G,n,top=4){pdark(f,x+1,y+1,.8);for(let k=0;k<n;k++){const a=-Math.PI/2+rn(-1.1,1.1),l=rn(1.5,3.4);let px=x,py=y;for(let j=0;j<l;j++){px+=Math.cos(a);py+=Math.sin(a);pset(f,px,py,G[Math.min(top,1+j)]);}}}
+
+// ---------------- round 3 shared bits ----------------
+const TM3={PEAR:110,BONE:111,ROOT:112,BELL:113};
+// reef: five harmonised palettes (shadows lean violet, highlights lean warm), each with a branching and a mound texture
+const RPAL=[ramp('#5a1e40','#9c3a5c','#d8687a','#ffb2ae'),/*coral pink*/ramp('#6a2a24','#b0573a','#e48a58','#ffc89a'),/*peach*/
+  ramp('#3a2252','#664084','#9670b8','#cfaee6'),/*lavender*/ramp('#1c3e4a','#2a6a6c','#4a9a8e','#94cdb8'),/*sea-glass teal*/ramp('#5a4a46','#968070','#ccb496','#f2e4c8')/*cream*/];
+const RB=p=>120+p*2,RMd=p=>121+p*2;
+const TP3={pear:ramp('#2a4426','#46703a','#6a9a4c','#a2c876'),bone:ramp('#7a7060','#b8ae98','#e2dac6','#fcf6ea'),root:ramp('#24160c','#3e2816','#5e4024','#80603a')};
+const oColor=THEME_PAINTER.color;THEME_PAINTER.color=function(m,q,s,l,x,y){
+  if(m>=120&&m<130){const p=(m-120)>>1,R2=RPAL[p];if((m-120)&1){const g=Math.sin(x*1.3+Math.sin(y*0.9)*2.2)+Math.sin(y*1.2+Math.sin(x*0.8)*2);return R2[Math.abs(g)<0.45?Math.max(0,q-1):q];}
+    return R2[hash(x*5,y*7)>0.82?Math.min(3,q+1):q];}
+  switch(m){
+    case TM3.PEAR:{return TP3.pear[hash(x*3,y*5)>0.9?Math.max(0,q-1):q];}
+    case TM3.BONE:{return TP3.bone[hash(x*7,y*3)>0.92?Math.max(0,q-1):q];}
+    case TM3.ROOT:{const g=l*3.6+vnoise(s*.25,l*3)*1.2,f=g-Math.floor(g);if(q>=2&&vnoise(x*.22+9,y*.22)>0.6)return PAL.moss[q];if(f<0.22)q=Math.max(0,q-1);return TP3.root[q];}
+  }
+  return oColor.call(this,m,q,s,l,x,y);};
+// a curving tapered limb (roots, branches) as a chain of capsules
+function limb(S,pts,r0,r1,mat,cls=1){let L=0;for(let i=1;i<pts.length;i++){const t0=(i-1)/(pts.length-1),t1=i/(pts.length-1),[ax,ay]=pts[i-1],[bx,by]=pts[i],d=Math.hypot(bx-ax,by-ay);S.cap(ax,ay,r0+(r1-r0)*t0,bx,by,r0+(r1-r0)*t1,mat,cls,L,L+d);L+=d;}}
+// the cut end of a log seen from above: a squashed disc of pale end-grain with growth rings and a thin bark rim; a hollow log shows a dark hole
+function endFace(px,x,y,ux,uy,r,hollow){const LW=[hex('#5e3e22'),hex('#8e6438'),hex('#b88c58'),hex('#d8b47e')],BK=hex('#3a2614'),HO=hex('#140c06'),R2=Math.ceil(r+1);
+  for(let yy=-R2;yy<=R2;yy++)for(let xx=-R2;xx<=R2;xx++){const a=xx*ux+yy*uy,b=-xx*uy+yy*ux,d=Math.hypot(a/(r*0.45),b/(r*0.92));if(d>1)continue;const X=Math.round(x+xx),Y=Math.round(y+yy);if(X<0||Y<0||X>=W||Y>=H)continue;
+    let c;if(d>0.84)c=BK;else if(hollow&&d<0.55)c=d<0.42?HO:LW[0];else{const ring=Math.sin(d*r*1.5);c=LW[ring>0.55?1:(b<0?3:2)];}px[Y*W+X]=c;}}
+// only the end nearest the viewer (the lower one on screen; the right one when the log lies level) shows its cut face
+// only the end nearest the viewer (the lower one on screen; the right one when level) shows its cut face, and the log is cut
+// square there: the rounded capsule tip beyond the face is removed (and its shadow), so the end reads as a flat sawn face
+function logEnd(px,ax,ay,bx,by,ra,rb,hollow,o={}){const L=Math.hypot(bx-ax,by-ay),nearB=Math.abs(by-ay)>2?by>ay:bx>ax;
+  const ex=nearB?bx:ax,ey=nearB?by:ay,r=nearB?rb:ra,ux=(nearB?bx-ax:ax-bx)/L,uy=(nearB?by-ay:ay-by)/L,R2=Math.ceil(r+3);
+  const outside=(x,y)=>{const vx=x+.5-ex,vy=y+.5-ey,a=vx*ux+vy*uy,b=-vx*uy+vy*ux;return a>0&&Math.hypot(a/(r*0.45),b/(r*0.92))>1;};
+  for(let y=Math.floor(ey-R2);y<=ey+R2+6;y++)for(let x=Math.floor(ex-R2);x<=ex+R2+6;x++){if(x<0||y<0||x>=W||y>=H)continue;const i=y*W+x;
+    if(outside(x,y)){px[i]=o.pre?o.pre[i]:0;if(o.mat)o.mat[i]=0;}
+    if(o.bg&&o.bgPre&&outside(x-(o.sdx||3),y-(o.sdy||4)))o.bg[i]=o.bgPre[i];}
+  endFace(px,ex,ey,ux,uy,r,hollow);}
+const bez=(a,b,c,n=10)=>Array.from({length:n+1},(_,i)=>{const t=i/n,u=1-t;return[u*u*a[0]+2*u*t*b[0]+t*t*c[0],u*u*a[1]+2*u*t*b[1]+t*t*c[1]];});
+// ---------------- Sun Dune ----------------
+// Main feature: a terraced red-rock mesa filling the top-left corner, with the basking slab stepping down from it under
+// the lamp. Leading line: a dry wash of cracked clay runs from its foot diagonally to the lower right, where the second
+// group sits: a prickly pear in fruit, a bleached steer skull half in the sand, and the branch. A small boulder and agave
+// frame the top-right. Desert flowers and dry grass shelter in each group; a lizard's track loops through the open middle.
+const DUNE=ramp('#7a4422','#a8622e','#cc8442','#e4a462','#f2c690'),DUNE2=ramp('#86532e','#ac7040','#cc915a','#e2b07a','#f2cfa0'),CLAY=ramp('#9a6440','#c08458','#dca676','#ecc292','#f6d8b0');
+function crackAt(x,y,cs=7){const cx=Math.floor(x/cs),cy=Math.floor(y/cs);let d1=1e9,d2=1e9;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const gx=cx+a,gy=cy+b,px=(gx+hash(gx,gy*7))*cs,py=(gy+hash(gx*3,gy))*cs,d=Math.hypot(x+.5-px,y+.5-py);if(d<d1){d2=d1;d1=d;}else if(d<d2)d2=d;}return d2-d1;}
+function bakeDune(world){srand(11);const S=new FB(W,H),bg=new Uint32Array(N),ov=new Uint32Array(N),f={w:W,h:H,px:bg};
+  const lr=world.lampRock,hd=world.hide,pear={x:278,y:116},skull={x:250,y:152};
+  const WP=bez([134,92],[176,104],[228,138],30),WS=new Float32Array(N).fill(99),WT=new Float32Array(N);
+  for(let y=60;y<160;y++)for(let x=120;x<250;x++){let bd=99,bt=0;for(let k=0;k<WP.length;k++){const d=Math.hypot(x-WP[k][0],y-WP[k][1]);if(d<bd){bd=d;bt=k/(WP.length-1);}}WS[y*W+x]=bd;WT[y*W+x]=bt;}
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,n=fbm(x*.035+7,y*.035,4),u=x*0.3+y*0.95+fbm(x*.018,y*.018+3,3)*34,s=Math.sin(u*0.5),pale=fbm(x*.018+40,y*.018,3);
+    const P=pale>0.56?DUNE2:DUNE;let q=2.1+(n-0.5)*1.8+(bay(x,y)-.5)*0.8;if(s>0.72)q+=0.7;else if(s<-0.86)q-=0.9;let c=P[clamp(Math.floor(q),0,4)];
+    if(pale>0.53&&pale<0.56)c=mixc(c,DUNE2[2],0.5);
+    const wd=WS[i],ww=Math.pow(Math.sin(Math.PI*WT[i]),0.6)*(7+4*fbm(x*0.05,y*0.05,2));if(wd<ww){const k=crackAt(x,y);let cq=clamp(Math.floor(2.2+(fbm(x*.08,y*.08,3)-.5)*2+(bay(x,y)-.5)),0,4);c=CLAY[cq];if(k<0.75)c=hex('#7a4a2c');else if(k<1.4)c=CLAY[Math.max(0,cq-1)];if(wd>ww-1.6)c=mixc(c,P[2],0.5);}
+    if(hash(x*3,y*11)>0.985)c=mixc(c,hex('#fff0d0'),0.3);bg[i]=edgeAO(c,x,y);}
+  // the mesa: three terraces, each smaller and higher, cut off by the glass, with fallen blocks at its foot
+  S.box(36,30,40,26,0.08,TM.SSTONE,1,0,0,0,6);S.box(28,22,28,18,0.12,TM.SSTONE,2,0,0,0,5);S.box(22,16,16,11,0.2,TM.SSTONE,3,0,0,0,4);
+  S.box(lr.x,lr.y,15,9,0.2,TM.SSTONE,1,0,0,0,5);S.box(lr.x+15,lr.y+9,6,4.5,-0.4,TM.SSTONE,1,0,0,0,3);rockC(S,82,22,5,TM.SSTONE,5);rockC(S,14,74,6,TM.SSTONE,5);rockC(S,26,84,3,TM.SSTONE,3);
+  // top-right: one boulder and its pebbles
+  rockC(S,292,34,9,TM.SSTONE,6);rockC(S,276,22,4,TM.SSTONE,4);
+  composite(S,THEME_PAINTER,{out:bg,sAmt:.7,sdx:2,sdy:3});S.clearLayer();
+  for(const[cx,cy,ang,n]of[[lr.x+18,lr.y+16,0.5,14],[60,76,1.2,10],[284,50,1.9,8]])for(let k=0;k<n;k++){const t=k*2.2+rn(0,2),x=Math.round(cx+Math.cos(ang)*t+rn(-3,3)),y=Math.round(cy+Math.sin(ang)*t*0.6+rn(-2,2)),c=rp(TP.sstone.slice(1));pdark(f,x+1,y+1,.7);pset(f,x,y,c);if(rr()<0.4){pset(f,x+1,y,shade(c,0.85));pdark(f,x+2,y+1,.75);}}
+  // dry grass in the shelter of each group
+  const DG=ramp('#5a4a26','#7e6a38','#a68e4e','#cab06a','#e8d290');
+  for(const[cx,cy,n,sp]of[[70,62,10,16],[pear.x-16,pear.y+10,8,12],[hd.x-8,hd.y-8,5,10],[274,48,6,10],[18,104,5,8]])for(let k=0;k<n;k++){const a=rr()*TAU,d=Math.sqrt(rr())*sp;tuft(f,Math.round(cx+Math.cos(a)*d),Math.round(cy+Math.sin(a)*d*0.6),DG,4+k%3);}
+  // prickly pear: paddles fanning out in two tiers
+  {const pads=[[0,0,9,5,0.1],[-11,-5,7.5,4,-0.7],[11,-6,8,4.2,0.6],[-5,-15,6.5,3.6,-0.25],[14,-17,6,3.4,0.85],[-18,-14,5.5,3,-1.05]];
+    for(const[dx,dy,a,b,r]of pads){const x=pear.x+dx,y=pear.y+dy,c=Math.cos(r),s=Math.sin(r);S.cap(x-s*(a-b),y-c*(a-b),b,x+s*(a-b),y+c*(a-b),b,TM3.PEAR,1,0,0,0.15);}
+    composite(S,THEME_PAINTER,{out:bg,sAmt:.65,sdx:2,sdy:3});S.clearLayer();
+    for(let y=pear.y-22;y<pear.y+8;y++)for(let x=pear.x-22;x<pear.x+22;x++){const c=bg[y*W+x];if(hash(x*11,y*5)>0.9&&((c>>8)&255)>((c)&255)+10)pset(f,x,y,hex('#f2e6a0'));}
+    for(const[dx,dy]of[[-4,-16],[-1,-17],[13,-19],[16,-17],[-17,-15]]){pset(f,pear.x+dx,pear.y+dy,hex('#d0306a'));pset(f,pear.x+dx+1,pear.y+dy,hex('#a01e50'));pset(f,pear.x+dx,pear.y+dy-1,hex('#ff7aa8'));}}
+  // steer skull: cranium, muzzle, two sweeping horns, dark sockets
+  {const k=skull;S.cap(k.x,k.y-2,4.2,k.x,k.y+1,3.4,TM3.BONE,2,0,0,0.6);S.cap(k.x,k.y+2,2.8,k.x,k.y+7,2.2,TM3.BONE,2,0,0,0.5);
+    limb(S,bez([k.x-3,k.y-3],[k.x-10,k.y-4],[k.x-13,k.y-10],6),1.6,0.6,TM3.BONE,2);limb(S,bez([k.x+3,k.y-3],[k.x+10,k.y-4],[k.x+13,k.y-10],6),1.6,0.6,TM3.BONE,2);
+    composite(S,THEME_PAINTER,{out:bg,sAmt:.6,sdx:2,sdy:2});S.clearLayer();for(const[dx,dy]of[[-2,0],[2,0],[-1,6],[1,6]])pset(f,k.x+dx,k.y+dy,hex('#3a2a1a'));
+    for(let x=k.x-6;x<=k.x+6;x++)pset(f,x,k.y+9,mixc(bg[(k.y+9)*W+x],DUNE[3],0.6));}// half-buried: sand over the jaw
+  // agave in the top-right and a pup by the pear
+  for(const[x,y,r]of[[262,40,9],[pear.x+20,pear.y+8,4.5],[30,134,6]]){for(let k=0;k<11;k++){const a=k/11*TAU+0.2;S.cap(x,y,r*0.3,x+Math.cos(a)*r,y+Math.sin(a)*r*0.85,0.5,TM.SUC,1,0,r);}S.cap(x,y,r*0.32,x,y,r*0.32,TM.SUC,1,0,0,0.8);}
+  composite(S,THEME_PAINTER,{out:bg,sAmt:.6,sdx:1,sdy:2});S.clearLayer();
+  // small finds: a tumbleweed caught by the boulder, bleached snail shells, flat stones half in the sand, bird tracks, a few twigs
+  {const tw=[214,44];for(let yy=-6;yy<=6;yy++)for(let xx=-8;xx<=8;xx++)if(Math.hypot(xx/8,yy/5.5)<1)pdark(f,tw[0]+xx+3,tw[1]+yy+4,0.78);
+    for(let k=0;k<44;k++){const a=rr()*TAU,b=a+rn(1.2,3),r1=rn(2,7),r2=rn(2,7);line(f,tw[0]+Math.cos(a)*r1,tw[1]+Math.sin(a)*r1*0.8,tw[0]+Math.cos(b)*r2,tw[1]+Math.sin(b)*r2*0.8,rp([hex('#8a6a3a'),hex('#b08c54'),hex('#6a4e2a')]));}}
+  for(const[x,y]of[[142,36],[68,108],[302,92],[196,168]]){for(const[u,v]of[[1,2],[2,2],[3,1],[3,0]])pdark(f,x+u,y+v,.7);const C=[hex('#fffaf0'),hex('#e8dcc8'),hex('#b8a890'),hex('#7a6a58')];
+    for(const[u,v,q]of[[0,-1,0],[1,-1,1],[-1,0,1],[0,0,0],[1,0,2],[2,0,1],[0,1,1],[1,1,1],[2,-1,2]])pset(f,x+u,y+v,C[q]);pset(f,x+1,y,C[3]);}
+  // a lizard's burrow: a dark hole with a fan of dug-out sand in front of it
+  {const bx=118,by=128;for(let yy=-4;yy<=6;yy++)for(let xx=-7;xx<=7;xx++){const d=Math.hypot(xx/7,(yy-2)/4);if(d<1&&yy>0)pset(f,bx+xx,by+yy,mixc(bg[(by+yy)*W+bx+xx],DUNE[4],0.5*(1-d)));}for(let yy=-2;yy<=1;yy++)for(let xx=-3;xx<=3;xx++)if(Math.hypot(xx/3.2,yy/2)<1)pset(f,bx+xx,by+yy,yy<0?hex('#2a140a'):hex('#4a2a14'));}
+  for(const[x,y,w2,h2]of[[150,166,5,2],[304,108,4,2],[118,22,5,2],[86,150,4,2]]){for(let yy=0;yy<h2;yy++)for(let xx=0;xx<w2;xx++)pset(f,x+xx,y+yy,yy?TP.sstone[1]:TP.sstone[2]);for(let xx=0;xx<w2;xx++)pdark(f,x+xx+1,y+h2,0.75);}
+  for(let k=0;k<9;k++){const x=Math.round(52+k*9+Math.sin(k*1.3)*3),y=Math.round(164-k*4.2+Math.cos(k)*2),c=shade(DUNE[1],0.62);pset(f,x,y,c);pset(f,x-1,y-1,c);pset(f,x+1,y-1,c);pset(f,x-2,y-2,c);pset(f,x+2,y-2,c);pset(f,x,y+1,c);pset(f,x,y+2,c);}
+  for(const[x,y,a,l]of[[60,80,0.4,6],[296,62,2.2,5],[268,146,1.1,6],[24,120,2.7,5],[226,28,0.2,4]]){line(f,x+1,y+1,x+Math.cos(a)*l+1,y+Math.sin(a)*l+1,shade(bg[y*W+x],.65));line(f,x,y,x+Math.cos(a)*l,y+Math.sin(a)*l,hex('#a89270'));}
+  // desert flowers: marigold yellow and verbena purple, sheltered by the groups
+  const fl=(x,y,c1,c2)=>{pdark(f,x+1,y+1,.75);pset(f,x,y,c1);pset(f,x+1,y,c2);pset(f,x,y+1,c2);};
+  for(const[cx,cy,n,sp,c1,c2]of[[86,74,6,10,'#ffd23a','#e89a14'],[pear.x-24,pear.y+2,5,8,'#c87ae8','#8a46b0'],[skull.x+2,skull.y+13,4,5,'#ffd23a','#e89a14'],[250,58,4,7,'#c87ae8','#8a46b0'],[40,118,4,6,'#ffd23a','#e89a14']])
+    for(let k=0;k<n;k++){const a=rr()*TAU,d=Math.sqrt(rr())*sp;fl(Math.round(cx+Math.cos(a)*d),Math.round(cy+Math.sin(a)*d*0.6),hex(c1),hex(c2));}
+  {const c=Math.cos(hd.ang),s=Math.sin(hd.ang),ax=hd.x-c*hd.len/2,ay=hd.y-s*hd.len/2,bx=hd.x+c*hd.len/2,by=hd.y+s*hd.len/2;
+    S.cap(ax,ay,hd.r*0.75,bx,by,hd.r*0.55,TM.BWOOD,1,0,hd.len);S.cap(ax,ay,hd.r*0.95,ax,ay,hd.r*0.95,TM.BWOOD,1,0,2);
+    const fx=hd.x+c*hd.len*0.15,fy=hd.y+s*hd.len*0.15;S.cap(fx,fy,2.4,fx+s*13+c*6,fy-c*13+s*6,1.1,TM.BWOOD,1,0,14);S.cap(bx,by,hd.r*0.5,bx+c*9-s*4,by+s*9+c*4,0.9,TM.BWOOD,1,0,10);
+    composite(S,THEME_PAINTER,{out:ov,shadowOut:bg,sAmt:.5,sdx:3,sdy:4});S.clearLayer();}
+  for(let i=0;i<N;i++){const j=i*3;R.LD[j]*=1.07;R.LD[j+2]*=0.86;}
+  finish(world,bg,ov);world.plants=[];}
+
+// ---------------- Flower Field ----------------
+// Leading line: the dirt path curves across the tank. The edges are a deep wildflower border (tall grass, big blooms and
+// drifts of small flowers) that frames an open, shorter lawn in the middle. Big flowers come in three stands at the
+// corners and a pair on the left edge; small flowers thicken toward the border and line the path.
+const GRS=ramp('#26501c','#326622','#427c2a','#569434','#70ac42'),GRL=ramp('#2e5a1e','#3c7426','#50902e','#6cae3a','#96cc56'),PATH=ramp('#4e3622','#664a2e','#806040','#9a7a56','#b4966c');
+function bigFlower(S,x,y,r,kind,ang=0){
+  for(let k=0;k<3;k++){const a=ang+k*2.1+0.4,ex=x+Math.cos(a)*r*1.5,ey=y+Math.sin(a)*r*1.2;S.cap(x,y,r*0.25,ex,ey,r*0.42,TM.FLEAF,1,0,r*1.5);}
+  const pm=kind==='sun'?TM.PET_Y:kind==='cosmos'?TM.PET_P:kind==='poppy'?TM.PET_O:TM.PET_W,n=kind==='sun'?16:kind==='cosmos'?8:kind==='poppy'?5:13,w=kind==='sun'?r*0.22:kind==='cosmos'?r*0.36:kind==='poppy'?r*0.55:r*0.16;
+  for(let k=0;k<n;k++){const a=ang+k/n*TAU;S.cap(x+Math.cos(a)*r*0.35,y+Math.sin(a)*r*0.3,w*0.7,x+Math.cos(a)*r,y+Math.sin(a)*r*0.85,w,pm,2,0,r);}
+  const dc=kind==='sun'?r*0.42:kind==='poppy'?r*0.22:r*0.24;S.cap(x,y,dc,x,y,dc,kind==='sun'||kind==='poppy'?TM.SEEDC:TM.PET_Y,2,0,0,0.9);}
+function bakeField(world){srand(23);const S=new FB(W,H),bg=new Uint32Array(N),ov=new Uint32Array(N),f={w:W,h:H,px:bg};
+  const pathY=x=>132-34*Math.sin(x*0.014+0.5)-x*0.16,pathD=(x,y)=>Math.abs(y-pathY(x));
+  const edgeK=(x,y)=>{const e=Math.min(x-TANK.x0,y-TANK.y0,TANK.x1-1-x,TANK.y1-1-y)+(fbm(x*0.04,y*0.04+9,3)-0.5)*26;return clamp(1-e/34,0,1);};
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,n=fbm(x*.04+3,y*.04,4),b=bay(x,y),ek=edgeK(x,y);let c=GRS[clamp(Math.floor(1.9+(n-0.5)*2.2+(b-.5)*0.8+ek*0.4),0,4)];
+    const d=pathD(x,y),pw=7+fbm(x*0.08,7,2)*3;if(d<pw){c=PATH[clamp(Math.floor(1.6+fbm(x*.12,y*.12,3)*2+(b-.5)*0.8),0,4)];if(d>pw-1.5)c=mixc(c,GRS[1],0.5);if(hash(x*7,y*3)>0.94)c=mixc(c,hex('#d0c4a8'),.4);}
+    if(d>=pw){const yg=clamp((fbm(x*.028+90,y*.028,3)-0.5)*4,-1,1);c=yg>0?mixc(c,hex('#86b83e'),0.16*yg):mixc(c,hex('#2e6a3a'),-0.14*yg);}
+    bg[i]=edgeAO(c,x,y);}
+  // short lawn tufts in the middle, tall bright grass in the border
+  for(let k=0;k<1500;k++){const x=Math.floor(rn(10,310)),y=Math.floor(rn(12,170));if(pathD(x,y)<9)continue;const ek=edgeK(x,y);if(ek>0.3)tuft(f,x,y,GRL,3+(k%3),4);else if(k%2)tuft(f,x,y,GRS,2+(k%2),3);}
+  // clover patches with real three-leaf shapes
+  for(const[cx,cy]of[[150,60],[236,104],[96,150]])for(let k=0;k<26;k++){const a=rr()*TAU,d=Math.sqrt(rr())*12,x=Math.round(cx+Math.cos(a)*d),y=Math.round(cy+Math.sin(a)*d*0.6);if(pathD(x,y)<9)continue;
+    for(const[u,v]of[[0,-1],[-1,0],[1,0]])pset(f,x+u,y+v,hex('#5aa646'));pset(f,x,y,hex('#3e7a34'));pdark(f,x+1,y+1,.8);}
+  const P=(x,y,c)=>pset(f,x,y,hex(c));
+  const SMALL={daisy:(x,y)=>{pdark(f,x+1,y+1,.75);for(const[u,v]of[[0,-1],[1,0],[0,1],[-1,0]])P(x+u,y+v,'#f4f2e8');P(x,y,'#eebc2a');},
+    butter:(x,y)=>{pdark(f,x+1,y+1,.75);P(x,y,'#f6d03a');P(x+1,y,'#e2ac1e');P(x,y-1,'#fff09a');},
+    clover:(x,y)=>{P(x,y,'#f0c8dc');P(x+1,y,'#d49ab8');P(x,y+1,'#b87aa0');},
+    bluebell:(x,y)=>{pdark(f,x+1,y+1,.75);P(x,y,'#7a9cf0');P(x,y+1,'#4a64c0');P(x+1,y,'#a8c4ff');},
+    lavender:(x,y)=>{pdark(f,x+1,y+1,.75);P(x,y,'#b88ae0');P(x,y-1,'#9a66cc');P(x,y-2,'#d4b0f4');P(x+1,y-1,'#7a4aaa');},
+    poppy:(x,y)=>{pdark(f,x+1,y+1,.7);P(x,y,'#ff5a3a');P(x+1,y,'#d8301e');P(x,y+1,'#d8301e');P(x+1,y+1,'#1a0a0a');}};
+  const drift=(cx,cy,rx,ry,n,kinds)=>{for(let k=0;k<n;k++){const a=rr()*TAU,d=Math.pow(rr(),0.7);const x=Math.round(cx+Math.cos(a)*rx*d),y=Math.round(cy+Math.sin(a)*ry*d);if(pathD(x,y)<9||!inT(x+1,y+1))continue;SMALL[rp(kinds)](x,y);}};
+  // the border: drifts all the way round, each with its own mix so colours come in bands, not confetti
+  const border=[[40,20,['daisy','daisy','butter']],[110,16,['lavender','lavender','bluebell']],[180,18,['butter','daisy']],[250,16,['clover','daisy']],[304,40,['poppy','butter']],
+    [306,96,['lavender','bluebell']],[300,150,['butter','daisy']],[226,166,['clover','daisy']],[150,168,['bluebell','lavender']],[70,166,['poppy','daisy']],[14,120,['butter','daisy']],[14,70,['lavender','bluebell']]];
+  for(const[x,y,k]of border)drift(x,y,30,14,80,k);
+  for(let x=20;x<300;x+=22){const side=(x/22|0)%2?1:-1;drift(x,pathY(x)+side*13,10,4,8,(x/22|0)%3===0?['butter']:['daisy','clover']);}
+  rockC(S,154,150,4.5,M.ROCK,5);rockC(S,163,155,2.6,M.ROCK,3);
+  composite(S,THEME_PAINTER,{out:bg,sAmt:.6,sdx:2,sdy:3});S.clearLayer();
+  for(const[x,y]of[[214,74],[221,79],[209,82]]){pdark(f,x+1,y+1,.75);for(let k=0;k<12;k++){const a=k/12*TAU;pset(f,x+Math.round(Math.cos(a)*2.4),y+Math.round(Math.sin(a)*2),k&1?hex('#f2f2ec'):hex('#ccd0c4'));}pset(f,x,y,hex('#b0a070'));}
+  const hd=world.hide,c=Math.cos(hd.ang),s=Math.sin(hd.ang);S.cap(hd.x-c*hd.len/2,hd.y-s*hd.len/2,hd.r,hd.x+c*hd.len/2,hd.y+s*hd.len/2,hd.r,M.LOG,1,0,hd.len);
+  // big flower stands: corners frame the tank, a pair on the left edge
+  {const bgPre=bg.slice();composite(S,THEME_PAINTER,{out:ov,shadowOut:bg,sAmt:.55,sdx:4,sdy:6});S.clearLayer();logEnd(ov,hd.x-c*hd.len/2,hd.y-s*hd.len/2,hd.x+c*hd.len/2,hd.y+s*hd.len/2,hd.r,hd.r,true,{bg,bgPre,sdx:4,sdy:6});}
+  bigFlower(S,40,40,12,'sun',0.2);bigFlower(S,64,30,8,'cosmos',0.7);bigFlower(S,56,58,7,'cosmos',1.9);bigFlower(S,22,64,5.5,'daisy',0.3);
+  bigFlower(S,282,28,9,'daisy',0.5);bigFlower(S,300,52,7.5,'cosmos',1.2);bigFlower(S,262,20,6,'poppy',2.0);
+  bigFlower(S,290,150,13,'sun',1.1);bigFlower(S,266,158,7,'poppy',0.3);bigFlower(S,304,124,6,'daisy',2.2);
+  bigFlower(S,20,128,8,'poppy',0.9);bigFlower(S,30,150,6.5,'cosmos',2.6);
+  bigFlower(S,200,166,7,'daisy',1.4);
+  composite(S,THEME_PAINTER,{out:ov,shadowOut:bg,sAmt:.55,sdx:4,sdy:6});S.clearLayer();
+  for(let i=0;i<N;i++){const j=i*3;R.LD[j]*=1.03;R.LD[j+1]*=1.04;R.LD[j+2]*=0.95;}
+  finish(world,bg,ov);world.plants=[];}
+
+// ---------------- Enchanted Grove ----------------
+// Framing: an old tree's roots crawl in from the bottom-left corner and down the right edge; a giant red toadstool family
+// holds the top-left corner and a purple one the bottom-right. Main feature: the fairy ring on the upper-right third with
+// glowing bluebells and the brightest glow caps. The log lies on the lower-left third with shelf fungi and its own glow
+// cluster. Small life everywhere at the edges (bonnet mushrooms, mossy stones, ferns, leaf drifts); a mossy clearing in the middle.
+const LOAM=ramp('#1e1226','#2c1a34','#3a2444','#4a2e54','#5c3a66'),GMOSS=ramp('#0c2a30','#123e44','#185858','#20726c','#2e8e86');
+function bakeGrove(world){srand(37);THEME_PAINTER.tint={[M.LOG]:[hex('#5e3a86'),0.38],[TM3.ROOT]:[hex('#5e3a86'),0.38],[TM.SHELF]:[hex('#8a4a9a'),0.22],[M.ROCK]:[hex('#3e7a90'),0.36],[M.LITTER]:[hex('#6a3a7a'),0.32],[TM.FCAP]:[hex('#9aa8e0'),0.22],[TM.CAP]:[hex('#a03a6a'),0.14],[TM.TCAP]:[hex('#6a3aa0'),0.12]};
+  try{bakeGrove2(world);}finally{THEME_PAINTER.tint=null;}}
+function bakeGrove2(world){const S=new FB(W,H),bg=new Uint32Array(N),ov=new Uint32Array(N),f={w:W,h:H,px:bg},EM=new Float32Array(N*3);
+  const fr={x:226,y:50,r:22},hd=world.hide;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,n=fbm(x*.05+21,y*.05,4),b=bay(x,y);let c=LOAM[clamp(Math.floor(n*5-0.3+(b-.5)*0.8),0,4)];
+    const e=Math.min(x-TANK.x0,y-TANK.y0,TANK.x1-1-x,TANK.y1-1-y),m=0.12+clamp(1-e/34,0,1)*0.2+fbm(x*.022+70+fbm(x*.02,y*.02,2)*3,y*.022+11,4)*0.85+(vnoise(x*.5,y*.5)-.5)*0.08;
+    if(m>0.57){const lv=(m-0.57)*14+(vnoise(x*.45,y*.45)-.5)*2+b*0.8;c=GMOSS[clamp(Math.floor(lv),0,4)];if(hash(x*13,y*7)>0.996&&m>0.75){c=hex('#7af0c8');EM[i*3]=20;EM[i*3+1]=110;EM[i*3+2]=90;}}
+    bg[i]=edgeAO(c,x,y,14);}
+  // leaf drifts against the glass and the roots
+  for(let k=0;k<46;k++){const e=rr();let x,y;if(e<0.5){x=rn(14,306);y=rr()<0.5?rn(12,24):rn(154,168);}else{x=rr()<0.5?rn(12,26):rn(294,308);y=rn(14,166);}
+    const a=rr()*TAU,sz=rn(4,7),c=Math.cos(a),sn=Math.sin(a),mx=x+c*sz*.45,my=y+sn*sz*.45;S.cap(x,y,.6,mx,my,sz*.3,M.LITTER,1,0,sz*.45);S.cap(mx,my,sz*.3,x+c*sz,y+sn*sz,.3,M.LITTER,1,sz*.45,sz);}
+  composite(S,THEME_PAINTER,{out:bg,sAmt:.7,sdx:1,sdy:1});S.clearLayer();
+  // roots: thick where they enter at the glass, tapering and splitting as they reach in
+  limb(S,bez([4,176],[40,150],[96,160],12),7,1.2,TM3.ROOT);limb(S,bez([30,158],[46,128],[34,104],10),4,0.8,TM3.ROOT);limb(S,bez([60,152],[80,142],[110,148],8),3,0.7,TM3.ROOT);
+  limb(S,bez([318,120],[290,112],[270,130],10),6,1,TM3.ROOT);limb(S,bez([318,86],[300,82],[286,94],8),3.6,0.8,TM3.ROOT);limb(S,bez([300,116],[296,140],[276,152],8),3,0.7,TM3.ROOT);
+  // little things on the clearing floor: twigs, sorrel, tiny white flowers, a pebble pair
+  {for(const[x,y,a,l]of[[140,80,0.4,6],[200,118,2.2,5],[170,142,1.0,6],[150,120,2.8,5]]){line(f,x+1,y+1,x+Math.cos(a)*l+1,y+Math.sin(a)*l+1,shade(bg[Math.floor(y)*W+Math.floor(x)],.6));line(f,x,y,x+Math.cos(a)*l,y+Math.sin(a)*l,hex('#5a3e24'));}
+   for(const[cx,cy]of[[150,92],[196,136],[124,70]])for(let k=0;k<10;k++){const x=Math.round(cx+rn(-7,7)),y=Math.round(cy+rn(-4,4));if(k%3){pset(f,x,y,hex('#5aa646'));pset(f,x+1,y,hex('#3e8a3a'));pset(f,x,y-1,hex('#6ab850'));}else{pset(f,x,y,hex('#f0eee0'));pdark(f,x+1,y+1,.8);}}
+   rockC(S,182,96,2.6,M.ROCK,3);rockC(S,188,99,1.6,M.ROCK,2);}
+  // mossy stones in a family at the top middle
+  rockFamily(S,148,26,7,M.ROCK,0.5);
+  // stepping stones from the log to the fairy ring: a leading line through the clearing
+  {const st=bez([138,100],[176,94],[204,70],6);for(let k=1;k<st.length;k++){const[x,y]=st[k],r=2.8-k*0.12;S.cap(x-r*0.4,y,r,x+r*0.4,y,r,M.ROCK,1,0,0,0.15);}}
+  for(let k=0;k<14;k++){const a=k/14*TAU+rn(-.1,.1),x=fr.x+Math.cos(a)*fr.r,y=fr.y+Math.sin(a)*fr.r*0.72,r=rn(1.5,2.3);S.cap(x,y,r,x,y,r,TM.FCAP,1,0,0,0.6);}
+  composite(S,THEME_PAINTER,{out:bg,sAmt:.65,sdx:2,sdy:3});S.clearLayer();
+  // a tiny arched fairy door in the big root, with a lit window and a lantern beside it
+  {const dx=34,dy=154,D=hex('#7a4222'),D2=hex('#9a5a2c'),F=hex('#2a160a');for(let y=-10;y<=1;y++)for(let x=-5;x<=5;x++){const arch=y<-5?Math.hypot(x,(y+5)*1.1)<=5.2:Math.abs(x)<=5;if(!arch)continue;const edge=Math.abs(x)>=5||(y<-5&&Math.hypot(x,(y+5)*1.1)>4.2)||y===1;pset(f,dx+x,dy+y,edge?F:(Math.abs(x)%2?D:D2));}
+    for(let x=-3;x<=3;x++)pdark(f,dx+x+1,dy+2,0.7);pset(f,dx+2,dy-4,hex('#f0c040'));pset(f,dx+2,dy-3,hex('#b08020'));for(const[u,v]of[[-1,-8],[0,-8],[1,-8],[-1,-7],[0,-7],[1,-7]])pset(f,dx+u,dy+v,hex('#ffe08a'));pset(f,dx,dy-7,hex('#6a3a1e'));
+    pset(f,dx+8,dy-4,hex('#ffe8a0'));pset(f,dx+8,dy-3,hex('#ffd060'));pset(f,dx+8,dy-5,hex('#3a2a1a'));pset(f,dx+8,dy-2,hex('#3a2a1a'));pset(f,dx+8,dy-1,hex('#3a2a1a'));
+    for(const[x,y,k]of[[dx,dy-7,1],[dx+8,dy-4,1.4]])for(let yy=-10;yy<=10;yy++)for(let xx=-10;xx<=10;xx++){const q=1-Math.hypot(xx,yy*1.2)/10;if(q<=0||!inT(x+xx,y+yy))continue;const i=((y+yy)*W+x+xx)*3;EM[i]+=150*q*q*k;EM[i+1]+=100*q*q*k;EM[i+2]+=30*q*q*k;}}
+  const toad=(x,y,r,mat)=>S.cap(x,y,r,x,y,r,mat,2,0,0,0.7);
+  toad(52,38,5,TM.CAP);toad(60,48,3.2,TM.CAP);toad(44,52,2.4,TM.CAP);toad(66,30,2,TM.CAP);
+  toad(262,146,4.4,TM.TCAP);toad(254,156,3,TM.TCAP);toad(270,136,2.2,TM.TCAP);
+  // tiny pale bonnet mushrooms along the roots
+  for(const[cx,cy,n]of[[70,150,7],[34,118,5],[284,104,6],[110,146,4]])for(let k=0;k<n;k++){const x=cx+rn(-6,6),y=cy+rn(-3,3),r=rn(0.9,1.5);S.cap(x,y,r,x,y,r,TM.FCAP,2,0,0,0.6);}
+  const glows=[];const gcl=(cx,cy,n,sp)=>{for(let k=0;k<n;k++){const a=rr()*TAU,d=Math.sqrt(rr())*sp,x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d*0.7,r=k===0?3.4:rn(1.6,2.8);S.cap(x,y+1.5,r*0.45,x,y+1.5,r*0.45,TM.STEMW,2,0,0,0.3);S.cap(x,y,r,x,y,r,TM.GCAP,2,0,0,0.7);glows.push([x,y,r,1]);}};
+  gcl(fr.x+38,fr.y+24,5,6);gcl(hd.x+hd.len*0.5*Math.cos(hd.ang)+14,hd.y+hd.len*0.5*Math.sin(hd.ang)+16,4,5);gcl(26,92,3,4);
+  composite(S,THEME_PAINTER,{out:bg,sAmt:.65,sdx:2,sdy:3});S.clearLayer();
+  // glowing bluebells: drooping violet bells inside and around the ring
+  for(const[cx,cy,n,sp]of[[fr.x-6,fr.y-2,9,12],[fr.x+26,fr.y+30,4,5],[120,108,5,7]])for(let k=0;k<n;k++){const a=rr()*TAU,d=Math.sqrt(rr())*sp,x=Math.round(cx+Math.cos(a)*d),y=Math.round(cy+Math.sin(a)*d*0.7);
+    pset(f,x,y-1,hex('#3a6a3a'));pset(f,x,y,hex('#9a8af0'));pset(f,x+1,y,hex('#6a5ad0'));pset(f,x,y+1,hex('#c8c0ff'));const i=(y*W+x)*3;EM[i]+=40;EM[i+1]+=30;EM[i+2]+=120;EM[i+3]+=20;EM[i+5]+=70;glows.push([x,y,1.2,0.35]);}
+  for(const[gx,gy,gr,str]of glows){const R2=(16+gr*3)*(str<1?0.7:1);for(let y=Math.floor(gy-R2);y<=gy+R2;y++)for(let x=Math.floor(gx-R2);x<=gx+R2;x++){if(!inT(x,y))continue;const d=Math.hypot(x+.5-gx,(y+.5-gy)*1.25)/R2;if(d>=1)continue;const k=Math.pow(1-d,2.2)*0.5*str,i=(y*W+x)*3;
+      if(str<1){EM[i]+=40*k;EM[i+1]+=34*k;EM[i+2]+=130*k;}else{EM[i]+=24*k;EM[i+1]+=120*k;EM[i+2]+=120*k;}}
+    if(str===1)for(let y=Math.floor(gy-gr);y<=gy+gr;y++)for(let x=Math.floor(gx-gr);x<=gx+gr;x++){if(Math.hypot(x+.5-gx,y+.5-gy)<gr){const i=(y*W+x)*3;EM[i]+=40;EM[i+1]+=150;EM[i+2]+=140;}}}
+  const c=Math.cos(hd.ang),s=Math.sin(hd.ang);
+  S.cap(hd.x-c*hd.len/2,hd.y-s*hd.len/2,hd.r,hd.x+c*hd.len/2,hd.y+s*hd.len/2,hd.r,M.LOG,1,0,hd.len);
+  for(let k=0;k<3;k++){const t=-0.3+k*0.2,x=hd.x+c*hd.len*t-s*(hd.r+0.5),y=hd.y+s*hd.len*t+c*(hd.r+0.5)-1;S.cap(x,y,2.6-k*0.4,x-s*2,y+c*2,1.4,TM.SHELF,2,0,3);}
+  {const bgPre=bg.slice();composite(S,THEME_PAINTER,{out:ov,shadowOut:bg,sAmt:.55,sdx:4,sdy:6});S.clearLayer();logEnd(ov,hd.x-c*hd.len/2,hd.y-s*hd.len/2,hd.x+c*hd.len/2,hd.y+s*hd.len/2,hd.r,hd.r,true,{bg,bgPre,sdx:4,sdy:6});}
+  S.cap(24,24,20,24,24,20,TM.CAP,2,0,0,0.5);S.cap(300,162,15,300,162,15,TM.TCAP,2,0,0,0.5);
+  composite(S,THEME_PAINTER,{out:ov,shadowOut:bg,sAmt:.55,sdx:4,sdy:6});S.clearLayer();
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,j=i*3,dp=0.92+0.3*clamp((fbm(x*0.025+3,y*0.025,3)-0.38)*3,0,1);R.LD[j]*=dp*0.97;R.LD[j+1]*=dp;R.LD[j+2]*=dp*0.98;R.LN[j]*=0.8;R.LN[j+1]*=0.85;R.LN[j+2]*=0.95;}
+  R.EM=EM;R.spores=Array.from({length:18},()=>({x:rn(20,300),y:rn(20,160),ph:rn(0,TAU),s:rn(0.5,1.2)}));
+  finish(world,bg,ov);world.plants=[makePlant('fern',308,14,1.6,3.1,8,18,34),makePlant('fern',12,176,-1.4,-0.2,7,16,28)];}
+
+// ---------------- Coral Reef ----------------
+// The reef is built from real boulders (domed, lit and shadowed like the other tanks' rocks, crusted with pink coralline)
+// arranged in a horseshoe round a sandy lagoon. Corals grow on the boulders only, grouped by area so each part of the reef
+// has its own character and colour family:
+//   back-left  : pink branching coral, purple sea fans, green flowerpot coral, zoanthid carpets
+//   back-middle: orange sun-coral cups, yellow pillar coral, pearly bubble coral, feather-duster worms
+//   right side : blue branching coral, purple brain coral, teal table coral, sea whips, mushroom corals
+//   coral head : purple and pink, a pink flowerpot coral, feather dusters
+// Flowerpot polyps, zoanthids and feather dusters are alive: they sway, and pull in when the glass is tapped or a critter
+// swims close, then creep back out one by one.
+const RSAND=ramp('#b4ac96','#cec6ac','#e2dcc4','#f2ecd8','#fffaee');
+const RPAL5=[PAL.coral,PAL.coral2,TP.cory,TP.corp,TP.blue,TP.table,ramp('#5a6a5e','#98ae9c','#d0e4d2','#f4fff4')/*pearl*/,ramp('#1e4a1c','#3a8a2a','#6ccc3a','#c4f88a')/*polyp green*/];
+const RC=(p,mound)=>140+p*2+(mound?1:0);
+const TM5={ROCK:160,RIDGE:161};
+const REEFR=ramp('#24223a','#423f5e','#666388','#9490b6'),CORALLINE=ramp('#5a2648','#8e4468','#c06a8a','#eaa0b8');
+{const oc=THEME_PAINTER.color;THEME_PAINTER.color=function(m,q,s,l,x,y){
+  if(m>=140&&m<156){const p=(m-140)>>1,R2=RPAL5[p];if((m-140)&1){const g=Math.sin(x*1.05+Math.sin(y*0.62)*2.6)+Math.sin(y*0.98+Math.sin(x*0.55)*2.3);return R2[Math.abs(g)<0.4?Math.max(0,q-1):q];}return R2[q];}
+  if(m===156){const b=Math.sin((x*0.75+y*0.45)+Math.sin(x*0.35-y*0.28)*2.6);return PAL.coral2[b>0.55?Math.min(3,q+1):b<-0.6?Math.max(0,q-1):q];}
+  if(m===157){const rib=Math.abs(Math.sin(Math.atan2(y-116,(x-100)*0.55)*7))<0.3;return TP3.bone[rib?Math.max(0,q-1):q];}
+  if(m===TM5.ROCK){const cr=vnoise(x*0.11+4,y*0.11)>0.6;return cr&&q>=1?CORALLINE[q]:REEFR[q];}
+  if(m===TM5.RIDGE){const r=Math.abs(Math.sin(Math.atan2(l,s)*0+s*1.3));return RPAL5[this._rp||0][q];}
+  return oc.call(this,m,q,s,l,x,y);};}
+function bakeReef(world){srand(53);const polyps0=[];const S=new FB(W,H),bot=new Uint32Array(N),bg=new Uint32Array(N),ov=new Uint32Array(N),fbx={w:W,h:H,px:bot};
+  const reefK=(x,y)=>{const n=(fbm(x*0.045+5,y*0.045,3)-0.5)*22;
+    return Math.max(48+12*Math.sin(x*0.035+1)+n-y, x-(258-14*Math.sin(y*0.05)+n*0.8), 30-Math.hypot(x-62,(y-136)*1.15)+n*0.6, 13-Math.hypot(x-198,(y-160)*1.2)+n*0.4);};
+  const RM=new Uint8Array(N);for(let y=TANK.y0;y<TANK.y1;y++)for(let x=TANK.x0;x<TANK.x1;x++)if(reefK(x,y)>0)RM[y*W+x]=1;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,n=fbm(x*0.05+31,y*0.05,4),rp2=Math.sin((x*0.8+y*0.35+fbm(x*0.03,y*0.03+7,3)*26)*0.42);bot[i]=RSAND[clamp(Math.floor(1.9+n*1.2+rp2*0.7+(bay(x,y)-.5)*0.8),0,4)];}
+  // coral rubble and shell grit scattered at the reef's foot
+  for(let k=0;k<160;k++){const x=Math.floor(rn(10,310)),y=Math.floor(rn(10,170)),i=y*W+x;if(RM[i])continue;let near=false;for(const[dx,dy]of[[6,0],[-6,0],[0,6],[0,-6]])if(RM[(y+dy)*W+x+dx])near=true;if(!near)continue;
+    const c=rp([hex('#e8d8d0'),hex('#c8a8b8'),hex('#f4ece0')]);pdark(fbx,x+1,y+1,.7);pset(fbx,x,y,c);}
+  for(const[x,y]of[[176,136],[206,104],[112,118]]){for(let a=0;a<TAU;a+=0.4)pset(fbx,x+Math.cos(a)*2.4,y+Math.sin(a)*2,hex('#e8dcc0'));pset(fbx,x,y,hex('#c8b898'));pset(fbx,x+1,y-1,hex('#c8b898'));pset(fbx,x-1,y-1,hex('#c8b898'));pdark(fbx,x+2,y+3,.8);}
+  const SC=[hex('#f4e4d4'),hex('#f0a8b8'),hex('#fff4e8')];
+  for(const[x,y]of[[152,118],[158,122],[176,94],[118,92],[214,126]]){const c2=rp(SC),d=shade(c2,0.7);pdark(fbx,x+1,y+2,.6);pset(fbx,x,y,c2);pset(fbx,x+1,y,d);pset(fbx,x,y+1,d);pset(fbx,x+1,y+1,shade(c2,0.85));}
+  // boulders: big ones first along the reef's spine, smaller ones filling in, all inside the reef shape
+  const B=[];const bfits=(x,y,r)=>RM[Math.floor(y)*W+Math.floor(x)]&&B.every(([a,b,q])=>Math.hypot(a-x,b-y)>(q+r)*0.62);
+  for(const[a,b,tries]of[[11,16,300],[7,11,500],[4,7,700]])for(let k=0;k<tries;k++){const x=rn(8,312),y=rn(8,172),r=rn(a,b);if(bfits(x,y,r))B.push([x,y,r]);}
+  B.sort((p,q)=>p[1]-q[1]);for(const[x,y,r]of B){S.cap(x-r*0.25,y,r*0.9,x+r*0.25,y+r*0.1,r*0.85,TM5.ROCK,1,0,0,0.75);}
+  composite(S,THEME_PAINTER,{out:bot,sAmt:.85,sdx:2,sdy:4});const BM=new Uint8Array(N);for(let i=0;i<N;i++)if(S.mat[i])BM[i]=1;S.clearLayer();
+  const as=world.air;S.cap(as.x,as.y,2.4,as.x,as.y,2.4,M.ROCK,1);composite(S,THEME_PAINTER,{out:bot,sAmt:.55,sdx:1,sdy:2});S.clearLayer();
+  R.depth=new Float32Array(N);const DEEP=hex('#0c4a86'),MID=hex('#1a86c0'),SHAL=hex('#3cbce2');const tintAt=e=>e<0.5?mixc(SHAL,MID,e*2):mixc(MID,DEEP,(e-0.5)*2);
+  const dR=chamfer(BM);
+  for(let y=TANK.y0;y<TANK.y1;y++)for(let x=TANK.x0;x<TANK.x1;x++){const i=y*W+x,ed=Math.min(x-TANK.x0,y-TANK.y0,TANK.x1-1-x,TANK.y1-1-y);
+    const e=BM[i]?0.22:clamp(0.34+0.5*clamp(dR[i]/40,0,1)+(fbm(x*0.03+5,y*0.03,3)-0.5)*0.1,0.3,0.85);R.depth[i]=e;bg[i]=mixc(bot[i],tintAt(e),BM[i]?0.07:0.28+0.36*e);
+    const rp2=Math.sin((x*0.8+y*0.35+fbm(x*0.03,y*0.03+7,3)*26)*0.42);if(!BM[i]&&rp2>0.82)bg[i]=mixc(bg[i],hex('#f0fcff'),0.14);if(ed<8)bg[i]=shade(bg[i],0.74+0.26*ed/8);}
+  // ---- corals ----
+  const zone=(x,y)=>Math.hypot(x-62,y-136)<46?'head':Math.hypot(x-198,y-160)<24?'mid':x>236&&y>46?'right':x<124?'left':'mid';
+  const ZK={left:{big:['branch','fan','gonio'],med:['branch','zoa','fan','branch'],small:['zoa','branch'],pal:[0,3]},
+    mid:{big:['sun','pillar','sun'],med:['bubble','pillar','duster','sun'],small:['bubble','duster'],pal:[1,2]},
+    right:{big:['branch','table','gonio','branch'],med:['brain','whip','mushroom','branch','zoa'],small:['mushroom','zoa','whip'],pal:[4,3]},
+    head:{big:['branch','gonio','fan'],med:['branch','brain','duster'],small:['duster','zoa'],pal:[3,0]}};
+  const CL={x:100,y:116};S.cap(CL.x-6,CL.y,4.6,CL.x+6,CL.y,4.6,157,2,0,0,0.6);for(let k=0;k<14;k++){const a=k/14*TAU,ex=CL.x+Math.cos(a)*9.6,ey=CL.y+Math.sin(a)*5.2;S.cap(ex,ey,1.9,ex,ey,1.9,157,2,0,0,0.6);}
+  composite(S,THEME_PAINTER,{out:bg,sAmt:.6,sdx:1,sdy:2});for(let i=0;i<N;i++)if(S.mat[i])bg[i]=mixc(bg[i],tintAt(0.3),0.2);S.clearLayer();polyps0.push({kind:'clam',x:CL.x,y:CL.y,r:6,pal:5,ext:1,cool:0,del:0});
+  const placed=[[CL.x,CL.y,14]];const fits=(x,y,r)=>{const i=Math.floor(y)*W+Math.floor(x);if(!BM[i])return false;for(const[dx,dy]of[[r*0.6,0],[-r*0.6,0],[0,r*0.5],[0,-r*0.5]]){const j=Math.floor(y+dy)*W+Math.floor(x+dx);if(!BM[j])return false;}return placed.every(([a,b,q])=>Math.hypot(a-x,b-y)>(q+r)*1.02);};
+  const branch=(x,y,a,len,r,depth,mat)=>{const ex=x+Math.cos(a)*len,ey=y+Math.sin(a)*len;S.cap(x,y,r,ex,ey,r*0.82,mat,2,0,len);if(depth>0){const sp=rn(0.4,0.6);branch(ex,ey,a-sp,len*0.7,r*0.8,depth-1,mat);branch(ex,ey,a+sp,len*0.7,r*0.8,depth-1,mat);}else S.cap(ex,ey,r*1.1,ex,ey,r*1.1,mat,2);};
+  const marks=[],polyps=polyps0;let gcount=0;
+  const KIND={
+    branch:(x,y,r,p)=>{const m=RC(p,0),a0=rr()*TAU,n=5;for(let i=0;i<n;i++)branch(x,y,a0+i/n*TAU+rn(-0.15,0.15),r*0.52,Math.max(1.5,r*0.17),2,m);S.cap(x,y,r*0.22,x,y,r*0.22,m,2,0,0,0.6);},
+    brain:(x,y,r,p)=>{r=Math.min(r,6.5);S.cap(x,y,r,x,y,r,RC(p,1),2,0,0,0.3);},
+    table:(x,y,r)=>{const m=RC(5,1);S.cap(x,y,r,x,y,r,m,2,0,r,0.1);const n=Math.round(r*2.2);for(let i=0;i<n;i++){const a=i/n*TAU;S.cap(x+Math.cos(a)*r,y+Math.sin(a)*r*0.9,r*0.2,x+Math.cos(a)*r,y+Math.sin(a)*r*0.9,r*0.2,m,2,0,r,0.05);}},
+    fan:(x,y,r,p)=>{const m=RC(3,0),a=Math.atan2(y-90,x-160)+Math.PI;for(let k=-3;k<=3;k++)branch(x,y,a+k*0.22,r*(1-Math.abs(k)*0.07),0.9,1,m);},
+    sun:(x,y,r)=>{const n=Math.round(r*0.8);for(let k=0;k<n;k++){const a=k*2.399,d=Math.sqrt((k+0.5)/n)*r*0.8,u=x+Math.cos(a)*d,v=y+Math.sin(a)*d*0.85,q=rn(1.7,2.5);S.cap(u,v,q,u,v,q,RC(1,0),2,0,0,0.85);marks.push(['cup',u,v,q]);}},
+    lettuce:(x,y,r)=>{for(let k=0;k<4;k++){const a=k*1.7+rr(),d=k?r*0.42:0,q=k?r*0.55:r*0.62;S.cap(x+Math.cos(a)*d,y+Math.sin(a)*d*0.85,q,x+Math.cos(a)*d,y+Math.sin(a)*d*0.85,q,156,2,0,0,0.4);}},
+    elkhorn:(x,y,r)=>{const m=RC(1,0),a0=rr()*TAU,n=3+(rr()<0.5?1:0);for(let k=0;k<n;k++){const a=a0+k*TAU/n+rn(-0.35,0.35),L=r*rn(0.55,0.95),ex=x+Math.cos(a)*L,ey=y+Math.sin(a)*L*0.85;S.cap(x,y,r*0.26,ex,ey,r*0.3,m,2,0,r,0.2);
+      const nf=rr()<0.5?2:3;for(let f=0;f<nf;f++){const da=(f-(nf-1)/2)*0.55+rn(-0.15,0.15),fl=r*rn(0.22,0.4);S.cap(ex,ey,r*0.2,ex+Math.cos(a+da)*fl,ey+Math.sin(a+da)*fl*0.85,r*rn(0.1,0.16),m,2,0,r,0.2);}}},
+    pillar:(x,y,r)=>{const m=RC(2,1);for(let k=0;k<6;k++){const u=x+rn(-r*0.6,r*0.6),v=y+rn(-r*0.5,r*0.5),q=rn(1.8,2.8);S.cap(u,v,q,u,v,q,m,2,0,0,0.8);marks.push(['ring',u,v,q]);}},
+    bubble:(x,y,r)=>{const m=RC(6,0);for(let k=0;k<9;k++){const a=rr()*TAU,d=Math.sqrt(rr())*r*0.7,q=rn(1.1,1.9);S.cap(x+Math.cos(a)*d,y+Math.sin(a)*d*0.8,q,x+Math.cos(a)*d,y+Math.sin(a)*d*0.8,q,m,2,0,0,0.9);}},
+    mushroom:(x,y,r)=>{const m=RC(rr()<0.5?0:5,1);S.cap(x,y,r*0.85,x,y,r*0.85,m,2,0,0,0.2);marks.push(['ridges',x,y,r*0.85]);},
+    whip:(x,y,r)=>{const m=RC(rr()<0.5?3:0,0);for(let k=0;k<3;k++){let px=x,py=y,a=-Math.PI/2+rn(-0.9,0.9);for(let j=0;j<5;j++){const nx=px+Math.cos(a)*r*0.35,ny=py+Math.sin(a)*r*0.35;S.cap(px,py,0.8,nx,ny,0.7,m,2,0,r);px=nx;py=ny;a+=rn(-0.4,0.4);}}},
+    gonio:(x,y,r,p)=>{if(gcount>=4)return KIND.branch(x,y,r,p);gcount++;const pal=p===3||p===0?0:p===4?5:7;S.cap(x,y,r*0.8,x,y,r*0.8,RC(pal,1),2,0,0,0.5);polyps.push({kind:'gonio',x,y,r:r*0.8,pal,ext:1,cool:0,del:rr()*2});},
+    zoa:(x,y,r)=>{const pal=rr()<0.5?1:7;for(let k=0;k<Math.round(r*2.4);k++){const a=k*2.399,d=Math.sqrt((k+0.5)/(r*2.4))*r,u=x+Math.cos(a)*d,v=y+Math.sin(a)*d*0.8;polyps.push({kind:'zoa',x:u,y:v,r:1.3,pal,ext:1,cool:0,del:rr()*2.5});}},
+    duster:(x,y,r)=>{for(let k=0;k<3;k++){const u=x+rn(-r*0.5,r*0.5),v=y+rn(-r*0.4,r*0.4);S.cap(u,v+1,1.2,u,v+1,1.2,RC(6,0),2,0,0,0.4);polyps.push({kind:'duster',x:u,y:v,r:4.6,pal:rr()<0.5?3:0,ext:1,cool:0,del:rr()*3});}},
+  };
+  const items=[];
+  for(const[tier,rmin,rmax,tries]of[['big',9,13,600],['med',5.5,8,1100],['small',3,4.5,1400],['small',2.4,3.2,1600]])for(let k=0;k<tries;k++){const x=rn(10,310),y=rn(10,170),r=rn(rmin,rmax);if(!fits(x,y,r))continue;placed.push([x,y,r]);const z=ZK[zone(x,y)];items.push([x,y,r,rp(z[tier]),rr()<0.65?z.pal[0]:z.pal[1]]);}
+  items.sort((a,b)=>a[1]-b[1]);const pre=bg.slice();
+  for(const[x,y,r,k,p]of items)KIND[k](x,y,r,p);
+  const hd=world.hide,c=Math.cos(hd.ang),sn=Math.sin(hd.ang);
+  S.cap(hd.x-c*hd.len/2,hd.y-sn*hd.len/2,hd.r*0.8,hd.x+c*hd.len/2,hd.y+sn*hd.len/2,hd.r,M.LOG,1,0,hd.len);
+  for(let k=0;k<5;k++){const a=k/5*TAU+0.4;S.cap(142,128,1.9,142+Math.cos(a)*5.5,128+Math.sin(a)*4.6,0.7,M.STAR,2);}S.cap(142,128,2,142,128,2,M.STAR,2);
+  composite(S,THEME_PAINTER,{out:bg,sAmt:.55,sdx:1,sdy:2});
+  const EM=new Float32Array(N*3),FL={0:[255,110,170],3:[170,90,255],5:[60,240,210],7:[120,255,90],4:[60,150,255]};
+  for(let i=0;i<N;i++){const m=S.mat[i];if(m<140||m>=156)continue;const f=FL[(m-140)>>1];if(!f)continue;const k=(S.key[i]&3)>=2?0.34:0.2;EM[i*3]=f[0]*k;EM[i*3+1]=f[1]*k;EM[i*3+2]=f[2]*k;}
+  R.EM=EM;R.spores=null;
+  const brM=new Uint8Array(N);for(let i=0;i<N;i++)if(S.mat[i]===M.LOG)brM[i]=1;S.clearLayer();
+  logEnd(bg,hd.x-c*hd.len/2,hd.y-sn*hd.len/2,hd.x+c*hd.len/2,hd.y+sn*hd.len/2,hd.r*0.8,hd.r,true,{pre,bg,bgPre:pre,sdx:1,sdy:2});
+  const bf={w:W,h:H,px:bg};
+  for(const[t,u,v,q]of marks){if(t==='cup'){pset(bf,u,v,hex('#5a1e06'));pset(bf,u-0.6,v,hex('#7a2e0a'));for(let k=0;k<6;k++){const a=k/6*TAU;pset(bf,u+Math.cos(a)*(q-0.4),v+Math.sin(a)*(q-0.4)*0.9,hex('#ffd860'));}}else if(t==='ring'){pset(bf,u,v,hex('#6a4a0a'));pset(bf,u+1,v,hex('#8a6a14'));}
+    else for(let k=0;k<10;k++){const a=k/10*TAU;for(let d=1.2;d<q-0.6;d+=0.9)pdark(bf,u+Math.cos(a)*d,v+Math.sin(a)*d*0.9,0.82);}}
+  for(let i=0;i<N;i++)if(bg[i]!==pre[i]){const e=R.depth[i]||0.5;bg[i]=mixc(bg[i],tintAt(e),0.15+0.1*e);}
+  R.wcol=new Uint32Array(N);for(let i=0;i<N;i++){const e=R.depth[i]||0.5;R.wcol[i]=mixc(RSAND[2],tintAt(e),0.7);}
+  for(let i=0;i<N;i++)if(brM[i])ov[i]=bg[i];
+  R.pIdx=[];R.pX=[];R.pY=[];R.pD=[];R.pS=[];for(let y=TANK.y0;y<TANK.y1;y++)for(let x=TANK.x0;x<TANK.x1;x++){const i=y*W+x;R.pIdx.push(i);R.pX.push(x);R.pY.push(y);R.pD.push(R.depth[i]);R.pS.push(0);}
+  R.deepList=R.pIdx.filter(i=>R.depth[i]>0.45);R.shallowList=R.pIdx.filter(i=>R.depth[i]<0.45);R.landList=[];
+  for(const a of[{x:122,y:60,r:7,c:0},{x:246,y:122,r:7,c:1},{x:88,y:134,r:6,c:0}])polyps.push({kind:'anem',x:a.x,y:a.y,r:a.r,c:a.c,ext:1,cool:0,del:rr()*2});
+  world.polyps=polyps;world.polyT=null;
+  const anemAt=[{x:122,y:60},{x:246,y:122}];world.anem=[];
+  world.fish=[...Array.from({length:9},(_,k)=>({kind:'chromis',k,cx:182,cy:80,rx:30,ry:14,sp:0.35,ph:k*0.55})),
+    {kind:'tang',k:0,cx:110,cy:100,rx:46,ry:22,sp:0.22,ph:0},{kind:'tang',k:1,cx:200,cy:116,rx:40,ry:18,sp:-0.26,ph:2},
+    ...anemAt.flatMap((a,j)=>[0,1].map(k=>({kind:'clown',k,cx:a.x,cy:a.y,rx:6,ry:4,sp:0.9*(k?1:-1),ph:k*2+j})))];
+  finish(world,bg,ov);world.plants=[];}
+// ---- living polyps: sway when calm, snap shut when startled, creep back out one by one ----
+const FLP={5:[30,120,140],0:[120,40,90],3:[80,40,130],5:[30,120,100],7:[50,130,40],1:[130,70,20]};
+const SNAP={duster:14,zoa:7,gonio:3.5,anem:5,clam:6},CREEP={duster:0.9,zoa:0.5,gonio:0.35,anem:0.4,clam:0.3};
+function startlePolyps(w,x,y,range,force){if(!w.polyps)return;for(const p of w.polyps){const d=Math.hypot(p.x-x,p.y-y);if(d>range)continue;p.cool=Math.max(p.cool,force*(1.3-d/range)*2.4+rn(0,0.6));}}
+// pixels drawn each frame go into a small buffer first, then get a 1px outline in a deep shade of their own colour (the critter rule)
+const SPB=new Map(),SPW=hex('#1a7aa8');let SPOL=0,SPFB=null,SPTINT=0;
+function spBegin(fb,ol){spFlush();SPFB=fb;SPOL=ol;}
+function sp(x,y,c){x=Math.floor(x);y=Math.floor(y);if(x<1||y<1||x>=W-1||y>=H-1)return;SPB.set(y*W+x,c);}
+function spFlush(){if(!SPFB||!SPB.size){SPB.clear();return;}const px=SPFB.px;const ol=SPTINT?mixc(SPOL,SPW,SPTINT*0.6):SPOL;for(const i of SPB.keys())for(const j of[i-1,i+1,i-W,i+W])if(!SPB.has(j))px[j]=ol;for(const[i,c]of SPB)px[i]=SPTINT?mixc(c,SPW,SPTINT):c;SPB.clear();}
+function drawPolyps(fb,w){if(!w.polyps)return;const T=w.t,dt=w.polyT==null?0:clamp(T-w.polyT,0,0.1);w.polyT=T;
+  const pet=w.pet;if(pet&&pet.headPos){const h=pet.headPos();startlePolyps(w,h.x,h.y,16,0.5);}
+  for(const p of w.polyps){if(p.cool>0){p.cool-=dt;p.ext=Math.max(0,p.ext-dt*SNAP[p.kind]);if(p.cool<=0)p.del=rn(0,1.6);}else if(p.del>0)p.del-=dt;else p.ext=Math.min(1,p.ext+dt*CREEP[p.kind]);
+    const e=p.ext*p.ext*(3-2*p.ext),R2=p.kind==='anem'?(p.c?ANEM2:ANEM1):RPAL5[p.pal];spBegin(fb,shade(R2[0],0.55));
+    if(p.kind==='clam'){const half=e*3;for(let x=-8;x<=8;x++){const zig=Math.abs(Math.sin(x*0.9))*0.9,h=Math.max(0,half*(1-Math.abs(x)/11)-zig*e);
+        if(h<0.5){sp(p.x+x,p.y,hex('#2a3a40'));continue;}for(let y=-h;y<=h;y+=1){const t=Math.abs(y)/Math.max(1,h),c=t>0.7?hex('#1e6a8a'):(hash(x+30,Math.round(y)+9)>0.72?hex('#9af0ff'):(x+Math.round(y))&1?hex('#2aa6c8'):hex('#3cc0b0'));sp(p.x+x,p.y+y,c);}}
+      sp(p.x,p.y,hex('#0e2a34'));continue;}
+    if(p.kind==='anem'){const n=16,L0=p.r*(0.3+0.7*e);for(let k=0;k<n;k++){const an=k/n*TAU,swy=Math.sin(T*1.4+k*0.9+p.x)*0.35*e;let x=p.x+Math.cos(an)*1.5,y=p.y+Math.sin(an)*1.2;
+        for(let j=0;j<L0;j++){const aa=an+swy*(j/Math.max(1,L0));x+=Math.cos(aa)*1.1;y+=Math.sin(aa)*0.9;const q=j>=L0-1?3:j>L0*0.5?2:1;sp(x,y,R2[q]);if(j<L0-2)sp(x+Math.cos(aa+1.57)*0.8,y+Math.sin(aa+1.57)*0.7,R2[q-1]);}}
+      for(const[u,v,q]of[[0,0,0],[1,0,1],[-1,0,1],[0,1,1],[0,-1,2],[1,1,0]])sp(p.x+u,p.y+v,R2[q]);continue;}
+    if(p.kind==='zoa'){if(e<0.15){sp(p.x,p.y,shade(R2[0],0.8));continue;}
+      const rr2=0.7+e*1.2;for(let k=0;k<10;k++){const a=k/10*TAU+Math.sin(T*1.3+p.x)*0.2;sp(p.x+Math.cos(a)*rr2,p.y+Math.sin(a)*rr2*0.9,k&1?R2[2]:R2[3]);}sp(p.x,p.y,hex(p.pal===1?'#3ae070':'#ff9a3a'));sp(p.x+1,p.y,hex(p.pal===1?'#1a9a50':'#d06a1a'));}
+    else if(p.kind==='duster'){const L=1+e*p.r;sp(p.x,p.y,R2[1]);if(e<0.1)continue;
+      for(let k=0;k<15;k++){const a=-Math.PI*1.1+k/14*Math.PI*1.2+Math.sin(T*1.6+k*0.5+p.x)*0.12*e;for(let j=1;j<=L;j++){const c=(j|0)%2?R2[3]:hex('#fbf4ff');sp(p.x+Math.cos(a)*j,p.y+Math.sin(a)*j*0.85,j>L-1?R2[2]:c);}}}
+    else{// flowerpot: dozens of short tentacles all over the dome, each with a pale tip
+      const n=Math.round(p.r*5);for(let k=0;k<n;k++){const a=k*2.399,d=Math.sqrt((k+0.5)/n)*p.r*0.95,bx=p.x+Math.cos(a)*d,by=p.y+Math.sin(a)*d*0.85,sw=Math.sin(T*1.4+k*0.7+p.x*0.1)*0.5,
+        L=e*(2+((k*7)%3)*0.7)*(0.6+0.6*d/p.r),ox=Math.cos(a)*(0.3+0.7*d/p.r)+sw*0.5,oy=Math.sin(a)*(0.3+0.6*d/p.r)*0.85-0.5;
+        if(L<0.5){sp(bx,by,shade(R2[1],0.85));continue;}for(let j=0;j<L;j+=0.8)sp(bx+ox*j,by+oy*j,j<L*0.5?R2[2]:R2[3]);sp(bx+ox*L,by+oy*L,hex(p.pal===0?'#fff0c0':'#e8ffc8'));}}}spFlush();}
+
+const FISHC={chromis:[hex('#3a8eb8'),hex('#9adcf0'),hex('#1e5a80')],tang:[hex('#f4c24a'),hex('#fff0a0'),hex('#c08a2a')],clown:[hex('#ff7a1a'),hex('#ffffff'),hex('#1a0a04')]};
+function drawFish(fb,w){if(!w.fish)return;const T=w.t;
+  for(const f of w.fish){const a=T*f.sp+f.ph+(f.kind==='chromis'?Math.sin(T*0.7+f.k)*0.15:0),wob=f.kind==='chromis'?[Math.sin(f.k*2.3)*6,Math.cos(f.k*1.7)*4]:[0,0];
+    const x=f.cx+Math.cos(a)*f.rx+wob[0],y=f.cy+Math.sin(a)*f.ry+wob[1],dir=Math.atan2(Math.cos(a)*f.ry*f.sp,-Math.sin(a)*f.rx*f.sp),C=FISHC[f.kind],L=f.kind==='tang'?5:f.kind==='clown'?4:3.5;
+    const cx=Math.cos(dir),cy=Math.sin(dir),tail=Math.sin(T*9+f.k)*0.5;
+    pdark(fb,x+2,y+3,0.82);spBegin(fb,shade(C[2],0.6));
+    for(let u=-L/2;u<=L/2;u+=0.5){const wd=(f.kind==='tang'?1.6:1.1)*Math.sqrt(Math.max(0,1-(u/(L/2))**2));for(let v=-wd;v<=wd;v+=0.5){const px=x+cx*u-cy*v,py=y+cy*u+cx*v;
+      let col=C[0];if(f.kind==='clown'&&Math.abs(u)<0.4||f.kind==='clown'&&Math.abs(u-1.3)<0.3)col=C[1];if(v<-wd*0.4)col=C[1]===hex('#ffffff')?col:mixc(col,C[1],0.5);sp(px,py,col);}}
+    const tx=x-cx*(L/2+0.8),ty=y-cy*(L/2+0.8);sp(tx-cy*(0.8+tail),ty+cx*(0.8+tail),C[2]);sp(tx+cy*(0.8-tail),ty-cx*(0.8-tail),C[2]);
+    sp(x+cx*(L/2-0.6),y+cy*(L/2-0.6),hex('#0a0a10'));}spFlush();}
+
+// ---------------- Bayou ----------------
+// Framing: the cypress stump and its knees anchor the top-left, reeds line the left glass. Leading line: the mossy log
+// runs diagonally from the bottom middle up to the right. Lily pads come in groups: three by the stump, a trail of three
+// stepping-stones toward the log, and a lone pad with a flower in the open water. Duckweed collects in the still corners.
+function bakeBayou(world){srand(71);const S=new FB(W,H),bot=new Uint32Array(N),bg=new Uint32Array(N),ov=new Uint32Array(N);
+  const SILT=ramp('#1e1a10','#2c2616','#3a321e','#4a4028','#5c5034');
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=y*W+x,n=fbm(x*.05+9,y*.05,4);bot[i]=SILT[clamp(Math.floor(1.5+n*3+(bay(x,y)-.5)),0,4)];}
+  for(let k=0;k<40;k++){const x=rn(16,304),y=rn(14,166),a=rr()*TAU,sz=rn(4,7),c=Math.cos(a),sn=Math.sin(a),mx=x+c*sz*.45,my=y+sn*sz*.45;S.cap(x,y,.6,mx,my,sz*.3,M.LITTER,1,0,sz*.45);S.cap(mx,my,sz*.3,x+c*sz,y+sn*sz,.3,M.LITTER,1,sz*.45,sz);}
+  composite(S,THEME_PAINTER,{out:bot,sAmt:.5,sdx:1,sdy:1});S.clearLayer();
+  S.cap(186,158,11,282,116,12.5,M.LOG,1,0,110);S.cap(240,136,3.4,252,152,1.8,M.LOG,1,0,18);S.cap(272,121,3,284,104,1.6,M.LOG,1,0,18);
+  S.cap(46,42,19,46,42,19,TM.CYP,1,0,0,0.3);for(const[x,y,r]of[[80,24,4],[78,60,3.4],[22,72,3],[88,44,2.4],[56,72,2.2]])S.cap(x,y,r,x,y-1,r*0.8,TM.CYP,1,0,0,0.7);
+  const land=new Uint8Array(N),preL=bg.slice();composite(S,THEME_PAINTER,{out:bg,sAmt:.6,sdx:2,sdy:3});
+  {const cx=46,cy=39,f2={w:W,h:H,px:bg};for(let y=cy-19;y<=cy+19;y++)for(let x=cx-19;x<=cx+19;x++){const d=Math.hypot(x+.5-cx,(y+.5-cy)*1.12);if(d>17.5)continue;const ring=Math.sin(d*1.25+vnoise(x*.3,y*.3)*2.2);let c=ring>0.6?hex('#8a6a40'):hex('#b48e5c');if(d>16.4)c=hex('#3e2a18');else if(d>15.4)c=hex('#6a4a2c');if(hash(Math.floor(Math.atan2(y-cy,x-cx)*5),3)>0.8&&d>4&&d<15)c=shade(c,0.85);if(d<1.2)c=hex('#6a4a28');if((x-cx)*0.6+(y-cy)>3)c=shade(c,0.86);if(hash(x*7,y*3)>0.9)c=shade(c,0.9);pset(f2,x,y,c);}}
+  logEnd(bg,186,158,282,116,11,12.5,false,{pre:preL,mat:S.mat,bg,bgPre:preL,sdx:2,sdy:3});
+  for(let i=0;i<N;i++)if(S.mat[i])land[i]=1;const landPx=bg.slice();S.clearLayer();
+  const dL=chamfer(land);R.depth=new Float32Array(N);const DEEP=hex('#0e1c12'),MID=hex('#1e3a22'),SHAL=hex('#3a5e30');
+  for(let y=TANK.y0;y<TANK.y1;y++)for(let x=TANK.x0;x<TANK.x1;x++){const i=y*W+x;if(land[i]){bg[i]=landPx[i];continue;}
+    const ed=Math.min(x-TANK.x0,y-TANK.y0,TANK.x1-1-x,TANK.y1-1-y),e=clamp(Math.min(Math.pow(clamp(dL[i]/16,0,1),0.8),0.35+0.65*clamp(ed/26,0,1))+(fbm(x*0.04,y*0.04+3,3)-0.5)*0.15,0.08,1);
+    R.depth[i]=e;const tint=e<0.5?mixc(SHAL,MID,e*2):mixc(MID,DEEP,(e-0.5)*2);bg[i]=mixc(bot[i],tint,0.45+0.45*e);if(ed<8)bg[i]=shade(bg[i],0.7+0.3*ed/8);if(dL[i]<2.2)bg[i]=shade(bg[i],0.7);}
+  // duckweed collects in the still water: the corners, along the log's upstream side, and around the stump
+  const bf={w:W,h:H,px:bg},DW=[hex('#8ec83c'),hex('#6aa82e'),hex('#4e8a26')];
+  const still=(x,y)=>Math.max(1-Math.hypot(x-20,y-160)/60,1-Math.hypot(x-300,y-20)/50,1-dL[y*W+x]/12,1-Math.hypot(x-42,y-36)/40);
+  for(let k=0;k<3200;k++){const x=Math.floor(rn(9,311)),y=Math.floor(rn(9,171)),i=y*W+x;if(land[i])continue;const p=clamp(still(x,y),0,1)*(0.6+0.6*fbm(x*0.08+40,y*0.08,3));if(rr()<p*p){pset(bf,x,y,rp(DW));if(rr()<0.4)pset(bf,x+1,y,DW[2]);}}
+  R.pIdx=[];R.pX=[];R.pY=[];R.pD=[];R.pS=[];
+  for(let y=TANK.y0;y<TANK.y1;y++)for(let x=TANK.x0;x<TANK.x1;x++){const i=y*W+x;if(!R.depth[i])continue;let shore=false;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])if(!R.depth[i+dy*W+dx]&&inT(x+dx,y+dy))shore=true;
+    R.pIdx.push(i);R.pX.push(x);R.pY.push(y);R.pD.push(R.depth[i]);R.pS.push(shore?1:0);}
+  R.deepList=R.pIdx.filter(i=>R.depth[i]>0.35);R.shallowList=R.pIdx.filter(i=>R.depth[i]>0.1&&R.depth[i]<0.45);
+  R.landList=[];for(const p of world.pads){for(let y=Math.floor(p.ay-p.r);y<=p.ay+p.r;y++)for(let x=Math.floor(p.ax-p.r);x<=p.ax+p.r;x++){if(Math.hypot(x+.5-p.ax,(y+.5-p.ay)*1.15)<p.r-1.5)R.depth[y*W+x]=0;}R.landList.push(Math.round(p.ay)*W+Math.round(p.ax));}
+  for(let i=0;i<N;i+=5)if(land[i])R.landList.push(i);
+  finish(world,bg,ov);
+  world.plants=[makePlant('pothos',306,14,1.75,3.05,6,30,60),makePlant('reed',14,104,-2.0,-1.1,11,14,24),makePlant('reed',16,150,-2.1,-1.0,9,12,20),makePlant('reed',304,150,-2.0,-1.1,8,12,20)];}
+
+{const oc=THEME_PAINTER.color;THEME_PAINTER.color=function(m,q,s2,l,x,y){const c=oc.call(this,m,q,s2,l,x,y),t=this.tint&&this.tint[m];return t?mixc(c,t[0],t[1]):c;};}// installed last so it tints whatever the other colour rules return
+
+const BAKE={dune:bakeDune,field:bakeField,grove:bakeGrove,reef:bakeReef,bayou:bakeBayou},BASE={dune:'terra',field:'terra',grove:'terra',reef:'sea',bayou:'aqua'};
+function layout(w){const th=w.theme;w.fish=null;w.polyps=null;if(!th)return;
+
+  if(BASE[th]==='terra')w.dish=null;
+  if(th==='dune'){w.hide={x:180,y:160,ang:-0.1,len:44,r:6.5};w.lamp={x:104,y:62};w.lampRock={x:100,y:66};}
+  if(th==='field'){w.hide={x:112,y:150,ang:-0.16,len:44,r:8};w.lampRock={x:160,y:90};}
+  if(th==='grove'){w.hide={x:96,y:112,ang:-0.35,len:46,r:8};w.lampRock={x:148,y:26};}
+  if(th==='bayou'){w.dish=null;w.hide={x:236,y:130,ang:-0.36,len:20,r:9};w.lamp={x:180,y:60};w.lampRock={x:236,y:130};
+    w.pads=[[106,22,7,0.4,false],[104,54,15,2.2,true],[76,76,6,4.1,false],[126,30,5,1.0,false],[130,122,12,1.2,false],[156,104,6.5,5.3,false],[176,90,9,0.9,true],[196,40,16,3.0,false],[224,64,6,4.6,false],[44,128,10,2.0,false],[70,148,6,5.6,true],[260,32,8,1.8,false],[290,62,5.5,0.2,false]]
+      .map(([x,y,r,a,fl])=>({x,y,ax:x,ay:y,vx:0,vy:0,r,ang:a,flower:fl,ph:rand(TAU)}));
+    w.weeds=[[26,90],[150,150],[250,90],[300,110]].map(([x,y])=>({x,y,blades:Array.from({length:9},(_,k)=>({a:-0.9+(k-4)*0.14+rand(-0.1,0.1),len:rand(10,22),ph:rand(TAU),c:Math.random()<0.5}))}));}
+  if(th==='reef'){w.hide={x:128,y:156,ang:0.18,len:34,r:4.5};w.weeds=[];w.air={x:298,y:160};}}
+function lightPre(d){const w0=game.world;
+  if(w0&&w0.theme==='reef'&&R.depth){const px=fb.px;for(let i=0;i<N;i++){if(!R.depth[i])continue;const c=px[i];let r=c&255,g=c>>8&255,b=c>>>16&255;const l=(r+g+b)/3;r=l+(r-l)*1.3-6;g=l+(g-l)*1.2-5;b=l+(b-l)*1.3+12;px[i]=(0xff000000|(clamp(b,0,255)<<16)|(clamp(g,0,255)<<8)|clamp(r,0,255))>>>0;}}
+}
+function lightPost(d){const w=game.world;if(!w||(w.theme!=='grove'&&w.theme!=='reef')||!R.EM)return;const px=fb.px,E=R.EM,k=0.18+0.82*(1-d),fl=0.85+0.15*Math.sin(w.t*1.7);
+  for(let i=0,j=0;i<N;i++,j+=3){if(!E[j]&&!E[j+1])continue;const c=px[i],m=k*fl;let R1=(c&255)+E[j]*m,G=(c>>8&255)+E[j+1]*m,B=(c>>>16&255)+E[j+2]*m;px[i]=(0xff000000|(Math.min(255,B)<<16)|(Math.min(255,G)<<8)|Math.min(255,R1))>>>0;}
+  if(w.theme==='reef'&&w.polyps){const nk=1-d;if(nk>0.05)for(const p of w.polyps){const b=nk*p.ext*(p.kind==='zoa'?0.5:0.8),c=FLP[p.pal]||FLP[7],R3=p.kind==='zoa'?1.6:p.kind==='duster'?3:p.r+2;
+    for(let yy=-R3;yy<=R3;yy++)for(let xx=-R3;xx<=R3;xx++){const q=1-Math.hypot(xx,yy)/(R3+0.5);if(q>0)padd(fb,p.x+xx,p.y+yy,c[0]*q*b,c[1]*q*b,c[2]*q*b);}}}
+  if(R.spores)for(const s of R.spores){const x=s.x+Math.sin(w.t*0.3*s.s+s.ph)*14,y=s.y-((w.t*3*s.s+s.ph*20)%160)+80,b=(0.3+0.7*(1-d))*(0.5+0.5*Math.sin(w.t*2+s.ph));const yy=((y-20)%140+140)%140+20;
+    padd(fb,x,yy,90*b,200*b,180*b);for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]])padd(fb,x+dx,yy+dy,25*b,60*b,55*b);}}
+function reefLife(w){SPTINT=0.2;drawPolyps(fb,w);drawFish(fb,w);SPTINT=0;}
+return{BAKE,layout,lightPre,lightPost,reefLife,startle:startlePolyps,logEnd};
+})();
 
 // =====================================================================
 //  Items, rarities and the two gachapon machines
@@ -8023,7 +9170,34 @@ const SEA_PETS=['cuttle','puffer','shark','nudi'];
 const noWater=w=>!!(w&&(w.sea||(w.pet&&w.pet.kind==='wisp')));
 const NO_HAT=['wisp'];// a living flame can't wear a hat
 const honeyThirst=w=>!!(w&&w.pet&&w.pet.kind==='bun');
-function habitatOf(kind){if(SEA_PETS.includes(kind))return 'sea';if(kind==='kraken')return 'aqua';if(AMPHI.includes(kind)){const ps=save.pets[kind];return(ps&&ps.tank)||(AMPHI_TERRA.includes(kind)?'terra':'aqua');}return 'terra';}
+// tanks: the three free ones every critter can use (if it suits them), and five themed ones you buy once from any critter's
+// Tanks page. A themed tank runs on a base tank's rules (land, pool or all water) and unlocks its song for the playlist.
+const TANKS={
+  terra:{name:'Terrarium',base:'terra',price:0,dot:['#5e8a3e','#4e3726'],blurb:'Mossy soil, a hide log and a basking rock under the lamp.'},
+  aqua:{name:'Paludarium',base:'aqua',price:0,dot:['#3f8c86','#8a7048'],blurb:'A pool with lily pads beside mossy land and a sandy beach.'},
+  sea:{name:'Aquarium',base:'sea',price:0,dot:['#3cbce2','#e2dac2'],blurb:'All water over pale sand, with coral and an air stone.'},
+  dune:{name:'Sun Dune',base:'terra',price:300,song:'dry',dot:['#e4a462','#9a4a22'],blurb:'Warm orange sand, a red-rock mesa, a prickly pear and a bleached steer skull.',
+    who:['lizard','dragon','gecko','scorpion','tarantula','snake','crab','golem','bun','chick']},
+  bayou:{name:'Bayou',base:'aqua',price:300,song:'swamp',dot:['#4a7a34','#2a3a1e'],blurb:'Murky green water, lily pads to sit on, a mossy log and a cypress stump.',
+    who:['frog','dart','axolotl','turtle','salamander','snake','kraken']},
+  reef:{name:'Coral Reef',base:'sea',price:300,song:'sea',dot:['#ff6e9e','#3cbce2'],blurb:'A living coral reef with reef fish, a giant clam and corals that hide when you tap the glass.',
+    who:['shark','nudi','puffer','cuttle','kraken']},
+  field:{name:'Flower Field',base:'terra',price:300,song:'wind',dot:['#ffc828','#4a842e'],blurb:'Grass, a dirt path, wildflowers and big sunflowers to walk under.',
+    who:['bee','chick','fuzzworm','gsnail','lizard','turtle','millipede','bun','chameleon','slime','mush']},
+  grove:{name:'Enchanted Grove',base:'terra',price:300,song:'odd',dot:['#3ac4c8','#5a2e66'],blurb:'Purple soil, teal moss, glowing mushrooms, a fairy ring and a tiny fairy door.',
+    who:['mush','wisp','slime','golem','bun','fuzzworm','gsnail','millipede','dart','salamander','chameleon','tarantula','frog']}};
+const THEME_IDS=['dune','bayou','reef','field','grove'];
+function baseTanks(kind){if(SEA_PETS.includes(kind))return['sea'];if(kind==='kraken')return['aqua'];if(AMPHI.includes(kind))return['terra','aqua'];return['terra'];}
+const tankFits=(kind,id)=>TANKS[id].who?TANKS[id].who.includes(kind):baseTanks(kind).includes(id);
+const tankOwned=id=>!TANKS[id].price||!!save.allTanks||(save.tanks||[]).includes(id);
+// the themed tank a critter lives in, if it has one it can use
+function tankOf(kind){const t=save.pets[kind]?.tank;return t&&TANKS[t]&&TANKS[t].who&&tankFits(kind,t)&&tankOwned(t)?t:null;}
+// which tank a critter is in right now (themed or base)
+const tankIdOf=kind=>tankOf(kind)||habitatOf(kind);
+// a song plays in the shuffle if it's one of the three free ones or came with a tank you own
+const songOwned=k=>['chill','rain','tide'].includes(k)||THEME_IDS.some(id=>TANKS[id].song===k&&tankOwned(id));
+function habitatOf(kind){const th=tankOf(kind);if(th)return TANKS[th].base;
+  if(SEA_PETS.includes(kind))return 'sea';if(kind==='kraken')return 'aqua';if(AMPHI.includes(kind)){const t=save.pets[kind]?.tank;return(t==='terra'||t==='aqua')?t:(AMPHI_TERRA.includes(kind)?'terra':'aqua');}return 'terra';}
 const tankKey=t=>t==='aqua'?'placedAqua':t==='sea'?'placedSea':'placed';
 function layoutTank(w,tank,kind){w.air=null;w.anem=[];
   if(tank==='sea'){w.dish=null;w.hide={x:232,y:128,ang:0.32,len:40,r:4.5};w.lamp={x:160,y:40};w.lampRock=null;w.pads=[];w.air={x:214,y:30};w.airb=[];w.airT=0;w.anem=[{x:140,y:118,r:7,c:0},{x:40,y:112,r:6,c:1},{x:268,y:130,r:6,c:0},{x:190,y:150,r:5,c:1}];
@@ -8032,6 +9206,7 @@ function layoutTank(w,tank,kind){w.air=null;w.anem=[];
     w.pads=[[52,84,5.5,0.4,false],[63,93,4.2,2.2,true],[34,136,5,4.1,false],[128,148,5.8,1.2,false],[140,140,3.6,5.3,false]].map(([x,y,r,a,f])=>({x,y,ax:x,ay:y,vx:0,vy:0,r,ang:a,flower:f,ph:rand(TAU)}));
     w.weeds=[[26,60],[88,118],[150,120],[60,160],[120,86]].map(([x,y])=>({x,y,blades:Array.from({length:9},(_,k)=>({a:-0.9+(k-4)*0.14+rand(-0.1,0.1),len:rand(10,22),ph:rand(TAU),c:Math.random()<0.5}))}));}
   else{w.dish=AMPHI.includes(kind)?{x:248,y:52,rw:12.5,rr:16.5}:null;w.hide={x:88,y:140,ang:-0.12,len:48,r:11};w.lamp={x:70,y:46};w.lampRock={x:70,y:50};w.pads=[];w.weeds=[];}
+  THEMES.layout(w);
 }
 // depth of water under a point: 0 on land, >0 in water (up to 1 in the deep end)
 function waterAt(w,x,y){if(!w)return 0;if(w.allWater)return 1;
@@ -8135,8 +9310,8 @@ function drawSubPrey(w,q){const x0=Math.max(0,Math.floor(q.x-11)),x1=Math.min(W-
   if(q.layered){fb.clearLayer();q.drawL(fb);composite(fb,FOOD_PAINTER,{sAmt:.8,sdx:1,sdy:1});}else q.draw(fb,w.t);
   const d=Math.max(0.2,waterAt(w,q.x,q.y)),a=Math.min(0.7,(q.sink||0)*0.62*(0.5+0.5*d));
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x;if(px[i]===SUBBUF[i])continue;px[i]=mixc(mixc(px[i],SUBBUF[i],a),SHEENC,sheen(x,y,w.t)*a*1.5);}}
-function setTank(tank,force,kind){const w=game.world;kind=kind||game.kind||save.cur;const dishy=tank==='terra'&&AMPHI.includes(kind);if(w.hab===tank&&!force&&!!w.dish===dishy)return;
-  w.hab=tank;w.sea=tank==='sea';w.tank=w.sea?'aqua':tank;layoutTank(w,tank,kind);w.foodMem=[];w.prey=[];w.ripples=[];w.parts=[];w.coins=[];w.bubbles=[];w.shrooms=[];w.mess=[];w.wet.fill(0);
+function setTank(tank,force,kind){const w=game.world;kind=kind||game.kind||save.cur;const th=kind&&SPECIES[kind]?tankOf(kind):null,dishy=tank==='terra'&&AMPHI.includes(kind)&&!th;if(w.hab===tank&&!force&&!!w.dish===dishy&&(w.theme||null)===th)return;
+  w.hab=tank;w.theme=th;w.sea=tank==='sea';w.tank=w.sea?'aqua':tank;layoutTank(w,tank,kind);w.foodMem=[];w.prey=[];w.ripples=[];w.parts=[];w.coins=[];w.bubbles=[];w.shrooms=[];w.mess=[];w.wet.fill(0);
   bakeWorld(w);staticDrawn=false;
 }
 // each critter keeps its own decor layout; toys go back in the bag when you switch critters
@@ -8556,7 +9731,7 @@ const CAUS=hex('#a8ecd6'),SPARK=hex('#f0fffa'),FOAM=hex('#d6eee4');
 // pool water: identical maths to before, but every sine that depends only on x or only on y is tabled once per frame
 // and recombined per pixel with sin(a+b)=sin a cos b+cos a sin b, so the per-pixel loop has no trig at all
 const PT=(()=>{const f=n=>new Float32Array(n),o={};for(const k of['a1s','a1c','b1s','b1c','vx','h1s','h1c','h2s','h2c','r1s','r1c','r2s','r2c'])o[k]=f(W);for(const k of['a2s','a2c','b2s','b2c','vy','g1s','g1c','g2s','g2c','q1s','q1c','q2s','q2c'])o[k]=f(H);return o;})();
-function drawPool(w){const px=fb.px,T=w.t,I=R.pIdx,D=R.pD,X=R.pX,Y=R.pY,SH=R.pS,tq=Math.floor(T*3),sea=w.sea,murk=clamp((65-(w.stats.clean??100))/65,0,1)*0.3,rayK=sea?0.42*w.dayness+0.05:0,B=R.BAY;const {a1s,a1c,b1s,b1c,vx,h1s,h1c,h2s,h2c,r1s,r1c,r2s,r2c,a2s,a2c,b2s,b2c,vy,g1s,g1c,g2s,g2c,q1s,q1c,q2s,q2c}=PT;
+function drawPool(w){if(w.theme==='reef')THEMES.reefLife(w);const px=fb.px,T=w.t,I=R.pIdx,D=R.pD,X=R.pX,Y=R.pY,SH=R.pS,tq=Math.floor(T*3),sea=w.sea,murk=clamp((65-(w.stats.clean??100))/65,0,1)*0.3,rayK=sea?0.42*w.dayness+0.05:0,B=R.BAY;const {a1s,a1c,b1s,b1c,vx,h1s,h1c,h2s,h2c,r1s,r1c,r2s,r2c,a2s,a2c,b2s,b2c,vy,g1s,g1c,g2s,g2c,q1s,q1c,q2s,q2c}=PT;
   for(let x=0;x<W;x++){let v=x*0.29+T*1.05;a1s[x]=Math.sin(v);a1c[x]=Math.cos(v);v=Math.sin(x*0.18-T*0.57)*1.7;b1s[x]=Math.sin(v);b1c[x]=Math.cos(v);vx[x]=Math.sin(x*0.05+T*0.3);
     v=x*0.045+T*0.35;h1s[x]=Math.sin(v);h1c[x]=Math.cos(v);v=x*0.021-T*0.22;h2s[x]=Math.sin(v);h2c[x]=Math.cos(v);
     if(sea){v=x*0.0275+T*0.22;r1s[x]=Math.sin(v);r1c[x]=Math.cos(v);v=x*0.01265-T*0.11+1.3;r2s[x]=Math.sin(v);r2c[x]=Math.cos(v);}}
@@ -8614,13 +9789,14 @@ function drawPads(fb,w){
 function drawWet(w){const px=fb.px,wet=w.wet,G=hex('#cfe6ee');
   for(let i=0;i<N;i++){const v=wet[i];if(v<0.03)continue;px[i]=shade(px[i],1-0.5*v);if(v>0.45&&R.glint[i])px[i]=mixc(px[i],G,0.7);}}
 const LCACHE={d:-1,src:null,f:new Float64Array(N*3)};
-function applyLight(d){
+function applyLight(d){THEMES.lightPre(d);
   const px=fb.px,LD=R.LD,LN=R.LN,BAY=R.BAY,L=LCACHE,F=L.f;
   if(L.src!==LD||Math.abs(L.d-d)>0.002){L.src=LD;L.d=d;// the (quantised) light only changes during a lights on/off fade
     for(let i=0,j=0;i<N;i++,j+=3){const b=BAY[i];F[j]=Math.floor((LN[j]+(LD[j]-LN[j])*d)*10+b)/10;F[j+1]=Math.floor((LN[j+1]+(LD[j+1]-LN[j+1])*d)*10+b)/10;F[j+2]=Math.floor((LN[j+2]+(LD[j+2]-LN[j+2])*d)*10+b)/10;}}
   for(let i=0,j=0;i<N;i++,j+=3){const c=px[i];
     let r=(c&255)*F[j],g=(c>>8&255)*F[j+1],bl=(c>>>16&255)*F[j+2];if(r>255)r=255;if(g>255)g=255;if(bl>255)bl=255;
     px[i]=(0xff000000|(bl<<16)|(g<<8)|r)>>>0;}
+  THEMES.lightPost(d);
 }
 const CUR_PAL={k:hex('#0d110d'),w:hex('#f2f1e2'),p:hex('#f3c2a6'),g:hex('#9ccf6a')};
 const CUR={
@@ -9915,10 +11091,6 @@ const ui={
     det.insertAdjacentHTML('beforeend',`<p class="pbl">${sp.blurb}</p>`);det.querySelector('.pbl').addEventListener('click',e=>e.currentTarget.classList.toggle('open'));
     const ch=document.createElement('div');ch.className='chips';det.appendChild(ch);
     if(ps)ch.insertAdjacentHTML('beforeend',`<span class="chip bond"><img class="px" src="${iconURL('heart')}" alt="">Bond ${ps.lvl}</span>`+(ps.hat?`<span class="chip"><img class="px" src="${iconURL('gacha')}" alt="">${ITEMS[ps.hat].name}</span>`:''));
-    if(kind==='kraken')ch.insertAdjacentHTML('beforeend','<span class="chip hab">~ Paludarium only</span>');
-    else if(SEA_PETS.includes(kind))ch.insertAdjacentHTML('beforeend','<span class="chip hab">≈ Aquarium only</span>');
-    else if(AMPHI.includes(kind)){const hb=document.createElement('button');hb.className='chip hab tog';const lab=()=>{const aq=habitatOf(kind)==='aqua';hb.textContent=aq?'~ Lives in: Paludarium ⇄':'* Lives in: Terrarium ⇄';};lab();
-      hb.title='Switch which tank this critter lives in';hb.addEventListener('click',()=>{const ps2=petSave(kind);ps2.tank=habitatOf(kind)==='aqua'?'terra':'aqua';markDirty();SFX.play('tick');lab();if(kind===game.kind){this.close(true);startGame(kind);}});ch.appendChild(hb);}
     if(ps){const h3=hd.querySelector('h3'),rb=document.createElement('button');rb.className='rn';rb.title='Rename';rb.textContent='✎';h3.appendChild(rb);
       rb.addEventListener('click',e=>{e.stopPropagation();const inp=document.createElement('input');inp.className='rnin';inp.maxLength=14;inp.value=ps.name;h3.replaceWith(inp);inp.focus();inp.select();
         const done=ok=>{if(done.d)return;done.d=true;const nm=inp.value.trim().slice(0,14);if(ok&&nm){ps.name=nm;if(kind===game.kind){game.name=nm;if(game.world.pet)game.world.pet.mind=mindFor(kind,nm);this.refreshPet();}markDirty();writeSave();SFX.play('tick');}this.renderPets(first2);};
@@ -9936,7 +11108,10 @@ const ui={
       if(was)setTimeout(()=>flash(`Welcome! You have ${save.coins} coins. Try the Gacha machines!`),2900);});
     det.appendChild(b);
     {const info=document.createElement('div');info.className='pinfo';pv.after(info);let n=info.nextSibling;while(n&&n!==b){const nx=n.nextSibling;info.appendChild(n);n=nx;}}
-    if(cb)det.insertBefore(cb,b);// pinned just above the visit/adopt button, outside the scrolling text
+    // tanks live on their own page too; the button shows where this critter lives now
+    const tb=document.createElement('button');tb.className='btn alt pcol';{const T=TANKS[tankIdOf(kind)];tb.innerHTML=`<span class="pcd" style="background:linear-gradient(135deg,${T.dot[0]} 50%,${T.dot[1]} 50%)"></span>${T.name}`;}
+    tb.addEventListener('click',()=>{SFX.play('tick');this.petTanks(det);});
+    {const row=document.createElement('div');row.className='pbtns';if(cb)row.appendChild(cb);row.appendChild(tb);det.insertBefore(row,b);}// pinned just above the visit/adopt button, outside the scrolling text
     {const p=this.livePreview(kind,cv);p.pet.skinTry=undefined;drawPreview(p);this.previews.push(p);}
   },
   // a critter's colours page: the live preview stays put up top, the colour chips scroll underneath,
@@ -9974,6 +11149,36 @@ const ui={
       const r=$('roster').querySelector('.prow.on');if(r){const im=r.querySelector('img,canvas');if(im)im.replaceWith(petSnap(kind));}});
     {const p=this.livePreview(kind,cv);p.pet.skinTry=tryId;drawPreview(p);this.previews.push(p);}
   },
+  // a critter's tanks page: a picture of the tank up top, the free and themed tanks underneath, and one button that buys or
+  // moves the critter in. Themed tanks are bought once for every critter that fits them, and bring their song along.
+  petTanks(det,tryId){const kind=this.petSel,sp=SPECIES[kind];let ps=save.pets[kind];const cur=tankIdOf(kind);if(tryId===undefined)tryId=cur;
+    $('roster').classList.add('colours');det.innerHTML='';this.previews=[];
+    const top=document.createElement('div');top.className='pcolh';top.innerHTML=`<button class="btn alt">‹ Back</button><b>${ps?ps.name+'\'s':sp.label} tank</b>`;det.appendChild(top);
+    top.querySelector('button').addEventListener('click',()=>{SFX.play('tick');this.petDetail(det);});
+    const T=TANKS[tryId],pv=document.createElement('div');pv.className='pbig';const cv=document.createElement('canvas');cv.width=160;cv.height=90;cv.className='px';pv.appendChild(cv);det.appendChild(pv);
+    {const g=cv.getContext('2d');g.imageSmoothingEnabled=true;g.drawImage(tankThumb(tryId,kind),0,0,160,90);}
+    const list=document.createElement('div');list.className='pinfo pcols';det.appendChild(list);
+    list.insertAdjacentHTML('beforeend',`<p class="pbl">${T.blurb}${T.song?` Comes with the song <b>${TRACKS[T.song].name}</b>.`:''}</p>`);
+    const tier=label=>{const h=document.createElement('div');h.className='tierh';h.textContent=label;list.appendChild(h);const g=document.createElement('div');g.className='sgrid';list.appendChild(g);return g;};
+    const card=(g,id)=>{const t=TANKS[id],fits=tankFits(kind,id),c=document.createElement('button');c.className='scard'+(id===tryId?' on':'')+(id===cur?' wear':'')+(fits?'':' ghost');
+      c.innerHTML=`<span class="dot" style="background:linear-gradient(135deg,${t.dot[0]} 50%,${t.dot[1]} 50%)"></span><span class="n">${t.name}</span>`+
+        (id===cur?'<span class="pr own">Here</span>':!fits?'<span class="pr own">Not for '+sp.label.split(' ').pop()+'</span>':tankOwned(id)?`<span class="pr own">${t.price?'Owned':'Free'}</span>`:`<span class="pr"><img class="px" src="${iconURL('coin')}" alt="">${t.price}</span>`);
+      c.addEventListener('click',()=>{if(id===tryId)return;SFX.play('tick');const st=list.scrollTop;this.petTanks(det,id);det.querySelector('.pcols').scrollTop=st;});g.appendChild(c);};
+    {const g=tier('Free tanks');for(const id of baseTanks(kind))card(g,id);}
+    {const g=tier('Themed tanks');for(const id of THEME_IDS)card(g,id);}
+    const a=document.createElement('button');a.className='btn pgo';det.appendChild(a);const fits=tankFits(kind,tryId),own=tankOwned(tryId);
+    if(tryId===cur){a.textContent='Lives here';a.disabled=true;}
+    else if(!fits){a.textContent=`${sp.label} can't live here`;a.disabled=true;}
+    else if(!ps&&!petOwned(kind)){a.textContent='Adopt first';a.disabled=true;}
+    else if(own)a.textContent='Move in';
+    else{a.classList.add('buy');a.innerHTML=`Buy &amp; move in · <img class="px" src="${iconURL('coin')}" alt="">${T.price}`;}
+    a.addEventListener('click',()=>{if(!ps){if(!petOwned(kind))return;ps=petSave(kind);}
+      if(!own){if(save.coins<T.price){SFX.play('nope');a.textContent=`Need ${T.price-save.coins} more coins`;setTimeout(()=>{if(a.isConnected)a.innerHTML=`Buy &amp; move in · <img class="px" src="${iconURL('coin')}" alt="">${T.price}`;},1600);return;}
+        save.coins-=T.price;(save.tanks||(save.tanks=[])).push(tryId);this.bumpCoins();SFX.play('coin');setTimeout(()=>flash(`New song unlocked: ${TRACKS[T.song].name}`),400);}else SFX.play('ui');
+      ps.tank=tryId;markDirty();writeSave();
+      if(kind===game.kind){this.close(true);startGame(kind);return;}
+      this.petTanks(det,tryId);});
+  },
   // a critter's live preview window stays the same little world while the menu is open, so refreshing the menu
   // (filters, renaming, putting a hat on) doesn't respawn the critter somewhere else
   livePreview(kind,cv){this.livePv=this.livePv||{};const k=kind+'|'+cv.width+'x'+cv.height;let p=this.livePv[k];
@@ -9984,6 +11189,14 @@ const ui={
     for(const p of this.previews){p.pw.t+=dt;p.pet.update(dt);drawPreview(p);}
   },
 };
+// a tank's picture for the Tanks page: baked once in a scratch world, then the live tank's bake is put back
+const TANK_THUMB={};
+function tankThumb(id,kind){const dish=id==='terra'&&AMPHI.includes(kind),key=id+(dish?'+dish':'');if(TANK_THUMB[key])return TANK_THUMB[key];
+  const keep=Object.assign({},R),T=TANKS[id],w=createWorld();w.theme=T.who?id:null;w.hab=T.base;w.sea=T.base==='sea';w.tank=w.sea?'aqua':T.base;
+  layoutTank(w,T.base,dish?kind:'lizard');bakeWorld(w);
+  const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d'),img=g.createImageData(W,H),px=new Uint32Array(img.data.buffer);
+  px.set(R.bg);for(const i of R.ovIdx)px[i]=R.ov[i];for(let k=0;k<R.frameIdx.length;k++){const i=R.frameIdx[k];px[i]=R.frame[i];}g.putImageData(img,0,0);
+  for(const k of Object.keys(R))delete R[k];Object.assign(R,keep);TANK_THUMB[key]=c;return c;}
 // one frame of a critter preview window (live previews call this every frame, list thumbnails once)
 function drawPreview(p){{p.pw.parts.length=0;p.pw.ripples.length=0;
       p.fb.px.set(p.bg);withSkin(p.pet,()=>{p.fb.clearLayer();p.pet.draw(p.fb);composite(p.fb,p.pet,{sAmt:.6,sdx:1,sdy:1});if(p.pet.drawExtras)p.pet.drawExtras(p.fb);if(p.pet.selfLit)p.pet.glow(p.fb,0.5);});
@@ -10125,6 +11338,7 @@ function knockAt(x,y){const w=game.world,pet=w.pet;game.knockT=0.22;
     for(const q of w.prey){if(q.type==='cricket'&&q.h===0&&!q.caught){q.timer=0;}if(q.flier){q.landT=0;q.ang=Math.atan2(q.y-y,q.x-x);}}
     for(const t of w.toys)if(Math.hypot(t.x-x,t.y-y)<40&&!t.dragged){t.vh=rand(10,25);t.h=0.1;}
     for(const pl of w.plants)pl.dist=1;
+    if(w.theme==='reef')THEMES.startle(w,x,y,110,1);
 }
 // ---- Fun mode: with no tool in hand, your bare hand does the petting, picking up and knocking
 const HAND={// a slim white cartoon glove: three long fingers, a thumb and a cuff
