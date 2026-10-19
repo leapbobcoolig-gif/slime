@@ -53,6 +53,7 @@ Skins are bought from the swatch row in the Critters menu. Each critter gets one
   - Buying one adds its song to the music shuffle (`songOwned`): Warm Windowsill, Bayou Drift, Sea Glass, Dandelion Wind, Odd Bodies.
 - New scenery is laid out on purpose (composition): one main feature a third of the way in, a leading line, bigger things framing the edges, an open middle, and things grouped in families. Nothing overlaps anything else.
 - Every sprite has an outline in a deep shade of its own colour (the critter rule), never near-black. New painters name it with `olOf`.
+- Anything that moves (butterflies, dragonflies, the tumbleweed, reef fish and polyps) is built from capsules every frame (`LFB` + `composite` with `THEME_PAINTER`, or `WATER_PAINTER` under water). Static ground details may stay as baked pixels.
 - Logs and hides show only the end facing the viewer (the lower one on screen), cut square, with the hollow on hides (`THEMES.logEnd`).
 
 ## Testing

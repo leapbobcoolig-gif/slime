@@ -8199,7 +8199,7 @@ function bakeDune(world){srand(11);const S=new FB(W,H),bg=new Uint32Array(N),ov=
   for(const[x,y,r]of[[262,40,9],[pear.x+20,pear.y+8,4.5],[30,134,6]]){for(let k=0;k<11;k++){const a=k/11*TAU+0.2;S.cap(x,y,r*0.3,x+Math.cos(a)*r,y+Math.sin(a)*r*0.85,0.5,TM.SUC,1,0,r);}S.cap(x,y,r*0.32,x,y,r*0.32,TM.SUC,1,0,0,0.8);}
   composite(S,THEME_PAINTER,{out:bg,sAmt:.6,sdx:1,sdy:2});S.clearLayer();
   // small finds: a tumbleweed caught by the boulder, bleached snail shells, flat stones half in the sand, bird tracks, a few twigs
-  world.twigs=Array.from({length:40},()=>{const a=rr()*TAU;return[a,a+rn(1.2,3),rn(2,7),rn(2,7)];});// the tumbleweed's tangle, drawn live
+  world.twigs=Array.from({length:40},()=>{const a=rr()*TAU;return[a,a+rn(1.2,3),rn(2,7),rn(2,7)];}).filter((_,k)=>k%2);// the tumbleweed's tangle, drawn live
   for(const[x,y]of[[142,36],[68,108],[302,92],[196,168]]){for(const[u,v]of[[1,2],[2,2],[3,1],[3,0]])pdark(f,x+u,y+v,.7);const C=[hex('#fffaf0'),hex('#e8dcc8'),hex('#b8a890'),hex('#7a6a58')];
     for(const[u,v,q]of[[0,-1,0],[1,-1,1],[-1,0,1],[0,0,0],[1,0,2],[2,0,1],[0,1,1],[1,1,1],[2,-1,2]])pset(f,x+u,y+v,C[q]);pset(f,x+1,y,C[3]);}
   // a lizard's burrow: a dark hole with a fan of dug-out sand in front of it
@@ -8297,11 +8297,6 @@ function bakeGrove2(world){const S=new FB(W,H),bg=new Uint32Array(N),ov=new Uint
   {const st=bez([138,100],[176,94],[204,70],6);for(let k=1;k<st.length;k++){const[x,y]=st[k],r=2.8-k*0.12;S.cap(x-r*0.4,y,r,x+r*0.4,y,r,M.ROCK,1,0,0,0.15);}}
   for(let k=0;k<14;k++){const a=k/14*TAU+rn(-.1,.1),x=fr.x+Math.cos(a)*fr.r,y=fr.y+Math.sin(a)*fr.r*0.72,r=rn(1.5,2.3);S.cap(x,y,r,x,y,r,TM.FCAP,1,0,0,0.6);}
   composite(S,THEME_PAINTER,{out:bg,sAmt:.65,sdx:2,sdy:3});S.clearLayer();
-  // a tiny arched fairy door in the big root, with a lit window and a lantern beside it
-  {const dx=34,dy=154,D=hex('#7a4222'),D2=hex('#9a5a2c'),F=hex('#2a160a');for(let y=-10;y<=1;y++)for(let x=-5;x<=5;x++){const arch=y<-5?Math.hypot(x,(y+5)*1.1)<=5.2:Math.abs(x)<=5;if(!arch)continue;const edge=Math.abs(x)>=5||(y<-5&&Math.hypot(x,(y+5)*1.1)>4.2)||y===1;pset(f,dx+x,dy+y,edge?F:(Math.abs(x)%2?D:D2));}
-    for(let x=-3;x<=3;x++)pdark(f,dx+x+1,dy+2,0.7);pset(f,dx+2,dy-4,hex('#f0c040'));pset(f,dx+2,dy-3,hex('#b08020'));for(const[u,v]of[[-1,-8],[0,-8],[1,-8],[-1,-7],[0,-7],[1,-7]])pset(f,dx+u,dy+v,hex('#ffe08a'));pset(f,dx,dy-7,hex('#6a3a1e'));
-    pset(f,dx+8,dy-4,hex('#ffe8a0'));pset(f,dx+8,dy-3,hex('#ffd060'));pset(f,dx+8,dy-5,hex('#3a2a1a'));pset(f,dx+8,dy-2,hex('#3a2a1a'));pset(f,dx+8,dy-1,hex('#3a2a1a'));
-    for(const[x,y,k]of[[dx,dy-7,1],[dx+8,dy-4,1.4]])for(let yy=-10;yy<=10;yy++)for(let xx=-10;xx<=10;xx++){const q=1-Math.hypot(xx,yy*1.2)/10;if(q<=0||!inT(x+xx,y+yy))continue;const i=((y+yy)*W+x+xx)*3;EM[i]+=150*q*q*k;EM[i+1]+=100*q*q*k;EM[i+2]+=30*q*q*k;}}
   const toad=(x,y,r,mat)=>S.cap(x,y,r,x,y,r,mat,2,0,0,0.7);
   toad(52,38,5,TM.CAP);toad(60,48,3.2,TM.CAP);toad(44,52,2.4,TM.CAP);toad(66,30,2,TM.CAP);
   toad(262,146,4.4,TM.TCAP);toad(254,156,3,TM.TCAP);toad(270,136,2.2,TM.TCAP);
@@ -8431,40 +8426,39 @@ function bakeReef(world){srand(53);const polyps0=[];const S=new FB(W,H),bot=new 
 const FLP={5:[30,120,140],0:[120,40,90],3:[80,40,130],5:[30,120,100],7:[50,130,40],1:[130,70,20]};
 const SNAP={duster:14,zoa:7,gonio:3.5,anem:5,clam:6},CREEP={duster:0.9,zoa:0.5,gonio:0.35,anem:0.4,clam:0.3};
 function startlePolyps(w,x,y,range,force){if(!w.polyps)return;for(const p of w.polyps){const d=Math.hypot(p.x-x,p.y-y);if(d>range)continue;p.cool=Math.max(p.cool,force*(1.3-d/range)*2.4+rn(0,0.6));}}
-// pixels drawn each frame go into a small buffer first, then get a 1px outline in a deep shade of their own colour (the critter rule)
-const SPB=new Map(),SPW=hex('#1a7aa8');let SPOL=0,SPFB=null,SPTINT=0;
-function spBegin(fb,ol){spFlush();SPFB=fb;SPOL=ol;}
-function sp(x,y,c){x=Math.floor(x);y=Math.floor(y);if(x<1||y<1||x>=W-1||y>=H-1)return;SPB.set(y*W+x,c);}
-function spFlush(){if(!SPFB||!SPB.size){SPB.clear();return;}const px=SPFB.px;const ol=SPTINT?mixc(SPOL,SPW,SPTINT*0.6):SPOL;for(const i of SPB.keys())for(const j of[i-1,i+1,i-W,i+W])if(!SPB.has(j))px[j]=ol;for(const[i,c]of SPB)px[i]=SPTINT?mixc(c,SPW,SPTINT):c;SPB.clear();}
+const SPW=hex('#1a7aa8');// the reef water's blue, for things drawn under it
 function drawPolyps(fb,w){if(!w.polyps)return;const T=w.t,dt=w.polyT==null?0:clamp(T-w.polyT,0,0.1);w.polyT=T;
   const pet=w.pet;if(pet&&pet.headPos){const h=pet.headPos();startlePolyps(w,h.x,h.y,16,0.5);}
   for(const p of w.polyps){if(p.cool>0){p.cool-=dt;p.ext=Math.max(0,p.ext-dt*SNAP[p.kind]);if(p.cool<=0)p.del=rn(0,1.6);}else if(p.del>0)p.del-=dt;else p.ext=Math.min(1,p.ext+dt*CREEP[p.kind]);
-    const e=p.ext*p.ext*(3-2*p.ext),R2=p.kind==='anem'?(p.c?ANEM2:ANEM1):RPAL5[p.pal];spBegin(fb,shade(R2[0],0.55));
-    if(p.kind==='clam'){const half=e*3;for(let x=-8;x<=8;x++){const zig=Math.abs(Math.sin(x*0.9))*0.9,h=Math.max(0,half*(1-Math.abs(x)/11)-zig*e);
-        if(h<0.5){sp(p.x+x,p.y,hex('#2a3a40'));continue;}for(let y=-h;y<=h;y+=1){const t=Math.abs(y)/Math.max(1,h),c=t>0.7?hex('#1e6a8a'):(hash(x+30,Math.round(y)+9)>0.72?hex('#9af0ff'):(x+Math.round(y))&1?hex('#2aa6c8'):hex('#3cc0b0'));sp(p.x+x,p.y+y,c);}}
-      sp(p.x,p.y,hex('#0e2a34'));continue;}
-    if(p.kind==='anem'){const n=16,L0=p.r*(0.3+0.7*e);for(let k=0;k<n;k++){const an=k/n*TAU,swy=Math.sin(T*1.4+k*0.9+p.x)*0.35*e;let x=p.x+Math.cos(an)*1.5,y=p.y+Math.sin(an)*1.2;
-        for(let j=0;j<L0;j++){const aa=an+swy*(j/Math.max(1,L0));x+=Math.cos(aa)*1.1;y+=Math.sin(aa)*0.9;const q=j>=L0-1?3:j>L0*0.5?2:1;sp(x,y,R2[q]);if(j<L0-2)sp(x+Math.cos(aa+1.57)*0.8,y+Math.sin(aa+1.57)*0.7,R2[q-1]);}}
-      for(const[u,v,q]of[[0,0,0],[1,0,1],[-1,0,1],[0,1,1],[0,-1,2],[1,1,0]])sp(p.x+u,p.y+v,R2[q]);continue;}
-    if(p.kind==='zoa'){if(e<0.15){sp(p.x,p.y,shade(R2[0],0.8));continue;}
-      const rr2=0.7+e*1.2;for(let k=0;k<10;k++){const a=k/10*TAU+Math.sin(T*1.3+p.x)*0.2;sp(p.x+Math.cos(a)*rr2,p.y+Math.sin(a)*rr2*0.9,k&1?R2[2]:R2[3]);}sp(p.x,p.y,hex(p.pal===1?'#3ae070':'#ff9a3a'));sp(p.x+1,p.y,hex(p.pal===1?'#1a9a50':'#d06a1a'));}
-    else if(p.kind==='duster'){const L=1+e*p.r;sp(p.x,p.y,R2[1]);if(e<0.1)continue;
-      for(let k=0;k<15;k++){const a=-Math.PI*1.1+k/14*Math.PI*1.2+Math.sin(T*1.6+k*0.5+p.x)*0.12*e;for(let j=1;j<=L;j++){const c=(j|0)%2?R2[3]:hex('#fbf4ff');sp(p.x+Math.cos(a)*j,p.y+Math.sin(a)*j*0.85,j>L-1?R2[2]:c);}}}
+    // every polyp is built from capsules each frame: tentacles, plumes and mantles that sway and pull in
+    const e=p.ext*p.ext*(3-2*p.ext),C=(ax,ay,r0,bx,by,r1,m,cls=2)=>LFB.cap(ax,ay,r0,bx,by,r1,m,cls,0,1),D=(x,y,r,m,cls=2)=>LFB.cap(x,y,r,x,y,r,m,cls);
+    if(p.kind==='clam'){// the mantle between the shell's lips: a wavy band that narrows to a slit when it closes
+      const half=e*3;let pv=null;for(let x=-8;x<=8;x+=1){const zig=Math.abs(Math.sin(x*0.9))*0.9,h=Math.max(0.5,half*(1-Math.abs(x)/11)-zig*e),q=[p.x+x+0.5,p.y+0.5,h];if(pv)C(pv[0],pv[1],pv[2],q[0],q[1],q[2],205,3);pv=q;}continue;}
+    if(p.kind==='anem'){const n=16,L0=p.r*(0.3+0.7*e),m=p.c?202:201;for(let k=0;k<n;k++){const an=k/n*TAU,swy=Math.sin(T*1.4+k*0.9+p.x)*0.35*e;let x=p.x+Math.cos(an)*1.5,y=p.y+Math.sin(an)*1.2,pts=[[x,y]];
+        for(let j=0;j<L0;j++){const aa=an+swy*(j/Math.max(1,L0));x+=Math.cos(aa)*1.1;y+=Math.sin(aa)*0.9;pts.push([x,y]);}
+        for(let j=1;j<pts.length;j++){const r0=0.9-0.4*(j-1)/pts.length,r1=0.9-0.4*j/pts.length;LFB.cap(pts[j-1][0],pts[j-1][1],r0,pts[j][0],pts[j][1],r1,m,2,(j-1)/pts.length,j/pts.length);}}
+      D(p.x+0.5,p.y+0.5,1.6,m,3);continue;}
+    const R2=RPAL5[p.pal];
+    if(p.kind==='zoa'){if(e<0.15){D(p.x+0.5,p.y+0.5,0.6,140+p.pal*2);continue;}
+      const rr2=0.7+e*1.2;D(p.x+0.5,p.y+0.5,rr2+0.6,185+p.pal,2);{const r=Math.max(0.8,rr2-0.4);LFB.cap(p.x+0.5,p.y+0.5,r,p.x+0.5,p.y+0.5,r,p.pal===1?203:204,2,0,0,0.6);}}
+    else if(p.kind==='duster'){D(p.x+0.5,p.y+0.5,0.8,140+p.pal*2,3);if(e<0.1)continue;const L=1+e*p.r;
+      for(let k=0;k<15;k++){const a=-Math.PI*1.1+k/14*Math.PI*1.2+Math.sin(T*1.6+k*0.5+p.x)*0.12*e;LFB.cap(p.x+0.5,p.y+0.5,0.5,p.x+0.5+Math.cos(a)*L,p.y+0.5+Math.sin(a)*L*0.85,0.55,193+p.pal,2,0,1);}}
     else{// flowerpot: dozens of short tentacles all over the dome, each with a pale tip
       const n=Math.round(p.r*5);for(let k=0;k<n;k++){const a=k*2.399,d=Math.sqrt((k+0.5)/n)*p.r*0.95,bx=p.x+Math.cos(a)*d,by=p.y+Math.sin(a)*d*0.85,sw=Math.sin(T*1.4+k*0.7+p.x*0.1)*0.5,
         L=e*(2+((k*7)%3)*0.7)*(0.6+0.6*d/p.r),ox=Math.cos(a)*(0.3+0.7*d/p.r)+sw*0.5,oy=Math.sin(a)*(0.3+0.6*d/p.r)*0.85-0.5;
-        if(L<0.5){sp(bx,by,shade(R2[1],0.85));continue;}for(let j=0;j<L;j+=0.8)sp(bx+ox*j,by+oy*j,j<L*0.5?R2[2]:R2[3]);sp(bx+ox*L,by+oy*L,hex(p.pal===0?'#fff0c0':'#e8ffc8'));}}}spFlush();}
+        if(L<0.5)continue;LFB.cap(bx+0.5,by+0.5,0.5,bx+0.5+ox*L,by+0.5+oy*L,0.6,185+p.pal,2,0,1);}}}
+  composite(LFB,WATER_PAINTER,{out:fb.px});LFB.clearLayer();}
 
-const FISHC={chromis:[hex('#3a8eb8'),hex('#9adcf0'),hex('#1e5a80')],tang:[hex('#f4c24a'),hex('#fff0a0'),hex('#c08a2a')],clown:[hex('#ff7a1a'),hex('#ffffff'),hex('#1a0a04')]};
+const FISHM={chromis:[178,182],tang:[179,183],clown:[180,184]};
 function drawFish(fb,w){if(!w.fish)return;const T=w.t;
   for(const f of w.fish){const a=T*f.sp+f.ph+(f.kind==='chromis'?Math.sin(T*0.7+f.k)*0.15:0),wob=f.kind==='chromis'?[Math.sin(f.k*2.3)*6,Math.cos(f.k*1.7)*4]:[0,0];
-    const x=f.cx+Math.cos(a)*f.rx+wob[0],y=f.cy+Math.sin(a)*f.ry+wob[1],dir=Math.atan2(Math.cos(a)*f.ry*f.sp,-Math.sin(a)*f.rx*f.sp),C=FISHC[f.kind],L=f.kind==='tang'?5:f.kind==='clown'?4:3.5;
+    const x=f.cx+Math.cos(a)*f.rx+wob[0],y=f.cy+Math.sin(a)*f.ry+wob[1],dir=Math.atan2(Math.cos(a)*f.ry*f.sp,-Math.sin(a)*f.rx*f.sp),L=f.kind==='tang'?3.6:f.kind==='clown'?4:3.5;
     const cx=Math.cos(dir),cy=Math.sin(dir),tail=Math.sin(T*9+f.k)*0.5;
-    pdark(fb,x+2,y+3,0.82);spBegin(fb,shade(C[2],0.6));
-    for(let u=-L/2;u<=L/2;u+=0.5){const wd=(f.kind==='tang'?1.6:1.1)*Math.sqrt(Math.max(0,1-(u/(L/2))**2));for(let v=-wd;v<=wd;v+=0.5){const px=x+cx*u-cy*v,py=y+cy*u+cx*v;
-      let col=C[0];if(f.kind==='clown'&&Math.abs(u)<0.4||f.kind==='clown'&&Math.abs(u-1.3)<0.3)col=C[1];if(v<-wd*0.4)col=C[1]===hex('#ffffff')?col:mixc(col,C[1],0.5);sp(px,py,col);}}
-    const tx=x-cx*(L/2+0.8),ty=y-cy*(L/2+0.8);sp(tx-cy*(0.8+tail),ty+cx*(0.8+tail),C[2]);sp(tx+cy*(0.8-tail),ty-cx*(0.8-tail),C[2]);
-    sp(x+cx*(L/2-0.6),y+cy*(L/2-0.6),hex('#0a0a10'));}spFlush();}
+    // body along the heading (tail to head), a forked tail that beats, a dorsal fin and an eye
+    const P=(u,v)=>[x+cx*u-cy*v,y+cy*u+cx*v],K=FISHM[f.kind],r=f.kind==='tang'?2:1.1,[ax,ay]=P(-L/2,0),[bx,by]=P(L/2,0);
+    LFB.cap(ax,ay,r*(f.kind==='tang'?0.8:0.6),bx,by,r*(f.kind==='tang'?0.9:1),K[0],2,0,1);const[tx,ty]=P(-L/2-0.2,0);for(const sd of[-1,1]){const[ex,ey]=P(-L/2-1.6,sd*1.1+tail);LFB.cap(tx,ty,0.6,ex,ey,0.55,K[1],1,0,1);}
+    if(f.kind==='tang'){const[dx,dy]=P(-0.5,-r*1.05),[d2x,d2y]=P(-0.5,r*1.05);LFB.cap(dx,dy,0.7,d2x,d2y,0.7,K[1],1,0,1);}}
+  composite(LFB,WATER_PAINTER,{out:fb.px,sAmt:.82,sdx:2,sdy:3});LFB.clearLayer();}
 
 // ---------------- Bayou ----------------
 // Framing: the cypress stump and its knees anchor the top-left, reeds line the left glass. Leading line: the mossy log
@@ -8522,9 +8516,47 @@ function lightPost(d){const w=game.world;if(!w||(w.theme!=='grove'&&w.theme!=='r
   if(w.theme==='grove'&&w.live&&w.live.puff)for(const s of w.live.puff){const b=Math.min(1,s.life/0.6)*(0.4+0.6*(1-d));padd(fb,s.x,s.y-s.h,40*b,150*b,130*b);for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]])padd(fb,s.x+dx,s.y-s.h+dy,12*b,45*b,40*b);}
   if(R.spores)for(const s of R.spores){const x=s.x+Math.sin(w.t*0.3*s.s+s.ph)*14,y=s.y-((w.t*3*s.s+s.ph*20)%160)+80,b=(0.3+0.7*(1-d))*(0.5+0.5*Math.sin(w.t*2+s.ph));const yy=((y-20)%140+140)%140+20;
     padd(fb,x,yy,90*b,200*b,180*b);for(const[dx,dy]of[[-1,0],[1,0],[0,-1],[0,1]])padd(fb,x+dx,yy+dy,25*b,60*b,55*b);}}
-function reefLife(w){SPTINT=0.2;drawPolyps(fb,w);drawFish(fb,w);SPTINT=0;}
+function reefLife(w){drawPolyps(fb,w);drawFish(fb,w);}
 // ---------------- living tanks: wind in the grass, swaying flowers, butterflies, blowing sand, a tumbleweed,
 // footstep puffs, dragonflies, spore puffs and reef bubbles. All updated in update() and drawn each frame.
+// moving things (butterflies, dragonflies, the tumbleweed, reef fish) are built from capsules each frame and lit by composite
+const TM7={TENT:185/*+pal 0..7*/,DUST:193/*+pal*/,AN1:201,AN2:202,ZMG:203,ZMO:204,CLAM:205,BUG:170,WO:171,WW:172,WB:173,DBT:174,DBR:175,DWING:176,TWIG:177,FCH:178,FTANG:179,FCLOWN:180,FEYE:181,FINC:182,FINT:183,FINK:184};
+const TP7={bug:ramp('#2a1c12','#46301e','#6a4c30','#8c6c48'),wo:ramp('#8a3206','#d8600e','#ff9a2a','#ffd9a0'),ww:ramp('#6a6e9a','#b8c0f0','#e8ecff','#ffffff'),wb:ramp('#1a2e7a','#3a6ad8','#7ab4ff','#c8e2ff'),
+  dbt:ramp('#0e4a5a','#1a7a8a','#3ad0c8','#9af8f0'),dbr:ramp('#5a140a','#a02a1a','#e85a3a','#ffa08a'),dwing:ramp('#4e8296','#8cc4d4','#bfe6f0','#e6f8fc'),twig:ramp('#7a5a34','#94703f','#b08c54','#ccac70'),
+  fch:ramp('#1e5a80','#2e78a8','#3a8eb8','#9adcf0'),ftang:ramp('#a8701e','#d8a030','#f4c24a','#fff0a0'),fclown:ramp('#a8400a','#e05a10','#ff7a1a','#ffb070'),fwhite:ramp('#8a96a8','#d0dae6','#f4f8ff','#ffffff'),
+  feye:ramp('#141a30','#1e2a48','#2a3a60','#4a5a80'),finc:ramp('#163e5a','#1e5a80','#2e78a8','#5aaad0'),fint:ramp('#8a5a14','#c08a2a','#e0aa3a','#f4c24a'),fink:ramp('#6a2406','#c04a0e','#ff7a1a','#ffb070')};
+{const oc=THEME_PAINTER.color;THEME_PAINTER.color=function(m,q,s,l,x,y){
+  if(m>=185&&m<193){const R2=RPAL5[m-185];return s>0.72?R2[3]:R2[Math.max(1,q)];}// polyp tentacles: pale tips
+  if(m>=193&&m<201){const R2=RPAL5[m-193];return s>0.85?R2[2]:Math.floor(s*6)%2?R2[3]:hex('#fbf4ff');}// feather-duster plumes: banded
+  if(m===201||m===202){const R2=m===201?ANEM1:ANEM2;return s>0.8?R2[3]:R2[Math.max(1,q)];}
+  if(m===203)return ZMG[q];if(m===204)return ZMO[q];
+  if(m===205){const t=Math.abs(l);return t>0.7?hex('#1e6a8a'):hash(x+30,y+9)>0.72?hex('#9af0ff'):(x+y)&1?hex('#2aa6c8'):hex('#3cc0b0');}// giant clam mantle
+  if(m<170||m>184)return oc.call(this,m,q,s,l,x,y);
+  switch(m){
+    case TM7.BUG:return TP7.bug[q];
+    // wings: a darker rim toward the tip with pale spots, like the real thing
+    case TM7.WO:case TM7.WW:case TM7.WB:{const R2=m===TM7.WO?TP7.wo:m===TM7.WW?TP7.ww:TP7.wb;if(s>0.72)return hash(x*5,y*3)>0.8?R2[3]:R2[Math.max(0,q-2)];return R2[q];}
+    case TM7.DBT:case TM7.DBR:{const R2=m===TM7.DBT?TP7.dbt:TP7.dbr;return R2[Math.floor(s*1.1)%2?Math.max(0,q-1):q];}
+    case TM7.DWING:return TP7.dwing[hash(x*3,y*7)>0.85?Math.max(0,q-1):q];
+    case TM7.TWIG:return TP7.twig[q];
+    case TM7.FCH:case TM7.FTANG:case TM7.FCLOWN:if(s>0.8&&Math.abs(l)<0.3)return TP7.feye[1];
+      if(m===TM7.FCH)return TP7.fch[l<-0.35?Math.min(3,q+1):q];if(m===TM7.FTANG)return TP7.ftang[l<-0.35?Math.min(3,q+1):q];return(s>0.4&&s<0.56)||(s>0.76&&s<0.88)?TP7.fwhite[q]:TP7.fclown[q];
+    case TM7.FEYE:return TP7.feye[q];case TM7.FINC:return TP7.finc[q];case TM7.FINT:return TP7.fint[q];case TM7.FINK:return TP7.fink[q];}
+  return oc.call(this,m,q,s,l,x,y);};}
+// the same painter seen through water: colours and outlines lean toward the water's blue
+const ZMG=ramp('#0e5a2a','#1a9a50','#3ae070','#a0ffc0'),ZMO=ramp('#7a3006','#d06a1a','#ff9a3a','#ffd09a');
+const tintPainter=t=>({outline:0,seam:THEME_PAINTER.seam,color:(m,q,s,l,x,y)=>mixc(THEME_PAINTER.color(m,q,s,l,x,y),SPW,t),olOf:(m,x,y)=>mixc(THEME_PAINTER.olOf(m,x,y),SPW,t*0.6)});
+const WATER_PAINTER=tintPainter(0.2);
+// a butterfly seen from above: body along its heading, fore and hind wings that open and close
+function butterfly(S,x,y,ang,open,mat){const c=Math.cos(ang),s=Math.sin(ang),P=(u,v)=>[x+c*u-s*v,y+s*u+c*v];
+  // wings folded up read as a thin sliver along the body; spread, they make a wide bow tie
+  const span=0.6+4*open;for(const sd of[-1,1]){const[fx,fy]=P(0.3,sd*0.5),[tx,ty]=P(1.6+open*0.6,sd*span),[hx,hy]=P(-0.4,sd*0.5),[ux,uy]=P(-1.9,sd*span*0.8);
+    S.cap(fx,fy,0.6,tx,ty,0.7+1.1*open,mat,2,0,1);S.cap(hx,hy,0.6,ux,uy,0.6+0.9*open,mat,2,0,1);}
+  const[ax,ay]=P(-2,0),[bx,by]=P(1.2,0),[hx,hy]=P(1.9,0);S.cap(ax,ay,0.5,bx,by,0.6,TM7.BUG,3,0,1);S.cap(hx,hy,0.65,hx,hy,0.65,TM7.BUG,3);}
+// a dragonfly from above: big head, thorax, long segmented abdomen and four glassy wings held out flat
+function dragonfly(S,x,y,ang,fl,mat){const c=Math.cos(ang),s=Math.sin(ang),P=(u,v)=>[x+c*u-s*v,y+s*u+c*v];
+  for(const sd of[-1,1])for(const[u,L,sw]of[[1.5,6,0.4],[0.5,5.4,-0.6]]){const[ax,ay]=P(u,sd*0.8),[bx,by]=P(u+sw-0.4,sd*L*(0.85+0.15*fl));S.cap(ax,ay,0.5,bx,by,0.75,TM7.DWING,1,0,1);}
+  const[hx,hy]=P(3,0),[tx,ty]=P(2.1,0),[t2x,t2y]=P(0.2,0),[ex,ey]=P(-5.6,0);S.cap(t2x,t2y,0.7,ex,ey,0.5,mat,2,0,6);S.cap(tx,ty,1,t2x,t2y,0.9,mat,3,0,1);S.cap(hx,hy,1.1,hx,hy,1.1,mat,3);}
 const LFB=new FB(W,H),SANDC=[hex('#f2c690'),hex('#e4a462'),hex('#cc8442')];
 const lowG=()=>document.body.classList.contains('gfx-low');
 // a soft breeze that rolls across the tank in waves, with a stronger gust every so often
@@ -8552,10 +8584,11 @@ function update(w,dt){const th=w.theme;if(!th||!w.pet)return;const L=w.live||(w.
     while(L.sAcc>1){L.sAcc--;const c=pick([[214,74],[221,79],[209,82]]);S.push({x:c[0]+rand(-2,2),y:c[1]+rand(-2,2),h:1,life:rand(5,8),ph:rand(TAU)});}
     for(const s of S){const wd=windAt(s.x,T);s.x+=(6+wd*12)*dt;s.y+=Math.sin(T*1.3+s.ph)*3*dt-1.5*dt;s.h=Math.min(14,s.h+dt*2.5);s.life-=dt;}L.seeds=S.filter(s=>s.life>0&&s.x<310);
     // butterflies flit from flower to flower and settle for a while
-    const fl=w.flowers||[];const B=L.bf||(L.bf=[['#ff9a2a','#ffd9a0','#3a1a0a'],['#f4f2ff','#cfd6ff','#3a3a5a'],['#7ab4ff','#c8e2ff','#1a2a5a']].slice(0,lowG()?2:3).map(col=>({col,x:rand(40,280),y:rand(30,150),h:8,go:null,rest:rand(0,3),ph:rand(TAU)})));
+    const fl=w.flowers||[];const B=L.bf||(L.bf=[TM7.WO,TM7.WW,TM7.WB].slice(0,lowG()?2:3).map(mat=>({mat,x:rand(40,280),y:rand(30,150),h:8,go:null,rest:rand(0,3),ph:rand(TAU)})));
     for(const b of B){if(b.rest>0){b.rest-=dt;b.h=Math.max(1.5,b.h-dt*12);if(b.rest<=0){const f=pick(fl.length?fl:[{x:160,y:90}]);b.go=[f.x+rand(-3,3),f.y+rand(-3,3)];}continue;}
       if(!b.go)b.go=[rand(30,290),rand(25,155)];const dx=b.go[0]-b.x,dy=b.go[1]-b.y,d=Math.hypot(dx,dy);
-      if(d<2){b.go=null;b.rest=rand(2,5);continue;}const v=20;b.x+=dx/d*v*dt+Math.sin(T*7+b.ph)*6*dt;b.y+=dy/d*v*dt+Math.cos(T*5+b.ph)*5*dt;b.h=6+Math.sin(T*4+b.ph)*2.5;
+      if(d<2){b.go=null;b.rest=rand(2,5);continue;}const v=20,mx=dx/d*v+Math.sin(T*7+b.ph)*6,my=dy/d*v+Math.cos(T*5+b.ph)*5;b.x+=mx*dt;b.y+=my*dt;
+      const ta=Math.atan2(my,mx);b.ang=(b.ang??ta)+Math.atan2(Math.sin(ta-(b.ang??ta)),Math.cos(ta-(b.ang??ta)))*Math.min(1,dt*8);b.h=6+Math.sin(T*4+b.ph)*2.5;
       // shoo: a butterfly near the critter flies off
       if(Math.hypot(b.x-ft.x,b.y-ft.y)<10&&b.h<4){b.go=[rand(30,290),rand(25,155)];}}
   }
@@ -8566,11 +8599,11 @@ function update(w,dt){const th=w.theme;if(!th||!w.pet)return;const L=w.live||(w.
     // a bug touches the water now and then
     if((L.rip=(L.rip??rand(1,3))-dt)<=0){L.rip=rand(1.5,4);const s=randomWaterSpot(w,0.3);if(s)w.ripples.push({x:s[0],y:s[1],age:0,s:0.6});}
     // dragonflies dart, hover and rest on the pads
-    const D=L.df||(L.df=[['#3ad0c8','#1a6a8a'],['#e85a3a','#8a2a1a']].map(col=>({col,x:rand(60,260),y:rand(30,150),h:10,go:null,hover:rand(0.5,2),ang:0,rest:0})));
+    const D=L.df||(L.df=[TM7.DBT,TM7.DBR].map((mat,k)=>({mat,k,x:rand(60,260),y:rand(30,150),h:10,go:null,hover:rand(0.5,2),ang:0,rest:0})));
     for(const f of D){if(f.rest>0){f.rest-=dt;f.h=Math.max(1,f.h-dt*20);continue;}
       if(f.go){const dx=f.go[0]-f.x,dy=f.go[1]-f.y,d=Math.hypot(dx,dy);f.ang=Math.atan2(dy,dx);if(d<2){f.go=null;f.hover=rand(0.6,2.2);if(Math.random()<0.3&&w.pads.length){const p=pick(w.pads);f.go=[p.x,p.y];f.land=true;}}
         else{const st=Math.min(d,90*dt);f.x+=dx/d*st;f.y+=dy/d*st;f.h+=((f.land?2:10)-f.h)*Math.min(1,dt*4);if(d<3&&f.land){f.land=false;f.rest=rand(2,4);f.go=null;}}}
-      else{f.hover-=dt;f.x+=Math.sin(T*9+f.col.length)*4*dt;f.h=10+Math.sin(T*6)*0.8;if(f.hover<=0)f.go=[clamp(f.x+rand(-90,90),20,300),clamp(f.y+rand(-50,50),20,160)];}}
+      else{f.hover-=dt;f.x+=Math.sin(T*9+f.k*3)*4*dt;f.h=10+Math.sin(T*6)*0.8;if(f.hover<=0)f.go=[clamp(f.x+rand(-90,90),20,300),clamp(f.y+rand(-50,50),20,160)];}}
   }
   if(th==='grove'){
     // brushing past a mushroom family shakes loose a little cloud of glowing spores; now and then one puffs on its own
@@ -8590,17 +8623,19 @@ function drawUnder(w){const th=w.theme,L=w.live;if(!th||!L)return;const T=L.t;
       pdark(fb,tf.x+1,tf.y+1,0.8);for(const b of tf.b){const lean=(wd-0.3)*0.9+Math.sin(T*2.3+tf.x)*0.12+push;let x=tf.x,y=tf.y;for(let j=1;j<=b.l;j++){const a=b.a+lean*(j/b.l);x+=Math.cos(a);y+=Math.sin(a);pset(fb,x,y,G[Math.min(4,j+1)]);}}}}
   if(th==='dune'&&L.grains){const C=hex('#fff4dc');for(const g of L.grains){const a=Math.min(1,g.life*1.5)*0.85;pmix(fb,g.x,g.y,C,a);pmix(fb,g.x-1,g.y-0.35,C,a*0.6);pmix(fb,g.x-2,g.y-0.7,C,a*0.3);}}
   if(th==='dune'&&L.tw){const t=L.tw;for(let yy=-3;yy<=3;yy++)for(let xx=-6;xx<=6;xx++)if(Math.hypot(xx/6,yy/3)<1)pdark(fb,t.x+xx+2,t.y+yy+4,0.8);
-    const C=[hex('#8a6a3a'),hex('#b08c54'),hex('#6a4e2a')],tws=w.twigs||[];for(let k=0;k<tws.length;k++){const[a,b,r1,r2]=tws[k],ca=t.ang;line(fb,t.x+Math.cos(a+ca)*r1,t.y-t.h+Math.sin(a+ca)*r1*0.8,t.x+Math.cos(b+ca)*r2,t.y-t.h+Math.sin(b+ca)*r2*0.8,C[k%3]);}}}
+    // a ball of looping stems: tilted rings round a hollow middle, turned as it rolls; the far halves sit behind the near ones
+    const ca=t.ang;for(let i=0;i<8;i++){const ti=0.35+i*0.4,sp=i*1.05,R0=6.5*(0.78+0.22*Math.sin(i*2.1+1));let pv=null;for(let j=0;j<=16;j++){const th=j/16*TAU+sp,X=Math.cos(th),Y=Math.sin(th)*Math.cos(ti),Z=Math.sin(th)*Math.sin(ti),
+      rx=X*Math.cos(ca+sp)-Y*Math.sin(ca+sp),ry=X*Math.sin(ca+sp)+Y*Math.cos(ca+sp),q=[t.x+rx*R0,t.y-t.h+ry*R0*0.85,Z];if(pv)LFB.cap(pv[0],pv[1],0.45,q[0],q[1],0.45,TM7.TWIG,(pv[2]+Z)>0?3:2,0,1);pv=q;}}
+    composite(LFB,THEME_PAINTER,{out:fb.px});LFB.clearLayer();}}
 // drawn above the critter (flowers it walks under, flying things)
 function drawOver(w){const th=w.theme,L=w.live;if(!th||!L)return;const T=L.t;
   if(th==='field'){if(w.flowers){for(const f of w.flowers){const wd=windAt(f.x,T);bigFlower(LFB,f.x+Math.sin(T*1.1+f.ph)*(0.6+1.4*wd),f.y+Math.cos(T*0.9+f.ph)*0.6,f.r,f.k,f.a+Math.sin(T*0.7+f.ph)*0.12*(0.5+wd));}
       composite(LFB,THEME_PAINTER,{out:fb.px,sAmt:.55,sdx:4,sdy:6});LFB.clearLayer();}
     for(const s of L.seeds||[]){const a=Math.min(1,s.life/2);pdark(fb,s.x+1,s.y+1,1-0.15*a);pmix(fb,s.x,s.y-s.h,hex('#fbfbf4'),0.9*a);pmix(fb,s.x,s.y-s.h+1,hex('#c8c4a8'),0.6*a);}
-    for(const b of L.bf||[]){const C=b.col.map(hex),open=b.rest>0?0.5+0.5*Math.sin(T*2+b.ph):Math.abs(Math.sin(T*22+b.ph)),sx=b.x,sy=b.y-b.h;pdark(fb,b.x+2,b.y+2,0.85);
-      spBegin(fb,shade(C[0],0.45));const wv=Math.round(1+open*2.2);for(const sd of[-1,1]){for(let k=1;k<=wv;k++){sp(sx+sd*k,sy-2,C[0]);sp(sx+sd*k,sy-1,C[k===wv?1:0]);sp(sx+sd*k,sy,C[0]);}sp(sx+sd,sy+1,C[1]);sp(sx+sd*2,sy+1,C[0]);}sp(sx,sy-1,C[2]);sp(sx,sy,C[2]);sp(sx,sy+1,C[2]);spFlush();}}
-  if(th==='bayou')for(const f of L.df||[]){const c=Math.cos(f.ang),s=Math.sin(f.ang),C=f.col.map(hex),sx=f.x,sy=f.y-f.h,fl=f.rest>0?0.3:0.5+0.5*Math.sin(T*40);pdark(fb,f.x+2,f.y+3,0.85);
-    for(const k of[-1,1])for(const off of[0.6,-0.6]){const wx=-s*k,wy=c*k;for(let j=1;j<=3;j++)pmix(fb,sx+c*off+wx*j,sy+s*off+wy*j,hex('#e8f8ff'),0.35+0.3*fl);}
-    spBegin(fb,shade(C[1],0.5));for(let j=-2;j<=3;j++)sp(sx-c*j,sy-s*j,j<=0?C[0]:C[1]);sp(sx+c*1,sy+s*1,C[0]);spFlush();}
+    for(const b of L.bf||[]){const open=b.rest>0?0.5+0.5*Math.sin(T*2+b.ph):Math.abs(Math.sin(T*22+b.ph));butterfly(LFB,b.x,b.y-b.h,b.ang||0,open,b.mat);
+      composite(LFB,THEME_PAINTER,{out:fb.px,sAmt:.8,sdx:1+Math.round(b.h*0.4),sdy:1+Math.round(b.h*0.5)});LFB.clearLayer();}}
+  if(th==='bayou')for(const f of L.df||[]){const fl=f.rest>0?0.3:0.5+0.5*Math.sin(T*40);dragonfly(LFB,f.x,f.y-f.h,f.ang,fl,f.mat);
+    composite(LFB,THEME_PAINTER,{out:fb.px,sAmt:.8,sdx:1+Math.round(f.h*0.3),sdy:2+Math.round(f.h*0.4)});LFB.clearLayer();}
   if(th==='dune')for(const p of w.parts){if(p.type!=='dust'||!p.c)continue;const a=clamp(p.life/p.max,0,1),r=1.2+(1-a)*2;for(let yy=-3;yy<=3;yy++)for(let xx=-3;xx<=3;xx++){const d=Math.hypot(xx,yy*1.2)/r;if(d<1)pmix(fb,p.x+xx,p.y+yy-(1-a)*4,p.c,0.9*a*(1-d*0.5));}}
   if(th==='grove')for(const s of L.puff||[]){const a=Math.min(1,s.life/0.6);pmix(fb,s.x,s.y-s.h,hex('#c8fff0'),0.7*a);}
   if(th==='reef')for(const b of L.bub||[]){const a=Math.min(1,b.life);pmix(fb,b.x,b.y,hex('#e8fbff'),0.75*a);if(b.r>1){pmix(fb,b.x+1,b.y,hex('#bfe8f8'),0.5*a);pmix(fb,b.x,b.y-1,hex('#bfe8f8'),0.5*a);}}}
@@ -9262,7 +9297,7 @@ const TANKS={
   bayou:{name:'Bayou',base:'aqua',kind:'swim',price:300,song:'swamp',dot:['#4a7a34','#2a3a1e'],blurb:'Murky green water, lily pads to sit on, a mossy log and a cypress stump.'},
   reef:{name:'Coral Reef',base:'sea',kind:'sea',price:300,song:'sea',dot:['#ff6e9e','#3cbce2'],blurb:'A living coral reef with reef fish, a giant clam and corals that hide when you tap the glass.'},
   field:{name:'Flower Field',base:'terra',kind:'land',price:300,song:'wind',dot:['#ffc828','#4a842e'],blurb:'Grass, a dirt path, wildflowers and big sunflowers to walk under.'},
-  grove:{name:'Enchanted Grove',base:'terra',kind:'land',price:300,song:'odd',dot:['#3ac4c8','#5a2e66'],blurb:'Purple soil, teal moss, glowing mushrooms, a fairy ring and a tiny fairy door.'}};
+  grove:{name:'Enchanted Grove',base:'terra',kind:'land',price:300,song:'odd',dot:['#3ac4c8','#5a2e66'],blurb:'Purple soil, teal moss, glowing mushrooms and a fairy ring.'}};
 const THEME_IDS=['dune','bayou','reef','field','grove'];
 function baseTanks(kind){if(SEA_PETS.includes(kind))return['sea'];if(kind==='kraken')return['aqua'];if(AMPHI.includes(kind))return['terra','aqua'];return['terra'];}
 // who fits a themed tank is plain physics: land tanks take anything that can live on land, the Bayou takes swimmers,
