@@ -606,6 +606,7 @@ body.fun-hud .gtoast.out{transform:none;translate:-50% -10px;opacity:0}
   <div class="srow mix master"><label for="setVol">Master volume</label><input type="range" id="setVol" min="0" max="1" step="0.05"><output class="mixv" for="setVol"></output><span class="mixsp"></span></div>
   <div class="mixh">Mixer</div>
   <div class="srow mplay" id="musPlayer"><div class="mpinfo"><small id="musState">Now playing</small><b id="musName">…</b></div><button class="ibtn mpb" id="musPause" aria-label="Pause music"><svg viewBox="0 0 8 8" shape-rendering="crispEdges"><path id="musPauseIc" d="M1 1h2v6H1zM5 1h2v6H5z"/></svg></button><button class="ibtn mpb" id="musNext" aria-label="Next song"><svg viewBox="0 0 8 8" shape-rendering="crispEdges"><path d="M1 1h1v6H1zM2 2h1v4H2zM3 3h1v2H3zM4 3.5h1v1H4zM6 1h1.5v6H6z"/></svg></button></div>
+  <div class="srow" id="playlistRow"><label>Playlist<small>Tap a song to take it out of the shuffle.</small></label><div class="seg chips" id="setSongs"></div></div>
   <div class="srow mix" id="mixMusic"><label for="setMVol">Music volume<small>Follows the mood and menus.</small></label><input type="range" id="setMVol" min="0" max="1" step="0.05"><output class="mixv" for="setMVol"></output><span class="mixsp"></span></div>
   <div class="srow mix sfxch"><label for="mixCrit">Critters<small>Steps, chomps, chirps.</small></label><input type="range" id="mixCrit" data-ch="crit" min="0" max="1.5" step="0.05"><output class="mixv" for="mixCrit"></output><span class="mixsp"></span></div>
   <div class="srow mix sfxch"><label for="mixWorld">Tank &amp; toys<small>Misting, water, toys.</small></label><input type="range" id="mixWorld" data-ch="world" min="0" max="1.5" step="0.05"><output class="mixv" for="mixWorld"></output><span class="mixsp"></span></div>
@@ -1947,11 +1948,11 @@ const SFX=(()=>{
   // the playlist: a song plays about 5 minutes (time spent in menus doesn't count), then plays to the end of its loop,
   // its last notes ring out and fade, a short pause, and a different song starts from bar 1
   let musK=null,plLen=300,onTrack=null;const engs={},tgain={},pl={phase:'play',t:0,last:0};
-  const pickOther=()=>{const ks=Object.keys(TRACKS).filter(k=>k!==musK&&songOwned(k));return ks[Math.floor(Math.random()*ks.length)];};
+  const pickOther=()=>{const ks=Object.keys(TRACKS).filter(k=>k!==musK&&songOn(k));return ks.length?ks[Math.floor(Math.random()*ks.length)]:musK||Object.keys(TRACKS).find(songOn)||'chill';};
   function startTrack(k){const now=ac.currentTime;for(const j of Object.keys(engs))if(j!==k&&j!==musK){engs[j].dispose();tgain[j].disconnect();delete engs[j];delete tgain[j];}musK=k;if(!engs[k]){tgain[k]=ac.createGain();tgain[k].connect(duckG);engs[k]=makeTrack(ac,tgain[k],nbuf,TRACKS[k]);}
     mus=engs[k];mus.restart(now);const g=tgain[k].gain;g.cancelScheduledValues(now);g.setValueAtTime(0.0001,now);g.setTargetAtTime(1,now,0.2);pl.phase='play';pl.t=0;if(onTrack)onTrack(k);}
   // the music player's next button: a quick fade, then the next song in order from bar 1
-  function next(){if(!ac||!duckG)return;const now=ac.currentTime;if(musK)tgain[musK].gain.setTargetAtTime(0,now,0.15);const ks=Object.keys(TRACKS).filter(songOwned);startTrack(ks[(ks.indexOf(musK)+1)%ks.length]);}
+  function next(){if(!ac||!duckG)return;const now=ac.currentTime;if(musK)tgain[musK].gain.setTargetAtTime(0,now,0.15);const ks=Object.keys(TRACKS).filter(k=>songOn(k)||k===musK);startTrack(ks[(ks.indexOf(musK)+1)%ks.length]);}
   function music(ctx){if(!ac||!musicOn)return;const now=ac.currentTime;
     if(!duckG){duckG=ac.createGain();duckG.connect(musicBus);pl.last=now;startTrack(pickOther());}
     const dt=Math.min(0.25,Math.max(0,now-pl.last));pl.last=now;
@@ -8487,7 +8488,7 @@ function bakeBayou(world){srand(71);const S=new FB(W,H),bot=new Uint32Array(N),b
   for(let y=TANK.y0;y<TANK.y1;y++)for(let x=TANK.x0;x<TANK.x1;x++){const i=y*W+x;if(!R.depth[i])continue;let shore=false;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]])if(!R.depth[i+dy*W+dx]&&inT(x+dx,y+dy))shore=true;
     R.pIdx.push(i);R.pX.push(x);R.pY.push(y);R.pD.push(R.depth[i]);R.pS.push(shore?1:0);}
   R.deepList=R.pIdx.filter(i=>R.depth[i]>0.35);R.shallowList=R.pIdx.filter(i=>R.depth[i]>0.1&&R.depth[i]<0.45);
-  R.landList=[];for(const p of world.pads){for(let y=Math.floor(p.ay-p.r);y<=p.ay+p.r;y++)for(let x=Math.floor(p.ax-p.r);x<=p.ax+p.r;x++){if(Math.hypot(x+.5-p.ax,(y+.5-p.ay)*1.15)<p.r-1.5)R.depth[y*W+x]=0;}R.landList.push(Math.round(p.ay)*W+Math.round(p.ax));}
+  R.landList=[];for(const p of world.pads){if(p.r<12)continue;for(let y=Math.floor(p.ay-p.r);y<=p.ay+p.r;y++)for(let x=Math.floor(p.ax-p.r);x<=p.ax+p.r;x++){if(Math.hypot(x+.5-p.ax,(y+.5-p.ay)*1.15)<p.r-1.5)R.depth[y*W+x]=0;}R.landList.push(Math.round(p.ay)*W+Math.round(p.ax));}
   for(let i=0;i<N;i+=5)if(land[i])R.landList.push(i);
   finish(world,bg,ov);
   world.plants=[makePlant('pothos',306,14,1.75,3.05,6,30,60),makePlant('reed',14,104,-2.0,-1.1,11,14,24),makePlant('reed',16,150,-2.1,-1.0,9,12,20),makePlant('reed',304,150,-2.0,-1.1,8,12,20)];}
@@ -8520,12 +8521,14 @@ function reefLife(w){drawPolyps(fb,w);drawFish(fb,w);}
 // ---------------- living tanks: wind in the grass, swaying flowers, butterflies, blowing sand, a tumbleweed,
 // footstep puffs, dragonflies, spore puffs and reef bubbles. All updated in update() and drawn each frame.
 // moving things (butterflies, dragonflies, the tumbleweed, reef fish) are built from capsules each frame and lit by composite
-const TM7={TENT:185/*+pal 0..7*/,DUST:193/*+pal*/,AN1:201,AN2:202,ZMG:203,ZMO:204,CLAM:205,BUG:170,WO:171,WW:172,WB:173,DBT:174,DBR:175,DWING:176,TWIG:177,FCH:178,FTANG:179,FCLOWN:180,FEYE:181,FINC:182,FINT:183,FINK:184};
+const TM7={WEED:206,TENT:185/*+pal 0..7*/,DUST:193/*+pal*/,AN1:201,AN2:202,ZMG:203,ZMO:204,CLAM:205,BUG:170,WO:171,WW:172,WB:173,DBT:174,DBR:175,DWING:176,TWIG:177,FCH:178,FTANG:179,FCLOWN:180,FEYE:181,FINC:182,FINT:183,FINK:184};
 const TP7={bug:ramp('#2a1c12','#46301e','#6a4c30','#8c6c48'),wo:ramp('#8a3206','#d8600e','#ff9a2a','#ffd9a0'),ww:ramp('#6a6e9a','#b8c0f0','#e8ecff','#ffffff'),wb:ramp('#1a2e7a','#3a6ad8','#7ab4ff','#c8e2ff'),
   dbt:ramp('#0e4a5a','#1a7a8a','#3ad0c8','#9af8f0'),dbr:ramp('#5a140a','#a02a1a','#e85a3a','#ffa08a'),dwing:ramp('#4e8296','#8cc4d4','#bfe6f0','#e6f8fc'),twig:ramp('#7a5a34','#94703f','#b08c54','#ccac70'),
   fch:ramp('#1e5a80','#2e78a8','#3a8eb8','#9adcf0'),ftang:ramp('#a8701e','#d8a030','#f4c24a','#fff0a0'),fclown:ramp('#a8400a','#e05a10','#ff7a1a','#ffb070'),fwhite:ramp('#8a96a8','#d0dae6','#f4f8ff','#ffffff'),
   feye:ramp('#141a30','#1e2a48','#2a3a60','#4a5a80'),finc:ramp('#163e5a','#1e5a80','#2e78a8','#5aaad0'),fint:ramp('#8a5a14','#c08a2a','#e0aa3a','#f4c24a'),fink:ramp('#6a2406','#c04a0e','#ff7a1a','#ffb070')};
 {const oc=THEME_PAINTER.color;THEME_PAINTER.color=function(m,q,s,l,x,y){
+  if(m===TM7.WEED){const c=Math.cos(TWEED.a),sn=Math.sin(TWEED.a),dx=x+.5-TWEED.x,dy=y+.5-TWEED.y,u=dx*c+dy*sn,v=-dx*sn+dy*c;
+    const stem=Math.abs(Math.sin(u*1.1+Math.sin(v*0.7)*2.2))<0.24||Math.abs(Math.sin(v*1.2+Math.sin(u*0.8)*2))<0.24||Math.abs(Math.sin((u-v)*0.8+1))<0.14;return stem?TP7.twig[Math.min(3,q+1)]:TWGAP;}
   if(m>=185&&m<193){const R2=RPAL5[m-185];return s>0.72?R2[3]:R2[Math.max(1,q)];}// polyp tentacles: pale tips
   if(m>=193&&m<201){const R2=RPAL5[m-193];return s>0.85?R2[2]:Math.floor(s*6)%2?R2[3]:hex('#fbf4ff');}// feather-duster plumes: banded
   if(m===201||m===202){const R2=m===201?ANEM1:ANEM2;return s>0.8?R2[3]:R2[Math.max(1,q)];}
@@ -8544,6 +8547,7 @@ const TP7={bug:ramp('#2a1c12','#46301e','#6a4c30','#8c6c48'),wo:ramp('#8a3206','
     case TM7.FEYE:return TP7.feye[q];case TM7.FINC:return TP7.finc[q];case TM7.FINT:return TP7.fint[q];case TM7.FINK:return TP7.fink[q];}
   return oc.call(this,m,q,s,l,x,y);};}
 // the same painter seen through water: colours and outlines lean toward the water's blue
+const TWEED={x:0,y:0,a:0},TWGAP=0x01000000;// gaps between the stems are see-through: marked here, then filled with the shaded sand below// where the tumbleweed is and how far it has turned, for its painter
 const ZMG=ramp('#0e5a2a','#1a9a50','#3ae070','#a0ffc0'),ZMO=ramp('#7a3006','#d06a1a','#ff9a3a','#ffd09a');
 const tintPainter=t=>({outline:0,seam:THEME_PAINTER.seam,color:(m,q,s,l,x,y)=>mixc(THEME_PAINTER.color(m,q,s,l,x,y),SPW,t),olOf:(m,x,y)=>mixc(THEME_PAINTER.olOf(m,x,y),SPW,t*0.6)});
 const WATER_PAINTER=tintPainter(0.2);
@@ -8557,7 +8561,7 @@ function butterfly(S,x,y,ang,open,mat){const c=Math.cos(ang),s=Math.sin(ang),P=(
 function dragonfly(S,x,y,ang,fl,mat){const c=Math.cos(ang),s=Math.sin(ang),P=(u,v)=>[x+c*u-s*v,y+s*u+c*v];
   for(const sd of[-1,1])for(const[u,L,sw]of[[1.5,6,0.4],[0.5,5.4,-0.6]]){const[ax,ay]=P(u,sd*0.8),[bx,by]=P(u+sw-0.4,sd*L*(0.85+0.15*fl));S.cap(ax,ay,0.5,bx,by,0.75,TM7.DWING,1,0,1);}
   const[hx,hy]=P(3,0),[tx,ty]=P(2.1,0),[t2x,t2y]=P(0.2,0),[ex,ey]=P(-5.6,0);S.cap(t2x,t2y,0.7,ex,ey,0.5,mat,2,0,6);S.cap(tx,ty,1,t2x,t2y,0.9,mat,3,0,1);S.cap(hx,hy,1.1,hx,hy,1.1,mat,3);}
-const LFB=new FB(W,H),SANDC=[hex('#f2c690'),hex('#e4a462'),hex('#cc8442')];
+const TWBUF=new Uint32Array(N),LFB=new FB(W,H),SANDC=[hex('#f2c690'),hex('#e4a462'),hex('#cc8442')];
 const lowG=()=>document.body.classList.contains('gfx-low');
 // a soft breeze that rolls across the tank in waves, with a stronger gust every so often
 const windAt=(x,t)=>0.5+0.4*Math.sin(x*0.035-t*1.5)+1.1*Math.pow(Math.max(0,Math.sin(t*0.23)),8)*Math.max(0,Math.sin(x*0.05-t*3.2));
@@ -8618,15 +8622,18 @@ function update(w,dt){const th=w.theme;if(!th||!w.pet)return;const L=w.live||(w.
   }}
 // drawn on the ground, under the critter
 function drawUnder(w){const th=w.theme,L=w.live;if(!th||!L)return;const T=L.t;
+  if(th==='dune')for(const p of w.parts){if(p.type!=='dust'||!p.c)continue;const a=clamp(p.life/p.max,0,1),r=1.2+(1-a)*2;for(let yy=-3;yy<=3;yy++)for(let xx=-3;xx<=3;xx++){const d=Math.hypot(xx,yy*1.2)/r;if(d<1)pmix(fb,p.x+xx,p.y+yy-(1-a)*4,p.c,0.9*a*(1-d*0.5));}}
   if(th==='field'&&w.tufts){const G=[0,hex('#3c7426'),hex('#50902e'),hex('#6cae3a'),hex('#96cc56')];
     for(const tf of w.tufts){const wd=windAt(tf.x,T);let push=0;const d=Math.hypot(tf.x-L.fx,tf.y-L.fy);if(d<12)push=Math.sign(tf.x-L.fx||1)*(1-d/12)*1.1;
       pdark(fb,tf.x+1,tf.y+1,0.8);for(const b of tf.b){const lean=(wd-0.3)*0.9+Math.sin(T*2.3+tf.x)*0.12+push;let x=tf.x,y=tf.y;for(let j=1;j<=b.l;j++){const a=b.a+lean*(j/b.l);x+=Math.cos(a);y+=Math.sin(a);pset(fb,x,y,G[Math.min(4,j+1)]);}}}}
   if(th==='dune'&&L.grains){const C=hex('#fff4dc');for(const g of L.grains){const a=Math.min(1,g.life*1.5)*0.85;pmix(fb,g.x,g.y,C,a);pmix(fb,g.x-1,g.y-0.35,C,a*0.6);pmix(fb,g.x-2,g.y-0.7,C,a*0.3);}}
   if(th==='dune'&&L.tw){const t=L.tw;for(let yy=-3;yy<=3;yy++)for(let xx=-6;xx<=6;xx++)if(Math.hypot(xx/6,yy/3)<1)pdark(fb,t.x+xx+2,t.y+yy+4,0.8);
-    // a ball of looping stems: tilted rings round a hollow middle, turned as it rolls; the far halves sit behind the near ones
-    const ca=t.ang;for(let i=0;i<8;i++){const ti=0.35+i*0.4,sp=i*1.05,R0=6.5*(0.78+0.22*Math.sin(i*2.1+1));let pv=null;for(let j=0;j<=16;j++){const th=j/16*TAU+sp,X=Math.cos(th),Y=Math.sin(th)*Math.cos(ti),Z=Math.sin(th)*Math.sin(ti),
-      rx=X*Math.cos(ca+sp)-Y*Math.sin(ca+sp),ry=X*Math.sin(ca+sp)+Y*Math.cos(ca+sp),q=[t.x+rx*R0,t.y-t.h+ry*R0*0.85,Z];if(pv)LFB.cap(pv[0],pv[1],0.45,q[0],q[1],0.45,TM7.TWIG,(pv[2]+Z)>0?3:2,0,1);pv=q;}}
-    composite(LFB,THEME_PAINTER,{out:fb.px});LFB.clearLayer();}}
+    // a bushy ball: a tangle of stems over dark gaps (the texture turns as it rolls) with a few stray stems poking out
+    TWEED.x=t.x;TWEED.y=t.y-t.h;TWEED.a=t.ang;LFB.cap(t.x,t.y-t.h,6,t.x,t.y-t.h,6,TM7.WEED,2,0,0,0.3);
+    for(let i=0;i<7;i++){const a=i*0.9+t.ang+Math.sin(i*2.3),r0=5,r1=6+((i*5)%3)*0.6;LFB.cap(t.x+Math.cos(a)*r0,t.y-t.h+Math.sin(a)*r0*0.9,0.5,t.x+Math.cos(a+0.3)*r1,t.y-t.h+Math.sin(a+0.3)*r1*0.9,0.45,TM7.TWIG,2,0,1);}
+    const X0=Math.max(0,Math.floor(t.x-9)),X1=Math.min(W-1,Math.ceil(t.x+9)),Y0=Math.max(0,Math.floor(t.y-t.h-9)),Y1=Math.min(H-1,Math.ceil(t.y-t.h+9));
+    for(let y=Y0;y<=Y1;y++)TWBUF.set(fb.px.subarray(y*W+X0,y*W+X1+1),y*W+X0);composite(LFB,THEME_PAINTER,{out:fb.px});LFB.clearLayer();
+    for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=y*W+x;if(fb.px[i]===TWGAP)fb.px[i]=shade(TWBUF[i],0.5);}}}
 // drawn above the critter (flowers it walks under, flying things)
 function drawOver(w){const th=w.theme,L=w.live;if(!th||!L)return;const T=L.t;
   if(th==='field'){if(w.flowers){for(const f of w.flowers){const wd=windAt(f.x,T);bigFlower(LFB,f.x+Math.sin(T*1.1+f.ph)*(0.6+1.4*wd),f.y+Math.cos(T*0.9+f.ph)*0.6,f.r,f.k,f.a+Math.sin(T*0.7+f.ph)*0.12*(0.5+wd));}
@@ -8636,7 +8643,6 @@ function drawOver(w){const th=w.theme,L=w.live;if(!th||!L)return;const T=L.t;
       composite(LFB,THEME_PAINTER,{out:fb.px,sAmt:.8,sdx:1+Math.round(b.h*0.4),sdy:1+Math.round(b.h*0.5)});LFB.clearLayer();}}
   if(th==='bayou')for(const f of L.df||[]){const fl=f.rest>0?0.3:0.5+0.5*Math.sin(T*40);dragonfly(LFB,f.x,f.y-f.h,f.ang,fl,f.mat);
     composite(LFB,THEME_PAINTER,{out:fb.px,sAmt:.8,sdx:1+Math.round(f.h*0.3),sdy:2+Math.round(f.h*0.4)});LFB.clearLayer();}
-  if(th==='dune')for(const p of w.parts){if(p.type!=='dust'||!p.c)continue;const a=clamp(p.life/p.max,0,1),r=1.2+(1-a)*2;for(let yy=-3;yy<=3;yy++)for(let xx=-3;xx<=3;xx++){const d=Math.hypot(xx,yy*1.2)/r;if(d<1)pmix(fb,p.x+xx,p.y+yy-(1-a)*4,p.c,0.9*a*(1-d*0.5));}}
   if(th==='grove')for(const s of L.puff||[]){const a=Math.min(1,s.life/0.6);pmix(fb,s.x,s.y-s.h,hex('#c8fff0'),0.7*a);}
   if(th==='reef')for(const b of L.bub||[]){const a=Math.min(1,b.life);pmix(fb,b.x,b.y,hex('#e8fbff'),0.75*a);if(b.r>1){pmix(fb,b.x+1,b.y,hex('#bfe8f8'),0.5*a);pmix(fb,b.x,b.y-1,hex('#bfe8f8'),0.5*a);}}}
 return{BAKE,layout,lightPre,lightPost,reefLife,startle:startlePolyps,logEnd,update,drawUnder,drawOver};
@@ -9311,6 +9317,8 @@ function tankOf(kind){const t=save.pets[kind]?.tank;return t&&TANKS[t]&&TANKS[t]
 const tankIdOf=kind=>tankOf(kind)||habitatOf(kind);
 // a song plays in the shuffle if it's one of the three free ones or came with a tank you own
 const songOwned=k=>['chill','rain','tide'].includes(k)||THEME_IDS.some(id=>TANKS[id].song===k&&tankOwned(id));
+// in the shuffle: owned and not switched off in the Settings playlist
+const songOn=k=>songOwned(k)&&!(save.set.songsOff||[]).includes(k);
 function habitatOf(kind){const th=tankOf(kind);if(th)return TANKS[th].base;
   if(SEA_PETS.includes(kind))return 'sea';if(kind==='kraken')return 'aqua';if(AMPHI.includes(kind)){const t=save.pets[kind]?.tank;return(t==='terra'||t==='aqua')?t:(AMPHI_TERRA.includes(kind)?'terra':'aqua');}return 'terra';}
 const tankKey=t=>t==='aqua'?'placedAqua':t==='sea'?'placedSea':'placed';
@@ -9883,7 +9891,7 @@ function drawPool(w){if(w.theme==='reef')THEMES.reefLife(w);const px=fb.px,T=w.t
 const RAYC=hex('#cdeefa'),ANEM1=ramp('#6a1a4a','#b0327a','#f06aac','#ffb8dc'),ANEM2=ramp('#3a2a6a','#6a4ab0','#a07ef0','#dcc8ff');
 function updatePads(w,dt){const pet=w.pet,hd=pet&&pet.headPos?pet.headPos():null;
   for(const p of w.pads){p.ph+=dt;p.vx+=((p.ax-p.x)*1.2+Math.sin(p.ph*0.4)*0.6)*dt;p.vy+=((p.ay-p.y)*1.2+Math.cos(p.ph*0.33)*0.5)*dt;
-    if(hd){const dx=p.x-hd.x,dy=p.y-hd.y,d=Math.hypot(dx,dy);if(d<p.r+4&&d>0.01&&waterAt(w,hd.x,hd.y)>0.05){const f=(p.r+4-d)*6*dt;p.vx+=dx/d*f;p.vy+=dy/d*f;}}
+    if(hd){const dx=p.x-hd.x,dy=p.y-hd.y,d=Math.hypot(dx,dy);if(d<p.r+4&&d>0.01&&p.r<12&&!(pet.dive>0.5)&&waterAt(w,hd.x,hd.y)>0.05){const f=(p.r+4-d)*6*dt;p.vx+=dx/d*f;p.vy+=dy/d*f;}}
     p.vx*=1-dt*1.5;p.vy*=1-dt*1.5;p.x+=p.vx*dt;p.y+=p.vy*dt;p.ang+=p.vx*0.01;}}
 const PADC=ramp('#1a3a1a','#2c5a24','#44802e','#6aa640'),PADV=hex('#24481e');
 function drawPads(fb,w){
@@ -10019,7 +10027,7 @@ function renderPlay(){
   for(const p of w.parts){
     if(p.type==='crumb')pset(fb,p.x,p.y-p.h,p.c||hex('#7a5a30'));
     else if(p.type==='stink'){const f=clamp(p.life/p.max,0,1),r=1.5+(1-f)*2.5;for(let yy=-3;yy<=3;yy++)for(let xx=-4;xx<=4;xx++){const d=Math.hypot(xx,yy*1.2)/r;if(d<1)pmix(fb,p.x+xx,p.y+yy,hex('#a8c070'),0.45*f*(1-d));}}
-    else if(p.type==='dust'&&!p.c)pmix(fb,p.x,p.y,hex('#8a7058'),clamp(p.life/.4,0,1)*0.8);// sand puffs (p.c) are drawn over the critter's feet in THEMES.drawOver
+    else if(p.type==='dust'&&!p.c)pmix(fb,p.x,p.y,hex('#8a7058'),clamp(p.life/.4,0,1)*0.8);// sand puffs (p.c) are drawn under the critter in THEMES.drawUnder
     else if(p.type==='splash'){pmix(fb,p.x-1,p.y,drop,.6);pmix(fb,p.x+1,p.y,drop,.6);pmix(fb,p.x,p.y-1,drop,.6);}
     else if(p.type==='drop')pdark(fb,p.x+1,p.y+1,.8);
     else if(p.type==='ink'){const a=clamp(p.life/p.max,0,1)*0.7,r=p.r,IK=hex('#140a1c');for(let yy=Math.floor(p.y-r);yy<=p.y+r;yy++)for(let xx=Math.floor(p.x-r);xx<=p.x+r;xx++){const d=Math.hypot(xx+.5-p.x,yy+.5-p.y)/r;if(d>=1)continue;const f=a*(1-d*d);if(f<0.08&&((xx+yy)&1))continue;pmix(fb,xx,yy,IK,f);}}}
@@ -10054,14 +10062,15 @@ function renderPlay(){
     for(const q of w.prey)if(q.caught&&!q.layered)q.draw(fb,w.t);
     fb.clearLayer();for(const q of w.prey)if(q.caught&&q.layered)q.drawL(fb);composite(fb,FOOD_PAINTER);
     subEnd(w,pet);
-    if(pet.dive>0.5&&w.pads.length)drawPads(fb,w);
     if(plopRect){const[x0,y0,x1,y1]=plopRect,dx=pet.plop>0.1?Math.round(Math.sin(pet.plop*34)):0,sq=pet.plop>0.14&&pet.plop<0.4?1:0;
       // details drawn after the body (eyes, hat, held food) count as the critter too, but not the hat's shadow on the ground
       for(let y=y0;y<=y1;y++){const o=y*W;for(let x=x0;x<=x1;x++){const i=o+x;if(!PLOPM[i]&&px[i]!==PLOPB2[i]&&px[i]!==shade(PLOPB2[i],.55))PLOPM[i]=1;}SUBTMP.set(px.subarray(o+x0,o+x1+1),o+x0);}
       if(dx||sq)for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x,sx=x-dx,sy=y-sq,j=sy*W+sx,inR=sx>=x0&&sx<=x1&&sy>=y0;
         if(inR&&PLOPM[j])px[i]=SUBTMP[j];else if(PLOPM[i])px[i]=PLOPM[i-W-1]&&!aq?shade(PLOPBUF[i],.6):PLOPBUF[i];}}
     if(grumpRect){const[x0,y0,x1,y1]=grumpRect;for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const i=y*W+x,c=px[i];if(c===GRUMPBUF[i])continue;const r=c&255,g=c>>8&255,b=c>>>16&255,l=(r*0.3+g*0.5+b*0.2)*0.86,bl=l*1.04;
-      px[i]=(255<<24)|(Math.round(lerp(b,bl,0.6))<<16)|(Math.round(lerp(g,l,0.6))<<8)|Math.round(lerp(r,l*0.95,0.6));}}});
+      px[i]=(255<<24)|(Math.round(lerp(b,bl,0.6))<<16)|(Math.round(lerp(g,l,0.6))<<8)|Math.round(lerp(r,l*0.95,0.6));}}
+    // pads float over a diving critter; drawn after the grumpy tint and the poop wiggle so neither touches them
+    if(pet.dive>0.5&&w.pads.length)drawPads(fb,w);});
   // remember the critter's pixels as drawn, so its glow pass later can't paint over whatever ends up in front of it (logs, plants)
   const pc=pet.headPos(),ocx=Math.round(pet.x??pc.x),ocy=Math.round(pet.y??pc.y),ox0=Math.max(0,ocx-56),ox1=Math.min(W-1,ocx+56),oy0=Math.max(0,ocy-64),oy1=Math.min(H-1,ocy+36);
   const drawPetO=()=>{for(let y=oy0;y<=oy1;y++){const o=y*W;OCCPRE.set(px.subarray(o+ox0,o+ox1+1),o+ox0);}drawPet();for(let y=oy0;y<=oy1;y++){const o=y*W;OCCPOST.set(px.subarray(o+ox0,o+ox1+1),o+ox0);}};
@@ -10907,7 +10916,7 @@ const ui={
     $('petName').addEventListener('click',e=>{e.stopPropagation();if(!game.kind)return;const st=$('petStats');if(st.hidden){this.renderStats();st.hidden=false;if(HUDSKIN.on)HUDSKIN.paint(st,'plate');}else st.hidden=true;SFX.play('ui');});
     document.addEventListener('pointerdown',e=>{const st=$('petStats');if(!st.hidden&&!e.target.closest('#petStats')&&!e.target.closest('#petName'))st.hidden=true;});
     $('coins').addEventListener('click',()=>this.openModal('mGacha'));
-    $('btnLight').addEventListener('click',()=>toggleLight());$('btnSettings').addEventListener('click',()=>this.openModal('mSettings'));
+    $('btnLight').addEventListener('click',()=>toggleLight());$('btnSettings').addEventListener('click',()=>{ui.playlistUi&&ui.playlistUi();this.openModal('mSettings');});
     document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>this.close()));
     document.querySelectorAll('.modal').forEach(m=>m.addEventListener('pointerdown',e=>{if(e.target===m&&!game.firstRun)this.close();}));
     $('gPull').addEventListener('click',()=>this.pull());$('gcv').addEventListener('click',()=>{if(G.state==='ready'){G.state='shake';G.t=0;SFX.play('rattle');}else if(G.state==='idle')this.pull();});
@@ -10945,6 +10954,12 @@ const ui={
     const setMus=v=>{S.music=v;SFX.setMusic(v);ui.mixDim();musUi();markDirty();};SFX.onTrack=musUi;musUi();
     $('musPause').addEventListener('click',()=>{SFX.play('ui');setMus(!S.music);});
     $('musNext').addEventListener('click',()=>{SFX.play('ui');if(!S.music)setMus(true);SFX.next();musUi();});
+    // the playlist: one chip per song; songs from tanks not bought yet show locked
+    ui.playlistUi=()=>{const box=$('setSongs');box.textContent='';
+      for(const k of Object.keys(TRACKS)){const b=document.createElement('button'),own=songOwned(k),tank=THEME_IDS.find(id=>TANKS[id].song===k);b.className='btn alt'+(songOn(k)?' on':'');b.textContent=TRACKS[k].name;b.disabled=!own;
+        b.setAttribute('aria-pressed',songOn(k));if(!own)b.title='Comes with the '+TANKS[tank].name+' tank';
+        b.addEventListener('click',()=>{const off=new Set(S.songsOff||[]);if(songOn(k)){if(Object.keys(TRACKS).filter(songOn).length<=1){ui.toast('Keep at least one song in the playlist.');return;}off.add(k);}else off.delete(k);
+          S.songsOff=[...off];b.classList.toggle('on',songOn(k));b.setAttribute('aria-pressed',songOn(k));markDirty();SFX.play('ui');if(!songOn(k)&&SFX.track===k&&S.music){SFX.next();musUi();}});box.appendChild(b);}};ui.playlistUi();
     sw('setShake','shake');sw('setBubbles','bubbles');sw('setThoughts','thoughts');sw('setTrayTuck','trayTuck',v=>{if(!v)ui.tuckTray(null);});sw('setPixel','pixel',()=>fit());
     $('resetBtn').addEventListener('click',()=>{const b=$('resetBtn');if(this.resetArm&&performance.now()-this.resetArm<3000){game.resetting=true;try{localStorage.removeItem(SAVE_KEY);localStorage.removeItem('mossjar.pet');}catch(e){}location.reload();}
       else{this.resetArm=performance.now();b.textContent='Tap again to reset';setTimeout(()=>{b.textContent='Reset';},3000);}});

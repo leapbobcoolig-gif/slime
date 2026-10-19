@@ -51,6 +51,8 @@ Skins are bought from the swatch row in the Critters menu. Each critter gets one
   - Who fits is plain physics (`TANKS[id].kind` → `TANK_KIND`): land tanks take any critter that can live on land (amphibians too), the Bayou takes swimmers (amphibians, the kraken, sea critters), the Coral Reef takes open-water critters (sea critters and the kraken). No hand-picked theme lists.
   - Themed tanks are alive: wind in the grass, swaying flowers, butterflies, blowing sand, footstep puffs, a rolling tumbleweed, dragonflies, spore puffs, reef bubbles (`THEMES.update` / `drawUnder` / `drawOver`).
   - Buying one adds its song to the music shuffle (`songOwned`): Warm Windowsill, Bayou Drift, Sea Glass, Dandelion Wind, Odd Bodies.
+  - Settings → Sound has a Playlist: chips switch owned songs in or out of the shuffle (`save.set.songsOff`, `songOn`); at least one stays on.
+  - In the Bayou only the big lily pads (r ≥ 12) are land; smaller pads drift off when a swimmer bumps them, and float over a diving critter.
 - New scenery is laid out on purpose (composition): one main feature a third of the way in, a leading line, bigger things framing the edges, an open middle, and things grouped in families. Nothing overlaps anything else.
 - Every sprite has an outline in a deep shade of its own colour (the critter rule), never near-black. New painters name it with `olOf`.
 - Anything that moves (butterflies, dragonflies, the tumbleweed, reef fish and polyps) is built from capsules every frame (`LFB` + `composite` with `THEME_PAINTER`, or `WATER_PAINTER` under water). Static ground details may stay as baked pixels.
